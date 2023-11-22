@@ -1,0 +1,3 @@
+[submodule "external/Deep-MARL-for-Dynamic-JSP"]
+	path = external/Deep-MARL-for-Dynamic-JSP
+	url = https://github.com/RK0731/Deep-MARL-for-Dynamic-JSP.git
