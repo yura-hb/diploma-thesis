@@ -1,3 +1,6 @@
 [submodule "external/Deep-MARL-for-Dynamic-JSP"]
 	path = external/Deep-MARL-for-Dynamic-JSP
 	url = https://github.com/RK0731/Deep-MARL-for-Dynamic-JSP.git
+[submodule "external/PhD-Thesis-Projects"]
+	path = external/PhD-Thesis-Projects
+	url = https://github.com/RK0731/PhD-Thesis-Projects.git
