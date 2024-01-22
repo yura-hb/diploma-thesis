@@ -42,5 +42,5 @@ setup(
     entry_points={
         "console_scripts": ["diploma_thesis = diploma_thesis.__main__:main"]
     },
-    extras_require={"test": read_requirements("requirements-test.txt")},
+    extras_require={"workflows": read_requirements("requirements-test.txt")},
 )

@@ -17,10 +17,19 @@ class Problem:
     tightness_factor: float = 1.0
     # Expected utilization rate of machines
     expected_utilization: float = 0.75
+    # The number of machines per work center
+    machines_per_workcenter: int = 1
+    # The number of work centers
+    workcenter_count: int = 1
+    # Seed
+    seed: int = 0
 
     @property
     def beta(self) -> torch.Tensor:
-        return torch.mean(self.processing_time) / self.expected_utilization
+        """
+        Returns: Defines the expected number of jobs per time unit to meet the expected utilization for shopfloor
+        """
+        return self.expected_processing_time / (self.machines_per_workcenter * self.expected_utilization)
 
     @property
     def job_count(self) -> torch.Tensor:
@@ -28,7 +37,9 @@ class Problem:
 
     @property
     def expected_processing_time(self) -> torch.Tensor:
-        return torch.mean(self.processing_time)
+        distance = self.processing_time[1] - self.processing_time[0]
+
+        return torch.Tensor([self.processing_time[0] + distance / 2])
 
     def sample_processing_times(self, count: int, generator: torch.Generator) -> torch.Tensor:
         return torch.randint(
@@ -42,3 +53,5 @@ class Problem:
         exponential = torch.distributions.Exponential(self.beta)
 
         return exponential.rsample((count,))
+
+
