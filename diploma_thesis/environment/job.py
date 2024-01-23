@@ -2,21 +2,31 @@
 import torch
 
 from dataclasses import dataclass, field
+from enum import Enum
 
 
 @dataclass
 class Job:
+
+    class ReductionStrategy(Enum):
+        """
+        Job doesn't know in advance on which machine it will be processed inside work-center. ReductionStrategy
+        defines the way, how the expected processing time on the work-center is calculated
+        """
+        mean = 0
+        min = 1
+        max = 2
+
     # Id of the job
     id: int
-
-    # The sequence of indices, which job must visit in order to be complete
+    # The sequence of work-centers, which job must visit in order to be complete
     step_idx: torch.LongTensor
-    # The processing time of the job on each machine
+    # The processing time of the job in workcenter depending on the machine it was scheduled
     processing_times: torch.LongTensor
-
-    # The index of the current operation to complete
-    current_operation_idx: int = 0
-
+    # The index of the workcenter that the job is currently visiting
+    current_step_idx: int = 0
+    # The index of the machine in the work-center where the job is being processed
+    current_machine_idx: int = 0
     # The creation time of the job
     created_at: torch.LongTensor = 0
     # The time of the job completion
@@ -25,7 +35,7 @@ class Job:
     due_at: torch.LongTensor = 0
     # The time, when each operation arrives to the specified machine
     arrived_at: torch.LongTensor = field(default_factory=torch.LongTensor)
-    # The list of the times, when operation was selected for processing on the machine
+    # The list of the times, when operation was selected for processing on the workcenter
     started_at: torch.LongTensor = field(default_factory=torch.LongTensor)
     # Slack, i.e. the amount of time, that the job can be postponed
     # It is calculated as the due_at - current_time - remaining_processing time, and it is recorded at the arrival
@@ -33,44 +43,59 @@ class Job:
     slack: torch.LongTensor = field(default_factory=torch.LongTensor)
 
     def __post_init__(self):
-        self.arrived_at = torch.zeros_like(self.processing_times)
-        self.started_at = torch.zeros_like(self.processing_times)
-        self.stack = torch.zeros_like(self.processing_times)
+        self.arrived_at = torch.zeros_like(self.step_idx)
+        self.started_at = torch.zeros_like(self.step_idx)
+        self.slack = torch.zeros_like(self.step_idx)
 
     @property
-    def processing_time_moments(self):
+    def processing_time_moments(self, reduction_strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The expectation and variance of processing times
         """
-        return torch.mean(self.processing_times), torch.std(self.processing_times)
+        processing_times = self.expected_processing_times(self.processing_times.float(), reduction_strategy)
+
+        return torch.mean(processing_times), torch.std(processing_times)
 
     @property
-    def current_operation_processing_time(self):
+    def current_operation_processing_time_on_machine(self):
         """
-        Returns: Returns the processing time of the current operation
+        Returns: Returns the processing time of the current operation in machine
         """
-        return self.processing_times[self.current_operation_idx]
+        return self.processing_times[self.current_step_idx][self.current_machine_idx]
 
     @property
-    def remaining_processing_time(self):
+    def current_operation_processing_time_in_workcenter(self):
+        """
+        Returns: Returns the processing time of the current operation in workcenter
+        """
+        return self.processing_times[self.current_step_idx]
+
+    @property
+    def remaining_processing_time(self, strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The total processing time of the remaining operations
         """
-        return self.processing_times[self.current_operation_idx:].sum()
+
+        # Since we don't know, to which machine inside work-center the job will be dispatched next, we
+        # approximate it with the average
+        expected_processing_time = self.processing_times[self.current_step_idx:]
+        expected_processing_time = self.expected_processing_times(expected_processing_time.float(), strategy)
+
+        return expected_processing_time.sum()
 
     @property
     def remaining_operations_count(self):
         """
         Returns: The number of remaining operations
         """
-        return len(self.processing_times) - self.current_operation_idx
+        return self.processing_times.shape[0] - self.current_step_idx
 
     @property
-    def next_machine_idx(self):
+    def next_work_center_idx(self):
         """
-        Returns: The index of the next machine to visit or None if there is no next machine
+        Returns: The index of the work-center to visit or None if the job is completed
         """
-        next_idx = self.current_operation_idx + 1
+        next_idx = self.current_step_idx + 1
 
         if next_idx >= len(self.step_idx):
             return None
@@ -78,32 +103,32 @@ class Job:
         return self.step_idx[next_idx]
 
     @property
-    def next_operation_processing_time(self):
+    def next_operation_processing_time(self, strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The processing time of the next operation
         """
-        next_idx = self.current_operation_idx + 1
+        next_idx = self.current_step_idx + 1
 
         if next_idx >= len(self.step_idx):
             return 0
 
-        return self.processing_times[next_idx]
+        pt = self.processing_times[next_idx]
+
+        return self.expected_processing_times(pt.float(), strategy)
 
     @property
     def slack_upon_arrival(self):
         """
         Returns: The slack upon arrival of the job on the machine
         """
-        return self.slack[self.current_operation_idx]
+        return self.slack[self.current_step_idx]
 
     def slack_upon_now(self, now: int):
         """
-
         Args:
             now: Current time
 
-        Returns: The slack upon arrival of the job on the machine at now
-
+        Returns: The slack upon now of the job on the machine
         """
         return self.due_at - now - self.remaining_processing_time
 
@@ -118,26 +143,40 @@ class Job:
 
     def current_operation_waiting_time(self, now: int):
         """
-
         Args:
             now: Current time
 
         Returns: The time that the current operation has been waiting for processing on current machine
-
         """
-        return now - self.arrived_at[self.current_operation_idx]
+        return now - self.arrived_at[self.current_step_idx]
 
     def operation_completion_rate(self):
         """
-        Returns: The completion rate of the job based on the number of completed operations
+        The completion rate of the job based on the number of completed operations
         """
         return self.remaining_operations_count / len(self.step_idx)
 
     def time_completion_rate(self, now: int):
         """
-        Returns: The completion rate of the job based on the remaining processing time
+        The completion rate of the job based on the remaining processing time
         """
         return self.remaining_processing_time / self.processing_times.sum()
+    def with_next_step(self):
+        """
+        Advances the job to the next work-center
+        """
+        self.current_step_idx += 1
+        self.current_machine_idx = -1
+
+        return self
+
+    def with_assigned_machine(self, machine_idx: int):
+        """
+        Advances the job to the next machine
+        """
+        self.current_machine_idx = machine_idx
+
+        return self
 
     def with_arrival(self, now: int):
         """
@@ -148,7 +187,6 @@ class Job:
 
         Returns: Reference to self
         """
-        # TODO: Where the move to the next machine is updated?
         return self.with_current_operation_arrival_time(now).with_current_operation_slack_upon_arrival()
 
     def with_current_operation_arrival_time(self, now: int):
@@ -160,7 +198,7 @@ class Job:
 
         Returns: Reference to self
         """
-        self.arrived_at[self.current_operation_idx] = now
+        self.arrived_at[self.current_step_idx] = now
 
         return self
 
@@ -173,7 +211,7 @@ class Job:
 
         Returns: Reference to self
         """
-        self.started_at[self.current_operation_idx] = now
+        self.started_at[self.current_step_idx] = now
 
         return self
 
@@ -186,7 +224,7 @@ class Job:
 
         Returns: Reference to self
         """
-        self.slack[self.current_operation_idx] = self.slack_upon_now(self.arrived_at[self.current_operation_idx])
+        self.slack[self.current_step_idx] = self.slack_upon_now(self.arrived_at[self.current_step_idx])
 
         return self
 
@@ -220,3 +258,17 @@ class Job:
         self.completed_at = time
 
         return self
+
+    @staticmethod
+    def expected_processing_times(processing_times, strategy: ReductionStrategy):
+        processing_times = torch.atleast_2d(processing_times)
+
+        match strategy:
+            case Job.ReductionStrategy.mean:
+                return processing_times.mean(axis=1)
+            case Job.ReductionStrategy.min:
+                return processing_times.min(axis=1)
+            case Job.ReductionStrategy.max:
+                return processing_times.max(axis=1)
+            case _:
+                raise ValueError(f"Unknown reduction strategy {strategy}")

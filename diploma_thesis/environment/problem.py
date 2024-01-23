@@ -79,7 +79,7 @@ class Problem:
             "--tightness-factor",
             help="Tightness factor",
             type=float,
-            default=1.0
+            default=2.0
         )
 
         sub_parser.add_argument(

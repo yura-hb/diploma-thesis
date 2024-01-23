@@ -62,16 +62,19 @@ class ShopFloor:
         self.state = State()
         self.history = History()
 
+    def simulate(self):
         self.assign_initial_jobs()
 
         self.environment.process(self.dispatch_jobs())
+
+    # Redefine generation of Work-Center paths
 
     def assign_initial_jobs(self):
         step_idx = torch.arange(self.description.workcenter_count, dtype=torch.long)
 
         for work_center in self.work_centers:
-            for machine in work_center.context.machines:
-                step_idx = torch.randperm(step_idx, generator=self.generator)
+            for _ in work_center.context.machines:
+                step_idx = step_idx[torch.randperm(step_idx.shape[0], generator=self.generator)]
 
                 job = self.__sample_job__(step_idx,
                                           initial_work_center_idx=work_center.state.idx,

@@ -63,6 +63,8 @@ class WorkCenter:
         """
         self.context.with_info(machines, work_centers, shopfloor)
 
+        print(self.context)
+
         self.environment.process(self.dispatch())
 
     def dispatch(self):

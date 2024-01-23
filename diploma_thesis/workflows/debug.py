@@ -44,6 +44,8 @@ class Debug(Workflow):
         for machine in machines:
             machine.connect(machines, work_centers, shopfloor)
 
+        shopfloor.simulate()
+
         self.configuration.environment.run()
 
     def __make_working_units__(self) -> Tuple[List[WorkCenter], List[Machine]]:
