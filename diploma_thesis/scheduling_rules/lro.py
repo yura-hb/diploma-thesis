@@ -2,7 +2,7 @@
 import torch
 
 from .scheduling_rule import SchedulingRule, MachineState, WaitInfo
-from problem.job import Job
+from environment.job import Job
 
 
 class LROSchedulingRule(SchedulingRule):

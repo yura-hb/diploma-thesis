@@ -1,17 +1,16 @@
 
-from functools import reduce
-
 from dataclasses import dataclass, field
-from typing import List, Any, Tuple
+from functools import reduce
+from typing import List, Any
 
 import simpy
 import torch
 
-from collections import namedtuple
-from job import Job
+from environment.job import Job
+from environment.work_center import WorkCenter
+
 from scheduling_rules import SchedulingRule
-from shopfloor import ShopFloor
-from work_center import WorkCenter
+
 
 # TODO: WINQ (agent_machine.py: 365)
 # TODO: AVLM (agent_machine.py: 366)
@@ -172,7 +171,7 @@ class Context:
     work_centers: List[WorkCenter] = None
     shopfloor: Any = None
 
-    def with_info(self, machines: List['Machine'], work_centers: List[WorkCenter], shopfloor: ShopFloor):
+    def with_info(self, machines: List['Machine'], work_centers: List[WorkCenter], shopfloor: 'ShopFloor'):
         self.machines = machines
         self.work_centers = work_centers
         self.shopfloor = shopfloor
@@ -206,7 +205,7 @@ class Machine:
         self.sequence_learning_event = self.environment.event()
         self.routing_learning_event = self.environment.event()
 
-    def connect(self, machines: List['Machine'], work_centers: List[WorkCenter], shopfloor: ShopFloor):
+    def connect(self, machines: List['Machine'], work_centers: List[WorkCenter], shopfloor: 'ShopFloor'):
         """
         Connects machine to other machines and dispatcher,
         so that machine can communicate with them
@@ -309,11 +308,10 @@ class Machine:
         Returns: None
 
         """
-        self.context.shopfloor.forward(job)
+        self.context.shopfloor.forward(job, from_=self)
 
         if job.next_machine_idx is None:
             self.state.without_job(job.id, now=self.environment.now)
-            return
 
     def job_selected_with_rule_will_produce(self, job: Job):
         # TODO: before_operation from agent_machine.py: 194

@@ -4,12 +4,13 @@ import simpy
 from dataclasses import dataclass, field
 from .workflow import Workflow
 
-from problem.problem import Problem
-from problem.shopfloor import ShopFloor
-from problem.work_center import WorkCenter
-from problem.machine import Machine
-from scheduling_rules.fifo import FIFOSchedulingRule
-from scheduling_rules import SchedulingRule
+from environment.problem import Problem
+from environment.shopfloor import ShopFloor
+from environment.work_center import WorkCenter
+from environment.machine import Machine
+from scheduling_rules import SchedulingRule, FIFOSchedulingRule
+
+from routing_rules import RoutingRule, EARoutingRule
 
 from typing import Tuple, List
 from functools import reduce
@@ -20,10 +21,9 @@ class Debug(Workflow):
     @dataclass
     class Configuration:
         environment: simpy.Environment = field(default_factory=simpy.Environment)
-
         problem: Problem = field(default_factory=Problem)
-
         scheduling_rule: SchedulingRule = field(default_factory=lambda: FIFOSchedulingRule())
+        routing_rule: RoutingRule = field(default_factory=lambda: EARoutingRule())
 
     def __init__(self, configuration: Configuration = Configuration()):
         super().__init__()
@@ -51,7 +51,9 @@ class Debug(Workflow):
         machines = []
 
         for work_center_idx in range(self.configuration.problem.workcenter_count):
-            work_centers += [WorkCenter(self.configuration.environment, work_center_idx)]
+            work_centers += [WorkCenter(self.configuration.environment,
+                                        work_center_idx,
+                                        rule=self.configuration.routing_rule)]
 
             batch = []
 

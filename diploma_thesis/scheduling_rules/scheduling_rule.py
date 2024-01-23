@@ -2,7 +2,7 @@
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import List
-from problem.job import Job
+from environment.job import Job
 
 
 @dataclass

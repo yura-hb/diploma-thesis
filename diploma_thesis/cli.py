@@ -1,21 +1,30 @@
 
 import argparse
+import simpy
 
-from .workflows import Debug
+from workflows import Debug
+from workflows import Workflow
+from environment.problem import Problem
 
 
-def make_workflow(id: str):
+def make_workflow(id: str, problem: Problem) -> Workflow:
+    environment = simpy.Environment()
+
     match id:
         case "debug":
-            configuration = DebugConfiguration()
+            configuration = Debug.Configuration(
+                environment=environment,
+                problem=problem
+            )
 
-            return Debug()
+            return Debug(configuration=configuration)
         case _:
             raise ValueError(f"Unknown workflow id {id}")
 
 
 def main(args: argparse.Namespace):  # pragma: no cover
-    workflow = make_workflow(args.task)
+    problem = Problem.from_cli_arguments(args)
+    workflow = make_workflow(args.task, problem=problem)
 
     workflow.run()
 
@@ -25,10 +34,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--task", help="Run a workflow task")
 
-    sub_parsers = parser.add_subparsers(dest="problem")
-    sub_parser = sub_parsers.add_parser(id="problem", parents=[parser])
-
-    sub_parser.add_argument("--bla", help="Run a workflow task")
+    Problem.add_cli_arguments(parser)
 
     args = parser.parse_args([] if "__file__" not in globals() else None)
 

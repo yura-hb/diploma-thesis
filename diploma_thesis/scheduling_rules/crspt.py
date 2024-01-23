@@ -2,10 +2,10 @@
 import torch
 
 from .scheduling_rule import SchedulingRule, MachineState, WaitInfo
-from problem.job import Job
+from environment.job import Job
 
 
-class CRSchedulingRule(SchedulingRule):
+class CRSPTSchedulingRule(SchedulingRule):
     """
     Critical Ratio + Shortest Processing Time scheduling rule, i.e.
     the rule selects jobs with the lowest ratio of due time to remaining processing time and current operation time

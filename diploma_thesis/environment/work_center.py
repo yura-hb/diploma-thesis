@@ -3,9 +3,8 @@ from dataclasses import dataclass, field
 from typing import List
 import simpy
 
-from shopfloor import ShopFloor
-from machine import Machine
-from job import Job
+from environment.job import Job
+
 from routing_rules import RoutingRule, WorkCenterState
 
 
@@ -31,11 +30,11 @@ class History:
 
 
 class Context:
-    machines: List[Machine]
-    work_centers: List['WorkCenter']
-    shopfloor: ShopFloor
+    machines: List['Machine'] = field(default_factory=list)
+    work_centers: List['WorkCenter'] = field(default_factory=list)
+    shopfloor: 'ShopFloor' = field(default_factory=lambda: None)
 
-    def with_info(self, machines: List[Machine], work_centers: List['WorkCenter'], shopfloor: ShopFloor):
+    def with_info(self, machines: List['Machine'], work_centers: List['WorkCenter'], shopfloor: 'ShopFloor'):
         self.machines = machines
         self.work_centers = work_centers
         self.shopfloor = shopfloor
@@ -45,9 +44,9 @@ class Context:
 
 class WorkCenter:
 
-    def __init__(self, environment: simpy.Environment, work_center_idx: int, routing_rule: 'RoutingRule'):
+    def __init__(self, environment: simpy.Environment, work_center_idx: int, rule: 'RoutingRule'):
         self.environment = environment
-        self.routing_rule = routing_rule
+        self.rule = rule
 
         self.state = State(idx=work_center_idx)
         self.history = History()
@@ -55,7 +54,7 @@ class WorkCenter:
 
         self.on_route = environment.event()
 
-    def connect(self, machines: List['Machine'], work_centers: List['WorkCenter'], shopfloor: ShopFloor):
+    def connect(self, machines: List['Machine'], work_centers: List['WorkCenter'], shopfloor: 'ShopFloor'):
         """
         Args:
             machines: The list of machines in the work center!!!
@@ -80,7 +79,7 @@ class WorkCenter:
 
                 state = WorkCenterState(work_center_idx=self.state.idx, machines=self.context.machines)
 
-                machine = self.routing_rule.select_machine(job, state)
+                machine = self.rule.select_machine(job, state)
 
                 machine.receive(job)
 

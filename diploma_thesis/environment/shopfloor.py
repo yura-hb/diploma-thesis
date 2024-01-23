@@ -4,10 +4,10 @@ import torch
 from typing import List
 from dataclasses import dataclass, field
 
-from problem.job import Job
-from problem.problem import Problem
-from problem.machine import Machine
-from problem.work_center import WorkCenter
+from environment.job import Job
+from environment.problem import Problem
+from environment.machine import Machine
+from environment.work_center import WorkCenter
 
 
 @dataclass
