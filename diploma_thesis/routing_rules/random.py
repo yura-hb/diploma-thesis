@@ -2,7 +2,6 @@ import torch
 
 from environment.job import Job
 from routing_rules import WorkCenterState, RoutingRule
-from environment.machine import Machine
 
 
 class RandomRoutingRule(RoutingRule):

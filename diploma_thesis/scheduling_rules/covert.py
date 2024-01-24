@@ -5,6 +5,7 @@ import torch
 from .scheduling_rule import SchedulingRule, MachineState, WaitInfo
 from environment.job import Job
 
+# TODO: Pass Reduction strategy
 
 class COVERTSchedulingRule(SchedulingRule):
     """
@@ -12,13 +13,10 @@ class COVERTSchedulingRule(SchedulingRule):
     We assume that the cost is
     """
 
-    # TODO: - Verify
-
     def __call__(self, machine_state: MachineState) -> Job | WaitInfo:
-        processing_times = torch.LongTensor([job.remaining_processing_time for job in machine_state.queue])
-        dues = torch.LongTensor([job.due_at for job in machine_state.queue])
+        processing_times = torch.FloatTensor([job.remaining_processing_time() for job in machine_state.queue])
 
-        available_slack = (dues - processing_times - machine_state.now)
+        available_slack = torch.FloatTensor([job.slack_upon_now(machine_state.now) for job in machine_state.queue])
         available_slack = torch.clip(available_slack, 0, None)
 
         priority = (1 - available_slack / (0.05 * torch.mean(processing_times)))

@@ -13,10 +13,10 @@ class ATCSchedulingRule(SchedulingRule):
     """
 
     def __call__(self, machine_state: MachineState) -> Job | WaitInfo:
-        processing_times = torch.LongTensor(
+        processing_times = torch.FloatTensor(
             [job.current_operation_processing_time_on_machine for job in machine_state.queue]
         )
-        due_times = torch.LongTensor(
+        due_times = torch.FloatTensor(
             [job.time_until_due(machine_state.now) for job in machine_state.queue]
         )
 

@@ -11,7 +11,7 @@ class SPTSchedulingRule(SchedulingRule):
     """
 
     def __call__(self, machine_state: MachineState) -> Job | WaitInfo:
-        values = [job.current_operation_processing_time for job in machine_state.queue]
+        values = [job.current_operation_processing_time_on_machine for job in machine_state.queue]
         idx = torch.argmin(values)
 
         return machine_state.queue[idx]

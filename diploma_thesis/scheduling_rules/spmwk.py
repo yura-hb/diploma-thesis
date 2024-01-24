@@ -10,11 +10,11 @@ class SPMWKSchedulingRule(SchedulingRule):
     """
 
     def __call__(self, machine_state: MachineState) -> Job | WaitInfo:
-        slack = torch.LongTensor(
+        slack = torch.FloatTensor(
             [job.slack_upon_now(machine_state.now) for job in machine_state.queue]
         )
-        remaining_processing_times = torch.LongTensor(
-            [job.remaining_processing_time for job in machine_state.queue]
+        remaining_processing_times = torch.FloatTensor(
+            [job.remaining_processing_time() for job in machine_state.queue]
         )
 
         ratio = slack / remaining_processing_times

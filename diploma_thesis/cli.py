@@ -1,23 +1,22 @@
 
 import argparse
+
 import simpy
 
-from workflows import Debug
-from workflows import Workflow
 from environment.problem import Problem
+from environment.shopfloor import ShopFloor
+
+from workflows import StaticRuleTournament
+from workflows import StaticSingleRule
+from workflows import Workflow
 
 
 def make_workflow(id: str, problem: Problem) -> Workflow:
-    environment = simpy.Environment()
-
     match id:
-        case "debug":
-            configuration = Debug.Configuration(
-                environment=environment,
-                problem=problem
-            )
-
-            return Debug(configuration=configuration)
+        case "static_rule":
+            return StaticSingleRule(problem)
+        case "static_rule_tournament":
+            return StaticRuleTournament(problem=problem)
         case _:
             raise ValueError(f"Unknown workflow id {id}")
 

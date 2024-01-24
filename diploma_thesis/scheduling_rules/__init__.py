@@ -20,3 +20,25 @@ from .npt import NPTSchedulingRule
 from .random import RandomSchedulingRule
 from .spmwk import SPMWKSchedulingRule
 from .spmwkspt import SPMWKSPTSchedulingRule
+
+ALL_SCHEDULING_RULES = [
+    ATCSchedulingRule,
+    AVPROSchedulingRule,
+    COVERTSchedulingRule,
+    CRSchedulingRule,
+    CRSPTSchedulingRule,
+    EDDSchedulingRule,
+    FIFOSchedulingRule,
+    LPTSchedulingRule,
+    LROSchedulingRule,
+    LWRKSchedulingRule,
+    LWRKMODSchedulingRule,
+    MDDSchedulingRule,
+    MODSchedulingRule,
+    MONSchedulingRule,
+    MSSchedulingRule,
+    NPTSchedulingRule,
+    RandomSchedulingRule,
+    SPMWKSchedulingRule,
+    SPMWKSPTSchedulingRule,
+]

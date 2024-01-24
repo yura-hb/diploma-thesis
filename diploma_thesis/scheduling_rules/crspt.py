@@ -4,6 +4,7 @@ import torch
 from .scheduling_rule import SchedulingRule, MachineState, WaitInfo
 from environment.job import Job
 
+# TODO: Pass Reduction strategy
 
 class CRSPTSchedulingRule(SchedulingRule):
     """
@@ -12,17 +13,14 @@ class CRSPTSchedulingRule(SchedulingRule):
     """
 
     def __call__(self, machine_state: MachineState) -> Job | WaitInfo:
-        processing_times = torch.LongTensor(
-            [job.current_operation_processing_time for job in machine_state.queue]
+        remaining_processing_times = torch.FloatTensor(
+            [job.remaining_processing_time() for job in machine_state.queue]
         )
-        remaining_processing_times = torch.LongTensor(
-            [job.remaining_processing_time for job in machine_state.queue]
-        )
-        due_times = torch.LongTensor(
+        due_times = torch.FloatTensor(
             [job.time_until_due(machine_state.now) for job in machine_state.queue]
         )
 
-        ratio = due_times / (remaining_processing_times + processing_times)
+        ratio = due_times / remaining_processing_times
         index = torch.argmin(ratio)
 
         return machine_state.queue[index]

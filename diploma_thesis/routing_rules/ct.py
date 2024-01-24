@@ -11,7 +11,7 @@ class CTRoutingRule(RoutingRule):
     """
 
     def select_machine(self, job: Job, state: WorkCenterState) -> 'Machine':
-        cumulative_processing_times = torch.LongTensor(
+        cumulative_processing_times = torch.FloatTensor(
             [machine.cumulative_processing_time for machine in state.machines]
         ) + job.operation_processing_time_in_work_center(state.work_center_idx, Job.ReductionStrategy.none)
 

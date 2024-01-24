@@ -1,3 +1,4 @@
 
 from .workflow import Workflow
-from .debug import Debug
+from .static_single_rule import StaticSingleRule
+from .static_rule_tournament import StaticRuleTournament

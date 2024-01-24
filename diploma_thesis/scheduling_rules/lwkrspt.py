@@ -12,9 +12,9 @@ class LWRKSPTSchedulingRule(SchedulingRule):
     """
 
     def __call__(self, machine_state: MachineState) -> Job | WaitInfo:
-        values = [
-            job.remaining_processing_time + job.current_operation_processing_time for job in machine_state.queue
-        ]
+        values = torch.FloatTensor([
+            job.remaining_processing_time() for job in machine_state.queue
+        ])
         idx = torch.argmin(values)
 
         return machine_state.queue[idx]

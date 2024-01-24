@@ -12,7 +12,7 @@ class MSSchedulingRule(SchedulingRule):
     """
 
     def __call__(self, machine_state: MachineState) -> Job | WaitInfo:
-        slack = torch.LongTensor(
+        slack = torch.FloatTensor(
             [job.slack_upon_now(machine_state.now) for job in machine_state.queue]
         )
 

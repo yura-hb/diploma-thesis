@@ -11,7 +11,7 @@ class EDDSchedulingRule(SchedulingRule):
     """
 
     def __call__(self, machine_state: MachineState) -> Job | WaitInfo:
-        values = [job.due_at for job in machine_state.queue]
+        values = torch.FloatTensor([job.due_at for job in machine_state.queue])
         idx = torch.argmin(values)
 
         return machine_state.queue[idx]
