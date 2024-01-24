@@ -14,7 +14,6 @@ class WorkCenterState:
 
 
 class RoutingRule(metaclass=ABCMeta):
-
     @abstractmethod
     def select_machine(self, job: Job, state: WorkCenterState) -> 'Machine':
         ...

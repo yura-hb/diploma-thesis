@@ -63,8 +63,6 @@ class WorkCenter:
         """
         self.context.with_info(machines, work_centers, shopfloor)
 
-        print(self.context)
-
         self.environment.process(self.dispatch())
 
     def dispatch(self):
@@ -92,4 +90,14 @@ class WorkCenter:
     def receive(self, job: Job):
         self.state.with_new_job(job)
 
-        self.on_route.succeed()
+        job.with_next_step()
+
+        self.did_receive_job()
+
+    def did_receive_job(self):
+        # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the simulation
+        # the model shouldn't care
+        try:
+            self.on_route.succeed()
+        except:
+            pass

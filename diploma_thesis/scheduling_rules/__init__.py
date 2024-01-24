@@ -1,5 +1,5 @@
 
-from .scheduling_rule import SchedulingRule
+from .scheduling_rule import SchedulingRule, MachineState, WaitInfo
 
 from .atc import ATCSchedulingRule
 from .avpro import AVPROSchedulingRule

@@ -1,5 +1,7 @@
 
 import simpy
+import logging
+import sys
 
 from dataclasses import dataclass, field
 from .workflow import Workflow
@@ -35,7 +37,11 @@ class Debug(Workflow):
         machines = reduce(lambda x, y: x + y, machines_per_wc, [])
 
         shopfloor = ShopFloor(
-            self.configuration.environment, machines, work_centers, self.configuration.problem
+            self.configuration.environment,
+            machines,
+            work_centers,
+            self.configuration.problem,
+            logger=self.__make_logger__(),
         )
 
         for work_center, machines_in_workcenter in zip(work_centers, machines_per_wc):
@@ -46,7 +52,7 @@ class Debug(Workflow):
 
         shopfloor.simulate()
 
-        self.configuration.environment.run()
+        self.configuration.environment.run(until=self.configuration.problem.timespan)
 
     def __make_working_units__(self) -> Tuple[List[WorkCenter], List[Machine]]:
         work_centers = []
@@ -68,3 +74,16 @@ class Debug(Workflow):
             machines += [batch]
 
         return work_centers, machines
+
+    def __make_logger__(self):
+        logger = logging.getLogger('ShopFloor')
+        logger.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        stdout_handler.setLevel(logging.DEBUG)
+        stdout_handler.setFormatter(formatter)
+
+        logger.addHandler(stdout_handler)
+
+        return logger

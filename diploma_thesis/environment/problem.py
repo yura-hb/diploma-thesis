@@ -11,7 +11,7 @@ from typing import Tuple
 @dataclass
 class Problem:
     # The duration of the simulation in the number of jobs
-    timespan: int = 1000
+    timespan: int = 2000
     # Range of processing times [min, max]
     processing_time: Tuple[int, int] = (1, 10)
     # Tightness factor

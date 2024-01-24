@@ -12,7 +12,7 @@ class MachineState:
     """
     queue: List[Job] = field(default_factory=list)
     # The time moment scheduling is performed
-    now: int = 0
+    now: int = 0 
 
 
 @dataclass
