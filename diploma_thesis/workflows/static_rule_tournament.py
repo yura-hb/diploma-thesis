@@ -2,7 +2,7 @@ import simpy
 import torch
 
 from environment.problem import Problem
-from environment.shopfloor import ShopFloor
+from environment.shop_floor import ShopFloor
 from routing_rules import ALL_ROUTING_RULES, RandomRoutingRule
 from scheduling_rules import ALL_SCHEDULING_RULES, RandomSchedulingRule
 from .workflow import Workflow

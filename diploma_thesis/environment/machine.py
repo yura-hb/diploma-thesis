@@ -6,14 +6,10 @@ from typing import List, Any
 import simpy
 import torch
 
-from environment.job import Job
+from environment.job import Job, JobEvent
 from environment.work_center import WorkCenter
 
 from scheduling_rules import SchedulingRule, MachineState, WaitInfo
-
-# TODO: WINQ (agent_machine.py: 365)
-# TODO: AVLM (agent_machine.py: 366)
-# TODO: Machine Tardiness and
 
 
 @dataclass
@@ -37,6 +33,8 @@ class State:
     available_at: torch.FloatTensor = 0
     # The time of machine recover from breakdown
     restart_at: torch.FloatTensor = 0
+    # Total runtime
+    run_time: int = 0
 
     def with_new_job(self, job: Job, now: int):
         """
@@ -96,6 +94,11 @@ class State:
         self.restart_at = restart_at
         self.available_at = self.restart_at + self.total_processing_time
 
+    def with_runtime(self, operation_processing_time: int):
+        self.run_time += operation_processing_time
+
+        return self
+
     @property
     def is_empty(self):
         """
@@ -128,41 +131,6 @@ class State:
 
 
 @dataclass
-class History:
-    """
-    Support class representing the history of the machine
-    """
-
-    # Number of jobs, when machine selects the job
-    recorded_at: List[int] = field(default_factory=list)
-    number_of_jobs: List[int] = field(default_factory=list)
-
-    # Breakdowns of the machine
-    breakdown_start_at: List[int] = field(default_factory=list)
-    breakdown_end_at: List[int] = field(default_factory=list)
-
-    # Total runtime of operations on the machine
-    run_time: int = 0
-
-    def with_number_of_jobs(self, state: State, now: int):
-        self.recorded_at += [now]
-        self.number_of_jobs += [len(state.queue)]
-
-        return self
-
-    def with_breakdown_record(self, start: int, end: int):
-        self.breakdown_start_at += [start]
-        self.breakdown_end_at += [end]
-
-        return self
-
-    def with_runtime(self, operation_processing_time: int):
-        self.run_time += operation_processing_time
-
-        return operation_processing_time
-
-
-@dataclass
 class Context:
     machines: List['Machine'] = None
     work_centers: List[WorkCenter] = None
@@ -172,6 +140,15 @@ class Context:
         self.machines = machines
         self.work_centers = work_centers
         self.shopfloor = shopfloor
+
+        return self
+
+@dataclass
+class History:
+    decision_times: List[float] = field(default_factory=list)
+
+    def with_decision_time(self, decision_time: float):
+        self.decision_times += [decision_time]
 
         return self
 
@@ -187,7 +164,6 @@ class Machine:
         self.rule = rule
 
         self.state = State(machine_idx=machine_idx, work_center_idx=work_center_idx)
-
         self.history = History()
         self.context = Context()
 
@@ -219,7 +195,8 @@ class Machine:
         self.environment.process(self.produce())
 
     def receive(self, job: Job):
-        job.with_assigned_machine(self.state.machine_idx)
+        job.with_event(self.__new_event__(JobEvent.Kind.arrival_on_machine))
+
         self.state.with_new_job(job, self.environment.now)
         self.did_receive_job()
 
@@ -228,8 +205,10 @@ class Machine:
             yield self.environment.process(self.starve())
 
         while True:
-            self.state.with_decision_time(self.environment.now)
-            self.history.with_number_of_jobs(self.state, now=self.environment.now)
+            moment = self.environment.now
+
+            self.state.with_decision_time(moment)
+            self.history.with_decision_time(moment)
 
             job = self.select_job()
 
@@ -238,14 +217,17 @@ class Machine:
                 self.starve_if_needed()
                 continue
 
-            processing_time = job.current_operation_processing_time_on_machine
-
+            self.__notify_job_about_production__(job, production_start=True)
             self.context.shopfloor.will_produce(job, self)
+
+            processing_time = job.current_operation_processing_time_on_machine
 
             # Perform the operation of the job
             yield self.environment.timeout(processing_time)
 
-            self.history.with_runtime(processing_time)
+            self.__notify_job_about_production__(job, production_start=False)
+
+            self.state.with_runtime(processing_time)
 
             self.forward(job)
             self.breakdown_if_needed()
@@ -269,8 +251,6 @@ class Machine:
 
         job = self.rule(state)
 
-        self.job_selected_with_rule_will_produce(job)
-
         return job
 
     def breakdown(self, restart_at: int):
@@ -279,8 +259,6 @@ class Machine:
         self.state.with_breakdown(restart_at)
 
         yield self.is_on_event
-
-        self.history.with_breakdown_record(start, self.environment.now)
 
     def breakdown_if_needed(self):
         """
@@ -309,14 +287,6 @@ class Machine:
         self.state.without_job(job.id, now=self.environment.now)
         self.context.shopfloor.forward(job, from_=self)
 
-    def job_selected_with_rule_will_produce(self, job: Job):
-        # TODO: before_operation from agent_machine.py: 194
-        ...
-
-    def job_did_produce(self, job: Job):
-        # TODO: after_operation from agent_machine.py: 238
-        ...
-
     @property
     def work_center_idx(self) -> int:
         return self.state.work_center_idx
@@ -339,7 +309,7 @@ class Machine:
 
     @property
     def cumulative_run_time(self) -> int:
-        return self.history.run_time
+        return self.state.run_time
 
     def did_receive_job(self):
         # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the simulation
@@ -348,3 +318,16 @@ class Machine:
             self.did_dispatch_event.succeed()
         except:
            pass
+
+    def __notify_job_about_production__(self, job: Job, production_start: bool):
+        event = self.__new_event__(JobEvent.Kind.production_start if production_start else JobEvent.Kind.production_end)
+
+        job.with_event(event)
+
+    def __new_event__(self, kind: JobEvent.Kind):
+        return JobEvent(
+            moment=self.environment.now,
+            kind=kind,
+            work_center_idx=self.state.work_center_idx,
+            machine_idx=self.state.machine_idx
+        )

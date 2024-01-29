@@ -4,7 +4,7 @@ import argparse
 import simpy
 
 from environment.problem import Problem
-from environment.shopfloor import ShopFloor
+from environment.shop_floor import ShopFloor
 
 from workflows import StaticRuleTournament
 from workflows import StaticSingleRule

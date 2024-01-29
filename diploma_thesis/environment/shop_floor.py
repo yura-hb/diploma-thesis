@@ -2,7 +2,7 @@ import simpy
 import torch
 import logging
 
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from dataclasses import dataclass, field
 from functools import reduce
 
@@ -48,36 +48,35 @@ class State:
 class History:
 
     @dataclass
-    class ProductionRecord:
+    class Record:
         job_id: int
-        started_at: torch.FloatTensor
+        created_at: torch.FloatTensor
         duration: int
         work_center_idx: int
         machine_idx: int
 
     # A list of jobs, where each job is represented by the id of machine
-    jobs: List[Job] = field(default_factory=list)
-
-    production: List[List[int]] = field(default_factory=list)
+    jobs: Dict[int, Job] = field(default_factory=dict)
 
     def with_machines_count(self):
         return self
 
-    def with_production_info(self, job: Job, machine: Machine, now: int):
-        self.production += [self.ProductionRecord(
+    def with_new_job(self, job: Job):
+        self.jobs[job.id] = job
+
+        return self
+
+    def __make_record__(self, job: Job, machine: Machine, now: int):
+        return self.Record(
             job_id=job.id,
-            started_at=now,
+            created_at=now,
             duration=job.current_operation_processing_time_on_machine,
             work_center_idx=machine.state.work_center_idx,
             machine_idx=machine.state.machine_idx
-        )]
+        )
 
-        return self
-
-    def with_new_job(self, job):
-        self.jobs += [job]
-
-        return self
+    def job(self, job_id: int):
+        return self.jobs[job_id]
 
 
 class ShopFloor:
@@ -149,15 +148,28 @@ class ShopFloor:
             self.__dispatch__(job, work_center)
 
     def will_produce(self, job: Job, from_: Machine):
-        # TODO: Record information from update_global_info_progression method in agent_machine.py
-        # TODO: Record information from update_global_info_anticipation method in agent_machine.py
-        self.history.with_production_info(job, from_, self.configuration.environment.now)
+        ...
 
     def forward(self, job: Job, from_: Machine):
-        if next_work_center_idx := job.next_work_center_idx:
+        next_work_center_idx = job.next_work_center_idx
+
+        if next_work_center_idx is not None:
+            job.with_event(
+                Job.Event(
+                    moment=self.configuration.environment.now,
+                    kind=Job.Event.Kind.forward
+                )
+            )
+
             self.work_centers[next_work_center_idx].receive(job)
         else:
-            job.with_completion_time(self.configuration.environment.now)
+            job.with_event(
+                Job.Event(
+                    moment=self.configuration.environment.now,
+                    kind=Job.Event.Kind.completion
+                )
+            )
+
             self.state.with_job_completed()
 
         self.logger.info(
@@ -167,6 +179,13 @@ class ShopFloor:
         )
 
     def update_problem(self, problem: Problem):
+        """
+        Allows to change parameters of the problem
+
+        Args:
+            problem: Problem to be updated
+        """
+
         assert self.configuration.problem.machines_per_workcenter == problem.machines_per_workcenter, \
                "Expected the same number of machines per work center"
         assert self.configuration.problem.workcenter_count == problem.workcenter_count, \
@@ -199,18 +218,34 @@ class ShopFloor:
                 id=self.state.with_new_job_id().job_id,
                 step_idx=work_center_idx,
                 processing_times=processing_times,
-                created_at=torch.FloatTensor([created_at])
             )
-            .with_sampled_due_at(self.configuration.problem.tightness_factor, len(self.machines))
-            .with_arrival(self.configuration.environment.now)
+            .with_event(
+                Job.Event(
+                    kind=Job.Event.Kind.creation,
+                    moment=created_at,
+                )
+            )
+            .with_event(
+                Job.Event(
+                    kind=Job.Event.Kind.dispatch,
+                    moment=created_at,
+                )
+            )
         )
 
-        return job
+        due_at = self.__sample_due_time__(job=job)
+
+        return job.with_due_at(due_at)
+
+    def statistics(self) -> 'Statistics':
+        from .statistics import Statistics
+
+        return Statistics(self)
 
     def __dispatch__(self, job: Job, work_center: WorkCenter):
-        work_center.receive(job)
-
         self.state.with_new_job_in_system()
+
+        work_center.receive(job)
 
     def __make_working_units__(self) -> Tuple[List[WorkCenter], List[Machine]]:
         work_centers = []
@@ -248,3 +283,10 @@ class ShopFloor:
         self.machines = machines
 
         return self
+
+    def __sample_due_time__(self, job: Job):
+        mean, _ = job.processing_time_moments()
+        tightness = torch.distributions.Uniform(1, self.configuration.problem.tightness_factor).rsample((1,))
+        num_machines = self.configuration.problem.machines_per_workcenter * self.configuration.problem.workcenter_count
+
+        return torch.round(mean * num_machines * tightness + self.configuration.environment.now)

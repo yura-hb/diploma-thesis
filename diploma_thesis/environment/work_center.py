@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import List
 import simpy
 
-from environment.job import Job
+from environment.job import Job, JobEvent
 
 from routing_rules import RoutingRule, WorkCenterState
 
@@ -25,8 +25,14 @@ class State:
         return self
 
 
+@dataclass
 class History:
-    ...
+    decision_times: List[float] = field(default_factory=list)
+
+    def with_decision_time(self, decision_time: float):
+        self.decision_times += [decision_time]
+
+        return self
 
 
 class Context:
@@ -71,6 +77,8 @@ class WorkCenter:
         while True:
             yield self.on_route
 
+            self.history.with_decision_time(self.environment.now)
+
             for job in self.state.queue:
                 if len(self.context.machines) == 1:
                     machine = self.context.machines[0]
@@ -80,7 +88,6 @@ class WorkCenter:
                 state = WorkCenterState(work_center_idx=self.state.idx, machines=self.context.machines)
 
                 machine = self.rule.select_machine(job, state)
-
                 machine.receive(job)
 
             self.state.with_flushed_queue()
@@ -90,9 +97,19 @@ class WorkCenter:
     def receive(self, job: Job):
         self.state.with_new_job(job)
 
-        job.with_next_step()
+        job.with_event(
+            JobEvent(
+                moment=self.environment.now,
+                kind=JobEvent.Kind.arrival_on_work_center,
+                work_center_idx=self.state.idx
+            )
+        )
 
         self.did_receive_job()
+
+    @property
+    def machines(self):
+        return self.context.machines
 
     def did_receive_job(self):
         # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the simulation

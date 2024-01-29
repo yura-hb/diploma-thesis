@@ -51,7 +51,7 @@ class Problem:
         )
 
     def sample_next_arrival_time(self, count: int) -> torch.Tensor:
-        exponential = torch.distributions.Exponential(self.beta)
+        exponential = torch.distributions.Exponential(1 / self.beta)
 
         return exponential.rsample((count,))
 

@@ -13,7 +13,7 @@ class SPMWKSPTSchedulingRule(SchedulingRule):
 
     def __call__(self, machine_state: MachineState) -> Job | WaitInfo:
         slack = torch.FloatTensor(
-            [job.slack_upon_now(machine_state.now) for job in machine_state.queue]
+            [job.slack_upon_moment(machine_state.now) for job in machine_state.queue]
         )
         operation_processing_times = torch.FloatTensor(
             [job.current_operation_processing_time_on_machine for job in machine_state.queue]

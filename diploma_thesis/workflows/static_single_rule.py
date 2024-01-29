@@ -1,8 +1,9 @@
 import simpy
 
 from environment.problem import Problem
-from environment.shopfloor import ShopFloor
+from environment.shop_floor import ShopFloor
 from .workflow import Workflow
+from tabulate import tabulate
 
 
 class StaticSingleRule(Workflow):
@@ -28,4 +29,13 @@ class StaticSingleRule(Workflow):
         shopfloor.simulate()
 
         environment.run(until=self.problem.timespan)
+
+        statistics = shopfloor.statistics()
+        predicate = statistics.Predicate()
+
+        predicate.time_predicate = predicate.TimePredicate(at=90, kind=predicate.TimePredicate.Kind.less_than)
+
+        print(statistics.jobs(predicate=predicate))
+        print(statistics.utilization_rate())
+        print(statistics.total_flow_time(True, predicate))
 
