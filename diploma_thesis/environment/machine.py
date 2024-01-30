@@ -6,9 +6,7 @@ from typing import List, Any
 import simpy
 import torch
 
-from environment.job import Job, JobEvent
-from environment.work_center import WorkCenter
-
+import environment
 from scheduling_rules import SchedulingRule, MachineState, WaitInfo
 
 
@@ -22,7 +20,7 @@ class State:
     # The index of work_center, where the machine is located
     work_center_idx: int = 0
     # The list of jobs, which are queued on the machine
-    queue: List[Job] = field(default_factory=list)
+    queue: List[environment.Job] = field(default_factory=list)
     # The index of current processing job
     current_job_idx: int = 0
     # The moment of decision for the machine
@@ -36,7 +34,7 @@ class State:
     # Total runtime
     run_time: int = 0
 
-    def with_new_job(self, job: Job, now: int):
+    def with_new_job(self, job: environment.Job, now: int):
         """
         Adds new job to the queue
 
@@ -132,16 +130,20 @@ class State:
 
 @dataclass
 class Context:
-    machines: List['Machine'] = None
-    work_centers: List[WorkCenter] = None
-    shopfloor: Any = None
+    machines: List['environment.Machine'] = None
+    work_centers: List['environment.WorkCenter'] = None
+    shopfloor: 'environment.ShopFloor' = None
 
-    def with_info(self, machines: List['Machine'], work_centers: List[WorkCenter], shopfloor: 'ShopFloor'):
+    def with_info(self,
+                  machines: List['environment.Machine'],
+                  work_centers: List['environment.WorkCenter'],
+                  shopfloor: 'environment.ShopFloor'):
         self.machines = machines
         self.work_centers = work_centers
         self.shopfloor = shopfloor
 
         return self
+
 
 @dataclass
 class History:
@@ -178,7 +180,9 @@ class Machine:
         self.sequence_learning_event = self.environment.event()
         self.routing_learning_event = self.environment.event()
 
-    def connect(self, machines: List['Machine'], work_centers: List[WorkCenter], shopfloor: 'ShopFloor'):
+    def connect(self, machines: List['environment.Machine'],
+                work_centers: List['environment.WorkCenter'],
+                shopfloor: 'environment.ShopFloor'):
         """
         Connects machine to other machines and dispatcher,
         so that machine can communicate with them
@@ -194,8 +198,8 @@ class Machine:
 
         self.environment.process(self.produce())
 
-    def receive(self, job: Job):
-        job.with_event(self.__new_event__(JobEvent.Kind.arrival_on_machine))
+    def receive(self, job: environment.Job):
+        job.with_event(self.__new_event__(environment.JobEvent.Kind.arrival_on_machine))
 
         self.state.with_new_job(job, self.environment.now)
         self.did_receive_job()
@@ -275,7 +279,7 @@ class Machine:
         if self.state.is_empty:
             yield self.environment.process(self.starve())
 
-    def forward(self, job: Job):
+    def forward(self, job: environment.Job):
         """
         Forwards the job to the next machine by sending it to the shop floor
 
@@ -319,13 +323,15 @@ class Machine:
         except:
            pass
 
-    def __notify_job_about_production__(self, job: Job, production_start: bool):
-        event = self.__new_event__(JobEvent.Kind.production_start if production_start else JobEvent.Kind.production_end)
+    def __notify_job_about_production__(self, job: environment.Job, production_start: bool):
+        event = environment.JobEvent.Kind.production_start if production_start \
+                else environment.JobEvent.Kind.production_end
+        event = self.__new_event__(event)
 
         job.with_event(event)
 
-    def __new_event__(self, kind: JobEvent.Kind):
-        return JobEvent(
+    def __new_event__(self, kind: environment.JobEvent.Kind):
+        return environment.JobEvent(
             moment=self.environment.now,
             kind=kind,
             work_center_idx=self.state.work_center_idx,

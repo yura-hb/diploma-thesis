@@ -204,16 +204,16 @@ class Job:
         return self.current_step_idx >= 0
 
     @property
-    def tardiness(self):
+    def tardiness(self) -> torch.FloatTensor:
         """
         Returns: The tardiness of the job
         """
         assert self.is_completed, "Job must be completed in order to compute tardiness"
 
-        return max(self.history.completed_at - self.due_at, 0)
+        return torch.FloatTensor([max(self.history.completed_at - self.due_at, 0.0)])
 
     @property
-    def flow_time(self):
+    def flow_time(self) -> torch.FloatTensor:
         """
         Returns: The flow time of the job
         """
@@ -222,7 +222,7 @@ class Job:
         return self.history.completed_at - self.history.dispatched_at
 
     @property
-    def is_tardy(self):
+    def is_tardy(self) -> bool:
         """
         Returns: True if the job is tardy, False otherwise
         """
@@ -231,13 +231,13 @@ class Job:
         return self.due_at < self.history.completed_at
 
     @property
-    def earliness(self):
+    def earliness(self) -> torch.FloatTensor:
         """
         Returns: The earliness of the job
         """
         assert self.is_completed, "Job must be completed in order to compute earliness"
 
-        return max(self.due_at - self.history.completed_at, 0)
+        return torch.FloatTensor([max(self.due_at - self.history.completed_at, 0)])
 
     @property
     def remaining_operations_count(self):

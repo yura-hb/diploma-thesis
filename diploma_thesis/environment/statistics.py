@@ -2,14 +2,13 @@
 from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
-from typing import List, Callable, Tuple
+from typing import List, Callable, Tuple, Iterable
 
 import pandas as pd
 import torch
 
-from environment.job import Job
-from environment.shop_floor import ShopFloor
-from .utils.production_log_factory import ProductionLogFactory
+import environment
+import environment.statistics_utils as st
 
 
 class Statistics:
@@ -53,15 +52,15 @@ class Statistics:
         worker_predicate: WorkerPredicate = field(default_factory=WorkerPredicate)
         time_predicate: TimePredicate = field(default_factory=TimePredicate)
 
-    def __init__(self, shop_floor: ShopFloor):
+    def __init__(self, shop_floor: environment.ShopFloor):
         self.shop_floor = shop_floor
         self.shop_floor_history = deepcopy(shop_floor.history)
         self.work_center_history = deepcopy([work_center.history for work_center in shop_floor.work_centers])
         self.machine_history = deepcopy([machine.history for machine in shop_floor.machines])
 
-        self.production_logs = ProductionLogFactory().make(shop_floor)
+        self.production_logs = st.ProductionLogFactory().make(shop_floor)
 
-    def jobs(self, predicate: Predicate = Predicate()) -> List[Job]:
+    def jobs(self, predicate: Predicate = Predicate()) -> List[environment.Job]:
         """
         Fetches all jobs, which are in the system given by the predicate
 
@@ -74,55 +73,52 @@ class Statistics:
 
         return unfinished_job
 
-    def total_make_span(self, predicate: Predicate = Predicate()) -> torch.FloatTensor:
+    def total_make_span(self, predicate: Predicate = Predicate()) -> float:
         """
         Computes make span for the shop-floor, i.e. last job completion time.
         """
         logs = self.__filter__(predicate)
 
-        return logs[logs.event == ProductionLogFactory.Event.completed]['moment'].max()
+        return logs[logs.event == st.LogEvent.completed]['moment'].max()
 
     def utilization_rate(
         self,
-        interval: [float, float] = None,
+        time_predicate: Predicate.TimePredicate = Predicate.TimePredicate(),
         predicate: Predicate.MachinePredicate = Predicate.MachinePredicate()
-    ) -> torch.FloatTensor:
+    ) -> float:
         """
-        Computes utilization rate, i.e. the ratio of runtime to the total time. The metric is defined machine.
-        In case higher-level predicate (work-center or shop-floor) is given, the value for each machine
-        is returned.
+        Computes utilization rate, i.e. the ratio of runtime to the total time. The metric is defined for machine.
 
         Args:
             interval: The interval to compute utilization rate for. If None, [0, makespan] is taken
-            predicate: The predicate to select machines for which utilization rate should be computed.
+            time_predicate: The predicate to select time interval for which utilization rate should be computed.
+            predicate: The predicate to select machine for which utilization rate should be computed.
 
         Return: Utilization rate for machine or machines depending on the predicate.
         """
 
-        _interval = self.__estimate_interval__(interval)
+        _interval = self.__estimate_interval__(time_predicate)
 
-        return self.run_time(interval=_interval, predicate=predicate) / (_interval[1] - _interval[0])
+        return self.run_time(time_predicate=time_predicate, predicate=predicate) / (_interval[1] - _interval[0])
 
     def run_time(self,
-                 interval: [float, float] = None,
-                 predicate: Predicate.MachinePredicate = Predicate.MachinePredicate()) -> torch.FloatTensor:
-        _interval = self.__estimate_interval__(interval)
+                 time_predicate: Predicate.TimePredicate = Predicate.TimePredicate(),
+                 predicate: Predicate.MachinePredicate = Predicate.MachinePredicate()) -> float:
+        """
+        Computes total run time, i.e. the time the job was processing on the machine
+        """
+        _interval = self.__estimate_interval__(time_predicate)
 
-        select_predicate = self.Predicate(
-            worker_predicate=predicate,
-            time_predicate=self.Predicate.TimePredicate(
-                kind=self.Predicate.TimePredicate.Kind.less_than, at=_interval[1]
-            )
-        )
+        select_predicate = self.Predicate(worker_predicate=predicate, time_predicate=time_predicate)
 
         logs = self.__filter__(select_predicate)
 
         production_records = logs.set_index(['job_id', 'operation_id'])
 
-        df = production_records[production_records['event'] == ProductionLogFactory.Event.started_processing]
+        df = production_records[production_records['event'] == st.LogEvent.started_processing]
         df = df[['moment']].clip(lower=_interval[0], upper=None)
 
-        ends = production_records[production_records['event'] == ProductionLogFactory.Event.finished_processing]
+        ends = production_records[production_records['event'] == st.LogEvent.finished_processing]
         ends = ends['moment'].clip(lower=None, upper=_interval[1])
 
         df['ends'] = ends
@@ -130,7 +126,20 @@ class Statistics:
 
         return (df['ends'] - df['moment']).sum()
 
-    def total_flow_time(self, weighted_by_priority: bool, predicate: Predicate) -> torch.FloatTensor:
+    def total_number_of_processed_operations(
+        self,
+        time_predicate: Predicate.TimePredicate = Predicate.TimePredicate(),
+        predicate: Predicate.MachinePredicate = Predicate.MachinePredicate()
+    ) -> float:
+        """
+        Computes total number of completed jobs on the machine
+        """
+        _predicate = self.Predicate(time_predicate=time_predicate, worker_predicate=predicate)
+        job_ids = self.__job_ids__(st.LogEvent.finished_processing, _predicate)
+
+        return len(job_ids)
+
+    def total_flow_time(self, weighted_by_priority: bool = False, predicate: Predicate = Predicate()) -> float:
         """
         Computes total flow time for the shop-floor, i.e. the sum of durations from job dispatch to job completion.
 
@@ -142,7 +151,7 @@ class Statistics:
 
         return self.__reduce_jobs__(job_ids, weighted_by_priority, lambda job: job.flow_time)
 
-    def total_tardiness(self, weighted_by_priority: bool, predicate: Predicate) -> torch.FloatTensor:
+    def total_tardiness(self, weighted_by_priority: bool = False, predicate: Predicate = Predicate()) -> float:
         """
         Computes tardiness for the shop-floor, i.e. the sum of durations from job completion to job due.
 
@@ -154,7 +163,7 @@ class Statistics:
 
         return self.__reduce_jobs__(job_ids, weighted_by_priority, lambda job: job.tardiness)
 
-    def total_earliness(self, weighted_by_priority: bool, predicate: Predicate) -> torch.FloatTensor:
+    def total_earliness(self, weighted_by_priority: bool = False, predicate: Predicate = Predicate()) -> float:
         """
         Computes earliness for the shop-floor, i.e. the sum of durations from job due to job completion (the opposite of
         tardiness).
@@ -170,9 +179,9 @@ class Statistics:
 
     def total_number_of_tardy_jobs(
         self,
-        weighted_by_priority: bool,
+        weighted_by_priority: bool = False,
         predicate: Predicate = Predicate()
-    ) -> torch.FloatTensor:
+    ) -> float:
         """
         Computes earliness for the shop-floor, i.e. the sum of durations from job due to job completion (the opposite of
         tardiness).
@@ -183,7 +192,14 @@ class Statistics:
         """
         job_ids = self.__completed_job_ids__(predicate)
 
-        return self.__reduce_jobs__(job_ids, weighted_by_priority, lambda job: 1 if job.is_tardy else 0)
+        return self.__reduce_jobs__(job_ids,
+                                    weighted_by_priority,
+                                    lambda job: torch.LongTensor([1 if job.is_tardy else 0]))
+
+    def report(self, time_predicate: Predicate.TimePredicate) -> st.Report:
+        report_factory = st.ReportFactory(self, self.shop_floor, time_predicate)
+
+        return report_factory.make()
 
     def __filter__(self, predicate: Predicate) -> pd.DataFrame:
         logs = None
@@ -215,14 +231,35 @@ class Statistics:
             case _:
                 raise ValueError(f"Unsupported predicate {predicate}")
 
+    def __estimate_interval__(
+        self, time_predicate: Predicate.TimePredicate = Predicate.TimePredicate()
+    ) -> Tuple[float, float]:
+        match time_predicate.kind:
+            case self.Predicate.TimePredicate.Kind.less_than:
+                return [0, time_predicate.at]
+            case self.Predicate.TimePredicate.Kind.cut:
+                # Estimate interval from logs
+                predicate = self.Predicate(
+                    time_predicate=time_predicate,
+                    worker_predicate=self.Predicate.WorkerPredicate()
+                )
+                logs = self.__filter__(predicate)
+
+                lower = logs[logs.event == st.LogEvent.started_processing]['moment'].min()
+                upper = logs[logs.event == st.LogEvent.finished_processing]['moment'].max()
+
+                return [lower, upper]
+            case self.Predicate.TimePredicate.Kind.greater_than:
+                return [time_predicate.at, self.total_make_span()]
+
     def __started_and_not_completed_job_ids__(self, at: float):
         completed_job_ids_before_moment = self.production_logs[
-            (self.production_logs.event == ProductionLogFactory.Event.completed) &
+            (self.production_logs.event == st.LogEvent.completed) &
             (self.production_logs.moment <= at)
             ]['job_id'].unique()
 
         created_job_ids_before_moment = self.production_logs[
-            (self.production_logs.event == ProductionLogFactory.Event.created) &
+            (self.production_logs.event == st.LogEvent.created) &
             (self.production_logs.moment <= at)
             ]['job_id'].unique()
 
@@ -230,41 +267,37 @@ class Statistics:
 
         return job_ids
 
-    def all_criteria(self, predicate) -> pd.DataFrame:
-        ...
-
-    def __estimate_interval__(self, interval: Tuple[float, float] = None):
-        assert interval is None or (len(interval) == 2 and interval[0] < interval[1]), \
-            "Interval must be None or a list of two elements"
-
-        _interval = interval
-
-        if _interval is None:
-            _interval = [0, self.total_make_span()]
-
-        return _interval
-
-    def __completed_job_ids__(self, predicate: Predicate):
+    def __completed_job_ids__(self, predicate: Predicate) -> Iterable[str]:
         logs = self.__filter__(predicate)
 
-        completed = logs[logs.event == ProductionLogFactory.Event.completed]['job_id']
+        completed = logs[logs.event == st.LogEvent.completed]['job_id']
 
-        return completed.index.unique()
+        return completed.unique()
 
-    def __reduce_jobs__(self, job_ids, weighted_by_priority: bool, get_value: Callable[[Job], float]) -> torch.FloatTensor:
-        value = 0
+    def __job_ids__(self, event: st.LogEvent, predicate: Predicate) -> Iterable[str]:
+        logs = self.__filter__(predicate)
+
+        completed = logs[logs.event == event]['job_id']
+
+        return completed.unique()
+
+    def __reduce_jobs__(self,
+                        job_ids: Iterable[str],
+                        weighted_by_priority: bool,
+                        get_value: Callable[[environment.Job], float]) -> float:
+        value = torch.FloatTensor([0])
         total_weights = 0
 
         for job_id in job_ids:
             job = self.shop_floor_history.jobs[job_id]
             weight = job.priority if weighted_by_priority else 1
 
-            value += get_value(job) * weight
+            value += torch.atleast_1d(get_value(job)) * weight
             total_weights += weight
 
         value = torch.FloatTensor(value)
 
         if weighted_by_priority:
-            return value / total_weights
+            value /= total_weights
 
-        return value
+        return value.item()

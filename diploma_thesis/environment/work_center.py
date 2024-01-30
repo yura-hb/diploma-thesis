@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import List
 import simpy
 
-from environment.job import Job, JobEvent
+import environment
 
 from routing_rules import RoutingRule, WorkCenterState
 
@@ -12,9 +12,9 @@ from routing_rules import RoutingRule, WorkCenterState
 class State:
     idx: int = 0
 
-    queue: List[Job] = field(default_factory=list)
+    queue: List[environment.Job] = field(default_factory=list)
 
-    def with_new_job(self, job: Job):
+    def with_new_job(self, job: environment.Job):
         self.queue += [job]
 
         return self
@@ -36,11 +36,14 @@ class History:
 
 
 class Context:
-    machines: List['Machine'] = field(default_factory=list)
-    work_centers: List['WorkCenter'] = field(default_factory=list)
-    shopfloor: 'ShopFloor' = field(default_factory=lambda: None)
+    machines: List['environment.Machine'] = field(default_factory=list)
+    work_centers: List['environment.WorkCenter'] = field(default_factory=list)
+    shopfloor: 'environment.ShopFloor' = field(default_factory=lambda: None)
 
-    def with_info(self, machines: List['Machine'], work_centers: List['WorkCenter'], shopfloor: 'ShopFloor'):
+    def with_info(self,
+                  machines: List['environment.Machine'],
+                  work_centers: List['environment.WorkCenter'],
+                  shopfloor: 'environment.ShopFloor'):
         self.machines = machines
         self.work_centers = work_centers
         self.shopfloor = shopfloor
@@ -60,7 +63,9 @@ class WorkCenter:
 
         self.on_route = environment.event()
 
-    def connect(self, machines: List['Machine'], work_centers: List['WorkCenter'], shopfloor: 'ShopFloor'):
+    def connect(self, machines: List['environment.Machine'],
+                work_centers: List['environment.WorkCenter'],
+                shopfloor: 'environment.ShopFloor'):
         """
         Args:
             machines: The list of machines in the work center!!!
@@ -94,13 +99,13 @@ class WorkCenter:
 
             self.on_route = self.environment.event()
 
-    def receive(self, job: Job):
+    def receive(self, job: environment.Job):
         self.state.with_new_job(job)
 
         job.with_event(
-            JobEvent(
+            environment.JobEvent(
                 moment=self.environment.now,
-                kind=JobEvent.Kind.arrival_on_work_center,
+                kind=environment.JobEvent.Kind.arrival_on_work_center,
                 work_center_idx=self.state.idx
             )
         )
@@ -108,7 +113,7 @@ class WorkCenter:
         self.did_receive_job()
 
     @property
-    def machines(self):
+    def machines(self) -> List['environment.Machine']:
         return self.context.machines
 
     def did_receive_job(self):

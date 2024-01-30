@@ -98,8 +98,8 @@ class ShopFloor:
         self.logger = logger
         self.generator = generator
 
-        self.work_centers: List['WorkCenter'] = []
-        self.machines: List['Machine'] = []
+        self._work_centers: List['WorkCenter'] = []
+        self._machines: List['Machine'] = []
 
         self.state = State()
         self.history = History()
@@ -110,6 +110,20 @@ class ShopFloor:
         self.assign_initial_jobs()
 
         self.configuration.environment.process(self.dispatch_jobs())
+
+    @property
+    def statistics(self) -> 'Statistics':
+        from .statistics import Statistics
+
+        return Statistics(self)
+
+    @property
+    def work_centers(self) -> List['WorkCenter']:
+        return self._work_centers
+
+    @property
+    def machines(self) -> List['Machine']:
+        return self._machines
 
     # Redefine generation of Work-Center paths
 
@@ -237,11 +251,6 @@ class ShopFloor:
 
         return job.with_due_at(due_at)
 
-    def statistics(self) -> 'Statistics':
-        from .statistics import Statistics
-
-        return Statistics(self)
-
     def __dispatch__(self, job: Job, work_center: WorkCenter):
         self.state.with_new_job_in_system()
 
@@ -279,8 +288,8 @@ class ShopFloor:
         for machine in machines:
             machine.connect(machines, work_centers, self)
 
-        self.work_centers = work_centers
-        self.machines = machines
+        self._work_centers = work_centers
+        self._machines = machines
 
         return self
 
