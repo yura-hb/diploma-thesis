@@ -2,16 +2,17 @@ import simpy
 
 from environment.problem import Problem
 from environment.shop_floor import ShopFloor
+from environment.job_samplers import UniformJobSampler
 from .workflow import Workflow
-from tabulate import tabulate
 
 
 class StaticSingleRule(Workflow):
 
-    def __init__(self, problem: Problem):
+    def __init__(self, problem: Problem, sampler: UniformJobSampler):
         super().__init__()
 
         self.problem = problem
+        self.sampler = sampler
 
     def run(self):
         environment = simpy.Environment()
@@ -19,11 +20,12 @@ class StaticSingleRule(Workflow):
         configuration = ShopFloor.Configuration(
             environment=environment,
             problem=self.problem,
+            sampler=self.sampler
         )
 
         shopfloor = ShopFloor(
             configuration,
-            logger=self.__make_logger__('ShopFloor', log_stdout=True),
+            logger=self.__make_logger__('ShopFloor', log_stdout=True)
         )
 
         shopfloor.simulate()
