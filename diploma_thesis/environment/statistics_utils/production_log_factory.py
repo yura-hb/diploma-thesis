@@ -1,9 +1,12 @@
 
-from dataclasses import dataclass
+import multiprocessing as mp
+from dataclasses import dataclass, asdict
 from enum import StrEnum, auto
+from functools import reduce
 from typing import List
 
 import pandas as pd
+from joblib import Parallel, delayed
 
 from environment import Job, ShopFloor
 
@@ -40,14 +43,16 @@ class ProductionLogFactory:
 
         Returns: pandas.DataFrame representing production logs
         """
+        cpu_count = mp.cpu_count()
+        jobs = shop_floor.history.jobs
 
-        result = []
+        result = Parallel(n_jobs=cpu_count, batch_size=len(jobs) // cpu_count)(
+            delayed(self.__make_production_logs_from_job__)(job) for _, job in jobs.items()
+        )
 
-        for _, job in shop_floor.history.jobs.items():
-            result += self.__make_production_logs_from_job__(job)
+        result = reduce(lambda x, y: x + y, result, [])
 
         df = pd.DataFrame(result)
-
         df = df.astype({
             'job_id': 'int32',
             'operation_id': 'int32',
@@ -87,4 +92,5 @@ class ProductionLogFactory:
         if job.is_completed:
             result += [self.ProductionLog(job.id, 0, -1, -1, LogEvent.completed, job.history.completed_at)]
 
-        return result
+        # Convert to dict to speed up further computations
+        return [asdict(log) for log in result]

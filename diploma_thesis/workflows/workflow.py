@@ -27,10 +27,3 @@ class Workflow(metaclass=ABCMeta):
             logger.addHandler(stdout_handler)
 
         return logger
-
-    @staticmethod
-    def __make_generator__(problem: Problem) -> torch.Generator:
-        generator = torch.Generator()
-        generator.manual_seed(problem.seed)
-
-        return generator

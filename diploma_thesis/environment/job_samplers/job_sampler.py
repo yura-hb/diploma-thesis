@@ -16,7 +16,7 @@ class JobSampler(metaclass=ABCMeta):
         return
 
     @abstractmethod
-    def sample(self, job_id: int, moment: torch.FloatType) -> environment.Job:
+    def sample(self, job_id: int, initial_work_center_idx: int, moment: torch.FloatType) -> environment.Job:
         pass
 
     @abstractmethod

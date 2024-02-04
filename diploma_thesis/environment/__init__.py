@@ -1,5 +1,5 @@
 
-from .job import Job, JobEvent
+from .job import Job, JobEvent, ReductionStrategy as JobReductionStrategy
 from .machine import Machine
 from .work_center import WorkCenter
 from .problem import Problem

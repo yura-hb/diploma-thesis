@@ -1,10 +1,11 @@
 
 from dataclasses import dataclass, field
 from typing import List
+
 import simpy
+import torch
 
 import environment
-
 from routing_rules import RoutingRule, WorkCenterState
 
 
@@ -27,10 +28,13 @@ class State:
 
 @dataclass
 class History:
-    decision_times: List[float] = field(default_factory=list)
+    decision_times: torch.FloatTensor = field(default_factory=lambda: torch.FloatTensor([]))
 
     def with_decision_time(self, decision_time: float):
-        self.decision_times += [decision_time]
+        if not isinstance(decision_time, torch.Tensor):
+            decision_time = torch.FloatTensor([decision_time])
+
+        self.decision_times = torch.cat([self.decision_times, torch.atleast_1d(decision_time)])
 
         return self
 
@@ -92,7 +96,10 @@ class WorkCenter:
 
                 state = WorkCenterState(work_center_idx=self.state.idx, machines=self.context.machines)
 
+                self.context.shopfloor.will_dispatch(job, self)
+
                 machine = self.rule.select_machine(job, state)
+
                 machine.receive(job)
 
             self.state.with_flushed_queue()

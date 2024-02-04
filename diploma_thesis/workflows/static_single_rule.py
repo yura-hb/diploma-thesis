@@ -35,7 +35,7 @@ class StaticSingleRule(Workflow):
         statistics = shopfloor.statistics
 
         predicate = statistics.Predicate
-        time_predicate = predicate.TimePredicate(at=1000, kind=predicate.TimePredicate.Kind.less_than)
+        time_predicate = predicate.TimePredicate(at=self.problem.timespan, kind=predicate.TimePredicate.Kind.less_than)
 
         report = statistics.report(time_predicate)
 

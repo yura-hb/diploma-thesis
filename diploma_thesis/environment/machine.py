@@ -1,7 +1,7 @@
 
 from dataclasses import dataclass, field
 from functools import reduce
-from typing import List, Any
+from typing import List
 
 import simpy
 import torch
@@ -147,10 +147,13 @@ class Context:
 
 @dataclass
 class History:
-    decision_times: List[float] = field(default_factory=list)
+    decision_times: torch.FloatTensor = field(default_factory=lambda: torch.FloatTensor([]))
 
     def with_decision_time(self, decision_time: float):
-        self.decision_times += [decision_time]
+        if not isinstance(decision_time, torch.Tensor):
+            decision_time = torch.FloatTensor([decision_time])
+
+        self.decision_times = torch.cat([self.decision_times, torch.atleast_1d(decision_time)])
 
         return self
 
@@ -222,6 +225,7 @@ class Machine:
                 continue
 
             self.__notify_job_about_production__(job, production_start=True)
+
             self.context.shopfloor.will_produce(job, self)
 
             processing_time = job.current_operation_processing_time_on_machine

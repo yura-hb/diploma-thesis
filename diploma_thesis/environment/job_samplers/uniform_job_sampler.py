@@ -8,11 +8,11 @@ from dataclasses import dataclass
 
 
 class UniformJobSampler(JobSampler):
-
     @dataclass
     class Configuration:
-        # Minimum number of operations per job
-        min_operations_per_job: int = None
+        # A parameter for categorical distribution which determines the maximum number of steps
+        # dropped from generated sequence
+        job_unevenness_factor: int = 0
         # Parameters of uniform distribution for sampling processing times
         processing_times: torch.Tensor = torch.tensor([1, 10])
         # Tightness factor
@@ -22,26 +22,49 @@ class UniformJobSampler(JobSampler):
         # Seed for all random operations
         seed: int = 0
 
+        @property
+        def is_uneven_job_creation_expected(self):
+            return self.job_unevenness_factor > 0
+
     def __init__(self, problem: environment.Problem, configuration: Configuration):
         super().__init__(problem)
 
         self.configuration = configuration
         self.beta = self.__make_beta__()
+        self._number_of_jobs = torch.round(self.problem.timespan / self.beta)
 
         torch.manual_seed(self.configuration.seed)
 
         self.generator = torch.Generator()
+        self.generator.manual_seed(self.configuration.seed)
 
         self.arrival_time_distribution = torch.distributions.Exponential(1 / self.beta)
         self.processing_time_distribution = torch.distributions.Uniform(low=self.configuration.processing_times[0],
                                                                         high=self.configuration.processing_times[1])
         self.due_time_distribution = torch.distributions.Uniform(low=0, high=self.configuration.tightness_factor)
 
-    def number_of_jobs(self):
-        return torch.round(self.problem.timespan / self.beta)
+        if self.configuration.is_uneven_job_creation_expected:
+            self.uneveness_distribution = torch.distributions.Uniform(
+                low=0, high=self.configuration.job_unevenness_factor
+            )
 
-    def sample(self, job_id: int, moment: torch.FloatType) -> environment.Job:
+    def number_of_jobs(self):
+        return self._number_of_jobs
+
+    def sample(self, job_id: int, initial_work_center_idx: int, moment: torch.FloatType) -> environment.Job:
         work_center_idx = torch.randperm(self.problem.workcenter_count, generator=self.generator)
+
+        if initial_work_center_idx is not None:
+            initial_work_center_idx = torch.LongTensor([initial_work_center_idx])
+            work_center_idx = work_center_idx[work_center_idx != initial_work_center_idx]
+            work_center_idx = torch.hstack([initial_work_center_idx, work_center_idx])
+
+        if self.configuration.is_uneven_job_creation_expected:
+            cut_off = self.uneveness_distribution.sample((1,))
+            cut_off = int(cut_off)
+
+            if cut_off > 0:
+                work_center_idx = work_center_idx[:-cut_off]
 
         shape = (len(work_center_idx), self.problem.machines_per_workcenter)
 
@@ -71,17 +94,19 @@ class UniformJobSampler(JobSampler):
         return mean / (self.problem.machines_per_workcenter * self.configuration.expected_utilization)
 
     def __sample_due_time__(self, job: environment.Job, moment: int):
-        mean, _ = job.processing_time_moments()
-        tightness = 1 + self.due_time_distribution.rsample((1,))
-        num_machines = self.problem.machines_per_workcenter * self.problem.workcenter_count
+        # Take mean over all processing times of the job
+        mean, _ = job.processing_time_moments(reduction_strategy=environment.JobReductionStrategy.none)
+        tightness = 1. + self.due_time_distribution.rsample((1,))
+        num_machines = job.step_idx.shape[0]
 
         return torch.round(mean * num_machines * tightness + moment)
 
     @staticmethod
     def add_cli_arguments(sub_parser: argparse.ArgumentParser):
         sub_parser.add_argument(
-            "--min-operations-per-job",
-            help="The minimum number of operations per job",
+            "--job_unevenness_factor",
+            help="A parameter for categorical distribution"
+                 "which determines the maximum number of steps dropped from generated sequence",
             type=int,
             default=0
         )
@@ -98,7 +123,7 @@ class UniformJobSampler(JobSampler):
             "--tightness-factor",
             help="The tightness factor",
             type=float,
-            default=1.0
+            default=0.1
         )
 
         sub_parser.add_argument(
@@ -118,7 +143,7 @@ class UniformJobSampler(JobSampler):
     @staticmethod
     def from_cli_arguments(problem: environment.Problem, namespace: argparse.Namespace) -> 'UniformJobSampler':
         configuration = UniformJobSampler.Configuration(
-            min_operations_per_job=namespace.min_operations_per_job,
+            job_unevenness_factor=namespace.job_unevenness_factor,
             processing_times=torch.tensor(namespace.processing_times),
             tightness_factor=namespace.tightness_factor,
             expected_utilization=namespace.expected_utilization,

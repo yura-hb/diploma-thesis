@@ -1,4 +1,5 @@
 import logging
+from abc import abstractmethod
 from dataclasses import dataclass, field
 from functools import reduce
 from typing import List, Tuple, Dict
@@ -7,8 +8,8 @@ import simpy
 import torch
 
 import environment
-from routing_rules import RoutingRule, EARoutingRule
-from scheduling_rules import SchedulingRule, FIFOSchedulingRule
+
+from models import SchedulingModel, RoutingModel
 
 
 @dataclass
@@ -76,22 +77,51 @@ class History:
 
 
 class ShopFloor:
-    
+
+    class Delegate:
+        """
+        Support Class to handle the events in the shop-floor
+        """
+        @abstractmethod
+        def will_produce(self, job: environment.Job, machine: environment.Machine):
+            """
+            Will be triggered before the production of job on machine
+            """
+            ...
+
+        @abstractmethod
+        def did_produce(self, job: environment.Job, machine: environment.Machine):
+            """
+            Will be triggered after the production of job on machine
+            """
+            ...
+
+        @abstractmethod
+        def will_dispatch(self, job: environment.Job, work_center: environment.WorkCenter):
+            """
+            Will be triggered before dispatch of job on the work-center
+            """
+            ...
+
+        @abstractmethod
+        def did_complete(self, job: environment.Job):
+            """
+            Will be triggered after the completion of job
+            """
+            ...
+
     @dataclass
     class Configuration:
         problem: environment.Problem
         sampler: 'environment.job_samplers.JobSampler'
+        scheduling_rule: SchedulingModel
+        routing_rule: RoutingModel
         environment: simpy.Environment = field(default_factory=simpy.Environment)
-        scheduling_rule: SchedulingRule = field(default_factory=lambda: FIFOSchedulingRule())
-        routing_rule: RoutingRule = field(default_factory=lambda: EARoutingRule())
 
-    def __init__(
-        self,
-        configuration: Configuration,
-        logger: logging.Logger
-    ):
+    def __init__(self, configuration: Configuration, logger: logging.Logger, delegate: Delegate = Delegate()):
         self.configuration = configuration
         self.logger = logger
+        self.delegate = delegate
 
         self._work_centers: List[environment.WorkCenter] = []
         self._machines: List[environment.Machine] = []
@@ -120,35 +150,30 @@ class ShopFloor:
     def machines(self) -> List['environment.Machine']:
         return self._machines
 
-    # Redefine generation of Work-Center paths
-
     def assign_initial_jobs(self):
         for work_center in self.work_centers:
             for _ in work_center.context.machines:
-                job = self.__sample_job__(created_at=0)
-                # Hold reference to the job
+                job = self.__sample_job__(initial_work_center_idx=work_center.state.idx, created_at=0)
+
                 self.history.with_new_job(job)
-                # Send job to work-center
+
                 self.__dispatch__(job, work_center)
 
             work_center.did_receive_job()
 
     def dispatch_jobs(self):
-        while self.state.dispatched_job_count < self.configuration.problem.job_count:
-            # Sample arrival time for the next job
+        while self.state.dispatched_job_count < self.configuration.sampler.number_of_jobs():
             arrival_time = self.configuration.sampler.sample_next_arrival_time()
+
             yield self.configuration.environment.timeout(arrival_time)
-            # Sample the job
+
             job = self.__sample_job__(created_at=self.configuration.environment.now)
-            # Hold reference to the job
+
             self.history.with_new_job(job)
-            # Send job to the first machine
+
             work_center = self.work_centers[job.step_idx[0]]
 
             self.__dispatch__(job, work_center)
-
-    def will_produce(self, job: environment.Job, from_: environment.Machine):
-        ...
 
     def forward(self, job: environment.Job, from_: environment.Machine):
         next_work_center_idx = job.next_work_center_idx
@@ -171,6 +196,7 @@ class ShopFloor:
             )
 
             self.state.with_job_completed()
+            self.delegate.did_complete(job)
 
         self.logger.info(
             f"Job {job.id} { job.current_step_idx } has been { 'completed' if job.is_completed else 'produced' } "
@@ -178,9 +204,24 @@ class ShopFloor:
             f"at {self.configuration.environment.now}. Jobs in the system { self.state.number_of_jobs_in_system }"
         )
 
-    def __sample_job__(self, created_at: torch.FloatTensor = 0):
+    def breakdown(self, work_center_idx: int, machine_idx: int, duration: int):
+        ...
+
+    def will_produce(self, job: environment.Job, machine: environment.Machine):
+        self.delegate.will_produce(job, machine)
+
+    def did_produce(self, job: environment.Job, machine: environment.Machine):
+        self.delegate.did_produce(job, machine)
+
+    def will_dispatch(self, job: environment.Job, work_center: environment.WorkCenter):
+        self.delegate.will_dispatch(job, work_center)
+
+    def __sample_job__(self, initial_work_center_idx: int = None, created_at: torch.FloatTensor = 0):
         job = (
-            self.configuration.sampler.sample(job_id=self.state.with_new_job_id().job_id, moment=created_at)
+            self.configuration.sampler.sample(
+                job_id=self.state.with_new_job_id().job_id,
+                initial_work_center_idx=initial_work_center_idx,
+                moment=created_at)
             .with_event(
                 environment.Job.Event(
                     kind=environment.Job.Event.Kind.dispatch,
