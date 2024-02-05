@@ -1,0 +1,31 @@
+
+
+task:
+  id: 'single_model'
+
+problem:
+  timespan: 10000
+  machines_per_workcenter: 1
+  workcenter_count: 5
+
+sampler:
+  id: 'dynamic'
+  parameters:
+    processing_times: [1, 50]
+    tightness: 1
+    realistic_variance: 10
+    uneveness: 4
+    expected_utilization: 0.8
+#    even_arrival_time: 1
+    seed: 42
+
+scheduling_model:
+  id: 'static'
+  parameters:
+    rule: 'edd'
+
+routing_model:
+  id: 'static'
+  parameters:
+    rule: 'ea'
+

@@ -7,7 +7,7 @@ import simpy
 import torch
 
 import environment
-from scheduling_rules import SchedulingRule, MachineState, WaitInfo
+from model.scheduling.scheduling_rules import SchedulingRule, WaitInfo
 
 
 @dataclass
@@ -255,9 +255,7 @@ class Machine:
         if len(self.state.queue) == 1:
             return self.state.queue[0]
 
-        state = MachineState(self.state.queue, self.environment.now)
-
-        job = self.rule(state)
+        job = self.rule(self, self.environment.now)
 
         return job
 
@@ -294,6 +292,10 @@ class Machine:
         """
         self.state.without_job(job.id, now=self.environment.now)
         self.context.shopfloor.forward(job, from_=self)
+
+    @property
+    def queue(self) -> List[environment.Job]:
+        return self.state.queue
 
     @property
     def work_center_idx(self) -> int:

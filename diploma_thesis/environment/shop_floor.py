@@ -1,5 +1,5 @@
 import logging
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 from dataclasses import dataclass, field
 from functools import reduce
 from typing import List, Tuple, Dict
@@ -8,8 +8,8 @@ import simpy
 import torch
 
 import environment
-
-from models import SchedulingModel, RoutingModel
+import job_samplers
+from model import SchedulingModel, RoutingModel
 
 
 @dataclass
@@ -78,7 +78,7 @@ class History:
 
 class ShopFloor:
 
-    class Delegate:
+    class Delegate(metaclass=ABCMeta):
         """
         Support Class to handle the events in the shop-floor
         """
@@ -104,6 +104,20 @@ class ShopFloor:
             ...
 
         @abstractmethod
+        def did_dispatch(self, job: environment.Job, work_center: environment.WorkCenter, machine: environment.Machine):
+            """
+            Will be triggered after the dispatch of job to the machine
+            """
+            ...
+
+        @abstractmethod
+        def did_finish_dispatch(self, work_center: environment.WorkCenter):
+            """
+            Will be triggered after the dispatch of job on the work-center
+            """
+            ...
+
+        @abstractmethod
         def did_complete(self, job: environment.Job):
             """
             Will be triggered after the completion of job
@@ -113,9 +127,9 @@ class ShopFloor:
     @dataclass
     class Configuration:
         problem: environment.Problem
-        sampler: 'environment.job_samplers.JobSampler'
-        scheduling_rule: SchedulingModel
-        routing_rule: RoutingModel
+        sampler: 'job_samplers.JobSampler'
+        scheduling_model: SchedulingModel
+        routing_model: RoutingModel
         environment: simpy.Environment = field(default_factory=simpy.Environment)
 
     def __init__(self, configuration: Configuration, logger: logging.Logger, delegate: Delegate = Delegate()):
@@ -128,13 +142,15 @@ class ShopFloor:
 
         self.state = State()
         self.history = History()
-        
-        self.__build__()
+
+        from .utils import ShopFloorFactory
+
+        self._work_centers, self._machines = ShopFloorFactory(self.configuration).make()
 
     def simulate(self):
-        self.assign_initial_jobs()
+        self.__assign_initial_jobs__()
 
-        self.configuration.environment.process(self.dispatch_jobs())
+        self.configuration.environment.process(self.__dispatch_jobs__())
 
     @property
     def statistics(self) -> 'environment.Statistics':
@@ -150,30 +166,8 @@ class ShopFloor:
     def machines(self) -> List['environment.Machine']:
         return self._machines
 
-    def assign_initial_jobs(self):
-        for work_center in self.work_centers:
-            for _ in work_center.context.machines:
-                job = self.__sample_job__(initial_work_center_idx=work_center.state.idx, created_at=0)
-
-                self.history.with_new_job(job)
-
-                self.__dispatch__(job, work_center)
-
-            work_center.did_receive_job()
-
-    def dispatch_jobs(self):
-        while self.state.dispatched_job_count < self.configuration.sampler.number_of_jobs():
-            arrival_time = self.configuration.sampler.sample_next_arrival_time()
-
-            yield self.configuration.environment.timeout(arrival_time)
-
-            job = self.__sample_job__(created_at=self.configuration.environment.now)
-
-            self.history.with_new_job(job)
-
-            work_center = self.work_centers[job.step_idx[0]]
-
-            self.__dispatch__(job, work_center)
+    def breakdown(self, work_center_idx: int, machine_idx: int, duration: int):
+        ...
 
     def forward(self, job: environment.Job, from_: environment.Machine):
         next_work_center_idx = job.next_work_center_idx
@@ -204,9 +198,6 @@ class ShopFloor:
             f"at {self.configuration.environment.now}. Jobs in the system { self.state.number_of_jobs_in_system }"
         )
 
-    def breakdown(self, work_center_idx: int, machine_idx: int, duration: int):
-        ...
-
     def will_produce(self, job: environment.Job, machine: environment.Machine):
         self.delegate.will_produce(job, machine)
 
@@ -215,6 +206,37 @@ class ShopFloor:
 
     def will_dispatch(self, job: environment.Job, work_center: environment.WorkCenter):
         self.delegate.will_dispatch(job, work_center)
+
+    def did_dispatch(self, job: environment.Job, work_center: environment.WorkCenter, machine: environment.Machine):
+        self.delegate.did_dispatch(job, work_center, machine)
+
+    def did_finish_dispatch(self, work_center: environment.WorkCenter):
+        self.delegate.did_finish_dispatch(work_center)
+
+    def __assign_initial_jobs__(self):
+        for work_center in self.work_centers:
+            for _ in work_center.context.machines:
+                job = self.__sample_job__(initial_work_center_idx=work_center.state.idx, created_at=0)
+
+                self.history.with_new_job(job)
+
+                self.__dispatch__(job, work_center)
+
+            work_center.did_receive_job()
+
+    def __dispatch_jobs__(self):
+        while self.state.dispatched_job_count < self.configuration.sampler.number_of_jobs():
+            arrival_time = self.configuration.sampler.sample_next_arrival_time()
+
+            yield self.configuration.environment.timeout(arrival_time)
+
+            job = self.__sample_job__(created_at=self.configuration.environment.now)
+
+            self.history.with_new_job(job)
+
+            work_center = self.work_centers[job.step_idx[0]]
+
+            self.__dispatch__(job, work_center)
 
     def __sample_job__(self, initial_work_center_idx: int = None, created_at: torch.FloatTensor = 0):
         job = (
@@ -237,39 +259,3 @@ class ShopFloor:
 
         work_center.receive(job)
 
-    def __make_working_units__(self) -> Tuple[List[environment.WorkCenter], List[environment.Machine]]:
-        work_centers = []
-        machines = []
-
-        for work_center_idx in range(self.configuration.problem.workcenter_count):
-            work_centers += [environment.WorkCenter(self.configuration.environment,
-                                                    work_center_idx,
-                                                    rule=self.configuration.routing_rule)]
-
-            batch = []
-
-            for machine_idx in range(self.configuration.problem.machines_per_workcenter):
-                batch += [environment.Machine(self.configuration.environment,
-                                              machine_idx,
-                                              work_center_idx,
-                                              self.configuration.scheduling_rule)]
-
-            machines += [batch]
-
-        return work_centers, machines
-
-    def __build__(self):
-        work_centers, machines_per_wc = self.__make_working_units__()
-
-        machines = reduce(lambda x, y: x + y, machines_per_wc, [])
-
-        for work_center, machines_in_work_center in zip(work_centers, machines_per_wc):
-            work_center.connect(machines_in_work_center, work_centers, self)
-
-        for machine in machines:
-            machine.connect(machines, work_centers, self)
-
-        self._work_centers = work_centers
-        self._machines = machines
-
-        return self

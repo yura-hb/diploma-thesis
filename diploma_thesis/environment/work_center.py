@@ -6,7 +6,7 @@ import simpy
 import torch
 
 import environment
-from routing_rules import RoutingRule, WorkCenterState
+from model.routing.static.routing_rules import RoutingRule, WorkCenterState
 
 
 @dataclass
@@ -102,7 +102,11 @@ class WorkCenter:
 
                 machine.receive(job)
 
+                self.context.shopfloor.did_dispatch(job, self, machine)
+
             self.state.with_flushed_queue()
+
+            self.context.shopfloor.did_finish_dispatch(self)
 
             self.on_route = self.environment.event()
 

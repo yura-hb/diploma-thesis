@@ -1,11 +1,10 @@
-
-import torch
-
-from environment import Problem
-from abc import ABCMeta, abstractmethod
-
 import logging
 import sys
+from abc import ABCMeta, abstractmethod
+from typing import List, Any
+
+import environment
+from .utils import BroadCastShopFloorDelegate
 
 
 class Workflow(metaclass=ABCMeta):
@@ -27,3 +26,8 @@ class Workflow(metaclass=ABCMeta):
             logger.addHandler(stdout_handler)
 
         return logger
+
+    def make_delegate(self, candidates: List[Any]) -> BroadCastShopFloorDelegate:
+        return BroadCastShopFloorDelegate([
+            candidate for candidate in candidates if isinstance(candidate, environment.ShopFloor.Delegate)
+        ])
