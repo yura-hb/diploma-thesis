@@ -1,6 +1,6 @@
 from abc import ABCMeta
 
-from agent.dispatch.scheduling import scheduling_rules
+from agents.machine.model.scheduling import scheduling_rules
 
 
 class SchedulingModel(scheduling_rules.SchedulingRule, metaclass=ABCMeta):

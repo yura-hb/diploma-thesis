@@ -1,11 +1,11 @@
 
 import argparse
+from typing import Dict
+
 import yaml
 
-from environment.configuration import Configuration
 from workflows import SingleModel
 from workflows import Workflow
-from typing import Dict
 
 
 def make_workflow(configuration: Dict) -> Workflow:

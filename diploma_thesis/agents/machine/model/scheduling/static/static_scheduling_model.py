@@ -1,8 +1,8 @@
 import environment
 from environment import Job
-from agent.dispatch.scheduling.scheduling_rules import ALL_SCHEDULING_RULES
+from agents.machine.model.scheduling.scheduling_rules import ALL_SCHEDULING_RULES
 from environment.scheduling_rule import WaitInfo
-from agent.dispatch.scheduling.scheduling_model import SchedulingModel
+from agents.machine.model.scheduling.scheduling_model import SchedulingModel
 
 
 class StaticSchedulingModel(SchedulingModel):

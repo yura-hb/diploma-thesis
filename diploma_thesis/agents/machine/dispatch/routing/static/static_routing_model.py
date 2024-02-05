@@ -1,8 +1,8 @@
 
 import environment
 
-from agent.dispatch.routing.routing_model import RoutingModel
-from agent.dispatch.routing.static.routing_rules import ALL_ROUTING_RULES, WorkCenterState
+from agents.machine.dispatch.routing.routing_model import RoutingModel
+from agents.machine.dispatch.routing.static.routing_rules import ALL_ROUTING_RULES, WorkCenterState
 
 
 class StaticRoutingModel(RoutingModel):

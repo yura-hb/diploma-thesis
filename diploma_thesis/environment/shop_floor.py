@@ -9,8 +9,6 @@ import environment
 from .utils import ShopFloorFactory
 
 
-# TODO: Allow to disable assignment of initial jobs
-
 @dataclass
 class State:
     idx: int = 0
@@ -84,13 +82,15 @@ class ShopFloor:
         problem: environment.Configuration
         sampler: 'environment.JobSampler'
         agent: 'environment.Agent'
+        delegate: 'environment.Delegate'
         environment: simpy.Environment = field(default_factory=simpy.Environment)
 
     def __init__(self, idx: int, configuration: Configuration, logger: logging.Logger):
         self.id = id
         self.configuration = configuration
         self.logger = logger
-        self.agent = None
+        self.agent = configuration.agent
+        self.delegate = configuration.delegate
 
         self._work_centers: List[environment.WorkCenter] = []
         self._machines: List[environment.Machine] = []
@@ -163,26 +163,26 @@ class ShopFloor:
         return self.agent.route(self.state.idx, job, work_center_idx, machines)
 
     def will_produce(self, job: environment.Job, machine: environment.Machine):
-        self.agent.will_produce(self.state.idx, job, machine)
+        self.delegate.will_produce(self.state.idx, job, machine)
 
     def did_produce(self, job: environment.Job, machine: environment.Machine):
-        self.agent.did_produce(self.state.idx, job, machine)
+        self.delegate.did_produce(self.state.idx, job, machine)
 
     def will_dispatch(self, job: environment.Job, work_center: environment.WorkCenter):
-        self.agent.will_dispatch(self.state.idx, job, work_center)
+        self.delegate.will_dispatch(self.state.idx, job, work_center)
 
     def did_dispatch(self, job: environment.Job, work_center: environment.WorkCenter, machine: environment.Machine):
-        self.agent.did_dispatch(self.state.idx, job, work_center, machine)
+        self.delegate.did_dispatch(self.state.idx, job, work_center, machine)
 
     def did_finish_dispatch(self, work_center: environment.WorkCenter):
-        self.agent.did_finish_dispatch(self.state.idx, work_center)
+        self.delegate.did_finish_dispatch(self.state.idx, work_center)
 
     def did_complete(self, job: environment.Job):
-        self.agent.did_complete(self.state.idx, job)
+        self.delegate.did_complete(self.state.idx, job)
 
     def __assign_initial_jobs__(self):
         for work_center in self.work_centers:
-            for _ in work_center.context.machines:
+            for _ in work_center.machines:
                 job = self.__sample_job__(
                     initial_work_center_idx=work_center.state.idx,
                     created_at=self.configuration.environment.now

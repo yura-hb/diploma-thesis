@@ -276,7 +276,7 @@ class Machine:
 
     def did_receive_job(self):
         # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the simulation
-        # the agent shouldn't care
+        # the machine shouldn't care
         try:
             self.did_dispatch_event.succeed()
         except:
