@@ -4,10 +4,10 @@ import simpy
 import torch
 
 import environment
-from agent.scheduling import scheduling_rules
+from agent.dispatch.scheduling import scheduling_rules
 
 from dataclasses import dataclass
-from agent.scheduling.scheduling_model import SchedulingModel
+from agent.dispatch.scheduling.scheduling_model import SchedulingModel
 from typing import List
 
 

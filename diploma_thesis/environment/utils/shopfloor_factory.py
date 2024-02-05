@@ -1,13 +1,15 @@
 
 import environment
+import weakref
 from typing import List, Tuple
 from functools import reduce
 
 
 class ShopFloorFactory:
 
-    def __init__(self, configuration: environment.ShopFloor.Configuration):
+    def __init__(self, configuration: environment.ShopFloor.Configuration, shop_floor: environment.shop_floor):
         self.configuration = configuration
+        self.shop_floor = weakref.ref(shop_floor)
 
     def make(self):
         work_centers, machines_per_wc = self.__make_working_units__()
@@ -15,10 +17,10 @@ class ShopFloorFactory:
         machines = reduce(lambda x, y: x + y, machines_per_wc, [])
 
         for work_center, machines_in_work_center in zip(work_centers, machines_per_wc):
-            work_center.connect(machines_in_work_center, work_centers, self)
+            work_center.connect(machines_in_work_center, self.shop_floor)
 
         for machine in machines:
-            machine.connect(machines, work_centers, self)
+            machine.connect(self.shop_floor)
 
         return work_centers, machines
 
@@ -32,9 +34,7 @@ class ShopFloorFactory:
             batch = []
 
             for machine_idx in range(self.configuration.problem.machines_per_work_center):
-                batch += [environment.Machine(
-                    self.configuration.environment, machine_idx, work_center_idx
-                )]
+                batch += [environment.Machine(self.configuration.environment, machine_idx, work_center_idx)]
 
             machines += [batch]
 

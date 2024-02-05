@@ -1,3 +1,6 @@
+from .agent import Agent
+from typing import Dict
 
-from .scheduling.scheduling_model import SchedulingModel
-from .routing.routing_model import RoutingModel
+
+def from_cli(parameters: Dict) -> Agent:
+    pass

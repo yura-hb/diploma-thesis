@@ -4,8 +4,7 @@ from typing import Callable, Tuple
 import simpy
 import torch
 
-from environment import Configuration, Job
-from environment.job_sampler import JobSampler
+from environment import Configuration, Job, JobSampler
 
 
 class Sampler(JobSampler):

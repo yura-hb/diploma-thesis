@@ -1,8 +1,10 @@
 
 from dataclasses import dataclass
 from typing import Tuple
-from environment import Configuration, JobSampler
+
 import simpy
+
+from environment import JobSampler
 from .builder import Builder
 
 

@@ -115,23 +115,6 @@ class State:
 
 
 @dataclass
-class Context:
-    machines: List['environment.Machine'] = None
-    work_centers: List['environment.WorkCenter'] = None
-    shopfloor: 'environment.ShopFloor' = None
-
-    def with_info(self,
-                  machines: List['environment.Machine'],
-                  work_centers: List['environment.WorkCenter'],
-                  shopfloor: 'environment.ShopFloor'):
-        self.machines = machines
-        self.work_centers = work_centers
-        self.shopfloor = shopfloor
-
-        return self
-
-
-@dataclass
 class History:
     decision_times: torch.FloatTensor = field(default_factory=lambda: torch.FloatTensor([]))
 
@@ -146,15 +129,12 @@ class History:
 
 class Machine:
 
-    def __init__(self,
-                 environment: simpy.Environment,
-                 machine_idx: int,
-                 work_center_idx: int):
+    def __init__(self, environment: simpy.Environment, machine_idx: int, work_center_idx: int):
         self.environment = environment
 
         self.state = State(machine_idx=machine_idx, work_center_idx=work_center_idx)
         self.history = History()
-        self.context = Context()
+        self.shop_floor = None
 
         # Events
         self.did_dispatch_event = self.environment.event()
@@ -167,23 +147,11 @@ class Machine:
         self.sequence_learning_event = self.environment.event()
         self.routing_learning_event = self.environment.event()
 
-    def connect(self,
-                machines: List['environment.Machine'],
-                work_centers: List['environment.WorkCenter'],
-                shopfloor: 'environment.ShopFloor'):
-        """
-        Connects machine to other machines and dispatcher,
-        so that machine can communicate with them
+    def connect(self, shop_floor: 'environment.ShopFloor'):
+        self.shop_floor = shop_floor
+        self.environment.process(self.produce())
 
-        Args:
-            machines: List of all machines in the shop-floor
-            work_centers: List of all work-centers in the shop-floor
-            shop_floor: Shop-floor which implements the dispatching logic
-
-        Returns: Nothing
-        """
-        self.context = self.context.with_info(machines, work_centers, shopfloor)
-
+    def simulate(self):
         self.environment.process(self.produce())
 
     def receive(self, job: environment.Job):
@@ -193,7 +161,7 @@ class Machine:
         self.did_receive_job()
 
     def produce(self):
-        if not self.did_dispatch_event.triggered:
+        if not self.did_dispatch_event.triggered and len(self.state.queue) == 0:
             yield self.environment.process(self.starve())
 
         while True:
@@ -211,7 +179,7 @@ class Machine:
 
             self.__notify_job_about_production__(job, production_start=True)
 
-            self.context.shopfloor.will_produce(job, self)
+            self.shop_floor.will_produce(job, self)
 
             processing_time = job.current_operation_processing_time_on_machine
 
@@ -240,7 +208,7 @@ class Machine:
         if len(self.state.queue) == 1:
             return self.state.queue[0]
 
-        job = self.context.shopfloor.schedule(self, self.environment.now)
+        job = self.shop_floor.schedule(self, self.environment.now)
 
         return job
 
@@ -276,7 +244,7 @@ class Machine:
         Returns: None
         """
         self.state.without_job(job.id, now=self.environment.now)
-        self.context.shopfloor.forward(job, from_=self)
+        self.shop_floor.forward(job, from_=self)
 
     @property
     def queue(self) -> List[environment.Job]:

@@ -38,22 +38,6 @@ class History:
         return self
 
 
-class Context:
-    machines: List['environment.Machine'] = field(default_factory=list)
-    work_centers: List['environment.WorkCenter'] = field(default_factory=list)
-    shopfloor: 'environment.ShopFloor' = field(default_factory=lambda: None)
-
-    def with_info(self,
-                  machines: List['environment.Machine'],
-                  work_centers: List['environment.WorkCenter'],
-                  shopfloor: 'environment.ShopFloor'):
-        self.machines = machines
-        self.work_centers = work_centers
-        self.shopfloor = shopfloor
-
-        return self
-
-
 class WorkCenter:
 
     def __init__(self, environment: simpy.Environment, work_center_idx: int):
@@ -61,26 +45,23 @@ class WorkCenter:
 
         self.state = State(idx=work_center_idx)
         self.history = History()
-        self.context = Context()
+        self._machines = []
+        self.shop_floor = None
 
         self.on_route = environment.event()
 
-    def connect(self,
-                machines: List['environment.Machine'],
-                work_centers: List['environment.WorkCenter'],
-                shopfloor: 'environment.ShopFloor'):
-        """
-        Args:
-            machines: The list of machines in the work center!!!
-            work_centers: The list of work centers in the shop floor
-            shopfloor: reference to the shop floor
-        """
-        self.context.with_info(machines, work_centers, shopfloor)
+    def connect(self, shop_floor: 'environment.ShopFloor', machines: List['environment.Machine']):
+        self.shop_floor = shop_floor
+        self._machines = machines
+
+    def simulate(self):
+        for machine in self.machines:
+            machine.simulate()
 
         self.environment.process(self.dispatch())
 
     def dispatch(self):
-        assert self.context.shopfloor is not None, "Work center is not connected to the shop floor"
+        assert self.shop_floor is not None, "Work center is not connected to the shop floor"
 
         while True:
             yield self.on_route
@@ -88,25 +69,22 @@ class WorkCenter:
             self.history.with_decision_time(self.environment.now)
 
             for job in self.state.queue:
-                if len(self.context.machines) == 1:
-                    machine = self.context.machines[0]
+                if len(self.machines) == 1:
+                    machine = self.machines[0]
                     machine.receive(job)
                     continue
 
-                self.context.shopfloor.will_dispatch(job, self)
+                self.shop_floor.will_dispatch(job, self)
 
                 # TODO: React on None
-                machine = self.context.shopfloor.route(
-                    job, work_center_idx=self.state.idx, machines=self.context.machines
-                )
-
+                machine = self.shop_floor.shopfloor.route(job, work_center_idx=self.state.idx, machines=self.machines)
                 machine.receive(job)
 
-                self.context.shopfloor.did_dispatch(job, self, machine)
+                self.shop_floor.shopfloor.did_dispatch(job, self, machine)
 
             self.state.with_flushed_queue()
 
-            self.context.shopfloor.did_finish_dispatch(self)
+            self.shop_floor.shopfloor.did_finish_dispatch(self)
 
             self.on_route = self.environment.event()
 
@@ -125,7 +103,7 @@ class WorkCenter:
 
     @property
     def machines(self) -> List['environment.Machine']:
-        return self.context.machines
+        return self._machines
 
     def did_receive_job(self):
         # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the simulation

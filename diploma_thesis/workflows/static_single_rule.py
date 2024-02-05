@@ -5,8 +5,8 @@ import simpy
 from environment.configuration import Configuration
 from environment.shop_floor import ShopFloor
 from job_samplers import from_cli_arguments as job_sampler_from_cli_arguments
-from agent.routing import from_cli_arguments as routing_model_from_cli_arguments
-from agent.scheduling import from_cli_arguments as scheduling_model_from_cli_arguments
+from agent.dispatch.routing import from_cli_arguments as routing_model_from_cli_arguments
+from agent.dispatch.scheduling import from_cli_arguments as scheduling_model_from_cli_arguments
 from .workflow import Workflow
 
 

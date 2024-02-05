@@ -2,7 +2,6 @@
 import simpy
 
 from environment import Job, Configuration, JobSampler
-from environment.job_sampler import JobSampler
 
 
 class Sampler(JobSampler):

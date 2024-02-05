@@ -6,6 +6,7 @@ import simpy
 import torch
 
 import environment
+from .utils import ShopFloorFactory
 
 
 # TODO: Allow to disable assignment of initial jobs
@@ -96,14 +97,14 @@ class ShopFloor:
 
         self.state = State(idx=idx)
         self.history = History()
-
-        from .utils import ShopFloorFactory
-
         self._work_centers, self._machines = ShopFloorFactory(self.configuration).make()
 
     def simulate(self):
         if self.configuration.problem.pre_assign_initial_jobs:
             self.__assign_initial_jobs__()
+
+        for work_center in self.work_centers:
+            work_center.simulate()
 
         self.configuration.environment.process(self.__dispatch_jobs__())
 
