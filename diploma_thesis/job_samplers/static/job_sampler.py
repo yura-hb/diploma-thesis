@@ -1,13 +1,13 @@
 
 import simpy
 
-from environment import Job, Problem
-from job_samplers.job_sampler import JobSampler
+from environment import Job, Configuration, JobSampler
+from environment.job_sampler import JobSampler
 
 
 class Sampler(JobSampler):
 
-    def __init__(self, problem: Problem, environment: simpy.Environment):
+    def __init__(self, problem: Configuration, environment: simpy.Environment):
         super().__init__(problem, environment)
 
         self._number_of_jobs = 0

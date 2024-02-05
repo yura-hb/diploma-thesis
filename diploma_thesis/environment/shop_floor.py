@@ -1,5 +1,4 @@
 import logging
-from abc import abstractmethod, ABCMeta
 from dataclasses import dataclass, field
 from typing import List, Dict
 
@@ -7,11 +6,14 @@ import simpy
 import torch
 
 import environment
-import job_samplers
 
+
+# TODO: Allow to disable assignment of initial jobs
 
 @dataclass
 class State:
+    idx: int = 0
+
     job_id: int = 0
 
     number_of_jobs_in_system: int = 0
@@ -76,69 +78,23 @@ class History:
 
 class ShopFloor:
 
-    class Delegate(metaclass=ABCMeta):
-        """
-        Support Class to handle the events in the shop-floor
-        """
-        @abstractmethod
-        def will_produce(self, job: environment.Job, machine: environment.Machine):
-            """
-            Will be triggered before the production of job on machine
-            """
-            ...
-
-        @abstractmethod
-        def did_produce(self, job: environment.Job, machine: environment.Machine):
-            """
-            Will be triggered after the production of job on machine
-            """
-            ...
-
-        @abstractmethod
-        def will_dispatch(self, job: environment.Job, work_center: environment.WorkCenter):
-            """
-            Will be triggered before dispatch of job on the work-center
-            """
-            ...
-
-        @abstractmethod
-        def did_dispatch(self, job: environment.Job, work_center: environment.WorkCenter, machine: environment.Machine):
-            """
-            Will be triggered after the dispatch of job to the machine
-            """
-            ...
-
-        @abstractmethod
-        def did_finish_dispatch(self, work_center: environment.WorkCenter):
-            """
-            Will be triggered after the dispatch of job on the work-center
-            """
-            ...
-
-        @abstractmethod
-        def did_complete(self, job: environment.Job):
-            """
-            Will be triggered after the completion of job
-            """
-            ...
-
     @dataclass
     class Configuration:
-        problem: environment.Problem
-        sampler: 'job_samplers.JobSampler'
-        scheduling_rule: environment.SchedulingRule
-        routing_rule: environment.RoutingRule
+        problem: environment.Configuration
+        sampler: 'environment.JobSampler'
+        agent: 'environment.Agent'
         environment: simpy.Environment = field(default_factory=simpy.Environment)
 
-    def __init__(self, configuration: Configuration, logger: logging.Logger, delegate: Delegate = Delegate()):
+    def __init__(self, idx: int, configuration: Configuration, logger: logging.Logger):
+        self.id = id
         self.configuration = configuration
         self.logger = logger
-        self.delegate = delegate
+        self.agent = None
 
         self._work_centers: List[environment.WorkCenter] = []
         self._machines: List[environment.Machine] = []
 
-        self.state = State()
+        self.state = State(idx=idx)
         self.history = History()
 
         from .utils import ShopFloorFactory
@@ -146,7 +102,8 @@ class ShopFloor:
         self._work_centers, self._machines = ShopFloorFactory(self.configuration).make()
 
     def simulate(self):
-        self.__assign_initial_jobs__()
+        if self.configuration.problem.pre_assign_initial_jobs:
+            self.__assign_initial_jobs__()
 
         self.configuration.environment.process(self.__dispatch_jobs__())
 
@@ -188,7 +145,7 @@ class ShopFloor:
             )
 
             self.state.with_job_completed()
-            self.delegate.did_complete(job)
+            self.did_complete(job)
 
         self.logger.info(
             f"Job {job.id} { job.current_step_idx } has been { 'completed' if job.is_completed else 'produced' } "
@@ -196,25 +153,39 @@ class ShopFloor:
             f"at {self.configuration.environment.now}. Jobs in the system { self.state.number_of_jobs_in_system }"
         )
 
+    def schedule(self, machine: environment.Machine, now: int) -> environment.Job | environment.WaitInfo:
+        return self.agent.schedule(self.state.idx, machine, now)
+
+    def route(
+        self, job: environment.Job, work_center_idx: int, machines: List['environment.Machine']
+    ) -> 'environment.Machine | None':
+        return self.agent.route(self.state.idx, job, work_center_idx, machines)
+
     def will_produce(self, job: environment.Job, machine: environment.Machine):
-        self.delegate.will_produce(job, machine)
+        self.agent.will_produce(self.state.idx, job, machine)
 
     def did_produce(self, job: environment.Job, machine: environment.Machine):
-        self.delegate.did_produce(job, machine)
+        self.agent.did_produce(self.state.idx, job, machine)
 
     def will_dispatch(self, job: environment.Job, work_center: environment.WorkCenter):
-        self.delegate.will_dispatch(job, work_center)
+        self.agent.will_dispatch(self.state.idx, job, work_center)
 
     def did_dispatch(self, job: environment.Job, work_center: environment.WorkCenter, machine: environment.Machine):
-        self.delegate.did_dispatch(job, work_center, machine)
+        self.agent.did_dispatch(self.state.idx, job, work_center, machine)
 
     def did_finish_dispatch(self, work_center: environment.WorkCenter):
-        self.delegate.did_finish_dispatch(work_center)
+        self.agent.did_finish_dispatch(self.state.idx, work_center)
+
+    def did_complete(self, job: environment.Job):
+        self.agent.did_complete(self.state.idx, job)
 
     def __assign_initial_jobs__(self):
         for work_center in self.work_centers:
             for _ in work_center.context.machines:
-                job = self.__sample_job__(initial_work_center_idx=work_center.state.idx, created_at=0)
+                job = self.__sample_job__(
+                    initial_work_center_idx=work_center.state.idx,
+                    created_at=self.configuration.environment.now
+                )
 
                 self.history.with_new_job(job)
 

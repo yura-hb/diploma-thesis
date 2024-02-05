@@ -3,13 +3,13 @@ from typing import Tuple
 import simpy
 import torch
 
-from environment import Problem, Job, JobReductionStrategy
+from environment import Configuration, Job, JobReductionStrategy
 from .job_sampler import Sampler
 
 
 class Builder:
 
-    def __init__(self, problem: Problem, environment: simpy.Environment, seed: int = 0):
+    def __init__(self, problem: Configuration, environment: simpy.Environment, seed: int = 0):
         self.problem = problem
         self.environment = environment
         self.job_sampler = Sampler(problem, environment)
@@ -22,7 +22,7 @@ class Builder:
             uneveness: Maximum number of jobs dropped from generated sequence
         """
         def sample(initial_work_center_idx: int):
-            step_idx = torch.randperm(self.job_sampler.problem.workcenter_count)
+            step_idx = torch.randperm(self.job_sampler.problem.work_center_count)
 
             if initial_work_center_idx is not None:
                 initial_work_center_idx = torch.LongTensor([initial_work_center_idx])
@@ -114,7 +114,7 @@ class Builder:
 
         distance = processing_times[1] - processing_times[0]
         mean = torch.Tensor([processing_times[0] + distance / 2])
-        beta = mean / (self.problem.machines_per_workcenter * expected_utilization)
+        beta = mean / (self.problem.machines_per_work_center * expected_utilization)
 
         return self.with_exponential_arrival_time(rate=1 / beta)
 

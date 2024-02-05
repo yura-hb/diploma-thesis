@@ -1,8 +1,8 @@
 
 import environment
 
-from model.routing.routing_model import RoutingModel
-from model.routing.static.routing_rules import ALL_ROUTING_RULES, WorkCenterState
+from agent.routing.routing_model import RoutingModel
+from agent.routing.static.routing_rules import ALL_ROUTING_RULES, WorkCenterState
 
 
 class StaticRoutingModel(RoutingModel):

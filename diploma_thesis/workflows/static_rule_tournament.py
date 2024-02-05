@@ -1,10 +1,10 @@
-from environment.problem import Problem
+from environment.configuration import Configuration
 from .workflow import Workflow
 
 
 class StaticRuleTournament(Workflow):
 
-    def __init__(self, problem: Problem):
+    def __init__(self, problem: Configuration):
         super().__init__()
 
         self.problem = problem

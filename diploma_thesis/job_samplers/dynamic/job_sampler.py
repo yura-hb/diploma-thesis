@@ -4,13 +4,13 @@ from typing import Callable, Tuple
 import simpy
 import torch
 
-from environment import Problem, Job
-from job_samplers.job_sampler import JobSampler
+from environment import Configuration, Job
+from environment.job_sampler import JobSampler
 
 
 class Sampler(JobSampler):
 
-    def __init__(self, problem: Problem, environment: simpy.Environment):
+    def __init__(self, problem: Configuration, environment: simpy.Environment):
         super().__init__(problem, environment)
 
         self._number_of_jobs = 0
@@ -25,7 +25,7 @@ class Sampler(JobSampler):
     def sample(self, job_id: int, initial_work_center_idx: int, moment: torch.FloatType) -> Job:
         step_idx = self._step_sampler(initial_work_center_idx)
 
-        shape = (len(step_idx), self.problem.machines_per_workcenter)
+        shape = (len(step_idx), self.problem.machines_per_work_center)
 
         processing_times = self._processing_time_sampler(shape)
 

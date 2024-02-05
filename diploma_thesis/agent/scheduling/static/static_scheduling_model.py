@@ -1,8 +1,8 @@
 import environment
 from environment import Job
-from model.scheduling.scheduling_rules import ALL_SCHEDULING_RULES
+from agent.scheduling.scheduling_rules import ALL_SCHEDULING_RULES
 from environment.scheduling_rule import WaitInfo
-from model.scheduling.scheduling_model import SchedulingModel
+from agent.scheduling.scheduling_model import SchedulingModel
 
 
 class StaticSchedulingModel(SchedulingModel):

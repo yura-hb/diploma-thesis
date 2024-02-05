@@ -1,7 +1,7 @@
 from typing import Dict
 
 from .routing_model import RoutingModel
-from model.routing.static.static_routing_model import StaticRoutingModel
+from agent.routing.static.static_routing_model import StaticRoutingModel
 
 key_to_model = {
     'static': StaticRoutingModel,

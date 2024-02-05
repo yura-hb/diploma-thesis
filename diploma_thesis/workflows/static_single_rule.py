@@ -2,11 +2,11 @@ from typing import Dict
 
 import simpy
 
-from environment.problem import Problem
+from environment.configuration import Configuration
 from environment.shop_floor import ShopFloor
 from job_samplers import from_cli_arguments as job_sampler_from_cli_arguments
-from model.routing import from_cli_arguments as routing_model_from_cli_arguments
-from model.scheduling import from_cli_arguments as scheduling_model_from_cli_arguments
+from agent.routing import from_cli_arguments as routing_model_from_cli_arguments
+from agent.scheduling import from_cli_arguments as scheduling_model_from_cli_arguments
 from .workflow import Workflow
 
 
@@ -20,7 +20,7 @@ class SingleModel(Workflow):
     def run(self):
         environment = simpy.Environment()
 
-        problem = Problem.from_cli_arguments(self.parameters['problem'])
+        problem = Configuration.from_cli_arguments(self.parameters['problem'])
         sampler = job_sampler_from_cli_arguments(problem, environment, self.parameters['sampler'])
         scheduling_model = scheduling_model_from_cli_arguments(self.parameters['scheduling_model'])
         routing_model = routing_model_from_cli_arguments(self.parameters['routing_model'])

@@ -1,9 +1,8 @@
 
 from dataclasses import dataclass
 from typing import Tuple
-from environment import Problem
+from environment import Configuration, JobSampler
 import simpy
-from job_samplers import JobSampler
 from .builder import Builder
 
 
@@ -32,7 +31,7 @@ class CLI:
             )
 
     @staticmethod
-    def from_cli_arguments(problem: Problem,
+    def from_cli_arguments(problem: Configuration,
                            environment: simpy.Environment,
                            parameters: dict) -> JobSampler:
         configuration = CLI.Configuration.from_cli_arguments(parameters)

@@ -40,9 +40,6 @@ class State:
         Args:
             job: Job to schedule into queue on the machine
             now: Timestamp when the job has arrived at the machine
-
-        Returns: Reference to self
-
         """
         self.queue += [job]
 
@@ -54,9 +51,6 @@ class State:
 
         Args:
             decision_time: Time of the decision
-
-        Returns: Reference to self
-
         """
         self.decision_time = decision_time
 
@@ -68,9 +62,6 @@ class State:
 
         Args:
             now: Current time
-
-        Returns: Reference to self
-
         """
         self.total_processing_time = torch.Tensor([
             job.current_operation_processing_time_on_machine for job in self.queue
@@ -85,8 +76,6 @@ class State:
 
         Args:
             restart_at: Moment of machine restart
-
-        Returns: Reference to self
         """
         self.restart_at = restart_at
         self.available_at = self.restart_at + self.total_processing_time
@@ -110,8 +99,6 @@ class State:
         Args:
             job_id: Job to remove from the queue
             now: Current time
-
-        Returns: Reference to self
         """
         idx = reduce(
             lambda value, pair: pair[0] if pair[1].id == job_id else value,
@@ -162,10 +149,8 @@ class Machine:
     def __init__(self,
                  environment: simpy.Environment,
                  machine_idx: int,
-                 work_center_idx: int,
-                 rule: environment.SchedulingRule):
+                 work_center_idx: int):
         self.environment = environment
-        self.rule = rule
 
         self.state = State(machine_idx=machine_idx, work_center_idx=work_center_idx)
         self.history = History()
@@ -182,7 +167,8 @@ class Machine:
         self.sequence_learning_event = self.environment.event()
         self.routing_learning_event = self.environment.event()
 
-    def connect(self, machines: List['environment.Machine'],
+    def connect(self,
+                machines: List['environment.Machine'],
                 work_centers: List['environment.WorkCenter'],
                 shopfloor: 'environment.ShopFloor'):
         """
@@ -249,12 +235,12 @@ class Machine:
 
     def select_job(self):
         if self.state.is_empty:
-            return WaitInfo(wait_time=1)
+            return environment.WaitInfo(wait_time=1)
 
         if len(self.state.queue) == 1:
             return self.state.queue[0]
 
-        job = self.rule(self, self.environment.now)
+        job = self.context.shopfloor.schedule(self, self.environment.now)
 
         return job
 
@@ -322,7 +308,7 @@ class Machine:
 
     def did_receive_job(self):
         # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the simulation
-        # the model shouldn't care
+        # the agent shouldn't care
         try:
             self.did_dispatch_event.succeed()
         except:

@@ -5,12 +5,12 @@ import simpy
 import torch
 
 import environment
-from environment import Problem
+from environment import Configuration
 
 
 class JobSampler(metaclass=ABCMeta):
 
-    def __init__(self, problem: Problem, environment: simpy.Environment):
+    def __init__(self, problem: Configuration, environment: simpy.Environment):
         self.problem = problem
         self.environment = environment
 

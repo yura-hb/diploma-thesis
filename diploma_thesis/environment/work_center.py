@@ -56,9 +56,8 @@ class Context:
 
 class WorkCenter:
 
-    def __init__(self, environment: simpy.Environment, work_center_idx: int, rule: environment.RoutingRule):
+    def __init__(self, environment: simpy.Environment, work_center_idx: int):
         self.environment = environment
-        self.rule = rule
 
         self.state = State(idx=work_center_idx)
         self.history = History()
@@ -66,7 +65,8 @@ class WorkCenter:
 
         self.on_route = environment.event()
 
-    def connect(self, machines: List['environment.Machine'],
+    def connect(self,
+                machines: List['environment.Machine'],
                 work_centers: List['environment.WorkCenter'],
                 shopfloor: 'environment.ShopFloor'):
         """
@@ -96,7 +96,9 @@ class WorkCenter:
                 self.context.shopfloor.will_dispatch(job, self)
 
                 # TODO: React on None
-                machine = self.rule.select_machine(job, work_center_idx=self.state.idx, machines=self.context.machines)
+                machine = self.context.shopfloor.route(
+                    job, work_center_idx=self.state.idx, machines=self.context.machines
+                )
 
                 machine.receive(job)
 
@@ -127,7 +129,7 @@ class WorkCenter:
 
     def did_receive_job(self):
         # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the simulation
-        # the model shouldn't care
+        # the agent shouldn't care
         try:
             self.on_route.succeed()
         except:

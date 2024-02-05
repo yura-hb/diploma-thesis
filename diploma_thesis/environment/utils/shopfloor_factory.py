@@ -26,18 +26,15 @@ class ShopFloorFactory:
         work_centers = []
         machines = []
 
-        for work_center_idx in range(self.configuration.problem.workcenter_count):
-            work_centers += [environment.WorkCenter(self.configuration.environment,
-                                                    work_center_idx,
-                                                    rule=self.configuration.routing_rule)]
+        for work_center_idx in range(self.configuration.problem.work_center_count):
+            work_centers += [environment.WorkCenter(self.configuration.environment, work_center_idx)]
 
             batch = []
 
-            for machine_idx in range(self.configuration.problem.machines_per_workcenter):
-                batch += [environment.Machine(self.configuration.environment,
-                                              machine_idx,
-                                              work_center_idx,
-                                              self.configuration.scheduling_rule)]
+            for machine_idx in range(self.configuration.problem.machines_per_work_center):
+                batch += [environment.Machine(
+                    self.configuration.environment, machine_idx, work_center_idx
+                )]
 
             machines += [batch]
 

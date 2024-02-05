@@ -2,7 +2,7 @@
 import argparse
 import yaml
 
-from environment.problem import Problem
+from environment.configuration import Configuration
 from workflows import SingleModel
 from workflows import Workflow
 from typing import Dict

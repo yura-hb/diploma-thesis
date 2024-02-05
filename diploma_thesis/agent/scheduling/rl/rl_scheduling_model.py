@@ -4,10 +4,10 @@ import simpy
 import torch
 
 import environment
-from model.scheduling import scheduling_rules
+from agent.scheduling import scheduling_rules
 
 from dataclasses import dataclass
-from model.scheduling.scheduling_model import SchedulingModel
+from agent.scheduling.scheduling_model import SchedulingModel
 from typing import List
 
 
@@ -53,14 +53,14 @@ class RLSchedulingModel(SchedulingModel, environment.ShopFloor.Delegate):
     class Configuration:
         # List of durations of each warm-up phase
         warm_up_phases: List[float]
-        # Number of steps to pretrain the model after warm-up
+        # Number of steps to pretrain the agent after warm-up
         pretrain_steps: int
-        # Duration of interval to trigger training of the model
+        # Duration of interval to trigger training of the agent
         train_interval: int
-        # Number of steps to update the model
+        # Number of steps to update the agent
         training_steps: int
         # Problem
-        problem: environment.Problem
+        problem: environment.Configuration
 
     def __init__(self, configuration: Configuration, inner_model: InnerModel, environment: simpy.Environment):
         self.configuration = configuration
