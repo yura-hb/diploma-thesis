@@ -6,7 +6,6 @@ import simpy
 import torch
 
 import environment
-from model.routing.static.routing_rules import RoutingRule, WorkCenterState
 
 
 @dataclass
@@ -57,7 +56,7 @@ class Context:
 
 class WorkCenter:
 
-    def __init__(self, environment: simpy.Environment, work_center_idx: int, rule: 'RoutingRule'):
+    def __init__(self, environment: simpy.Environment, work_center_idx: int, rule: environment.RoutingRule):
         self.environment = environment
         self.rule = rule
 
@@ -94,11 +93,10 @@ class WorkCenter:
                     machine.receive(job)
                     continue
 
-                state = WorkCenterState(work_center_idx=self.state.idx, machines=self.context.machines)
-
                 self.context.shopfloor.will_dispatch(job, self)
 
-                machine = self.rule.select_machine(job, state)
+                # TODO: React on None
+                machine = self.rule.select_machine(job, work_center_idx=self.state.idx, machines=self.context.machines)
 
                 machine.receive(job)
 

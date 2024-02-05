@@ -1,8 +1,7 @@
 
 import torch
 
-import environment
-from model.scheduling.scheduling_rule import SchedulingRule, WaitInfo
+from environment import Job, SchedulingRule, Machine, WaitInfo
 
 
 class MDDSchedulingRule(SchedulingRule):
@@ -11,7 +10,7 @@ class MDDSchedulingRule(SchedulingRule):
         selects job with the smallest value of max(due_at, operation_completed_at)
     """
 
-    def __call__(self, machine: environment.Machine, now: float) -> environment.Job | WaitInfo:
+    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
         processing_times = torch.FloatTensor(
             [job.current_operation_processing_time_on_machine for job in machine.queue]
         )

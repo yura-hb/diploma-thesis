@@ -1,10 +1,7 @@
-
-import environment
-
-from model.scheduling.scheduling_rule import SchedulingRule, WaitInfo
+from environment import SchedulingRule, WaitInfo, Machine, Job
 
 
 class FIFOSchedulingRule(SchedulingRule):
 
-    def __call__(self, machine: environment.Machine, now: float) -> environment.Job | WaitInfo:
+    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
         return machine.queue[0]

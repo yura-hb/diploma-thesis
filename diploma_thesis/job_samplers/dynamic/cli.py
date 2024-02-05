@@ -4,7 +4,7 @@ from typing import Tuple
 from environment import Problem
 import simpy
 from job_samplers import JobSampler
-from .builder import DynamicJobSamplerBuilder
+from .builder import Builder
 
 
 class CLI:
@@ -21,7 +21,7 @@ class CLI:
 
         @staticmethod
         def from_cli_arguments(args: dict):
-            return DynamicJobSamplerFromCLI.Configuration(
+            return CLI.Configuration(
                 processing_times=args['processing_times'],
                 tightness=args['tightness'],
                 uneveness=args.get('uneveness'),
@@ -35,9 +35,9 @@ class CLI:
     def from_cli_arguments(problem: Problem,
                            environment: simpy.Environment,
                            parameters: dict) -> JobSampler:
-        configuration = DynamicJobSamplerFromCLI.Configuration.from_cli_arguments(parameters)
+        configuration = CLI.Configuration.from_cli_arguments(parameters)
 
-        builder = DynamicJobSamplerBuilder(problem, environment, configuration.seed)
+        builder = Builder(problem, environment, configuration.seed)
 
         if realistic_variance := configuration.realistic_variance:
             builder.with_uniform_processing_times_and_realistic_variance(

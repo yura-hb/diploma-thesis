@@ -1,15 +1,13 @@
 import logging
 from abc import abstractmethod, ABCMeta
 from dataclasses import dataclass, field
-from functools import reduce
-from typing import List, Tuple, Dict
+from typing import List, Dict
 
 import simpy
 import torch
 
 import environment
 import job_samplers
-from model import SchedulingModel, RoutingModel
 
 
 @dataclass
@@ -128,8 +126,8 @@ class ShopFloor:
     class Configuration:
         problem: environment.Problem
         sampler: 'job_samplers.JobSampler'
-        scheduling_model: SchedulingModel
-        routing_model: RoutingModel
+        scheduling_rule: environment.SchedulingRule
+        routing_rule: environment.RoutingRule
         environment: simpy.Environment = field(default_factory=simpy.Environment)
 
     def __init__(self, configuration: Configuration, logger: logging.Logger, delegate: Delegate = Delegate()):

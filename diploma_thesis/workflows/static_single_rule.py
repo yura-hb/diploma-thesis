@@ -29,8 +29,8 @@ class SingleModel(Workflow):
             environment=environment,
             problem=problem,
             sampler=sampler,
-            scheduling_model=scheduling_model,
-            routing_model=routing_model
+            scheduling_rule=scheduling_model,
+            routing_rule=routing_model
         )
 
         shopfloor = ShopFloor(

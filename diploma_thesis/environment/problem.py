@@ -18,4 +18,3 @@ class Problem:
             machines_per_workcenter=configuration['machines_per_workcenter'],
             workcenter_count=configuration['workcenter_count']
         )
-

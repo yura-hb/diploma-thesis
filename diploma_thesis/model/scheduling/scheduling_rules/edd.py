@@ -1,8 +1,7 @@
 
 import torch
 
-import environment
-from model.scheduling.scheduling_rule import SchedulingRule, WaitInfo
+from environment import SchedulingRule, WaitInfo, Machine, Job
 
 
 class EDDSchedulingRule(SchedulingRule):
@@ -10,7 +9,7 @@ class EDDSchedulingRule(SchedulingRule):
     Earliest Due Date rule, i.e. selects jobs, in which due at is the shortest
     """
 
-    def __call__(self, machine: environment.Machine, now: float) -> environment.Job | WaitInfo:
+    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
         values = torch.FloatTensor([job.due_at for job in machine.queue])
         idx = torch.argmin(values)
 

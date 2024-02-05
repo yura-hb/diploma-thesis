@@ -1,7 +1,6 @@
 from typing import List
 
-from environment import Job, Machine
-from model.routing.static.routing_rules import RoutingRule
+from environment import Job, Machine, RoutingRule
 
 
 class EARoutingRule(RoutingRule):

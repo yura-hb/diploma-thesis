@@ -1,10 +1,7 @@
 
 import torch
 
-import environment
-from environment.job import Job
-from model.scheduling.scheduling_rule import SchedulingRule, WaitInfo
-
+from environment import Job, SchedulingRule, WaitInfo, Machine
 
 class ATCSchedulingRule(SchedulingRule):
     """
@@ -13,7 +10,7 @@ class ATCSchedulingRule(SchedulingRule):
     Source: https://www.jstor.org/stable/2632177
     """
 
-    def __call__(self, machine: environment.Machine, now: float) -> Job | WaitInfo:
+    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
         processing_times = torch.FloatTensor(
             [job.current_operation_processing_time_on_machine for job in machine.queue]
         )

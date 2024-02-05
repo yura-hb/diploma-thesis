@@ -1,8 +1,7 @@
 
 import torch
 
-import environment
-from model.scheduling.scheduling_rule import SchedulingRule, WaitInfo
+from environment import SchedulingRule, WaitInfo, Machine, Job
 
 
 # TODO: Pass Reduction strategy
@@ -13,7 +12,7 @@ class CRSPTSchedulingRule(SchedulingRule):
     the rule selects jobs with the lowest ratio of due time to remaining processing time and current operation time
     """
 
-    def __call__(self, machine: environment.Machine, now: float) -> environment.Job | WaitInfo:
+    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
         remaining_processing_times = torch.FloatTensor(
             [job.remaining_processing_time() for job in machine.queue]
         )

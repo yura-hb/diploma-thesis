@@ -1,8 +1,7 @@
 
 import torch
 
-import environment
-from model.scheduling.scheduling_rule import SchedulingRule, WaitInfo
+from environment import Job, SchedulingRule, Machine, WaitInfo
 
 
 class LWRKMODSchedulingRule(SchedulingRule):
@@ -10,7 +9,7 @@ class LWRKMODSchedulingRule(SchedulingRule):
     Least Work Remaining + Modified Operational Due date rule. Check implementation of the rules separately.
     """
 
-    def __call__(self, machine: environment.Machine, now: float) -> environment.Job | WaitInfo:
+    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
         due_at = torch.FloatTensor([job.due_at for job in machine.queue])
         processing_times = torch.FloatTensor([
             job.current_operation_processing_time_on_machine for job in machine.queue

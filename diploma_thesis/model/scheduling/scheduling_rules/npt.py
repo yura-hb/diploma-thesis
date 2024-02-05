@@ -2,8 +2,7 @@
 
 import torch
 
-import environment
-from model.scheduling.scheduling_rule import SchedulingRule, WaitInfo
+from environment import Job, SchedulingRule, Machine, WaitInfo
 
 
 class NPTSchedulingRule(SchedulingRule):
@@ -12,7 +11,7 @@ class NPTSchedulingRule(SchedulingRule):
     the smallest
     """
 
-    def __call__(self, machine: environment.Machine, now: float) -> environment.Job | WaitInfo:
+    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
         values = torch.FloatTensor([job.next_operation_processing_time() for job in machine.queue])
         idx = torch.argmin(values)
 

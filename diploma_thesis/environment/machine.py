@@ -7,7 +7,6 @@ import simpy
 import torch
 
 import environment
-from model.scheduling.scheduling_rules import SchedulingRule, WaitInfo
 
 
 @dataclass
@@ -164,7 +163,7 @@ class Machine:
                  environment: simpy.Environment,
                  machine_idx: int,
                  work_center_idx: int,
-                 rule: SchedulingRule):
+                 rule: environment.SchedulingRule):
         self.environment = environment
         self.rule = rule
 
@@ -219,7 +218,7 @@ class Machine:
 
             job = self.select_job()
 
-            if isinstance(job, WaitInfo):
+            if isinstance(job, environment.WaitInfo):
                 yield self.environment.timeout(job.wait_time)
                 self.starve_if_needed()
                 continue

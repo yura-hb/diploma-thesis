@@ -1,10 +1,8 @@
+from typing import List
+
 import torch
 
-from environment import Job
-from environment import Machine
-from model.routing.static.routing_rules import RoutingRule
-
-from typing import List
+from environment import Job, Machine, RoutingRule
 
 
 class RandomRoutingRule(RoutingRule):

@@ -1,6 +1,6 @@
-from environment import Machine, Job
 from typing import List
-from .routing_rule import RoutingRule
+
+from environment import Machine, Job, RoutingRule
 
 
 class UTRoutingRule(RoutingRule):

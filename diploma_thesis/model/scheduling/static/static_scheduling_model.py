@@ -1,7 +1,7 @@
 import environment
 from environment import Job
 from model.scheduling.scheduling_rules import ALL_SCHEDULING_RULES
-from model.scheduling.scheduling_rule import WaitInfo
+from environment.scheduling_rule import WaitInfo
 from model.scheduling.scheduling_model import SchedulingModel
 
 
