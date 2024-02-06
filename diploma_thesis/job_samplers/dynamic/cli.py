@@ -18,6 +18,7 @@ class CLI:
         realistic_variance: int
         expected_utilization: float
         even_arrival_time: float
+        n_jobs: int
         seed: int
 
         @staticmethod
@@ -29,6 +30,7 @@ class CLI:
                 realistic_variance=args.get('realistic_variance'),
                 expected_utilization=args.get('expected_utilization'),
                 even_arrival_time=args.get('even_arrival_time'),
+                n_jobs=args.get('n_jobs'),
                 seed=args['seed']
             )
 
@@ -50,6 +52,9 @@ class CLI:
         builder.with_uniform_step_generation(configuration.uneveness)
 
         builder.with_uniform_due_time(configuration.tightness)
+
+        if n_jobs := configuration.n_jobs:
+            builder.with_fixed_number_of_jobs(n_jobs)
 
         if expected_utilization := configuration.expected_utilization:
             builder.with_exponential_arrival_time_from_processing_time(

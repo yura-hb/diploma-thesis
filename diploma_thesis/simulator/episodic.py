@@ -1,10 +1,7 @@
-import simpy
+from typing import List
 
+from environment import Job, WorkCenter, Machine, WaitInfo
 from .simulator import Simulator
-from environment import Statistics, Job, WorkCenter, Machine, WaitInfo
-from agents import WorkCenterAgent, MachineAgent
-from dataclasses import dataclass
-from typing import Any, List
 
 
 class EpisodicSimulator(Simulator):
@@ -15,26 +12,18 @@ class EpisodicSimulator(Simulator):
     After the simulation is finished returns are estimated and passed to the agent for training.
     """
 
-    @dataclass
-    class Configuration:
-        episode_count: int
-        parallel_environments: int
-        terminating_condition: 'Any'
-        return_estimation: 'Any'
+    def schedule(self, shop_floor_id: int, machine: Machine, now: int) -> Job | WaitInfo:
+        state = self.machine.encode_state(machine)
 
-    def __init__(self,
-                 work_center: WorkCenterAgent,
-                 machine: MachineAgent,
-                 reward_model,
-                 configuration: Configuration):
-        super().__init__(work_center, machine, reward_model)
+        return self.machine.schedule(state)
 
-        self.configuration = configuration
+    def did_start_simulation(self, shop_floor_id: int):
+        pass
 
-    def simulate(self) -> [Statistics]:
-        environment = simpy.Environment()
+    def route(self, shop_floor_id: int, job: Job, work_center_idx: int, machines: List[Machine]) -> 'Machine | None':
+        state = self.work_center.encode_state(job, work_center_idx, machines)
 
-        self.environment.process()
+        return self.work_center.schedule(state)
 
     def will_produce(self, shop_floor_id: int, job: Job, machine: Machine):
         pass
@@ -53,3 +42,4 @@ class EpisodicSimulator(Simulator):
 
     def did_complete(self, shop_floor_id: int, job: Job):
         pass
+

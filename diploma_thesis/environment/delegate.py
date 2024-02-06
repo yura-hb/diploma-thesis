@@ -5,6 +5,13 @@ from environment import Job, Machine, WorkCenter
 class Delegate(metaclass=ABCMeta):
 
     @abstractmethod
+    def did_start_simulation(self, shop_floor_id: int):
+        """
+        Will be triggered after the start of simulation
+        """
+        ...
+
+    @abstractmethod
     def will_produce(self, shop_floor_id: int, job: Job, machine: Machine):
         """
         Will be triggered before the production of job on machine
@@ -43,5 +50,12 @@ class Delegate(metaclass=ABCMeta):
     def did_complete(self, shop_floor_id: int, job: Job):
         """
         Will be triggered after the completion of job
+        """
+        ...
+
+    @abstractmethod
+    def did_finish_simulation(self, shop_floor_id: int):
+        """
+        Will be triggered after all jobs have been completed
         """
         ...

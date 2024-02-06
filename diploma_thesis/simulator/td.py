@@ -1,18 +1,43 @@
+from typing import List
 
-from dataclasses import dataclass
-from typing import Any
+from environment import Job, WorkCenter, Machine, WaitInfo
+from .simulator import Simulator
 
 
-class TDSimulator:
+class TDSimulator(Simulator):
     """
-    A simulator, which launches several long-term simulations in parallel. Rewards are added to agent memory as soon
-    as they can be calculated.
+    A simulator, which estimates returns in Temporal Difference manner and send information for training as soon as
+    possible
     """
 
-    @dataclass
-    class Configuration:
-        episode_count: int
-        parallel_environments: int
-        terminating_condition: 'Any'
-        return_estimation: 'Any'
+    def schedule(self, shop_floor_id: int, machine: Machine, now: int) -> Job | WaitInfo:
+        state = self.machine.encode_state(machine)
+
+        return self.machine.schedule(state)
+
+    def route(self, shop_floor_id: int, job: Job, work_center_idx: int, machines: List[Machine]) -> 'Machine | None':
+        state = self.work_center.encode_state(job, work_center_idx, machines)
+
+        return self.work_center.schedule(state)
+
+    def did_start_simulation(self, shop_floor_id: int):
+        pass
+
+    def will_produce(self, shop_floor_id: int, job: Job, machine: Machine):
+        pass
+
+    def did_produce(self, shop_floor_id: int, job: Job, machine: Machine):
+        pass
+
+    def will_dispatch(self, shop_floor_id: int, job: Job, work_center: WorkCenter):
+        pass
+
+    def did_dispatch(self, shop_floor_id: int, job: Job, work_center: WorkCenter, machine: Machine):
+        pass
+
+    def did_finish_dispatch(self, shop_floor_id: int, work_center: WorkCenter):
+        pass
+
+    def did_complete(self, shop_floor_id: int, job: Job):
+        pass
 

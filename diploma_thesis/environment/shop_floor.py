@@ -42,7 +42,6 @@ class State:
 
 @dataclass
 class History:
-
     @dataclass
     class Record:
         job_id: int
@@ -76,7 +75,6 @@ class History:
 
 
 class ShopFloor:
-
     @dataclass
     class Configuration:
         problem: environment.Configuration
@@ -97,9 +95,11 @@ class ShopFloor:
 
         self.state = State(idx=idx)
         self.history = History()
-        self._work_centers, self._machines = ShopFloorFactory(self.configuration).make()
+        self._work_centers, self._machines = ShopFloorFactory(self.configuration, self).make()
 
     def simulate(self):
+        self.delegate.did_start_simulation(self.state.idx)
+
         if self.configuration.problem.pre_assign_initial_jobs:
             self.__assign_initial_jobs__()
 
@@ -149,16 +149,16 @@ class ShopFloor:
             self.did_complete(job)
 
         self.logger.info(
-            f"Job {job.id} { job.current_step_idx } has been { 'completed' if job.is_completed else 'produced' } "
-            f"on machine {from_.state.machine_idx} in work-center { from_.state.work_center_idx } "
-            f"at {self.configuration.environment.now}. Jobs in the system { self.state.number_of_jobs_in_system }"
+            f"Job {job.id} {job.current_step_idx} has been {'completed' if job.is_completed else 'produced'} "
+            f"on machine {from_.state.machine_idx} in work-center {from_.state.work_center_idx} "
+            f"at {self.configuration.environment.now}. Jobs in the system {self.state.number_of_jobs_in_system}"
         )
 
     def schedule(self, machine: environment.Machine, now: int) -> environment.Job | environment.WaitInfo:
         return self.agent.schedule(self.state.idx, machine, now)
 
     def route(
-        self, job: environment.Job, work_center_idx: int, machines: List['environment.Machine']
+            self, job: environment.Job, work_center_idx: int, machines: List['environment.Machine']
     ) -> 'environment.Machine | None':
         return self.agent.route(self.state.idx, job, work_center_idx, machines)
 
@@ -224,8 +224,14 @@ class ShopFloor:
 
         return job
 
+    def __test_if_finished__(self):
+        has_dispatched_all_jobs = len(self.history.jobs) >= self.configuration.sampler.number_of_jobs()
+        is_no_jobs_in_system = self.state.number_of_jobs_in_system == 0
+
+        if has_dispatched_all_jobs and is_no_jobs_in_system:
+            self.delegate.did_finish_simulation(self.state.idx)
+
     def __dispatch__(self, job: environment.Job, work_center: environment.WorkCenter):
         self.state.with_new_job_in_system()
 
         work_center.receive(job)
-

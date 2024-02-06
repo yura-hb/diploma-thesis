@@ -1,0 +1,4 @@
+
+
+class Return:
+    pass

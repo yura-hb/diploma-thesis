@@ -1,15 +1,26 @@
 import environment
 
 from typing import TypeVar, List
-from agents import Phase
+from agents import Phase, EvaluationPhase, Agent
 
 MachineState = TypeVar('MachineState')
 
 
-class WorkCenter:
+class WorkCenter(Agent):
+
+    def __init__(self):
+        self.phase = EvaluationPhase()
+
+    @property
+    def idx(self):
+        return ''
+
+    @property
+    def is_trainable(self):
+        return False
 
     def update(self, phase: Phase):
-        pass
+        self.phase = phase
 
     def train_step(self):
         pass
