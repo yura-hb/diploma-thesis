@@ -146,6 +146,15 @@ class Builder:
 
         return self
 
+    def with_fixed_number_of_jobs(self, number_of_jobs: int):
+        """
+        Args:
+            number_of_jobs: Number of jobs to be generated
+        """
+        self.job_sampler._number_of_jobs = number_of_jobs
+
+        return self
+
     @property
     def sampler(self) -> Sampler:
         return self.job_sampler

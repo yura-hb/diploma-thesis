@@ -1,6 +1,2 @@
-from .agent import Agent
-from typing import Dict
+from .machine import Machine
 
-
-def from_cli(parameters: Dict) -> Agent:
-    pass

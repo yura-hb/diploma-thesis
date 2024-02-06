@@ -1,17 +1,12 @@
 import environment
 
-from typing import TypeVar
+from typing import TypeVar, List
 from agents import Phase
 
 MachineState = TypeVar('MachineState')
 
 
-class Machine:
-
-    def __init__(self, state_encoder, model, memory):
-        self.state_encoder = state_encoder
-        self.model = model
-        self.memory = memory
+class WorkCenter:
 
     def update(self, phase: Phase):
         pass
@@ -19,7 +14,10 @@ class Machine:
     def train_step(self):
         pass
 
-    def encode_state(self, machine: environment.Machine) -> MachineState:
+    def encode_state(self,
+                     job: environment.Job,
+                     work_center_idx: int,
+                     machines: List[environment.Machine]) -> MachineState:
         pass
 
     def schedule(self, state: MachineState) -> environment.Job | environment.WaitInfo:
