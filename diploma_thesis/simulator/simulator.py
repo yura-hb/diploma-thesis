@@ -5,7 +5,7 @@ from typing import List, Callable
 
 import simpy
 
-from agents import WorkCenterAgent, MachineAgent, TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
+from agents import WorkCenter, Machine, TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
 from environment import Delegate, Agent
 from .reward import RewardModel
 from .simulation import Simulation
@@ -39,7 +39,7 @@ class EvaluateSchedule:
 class Simulator(Agent, Delegate, metaclass=ABCMeta):
 
     def __init__(
-        self, work_center: WorkCenterAgent, machine: MachineAgent, reward_model: RewardModel, logger: logging.Logger
+        self, work_center: WorkCenter, machine: Machine, reward_model: RewardModel, logger: logging.Logger
     ):
         self.work_center = work_center
         self.machine = machine

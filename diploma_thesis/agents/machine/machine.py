@@ -1,35 +1,15 @@
-import environment
 
+from abc import ABCMeta
 from typing import TypeVar
-from agents import Phase, EvaluationPhase
 
-MachineState = TypeVar('MachineState')
+from agents.base.agent import Agent
+from .model import MachineModel
+from .state import StateEncoder
+
+MachineStateEncoder = TypeVar('MachineStateEncoder', bound=StateEncoder)
+Model = TypeVar('Model', bound=MachineModel)
 
 
-class Machine:
+class Machine(Agent[MachineStateEncoder, Model], metaclass=ABCMeta):
 
-    def __init__(self, state_encoder, model, memory):
-        self.state_encoder = state_encoder
-        self.model = model
-        self.memory = memory
-        self.phase = EvaluationPhase()
-
-    @property
-    def is_trainable(self):
-        return False
-
-    def update(self, phase: Phase):
-        self.phase = phase
-
-    def train_step(self):
-        pass
-
-    def encode_state(self, machine: environment.Machine) -> MachineState:
-        pass
-
-    def schedule(self, state: MachineState) -> environment.Job | environment.WaitInfo:
-        pass
-
-    def record(self, state: MachineState, action, next_state: MachineState, reward):
-        pass
-
+    pass

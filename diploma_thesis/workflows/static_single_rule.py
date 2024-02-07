@@ -23,7 +23,7 @@ class SingleModel(Workflow):
         #     environment=environment,
         #     problem=problem,
         #     sampler=sampler,
-        #     scheduling_rule=scheduling_model,
+        #     scheduling_rule.py=scheduling_model,
         #     routing_rule=routing_model
         # )
         #

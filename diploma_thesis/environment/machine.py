@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass, field
 from functools import reduce
 from typing import List
@@ -143,10 +142,6 @@ class Machine:
         # Initially, machine is working
         self.is_on_event.succeed()
 
-        # TODO: Implement
-        self.sequence_learning_event = self.environment.event()
-        self.routing_learning_event = self.environment.event()
-
     def connect(self, shop_floor: 'environment.ShopFloor'):
         self.shop_floor = shop_floor
         self.environment.process(self.produce())
@@ -280,11 +275,11 @@ class Machine:
         try:
             self.did_dispatch_event.succeed()
         except:
-           pass
+            pass
 
     def __notify_job_about_production__(self, job: environment.Job, production_start: bool):
-        event = environment.JobEvent.Kind.production_start if production_start \
-                else environment.JobEvent.Kind.production_end
+        kind = environment.JobEvent.Kind
+        event = kind.production_start if production_start else kind.production_end
         event = self.__new_event__(event)
 
         job.with_event(event)

@@ -13,24 +13,24 @@ class CLI:
     @dataclass
     class Configuration:
         processing_times: Tuple[int, int]
+        n_jobs: int
         tightness: float
         uneveness: float
         realistic_variance: int
         expected_utilization: float
         even_arrival_time: float
-        n_jobs: int
         seed: int
 
         @staticmethod
         def from_cli_arguments(args: dict):
             return CLI.Configuration(
                 processing_times=args['processing_times'],
+                n_jobs=args.get('n_jobs'),
                 tightness=args['tightness'],
                 uneveness=args.get('uneveness'),
                 realistic_variance=args.get('realistic_variance'),
                 expected_utilization=args.get('expected_utilization'),
                 even_arrival_time=args.get('even_arrival_time'),
-                n_jobs=args.get('n_jobs'),
                 seed=args['seed']
             )
 

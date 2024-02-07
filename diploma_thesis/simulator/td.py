@@ -1,5 +1,6 @@
 from typing import List
 
+from agents import MachineInput, WorkCenterInput
 from environment import Job, WorkCenter, Machine, WaitInfo
 from .simulator import Simulator
 
@@ -11,14 +12,14 @@ class TDSimulator(Simulator):
     """
 
     def schedule(self, shop_floor_id: int, machine: Machine, now: int) -> Job | WaitInfo:
-        state = self.machine.encode_state(machine)
+        parameters = MachineInput(machine, now)
 
-        return self.machine.schedule(state)
+        return self.machine.schedule(parameters).result
 
     def route(self, shop_floor_id: int, job: Job, work_center_idx: int, machines: List[Machine]) -> 'Machine | None':
-        state = self.work_center.encode_state(job, work_center_idx, machines)
+        parameters = WorkCenterInput(job, work_center_idx, machines)
 
-        return self.work_center.schedule(state)
+        return self.work_center.schedule(parameters).result
 
     def did_start_simulation(self, shop_floor_id: int):
         pass

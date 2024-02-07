@@ -18,19 +18,19 @@ class StaticRuleTournament(Workflow):
     #     logger = self.__make_logger__(log_stdout=True)
     #
     #     for routing_rule in routing_rules:
-    #         for scheduling_rule in scheduling_rules:
-    #             logger.info(f'Start evaluating routing rule { routing_rule } and scheduling rule { scheduling_rule }')
+    #         for scheduling_rule.py in rule:
+    #             logger.info(f'Start evaluating routing rule { routing_rule } and scheduling rule { scheduling_rule.py }')
     #
     #             environment = simpy.Environment()
     #
     #             routing_rule_parameters = routing_rule_parameters_db.get(routing_rule, {})
-    #             scheduling_rule_parameters = scheduling_rule_parameters_db.get(scheduling_rule, {})
+    #             scheduling_rule_parameters = scheduling_rule_parameters_db.get(scheduling_rule.py, {})
     #
     #             configuration = ShopFloor.Configuration(
     #                 environment=environment,
     #                 problem=self.problem,
     #                 routing_model=routing_rule(**routing_rule_parameters),
-    #                 scheduling_model=scheduling_rule(**scheduling_rule_parameters),
+    #                 scheduling_model=scheduling_rule.py(**scheduling_rule_parameters),
     #                 sampler=self.
     #             )
     #
@@ -43,4 +43,4 @@ class StaticRuleTournament(Workflow):
     #
     #             environment.run(until=self.problem.timespan)
     #
-    #             logger.info(f'Finish evaluating routing rule {routing_rule} and scheduling rule {scheduling_rule}')
+    #             logger.info(f'Finish evaluating routing rule {routing_rule} and scheduling rule {scheduling_rule.py}')
