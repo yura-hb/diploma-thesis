@@ -1,0 +1,79 @@
+
+simulation: &simulation
+  name: ''
+  kind: 'dynamic'
+  parameters:
+    configuration:
+      timespan: 5000
+      machines_per_work_center: 10
+      work_center_count: 10
+      pre_assign_initial_jobs: True
+      breakdown_ratio: 0.0
+
+    job_sampler:
+      kind: 'dynamic'
+      parameters:
+        processing_times: [ 10, 50 ]
+        tightness: 0.5
+        uneveness: 5
+        realistic_variance: 10
+        expected_utilization: 0.95
+        seed: 42
+
+
+task:
+  kind: 'task'
+
+  machine_agent:
+    kind: 'static'
+    parameters:
+      model:
+        kind: 'static'
+        parameters:
+          rule: 'fifo'
+      encoder:
+        kind: 'plain'
+
+  work_center_agent:
+    kind: 'static'
+    parameters:
+      model:
+        kind: 'static'
+        parameters:
+          rule: 'ea'
+      encoder:
+        kind: 'plain'
+
+  simulator:
+    # Can be 'td'. Important for reinforcement learning
+    kind: 'episodic'
+
+  run:
+    timeline:
+      warmup:
+        - 10
+        - 100
+
+      duration: 10000
+
+    machine_train_schedule:
+      pretrain_steps: 10
+      train_interval: 100
+      max_training_steps: 1000
+
+    work_center_train_schedule:
+      pretrain_steps: 10
+      train_interval: 100
+      max_training_steps: 1000
+
+    n_workers: 2
+    simulations:
+      - <<: *simulation
+      - <<: *simulation
+      - <<: *simulation
+      - <<: *simulation
+
+  evaluate:
+    n_workers: 2
+    simulations:
+      - <<: *simulation

@@ -68,7 +68,7 @@ class Builder:
         assert variance > 0, "Variance must be positive"
 
         distribution = torch.distributions.Uniform(low=processing_times[0], high=processing_times[1])
-        noise = torch.distributions.Normal(loc=0, scale=torch.sqrt(variance))
+        noise = torch.distributions.Normal(loc=0, scale=torch.sqrt(torch.tensor(variance)))
 
         def sample(shape: Tuple[int]) -> torch.FloatTensor:
             times = distribution.sample(shape) + noise.sample(shape)

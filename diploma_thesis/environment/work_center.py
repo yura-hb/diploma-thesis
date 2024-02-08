@@ -46,12 +46,12 @@ class WorkCenter:
         self.state = State(idx=work_center_idx)
         self.history = History()
         self._machines = []
-        self.shop_floor = None
+        self._shop_floor = None
 
         self.on_route = environment.event()
 
     def connect(self, shop_floor: 'environment.ShopFloor', machines: List['environment.Machine']):
-        self.shop_floor = shop_floor
+        self._shop_floor = shop_floor
         self._machines = machines
 
     def simulate(self):
@@ -77,14 +77,14 @@ class WorkCenter:
                 self.shop_floor.will_dispatch(job, self)
 
                 # TODO: React on None
-                machine = self.shop_floor.shopfloor.route(job, work_center_idx=self.state.idx, machines=self.machines)
+                machine = self.shop_floor.route(job, work_center_idx=self.state.idx, machines=self.machines)
                 machine.receive(job)
 
-                self.shop_floor.shopfloor.did_dispatch(job, self, machine)
+                self.shop_floor.did_dispatch(job, self, machine)
 
             self.state.with_flushed_queue()
 
-            self.shop_floor.shopfloor.did_finish_dispatch(self)
+            self.shop_floor.did_finish_dispatch(self)
 
             self.on_route = self.environment.event()
 
@@ -100,6 +100,10 @@ class WorkCenter:
         )
 
         self.did_receive_job()
+
+    @property
+    def shop_floor(self):
+        return self._shop_floor()
 
     @property
     def machines(self) -> List['environment.Machine']:

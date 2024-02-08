@@ -9,12 +9,12 @@ from .dynamic import (CLI as DynamicJobSamplerFromCLI,
                       Sampler as DynamicJobSampler)
 from .static import (Sampler as StaticJobSampler)
 
-key_to_sampler_builder = {
+key_to_class = {
     "dynamic": DynamicJobSamplerFromCLI
 }
 
 
-def from_cli_arguments(problem: Configuration, environment: simpy.Environment, configuration: Dict) -> 'JobSampler':
-    sampler = key_to_sampler_builder[configuration['id']]
+def from_cli(problem: Configuration, environment: simpy.Environment, configuration: Dict) -> 'JobSampler':
+    cls = key_to_class[configuration['kind']]
 
-    return sampler.from_cli_arguments(problem, environment, configuration['parameters'])
+    return cls.from_cli(problem, environment, configuration['parameters'])

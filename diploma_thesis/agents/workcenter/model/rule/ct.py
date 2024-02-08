@@ -1,5 +1,5 @@
 
-from routing_rule import *
+from .routing_rule import *
 
 
 class CTRoutingRule(RoutingRule):

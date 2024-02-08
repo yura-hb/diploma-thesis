@@ -133,7 +133,7 @@ class Machine:
 
         self.state = State(machine_idx=machine_idx, work_center_idx=work_center_idx)
         self.history = History()
-        self.shop_floor = None
+        self._shop_floor = None
 
         # Events
         self.did_dispatch_event = self.environment.event()
@@ -143,7 +143,7 @@ class Machine:
         self.is_on_event.succeed()
 
     def connect(self, shop_floor: 'environment.ShopFloor'):
-        self.shop_floor = shop_floor
+        self._shop_floor = shop_floor
         self.environment.process(self.produce())
 
     def simulate(self):
@@ -240,6 +240,10 @@ class Machine:
         """
         self.state.without_job(job.id, now=self.environment.now)
         self.shop_floor.forward(job, from_=self)
+
+    @property
+    def shop_floor(self):
+        return self._shop_floor()
 
     @property
     def queue(self) -> List[environment.Job]:

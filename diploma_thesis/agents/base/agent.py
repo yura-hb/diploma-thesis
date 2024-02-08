@@ -4,36 +4,26 @@ from typing import TypeVar, Generic
 import torch
 
 from agents.utils import Phase, EvaluationPhase
-from .encoder import Encoder as STEncoder
-from .model import Model as Brain
-
-StateEncoder = TypeVar('StateEncoder', bound=STEncoder)
-Model = TypeVar('Model', bound=Brain)
+from .encoder import Encoder as StateEncoder, Input, State
+from .model import Model, Action, Result
 
 
-class Agent(Generic[StateEncoder, Model], metaclass=ABCMeta):
+class Agent(metaclass=ABCMeta):
 
     def __init__(self,
-                 state_encoder: StateEncoder.State,
-                 model: Model,
+                 model: Model[Input, State, Action, Result],
+                 state_encoder: StateEncoder[Input, State],
                  memory):
         self.state_encoder = state_encoder
         self.model = model
         self.memory = memory
         self.phase = EvaluationPhase()
 
-        # TODO: Check if it works!!!
-
-        assert isinstance(self.state_encoder.Input, self.model.Input), \
-            f"State encoder input type {self.state_encoder.Input} does not match model input type {self.model.Input}"
-        assert isinstance(self.state_encoder.State, self.model.State), \
-            f"State encoder state type {self.state_encoder.State} does not match model state type {self.model.State}"
-
     def update(self, phase: Phase):
         self.phase = phase
 
-    @abstractmethod
     @property
+    @abstractmethod
     def is_trainable(self):
         pass
 
@@ -42,18 +32,16 @@ class Agent(Generic[StateEncoder, Model], metaclass=ABCMeta):
         pass
 
     def store(self,
-              state: StateEncoder.State,
-              action: Model.Action,
-              next_state: StateEncoder.State,
+              state: State,
+              action: Action,
+              next_state: State,
               reward: torch.FloatTensor):
         pass
 
-    def schedule(self, state: StateEncoder.Input) -> Model.Record:
-        state = self.encode_state(state)
+    def schedule(self, parameters: Input) -> Model.Record:
+        state = self.encode_state(parameters)
 
-        return self.model(state, state)
+        return self.model(state, parameters)
 
-    def encode_state(self, state: StateEncoder.Input) -> StateEncoder.State:
-        return self.state_encoder.encode(state)
-
-
+    def encode_state(self, parameters: Input) -> State:
+        return self.state_encoder.encode(parameters)

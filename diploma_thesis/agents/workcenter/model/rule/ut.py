@@ -1,4 +1,4 @@
-from routing_rule import *
+from .routing_rule import *
 
 
 class UTRoutingRule(RoutingRule):

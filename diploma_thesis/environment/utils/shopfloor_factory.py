@@ -7,17 +7,19 @@ from functools import reduce
 
 class ShopFloorFactory:
 
-    def __init__(self, configuration: environment.ShopFloor.Configuration, shop_floor: environment.shop_floor):
+    def __init__(self, configuration: 'environment.ShopFloor.Configuration', shop_floor: 'environment.ShopFloor'):
         self.configuration = configuration
         self.shop_floor = weakref.ref(shop_floor)
 
     def make(self):
-        work_centers, machines_per_wc = self.__make_working_units__()
+        result = self.__make_working_units__()
+        work_centers = result[0]
+        machines_per_wc = result[1]
 
-        machines = reduce(lambda x, y: x + y, machines_per_wc, [])
+        machines: List[environment.Machine] = reduce(lambda x, y: x + y, machines_per_wc, [])
 
         for work_center, machines_in_work_center in zip(work_centers, machines_per_wc):
-            work_center.connect(machines_in_work_center, self.shop_floor)
+            work_center.connect(shop_floor=self.shop_floor, machines=machines_in_work_center)
 
         for machine in machines:
             machine.connect(self.shop_floor)

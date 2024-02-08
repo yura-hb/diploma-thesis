@@ -1,7 +1,8 @@
 
 from .model import MachineModel
 from agents.machine.state import PlainEncoder
-from .rule import SchedulingRule
+from .rule import SchedulingRule, ALL_SCHEDULING_RULES
+from typing import Dict
 
 
 class StaticModel(MachineModel[PlainEncoder.State, None]):
@@ -18,3 +19,9 @@ class StaticModel(MachineModel[PlainEncoder.State, None]):
             action=None
         )
 
+    @staticmethod
+    def from_cli(parameters: Dict):
+        rule = parameters['rule']
+        rule = ALL_SCHEDULING_RULES[rule]
+
+        return StaticModel(rule())

@@ -3,6 +3,7 @@ import simpy
 
 from environment import Job, Configuration, JobSampler
 
+
 class Sampler(JobSampler):
 
     def __init__(self, problem: Configuration, environment: simpy.Environment):

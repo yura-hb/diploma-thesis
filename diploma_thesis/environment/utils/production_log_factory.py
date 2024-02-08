@@ -8,7 +8,7 @@ from typing import List
 import pandas as pd
 from joblib import Parallel, delayed
 
-from environment import Job, ShopFloor
+import environment
 
 
 class LogEvent(StrEnum):
@@ -34,7 +34,7 @@ class ProductionLogFactory:
         event: str
         moment: float
 
-    def make(self, shop_floor: ShopFloor) -> pd.DataFrame:
+    def make(self, shop_floor: 'environment.ShopFloor') -> pd.DataFrame:
         """
         Completes production logs for the shop-floor.
 
@@ -64,7 +64,7 @@ class ProductionLogFactory:
 
         return df
 
-    def __make_production_logs_from_job__(self, job: Job) -> List[ProductionLog]:
+    def __make_production_logs_from_job__(self, job: environment.Job) -> List[ProductionLog]:
         result = []
 
         result += [self.ProductionLog(job.id, 0, -1, -1, LogEvent.created, job.history.created_at)]

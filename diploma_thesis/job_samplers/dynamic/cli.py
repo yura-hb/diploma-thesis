@@ -35,9 +35,7 @@ class CLI:
             )
 
     @staticmethod
-    def from_cli_arguments(problem: Configuration,
-                           environment: simpy.Environment,
-                           parameters: dict) -> JobSampler:
+    def from_cli(problem: Configuration, environment: simpy.Environment, parameters: dict) -> JobSampler:
         configuration = CLI.Configuration.from_cli_arguments(parameters)
 
         builder = Builder(problem, environment, configuration.seed)
@@ -65,4 +63,4 @@ class CLI:
         else:
             raise ValueError("Either expected_utilization or even_arrival_time must be provided")
 
-        return builder.sampler, configuration
+        return builder.sampler

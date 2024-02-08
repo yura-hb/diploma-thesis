@@ -4,14 +4,16 @@ from typing import Dict
 
 import yaml
 
-from workflows import SingleModel
+from workflows import Simulation
 from workflows import Workflow
 
 
 def make_workflow(configuration: Dict) -> Workflow:
-    match configuration['task']['id']:
-        case "single_model":
-            return SingleModel(configuration)
+    configuration = configuration['task']
+
+    match configuration['kind']:
+        case "task":
+            return Simulation(configuration)
         case _:
             raise ValueError(f"Unknown workflow id {id}")
 

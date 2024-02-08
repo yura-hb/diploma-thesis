@@ -11,7 +11,7 @@ from .utils import ShopFloorFactory
 
 @dataclass
 class State:
-    idx: int = 0
+    idx: str = 0
 
     job_id: int = 0
 
@@ -83,7 +83,7 @@ class ShopFloor:
         delegate: 'environment.Delegate'
         environment: simpy.Environment = field(default_factory=simpy.Environment)
 
-    def __init__(self, idx: int, configuration: Configuration, logger: logging.Logger):
+    def __init__(self, idx: str, configuration: Configuration, logger: logging.Logger):
         self.id = id
         self.configuration = configuration
         self.logger = logger
@@ -97,6 +97,8 @@ class ShopFloor:
         self.history = History()
         self._work_centers, self._machines = ShopFloorFactory(self.configuration, self).make()
 
+        self.did_finish_simulation_event = configuration.environment.event()
+
     def simulate(self):
         self.delegate.did_start_simulation(self.state.idx)
 
@@ -107,6 +109,8 @@ class ShopFloor:
             work_center.simulate()
 
         self.configuration.environment.process(self.__dispatch_jobs__())
+
+        return self.did_finish_simulation_event
 
     @property
     def statistics(self) -> 'environment.Statistics':
@@ -154,11 +158,11 @@ class ShopFloor:
             f"at {self.configuration.environment.now}. Jobs in the system {self.state.number_of_jobs_in_system}"
         )
 
-    def schedule(self, machine: environment.Machine, now: int) -> environment.Job | environment.WaitInfo:
+    def schedule(self, machine: environment.Machine, now: int) -> 'environment.Job | environment.WaitInfo':
         return self.agent.schedule(self.state.idx, machine, now)
 
     def route(
-            self, job: environment.Job, work_center_idx: int, machines: List['environment.Machine']
+        self, job: environment.Job, work_center_idx: int, machines: List['environment.Machine']
     ) -> 'environment.Machine | None':
         return self.agent.route(self.state.idx, job, work_center_idx, machines)
 
@@ -179,6 +183,7 @@ class ShopFloor:
 
     def did_complete(self, job: environment.Job):
         self.delegate.did_complete(self.state.idx, job)
+        self.__test_if_finished__()
 
     def __assign_initial_jobs__(self):
         for work_center in self.work_centers:
@@ -228,8 +233,10 @@ class ShopFloor:
         has_dispatched_all_jobs = len(self.history.jobs) >= self.configuration.sampler.number_of_jobs()
         is_no_jobs_in_system = self.state.number_of_jobs_in_system == 0
 
-        if has_dispatched_all_jobs and is_no_jobs_in_system:
+        if not self.did_finish_simulation_event.triggered and has_dispatched_all_jobs and is_no_jobs_in_system:
             self.delegate.did_finish_simulation(self.state.idx)
+
+            self.did_finish_simulation_event.succeed()
 
     def __dispatch__(self, job: environment.Job, work_center: environment.WorkCenter):
         self.state.with_new_job_in_system()

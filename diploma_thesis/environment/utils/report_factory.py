@@ -63,7 +63,7 @@ class ReportFactory:
 
     def __init__(self,
                  statistics: 'environment.Statistics',
-                 shop_floor: environment.ShopFloor,
+                 shop_floor: 'environment.ShopFloor',
                  time_predicate: 'environment.Statistics.Predicate.TimePredicate'):
         self.statistics = statistics
         self.shop_floor = shop_floor
