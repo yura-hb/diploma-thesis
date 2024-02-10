@@ -53,11 +53,18 @@ class History:
     # A list of jobs, where each job is represented by the id of machine
     jobs: Dict[int, environment.Job] = field(default_factory=dict)
 
+    started_at: int = 0
+
     def with_machines_count(self):
         return self
 
     def with_new_job(self, job: environment.Job):
         self.jobs[job.id] = job
+
+        return self
+
+    def with_started_at(self, now: int):
+        self.started_at = now
 
         return self
 
@@ -79,6 +86,7 @@ class ShopFloor:
     class Configuration:
         problem: environment.Configuration
         sampler: 'environment.JobSampler'
+        breakdown: 'environment.Breakdown'
         agent: 'environment.Agent'
         delegate: 'environment.Delegate'
         environment: simpy.Environment = field(default_factory=simpy.Environment)
@@ -100,17 +108,30 @@ class ShopFloor:
         self.did_finish_simulation_event = configuration.environment.event()
 
     def simulate(self):
+        torch.manual_seed(self.configuration.problem.seed)
+
+        self.history.with_started_at(self.configuration.environment.now)
         self.delegate.did_start_simulation(self.state.idx)
 
         if self.configuration.problem.pre_assign_initial_jobs:
             self.__assign_initial_jobs__()
 
         for work_center in self.work_centers:
-            work_center.simulate()
+            work_center.simulate(self.configuration.breakdown)
 
         self.configuration.environment.process(self.__dispatch_jobs__())
 
         return self.did_finish_simulation_event
+
+    def reset(self):
+        self.state = State(idx=self.state.idx)
+        self.history = History()
+        self.did_finish_simulation_event = self.configuration.environment.event()
+
+        for work_center in self.work_centers:
+            work_center.reset()
+
+    # Utility properties
 
     @property
     def statistics(self) -> 'environment.Statistics':
@@ -126,8 +147,7 @@ class ShopFloor:
     def machines(self) -> List['environment.Machine']:
         return self._machines
 
-    def breakdown(self, work_center_idx: int, machine_idx: int, duration: int):
-        ...
+    # Navigation
 
     def forward(self, job: environment.Job, from_: environment.Machine):
         next_work_center_idx = job.next_work_center_idx
@@ -154,9 +174,11 @@ class ShopFloor:
 
         self.logger.info(
             f"Job {job.id} {job.current_step_idx} has been {'completed' if job.is_completed else 'produced'} "
-            f"on machine {from_.state.machine_idx} in work-center {from_.state.work_center_idx} "
-            f"at {self.configuration.environment.now}. Jobs in the system {self.state.number_of_jobs_in_system}"
+            f"on machine {from_.state.machine_idx} in work-center {from_.state.work_center_idx}. "
+            f"Jobs in system {self.state.number_of_jobs_in_system}"
         )
+
+    # Decision methods
 
     def schedule(self, machine: environment.Machine, now: int) -> 'environment.Job | environment.WaitInfo':
         return self.agent.schedule(self.state.idx, machine, now)
@@ -165,6 +187,10 @@ class ShopFloor:
         self, job: environment.Job, work_center_idx: int, machines: List['environment.Machine']
     ) -> 'environment.Machine | None':
         return self.agent.route(self.state.idx, job, work_center_idx, machines)
+
+    # Events from subcomponents (WorkCenter, Machine)
+
+    # TODO: Rewrite with meta programming (Low Priority)
 
     def will_produce(self, job: environment.Job, machine: environment.Machine):
         self.delegate.will_produce(self.state.idx, job, machine)
@@ -185,12 +211,30 @@ class ShopFloor:
         self.delegate.did_complete(self.state.idx, job)
         self.__test_if_finished__()
 
+    def did_breakdown(self, machine: environment.Machine, repair_time: float):
+        self.logger.info(
+            f'Machine {machine.state.machine_idx} in work-center {machine.state.work_center_idx} '
+            f'has broken down. Repair time {repair_time}'
+        )
+
+        self.delegate.did_breakdown(self.state.idx, machine, repair_time)
+
+    def did_repair(self, machine: environment.Machine):
+        self.logger.info(
+            f'Machine {machine.state.machine_idx} in work-center {machine.state.work_center_idx} '
+            'has been repaired'
+        )
+
+        self.delegate.did_repair(self.state.idx, machine)
+
+    # Utility methods
+
     def __assign_initial_jobs__(self):
         for work_center in self.work_centers:
             for _ in work_center.machines:
                 job = self.__sample_job__(
                     initial_work_center_idx=work_center.state.idx,
-                    created_at=self.configuration.environment.now
+                    created_at=self.history.started_at
                 )
 
                 self.history.with_new_job(job)
@@ -200,7 +244,7 @@ class ShopFloor:
             work_center.did_receive_job()
 
     def __dispatch_jobs__(self):
-        while self.state.dispatched_job_count < self.configuration.sampler.number_of_jobs():
+        while self.__should_dispatch__():
             arrival_time = self.configuration.sampler.sample_next_arrival_time()
 
             yield self.configuration.environment.timeout(arrival_time)
@@ -230,13 +274,21 @@ class ShopFloor:
         return job
 
     def __test_if_finished__(self):
-        has_dispatched_all_jobs = len(self.history.jobs) >= self.configuration.sampler.number_of_jobs()
+        has_dispatched_all_jobs = not self.__should_dispatch__()
         is_no_jobs_in_system = self.state.number_of_jobs_in_system == 0
 
         if not self.did_finish_simulation_event.triggered and has_dispatched_all_jobs and is_no_jobs_in_system:
             self.delegate.did_finish_simulation(self.state.idx)
 
             self.did_finish_simulation_event.succeed()
+
+    def __should_dispatch__(self):
+        if number_of_jobs := self.configuration.sampler.number_of_jobs():
+            return self.state.dispatched_job_count < number_of_jobs
+
+        timespan = self.configuration.environment.now - self.history.started_at
+
+        return timespan < self.configuration.problem.timespan
 
     def __dispatch__(self, job: environment.Job, work_center: environment.WorkCenter):
         self.state.with_new_job_in_system()

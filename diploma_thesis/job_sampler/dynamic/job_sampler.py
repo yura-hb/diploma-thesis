@@ -4,10 +4,10 @@ from typing import Callable, Tuple
 import simpy
 import torch
 
-from environment import Configuration, Job, JobSampler
+from environment import Configuration, Job, JobSampler as JSampler
 
 
-class Sampler(JobSampler):
+class JobSampler(JSampler):
 
     def __init__(self, problem: Configuration, environment: simpy.Environment):
         super().__init__(problem, environment)

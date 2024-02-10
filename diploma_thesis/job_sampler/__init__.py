@@ -6,7 +6,7 @@ import simpy
 from environment import Configuration, JobSampler
 from .dynamic import (CLI as DynamicJobSamplerFromCLI,
                       Builder as DynamicJobSamplerBuilder,
-                      Sampler as DynamicJobSampler)
+                      JobSampler as DynamicJobSampler)
 from .static import (Sampler as StaticJobSampler)
 
 key_to_class = {

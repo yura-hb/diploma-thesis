@@ -5,21 +5,45 @@ simulation: &simulation
   parameters:
     configuration:
       timespan: 5000
-      machines_per_work_center: 10
-      work_center_count: 10
+      machines_per_work_center: 5
+      work_center_count: 5
       pre_assign_initial_jobs: True
-      breakdown_ratio: 0.0
 
     job_sampler:
       kind: 'dynamic'
       parameters:
-        processing_times: [ 10, 50 ]
-        tightness: 0.5
-        uneveness: 5
-        realistic_variance: 10
-        expected_utilization: 0.95
-        seed: 42
+        processing_times: # Sampler
+          kind: 'uniform'
+          parameters:
+            uniform: [ 10, 30 ]
+            noise: [ 0, 3 ]
+        permutation:
+          uneveness: 5
+        due_time: # Sampler
+          kind: 'uniform'
+          parameters:
+            uniform: [ 0, 0.2 ]
+        job_arrival_time_on_machine:
+          kind: 'sampler'
+          parameters:
+            sampler:
+              kind: 'uniform'
+              parameters:
+                uniform: [ 1, 5 ]
 
+    breakdown:
+      kind: 'dynamic'
+      parameters:
+        breakdown_arrival:
+          kind: 'exponential'
+          parameters:
+              mean: 1000
+        repair_duration:
+          kind: 'uniform'
+          parameters:
+              uniform: [ 200, 500 ]
+
+    seed: 42
 
 task:
   kind: 'task'
@@ -30,7 +54,7 @@ task:
       model:
         kind: 'static'
         parameters:
-          rule: 'fifo'
+          rule: 'random'
       encoder:
         kind: 'plain'
 
@@ -40,7 +64,7 @@ task:
       model:
         kind: 'static'
         parameters:
-          rule: 'ea'
+          rule: 'random'
       encoder:
         kind: 'plain'
 

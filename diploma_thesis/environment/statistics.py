@@ -196,7 +196,7 @@ class Statistics:
                                     weighted_by_priority,
                                     lambda job: torch.LongTensor([1 if job.is_tardy else 0]))
 
-    def report(self, time_predicate: Predicate.TimePredicate) -> st.Report:
+    def report(self, time_predicate: Predicate.TimePredicate = Predicate.TimePredicate()) -> st.Report:
         report_factory = st.ReportFactory(self, self.shop_floor, time_predicate)
 
         return report_factory.make()
@@ -291,8 +291,12 @@ class Statistics:
         for job_id in job_ids:
             job = self.shop_floor_history.jobs[job_id]
             weight = job.priority if weighted_by_priority else 1
+            metric = get_value(job)
 
-            value += torch.atleast_1d(get_value(job)) * weight
+            if not torch.is_tensor(metric):
+                metric = torch.FloatTensor([metric])
+
+            value += torch.atleast_1d(metric) * weight
             total_weights += weight
 
         value = torch.FloatTensor(value)

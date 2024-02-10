@@ -14,15 +14,21 @@ from .simulation import Simulation
 class Simulator(Agent, Delegate, metaclass=ABCMeta):
 
     def __init__(
-        self, work_center: WorkCenter, machine: Machine, reward_model: RewardModel, logger: logging.Logger
+        self,
+        work_center: WorkCenter,
+        machine: Machine,
+        reward_model: RewardModel,
+        environment: simpy.Environment,
+        logger: logging.Logger
     ):
         self.work_center = work_center
         self.machine = machine
         self.reward_model = reward_model
+        self.environment = environment
         self.logger = logger
-        self.environment = simpy.Environment()
 
     def train(self, config: RunConfiguration):
+        # TODO: - Revert
         # assert self.machine.is_trainable or self.work_center.is_trainable, 'At least one agent should be trainable'
 
         env = self.environment
@@ -48,6 +54,10 @@ class Simulator(Agent, Delegate, metaclass=ABCMeta):
         env.run(all_of_event)
 
     def evaluate(self, configuration: EvaluateConfiguration):
+        self.__log__(f'Evaluation Started')
+
+        self.__update__(EvaluationPhase())
+
         run_end = self.environment.event()
 
         self.environment.process(
@@ -55,6 +65,8 @@ class Simulator(Agent, Delegate, metaclass=ABCMeta):
         )
 
         self.environment.run(run_end)
+
+        self.__log__(f'Evaluation Ended')
 
     def __run__(self, run_event: simpy.Event, n_workers: int, simulations: List[Simulation]):
         resource = simpy.Resource(self.environment, capacity=n_workers)

@@ -5,6 +5,7 @@ from .cr import CRSchedulingRule
 from .crspt import CRSPTSchedulingRule
 from .edd import EDDSchedulingRule
 from .fifo import FIFOSchedulingRule
+from .lifo import LIFOSchedulingRule
 from .lpt import LPTSchedulingRule
 from .lro import LROSchedulingRule
 from .lwkr import LWRKSchedulingRule
@@ -28,6 +29,7 @@ ALL_SCHEDULING_RULES: Dict[str, SchedulingRule] = {
     'crspt': CRSPTSchedulingRule,
     'edd': EDDSchedulingRule,
     'fifo': FIFOSchedulingRule,
+    'lifo': LIFOSchedulingRule,
     'lpt': LPTSchedulingRule,
     'lro': LROSchedulingRule,
     'lwrk': LWRKSchedulingRule,

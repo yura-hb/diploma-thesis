@@ -6,6 +6,7 @@ from functools import reduce
 from typing import List
 
 import pandas as pd
+import torch
 from joblib import Parallel, delayed
 
 import environment
@@ -61,6 +62,13 @@ class ProductionLogFactory:
             'event': pd.CategoricalDtype(categories=LogEvent.__members__.values(), ordered=True),
             'moment': 'float32'
         })
+
+        started_at = shop_floor.history.started_at
+
+        if torch.is_tensor(started_at):
+            started_at = started_at.item()
+
+        df['moment'] -= started_at
 
         return df
 

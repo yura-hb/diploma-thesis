@@ -210,7 +210,7 @@ class Job:
         """
         assert self.is_completed, "Job must be completed in order to compute tardiness"
 
-        return torch.FloatTensor([max(self.history.completed_at - self.due_at, 0.0)])
+        return torch.tensor([max(self.history.completed_at - self.due_at, 0.0)])
 
     @property
     def flow_time(self) -> torch.FloatTensor:
@@ -237,7 +237,7 @@ class Job:
         """
         assert self.is_completed, "Job must be completed in order to compute earliness"
 
-        return torch.FloatTensor([max(self.due_at - self.history.completed_at, 0)])
+        return torch.tensor([max(self.due_at - self.history.completed_at, 0)])
 
     @property
     def remaining_operations_count(self):

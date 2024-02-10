@@ -54,6 +54,20 @@ class Delegate(metaclass=ABCMeta):
         ...
 
     @abstractmethod
+    def did_breakdown(self, shop_floor_id: str, machine: Machine, repair_time: float):
+        """
+        Will be triggered after the breakdown of machine
+        """
+        ...
+
+    @abstractmethod
+    def did_repair(self, shop_floor_id: str, machine: Machine):
+        """
+        Will be triggered after the repair of machine
+        """
+        ...
+
+    @abstractmethod
     def did_finish_simulation(self, shop_floor_id: str):
         """
         Will be triggered after all jobs have been completed

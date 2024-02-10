@@ -1,0 +1,20 @@
+
+
+task:
+  kind: 'tournament'
+
+  candidates:
+    - kind: 'static'
+      parameters:
+        scheduling:
+          - 'random'
+        routing:
+          - 'random'
+
+  criterion:
+    123: 123
+
+  simulator:
+    n_workers: 2
+    simulations:
+      pass

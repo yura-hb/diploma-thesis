@@ -4,8 +4,8 @@ from typing import Dict
 
 import yaml
 
-from workflows import Simulation
-from workflows import Workflow
+from workflow import Simulation
+from workflow import Workflow
 
 
 def make_workflow(configuration: Dict) -> Workflow:

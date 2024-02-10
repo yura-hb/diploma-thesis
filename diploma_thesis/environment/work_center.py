@@ -54,11 +54,19 @@ class WorkCenter:
         self._shop_floor = shop_floor
         self._machines = machines
 
-    def simulate(self):
+    def simulate(self, break_down: 'environment.Breakdown'):
         for machine in self.machines:
-            machine.simulate()
+            machine.simulate(break_down)
 
         self.environment.process(self.dispatch())
+
+    def reset(self):
+        self.state = State(idx=self.state.idx)
+        self.history = History()
+        self.on_route = self.environment.event()
+
+        for machine in self.machines:
+            machine.reset()
 
     def dispatch(self):
         assert self.shop_floor is not None, "Work center is not connected to the shop floor"
