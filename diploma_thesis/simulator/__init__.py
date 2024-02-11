@@ -3,6 +3,7 @@ from .simulator import Simulator
 from .episodic import EpisodicSimulator
 from .td import TDSimulator
 from .configuration import RunConfiguration, EvaluateConfiguration
+from .simulation import Simulation
 from agents import Machine, WorkCenter
 from typing import Dict
 

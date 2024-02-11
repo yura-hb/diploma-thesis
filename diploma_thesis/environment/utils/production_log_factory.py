@@ -1,13 +1,10 @@
-
-import multiprocessing as mp
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from enum import StrEnum, auto
 from functools import reduce
 from typing import List
 
 import pandas as pd
 import torch
-from joblib import Parallel, delayed
 
 import environment
 
@@ -21,6 +18,8 @@ class LogEvent(StrEnum):
     finished_processing = auto()
     machine_decision = auto()
     work_center_decision = auto()
+    machine_breakdown = auto()
+    machine_repair = auto()
     completed = auto()
 
 
@@ -44,14 +43,12 @@ class ProductionLogFactory:
 
         Returns: pandas.DataFrame representing production logs
         """
-        cpu_count = mp.cpu_count()
         jobs = shop_floor.history.jobs
 
-        result = Parallel(n_jobs=cpu_count, batch_size=len(jobs) // cpu_count)(
-            delayed(self.__make_production_logs_from_job__)(job) for _, job in jobs.items()
-        )
-
+        result = [self.__make_production_logs_from_job__(job) for _, job in jobs.items()]
+        result += self.__make_shop_floor_events_logs__(shop_floor)
         result = reduce(lambda x, y: x + y, result, [])
+        result = [log.__dict__ for log in result]
 
         df = pd.DataFrame(result)
         df = df.astype({
@@ -80,25 +77,94 @@ class ProductionLogFactory:
 
         if job.current_step_idx >= 0:
             for i in range(job.current_step_idx + 1):
-                def new_log(machine_idx: int, event: str, moment: float):
-                    return self.ProductionLog(
-                        job.id, i, work_center_idx=job.step_idx[i], machine_idx=machine_idx, event=event, moment=moment
-                    )
-
                 if arrived_at := job.history.arrived_at_work_center[i]:
-                    result += [new_log(-1, LogEvent.arrived_at_work_center, arrived_at)]
+                    result += [self.ProductionLog(
+                        job.id, i, job.step_idx[i], -1, LogEvent.arrived_at_work_center, arrived_at
+                    )]
 
                 if arrived_at := job.history.arrived_at_machine[i]:
-                    result += [new_log(job.history.arrived_machine_idx[i], LogEvent.arrived_at_work_center, arrived_at)]
+                    result += [self.ProductionLog(
+                        job.id, i, job.step_idx[i], job.history.arrived_machine_idx[i],
+                        LogEvent.arrived_at_machine, arrived_at
+                    )]
 
                 if started_at := job.history.started_at[i]:
-                    result += [new_log(job.history.arrived_machine_idx[i], LogEvent.started_processing, started_at)]
+                    result += [self.ProductionLog(
+                        job.id, i, job.step_idx[i], job.history.arrived_machine_idx[i],
+                        LogEvent.started_processing, started_at
+                    )]
 
                 if finished_at := job.history.finished_at[i]:
-                    result += [new_log(job.history.arrived_machine_idx[i], LogEvent.finished_processing, finished_at)]
+                    result += [self.ProductionLog(
+                        job.id, i, job.step_idx[i], job.history.arrived_machine_idx[i],
+                        LogEvent.finished_processing, finished_at
+                    )]
 
         if job.is_completed:
             result += [self.ProductionLog(job.id, 0, -1, -1, LogEvent.completed, job.history.completed_at)]
 
-        # Convert to dict to speed up further computations
-        return [asdict(log) for log in result]
+        return result
+
+    def __make_shop_floor_events_logs__(self, shop_floor: 'environment.ShopFloor') -> List[ProductionLog]:
+        result = []
+
+        result += [self.__make_breakdown_logs_from_machine__(machine) for machine in shop_floor.machines]
+        result += [self.__make_decision_time_logs_from_machine__(machine) for machine in shop_floor.machines]
+        result += [
+            self.__make_decision_time_logs_from_work_center__(work_center) for work_center in shop_floor.work_centers
+        ]
+
+        return result
+
+    def __make_breakdown_logs_from_machine__(self, machine: environment.Machine) -> List[ProductionLog]:
+        result = []
+
+        for i in range(machine.history.breakdown_start_at.shape[0]):
+            result += [self.ProductionLog(
+                -1, -1,
+                work_center_idx=machine.work_center_idx,
+                machine_idx=machine.machine_idx,
+                event=LogEvent.machine_breakdown,
+                moment=machine.history.breakdown_start_at[i])
+            ]
+
+        for i in range(machine.history.breakdown_end_at.shape[0]):
+            result += [self.ProductionLog(
+                -1, -1,
+                work_center_idx=machine.work_center_idx,
+                machine_idx=machine.machine_idx,
+                event=LogEvent.machine_repair,
+                moment=machine.history.breakdown_end_at[i])
+            ]
+
+        return result
+
+    def __make_decision_time_logs_from_machine__(self, machine: environment.Machine) -> List[ProductionLog]:
+        result = []
+
+        for i in range(machine.history.decision_times.shape[0]):
+            result += [
+                self.ProductionLog(
+                    -1, -1,
+                    work_center_idx=machine.work_center_idx,
+                    machine_idx=machine.machine_idx,
+                    event=LogEvent.machine_decision,
+                    moment=machine.history.decision_times[i]
+                )
+            ]
+
+        return result
+
+    def __make_decision_time_logs_from_work_center__(self, work_center: environment.WorkCenter) -> List[ProductionLog]:
+        result = []
+
+        for i in range(work_center.history.decision_times.shape[0]):
+            result += [self.ProductionLog(
+                -1, -1,
+                work_center_idx=work_center.state.idx,
+                machine_idx=-1,
+                event=LogEvent.work_center_decision,
+                moment=work_center.history.decision_times[i]
+            )]
+
+        return result

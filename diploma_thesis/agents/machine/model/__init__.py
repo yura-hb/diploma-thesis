@@ -12,3 +12,4 @@ def from_cli(parameters) -> MachineModel:
     cls = key_to_class[parameters['kind']]
 
     return cls.from_cli(parameters['parameters'])
+

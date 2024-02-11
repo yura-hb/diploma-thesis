@@ -107,6 +107,7 @@ class ReportFactory:
         for weighted_by_priority in [True, False]:
             shop_floor += [dict(
                 weighted_by_priority=weighted_by_priority,
+                total_jobs=len(self.statistics.jobs(predicate=predicate)),
                 makespan=self.statistics.total_make_span(predicate=predicate),
                 flow_time=self.statistics.total_flow_time(
                     weighted_by_priority=weighted_by_priority, predicate=predicate

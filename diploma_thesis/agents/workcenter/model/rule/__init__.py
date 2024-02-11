@@ -8,9 +8,9 @@ from .et import ETRoutingRule
 from .ut import UTRoutingRule
 
 ALL_ROUTING_RULES = {
+    'sq': SQRoutingRule,
     'random': RandomRoutingRule,
     'tt': TTRoutingRule,
-    'sq': SQRoutingRule,
     'ea': EARoutingRule,
     'ct': CTRoutingRule,
     'et': ETRoutingRule,

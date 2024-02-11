@@ -1,4 +1,95 @@
 
+simulation_1: &simulation_1
+  name: ''
+  kind: 'dynamic'
+  parameters:
+    configuration:
+      timespan: 10000
+      machines_per_work_center: 2
+      work_center_count: 10
+      pre_assign_initial_jobs: False
+
+    job_sampler:
+      kind: 'dynamic'
+      parameters:
+        processing_times:
+          kind: 'uniform'
+          parameters:
+            uniform: [ 10, 50 ]
+            noise: [ 0, 5 ]
+        permutation:
+          uneveness: 2
+        due_time:
+          kind: 'uniform'
+          parameters:
+            uniform: [ 0, 0.3 ]
+        job_arrival_time_on_machine:
+          kind: 'sampler'
+          parameters:
+            sampler:
+              kind: 'uniform'
+              parameters:
+                uniform: [ 1, 5 ]
+
+    breakdown:
+      kind: 'dynamic'
+      parameters:
+        breakdown_arrival:
+          kind: 'exponential'
+          parameters:
+              mean: 500
+        repair_duration:
+          kind: 'uniform'
+          parameters:
+              uniform: [ 100, 200 ]
+
+    seed: 42
+
+simulation_2: &simulation_2
+  name: ''
+  kind: 'dynamic'
+  parameters:
+    configuration:
+      timespan: 1000
+      machines_per_work_center: 5
+      work_center_count: 5
+      pre_assign_initial_jobs: False
+
+    job_sampler:
+      kind: 'dynamic'
+      parameters:
+        processing_times:
+          kind: 'uniform'
+          parameters:
+            uniform: [ 10, 50 ]
+            noise: [ 0, 5 ]
+        permutation:
+          uneveness: 2
+        due_time:
+          kind: 'uniform'
+          parameters:
+            uniform: [ 0, 0.3 ]
+        job_arrival_time_on_machine:
+          kind: 'sampler'
+          parameters:
+            sampler:
+              kind: 'uniform'
+              parameters:
+                uniform: [ 1, 5 ]
+
+    breakdown:
+      kind: 'dynamic'
+      parameters:
+        breakdown_arrival:
+          kind: 'exponential'
+          parameters:
+              mean: 500
+        repair_duration:
+          kind: 'uniform'
+          parameters:
+              uniform: [ 100, 200 ]
+
+    seed: 0
 
 task:
   kind: 'tournament'
@@ -6,15 +97,28 @@ task:
   candidates:
     - kind: 'static'
       parameters:
-        scheduling:
-          - 'random'
-        routing:
-          - 'random'
+        scheduling: 'all'
+        routing: 'all'
 
-  criterion:
-    123: 123
+  criteria:
+    - kind: 'makespan'
+      parameters:
+        weight: 1
+        direction: 'minimize'
+        scale: 'linear'
+    - kind: 'tardiness'
+      parameters:
+        weight: 1
+        direction: 'minimize'
+        scale: 'linear'
+
+  reward:
+    top_k: -1
+    points: 1
 
   simulator:
     n_workers: 2
     simulations:
-      pass
+      - <<: *simulation_1
+      - <<: *simulation_2
+

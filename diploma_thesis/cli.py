@@ -4,8 +4,7 @@ from typing import Dict
 
 import yaml
 
-from workflow import Simulation
-from workflow import Workflow
+from workflow import Workflow, Simulation, Tournament
 
 
 def make_workflow(configuration: Dict) -> Workflow:
@@ -14,6 +13,8 @@ def make_workflow(configuration: Dict) -> Workflow:
     match configuration['kind']:
         case "task":
             return Simulation(configuration)
+        case 'tournament':
+            return Tournament(configuration)
         case _:
             raise ValueError(f"Unknown workflow id {id}")
 
