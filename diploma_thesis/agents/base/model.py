@@ -1,6 +1,8 @@
+
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 from typing import TypeVar, Generic
+from agents.utils import Loggable
 
 State = TypeVar('State')
 Input = TypeVar('Input')
@@ -8,7 +10,7 @@ Action = TypeVar('Action')
 Result = TypeVar('Result')
 
 
-class Model(Generic[Input, State, Action, Result], metaclass=ABCMeta):
+class Model(Loggable, Generic[Input, State, Action, Result], metaclass=ABCMeta):
 
     @dataclass
     class Record:

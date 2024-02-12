@@ -1,4 +1,4 @@
-
+import logging
 
 from .work_center import WorkCenter
 from .model import StaticWorkCenterModel, from_cli as model_from_cli

@@ -48,7 +48,7 @@ class RunConfiguration:
             machine_train_schedule=cls.TrainSchedule.from_cli(parameters['machine_train_schedule']),
             work_center_train_schedule=cls.TrainSchedule.from_cli(parameters['work_center_train_schedule']),
             n_workers=parameters['n_workers'],
-            simulations=from_cli_list(logger=logger, parameters=parameters['simulations'])
+            simulations=from_cli_list(parameters=parameters['simulations'], logger=logger)
         )
 
 
@@ -61,5 +61,5 @@ class EvaluateConfiguration:
     def from_cli(cls, logger: Logger, parameters: Dict):
         return cls(
             n_workers=parameters['n_workers'],
-            simulations=from_cli_list(logger=logger, parameters=parameters['simulations'])
+            simulations=from_cli_list(parameters=parameters['simulations'], logger=logger)
         )

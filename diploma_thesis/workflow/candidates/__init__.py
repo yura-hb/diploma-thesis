@@ -1,3 +1,4 @@
+import logging
 
 from .template import Template, Candidate
 from .agent import Agent

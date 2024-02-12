@@ -1,8 +1,8 @@
-
-from .model import WorkCenterModel
-from agents.machine.state import PlainEncoder
-from .rule import RoutingRule, ALL_ROUTING_RULES
 from typing import Dict
+
+from agents.machine.state import PlainEncoder
+from .model import WorkCenterModel
+from .rule import RoutingRule, ALL_ROUTING_RULES
 
 
 class StaticModel(WorkCenterModel[PlainEncoder.State, None]):
@@ -11,6 +11,7 @@ class StaticModel(WorkCenterModel[PlainEncoder.State, None]):
 
     def __init__(self, rule: RoutingRule):
         self.rule = rule
+        super().__init__()
 
     def __call__(self, state: State, parameters: WorkCenterModel.Input) -> WorkCenterModel.Record:
         return WorkCenterModel.Record(

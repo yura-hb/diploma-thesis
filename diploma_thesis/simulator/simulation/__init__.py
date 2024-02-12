@@ -9,13 +9,13 @@ key_to_class = {
 }
 
 
-def from_cli(logger: Logger, parameters: Dict):
+def from_cli(parameters: Dict, logger: Logger):
     cls = key_to_class[parameters['kind']]
 
-    return cls.from_cli(name=parameters.get('name', ''), logger=logger, parameters=parameters['parameters'])
+    return cls.from_cli(name=parameters.get('name', ''), parameters=parameters['parameters'], logger=logger)
 
 
-def from_cli_list(logger: Logger, parameters: List[Dict]):
+def from_cli_list(parameters: List[Dict], logger: Logger):
     simulation_names = [parameter.get('name', '') for parameter in parameters]
     names = dict()
 
@@ -29,4 +29,4 @@ def from_cli_list(logger: Logger, parameters: List[Dict]):
 
         parameters[idx]['name'] = key
 
-    return [from_cli(logger, parameter) for parameter in parameters]
+    return [from_cli(parameter, logger) for parameter in parameters]

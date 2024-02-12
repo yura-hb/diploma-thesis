@@ -76,11 +76,11 @@ class Job:
         arrived_machine_idx: torch.LongTensor = field(default_factory=torch.LongTensor)
 
         def configure(self, step_idx: torch.LongTensor):
-            self.started_at = torch.zeros_like(step_idx)
-            self.finished_at = torch.zeros_like(step_idx)
-            self.arrived_at_work_center = torch.zeros_like(step_idx)
-            self.arrived_at_machine = torch.zeros_like(step_idx)
-            self.arrived_machine_idx = torch.zeros_like(step_idx)
+            self.started_at = torch.zeros_like(step_idx) - 1
+            self.finished_at = torch.zeros_like(step_idx) - 1
+            self.arrived_at_work_center = torch.zeros_like(step_idx) - 1
+            self.arrived_at_machine = torch.zeros_like(step_idx) - 1
+            self.arrived_machine_idx = torch.zeros_like(step_idx) - 1
 
         def with_event(self, event: JobEvent, step_idx: torch.LongTensor):
             def get_work_center_idx():
@@ -215,6 +215,28 @@ class Job:
         return reduce(self.processing_times.float(), strategy).sum()
 
     @property
+    def release_moment_on_machine(self):
+        """
+        Returns: Release time of job from machine or None if the job isn't processed at this moment
+        """
+        if not self.is_being_processed_on_machine:
+            return None
+
+        started_at = self.history.started_at[self.current_step_idx]
+
+        return started_at + self.current_operation_processing_time_on_machine
+
+    @property
+    def is_being_processed_on_machine(self):
+        """
+        Returns: True if the job is currently being processed on machine
+        """
+        return (self.current_machine_idx >= 0
+                and not self.is_completed
+                and self.is_dispatched
+                and self.history.started_at[self.current_step_idx] > 0)
+
+    @property
     def is_completed(self):
         return self.history.completed_at > 0
 
@@ -345,6 +367,7 @@ class Job:
                 self.current_step_idx = 0
             case JobEvent.Kind.forward:
                 self.current_step_idx += 1
+                self.current_machine_idx = -1
             case JobEvent.Kind.arrival_on_machine:
                 self.current_machine_idx = event.machine_idx
             case _:

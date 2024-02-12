@@ -56,9 +56,14 @@ class Tournament(Workflow):
 
     def __evaluate__(self, candidate: Candidate, criteria: List[Criterion]):
         environment = simpy.Environment()
+
         logger = self.__make_logger__(name=candidate.name, environment=environment, log_stdout=True)
         logger.setLevel(logging.INFO)
+
         configuration = EvaluateConfiguration.from_cli(logger, self.parameters['simulator'])
+
+        candidate.machine.with_logger(logger)
+        candidate.work_center.with_logger(logger)
 
         simulator = EpisodicSimulator(
             machine=candidate.machine,

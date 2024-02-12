@@ -4,7 +4,7 @@ from typing import Dict
 from .encoder import StateEncoder
 
 
-class PlainEncoder(StateEncoder):
+class DEEPMARLIndirectStateEncoder(StateEncoder):
 
     @dataclass
     class State:
@@ -15,4 +15,4 @@ class PlainEncoder(StateEncoder):
 
     @staticmethod
     def from_cli(parameters: Dict):
-        return PlainEncoder()
+        return DEEPMARLIndirectStateEncoder()

@@ -1,3 +1,4 @@
+import logging
 
 from .model import MachineModel
 from agents.machine.state import PlainEncoder
@@ -11,6 +12,7 @@ class StaticModel(MachineModel[PlainEncoder.State, None]):
 
     def __init__(self, rule: SchedulingRule):
         self.rule = rule
+        super().__init__()
 
     def __call__(self, state: State, parameters: MachineModel.Input) -> MachineModel.Record:
         return MachineModel.Record(

@@ -69,6 +69,7 @@ class Statistics:
         logs = self.__filter__(predicate)
 
         job_ids = logs['job_id'].unique()
+        job_ids = job_ids[job_ids >= 0]
         unfinished_job = [self.shop_floor_history.jobs[job_id] for job_id in job_ids]
 
         return unfinished_job

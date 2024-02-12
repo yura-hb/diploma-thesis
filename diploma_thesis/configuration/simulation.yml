@@ -29,7 +29,7 @@ simulation: &simulation
             sampler:
               kind: 'uniform'
               parameters:
-                uniform: [ 1, 5 ]
+                uniform: [ 1, 100 ]
 
     breakdown:
       kind: 'dynamic'
@@ -56,7 +56,7 @@ task:
         parameters:
           rule: 'random'
       encoder:
-        kind: 'plain'
+        kind: 'deep_marl_direct'
 
   work_center_agent:
     kind: 'static'

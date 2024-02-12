@@ -17,11 +17,11 @@ class Simulation(Workflow):
         self.parameters = parameters
 
     def run(self):
-        machine = machine_from_cli(parameters=self.parameters['machine_agent'])
-        work_center = work_center_from_cli(parameters=self.parameters['work_center_agent'])
         environment = simpy.Environment()
-
         logger = self.__make_logger__(name='', environment=environment, log_stdout=True)
+
+        machine = machine_from_cli(parameters=self.parameters['machine_agent']).with_logger(logger)
+        work_center = work_center_from_cli(parameters=self.parameters['work_center_agent']).with_logger(logger)
 
         simulator_logger = logger.getChild('Simulator')
 

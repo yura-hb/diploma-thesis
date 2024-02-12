@@ -1,14 +1,15 @@
+
+import logging
 from abc import ABCMeta, abstractmethod
-from typing import TypeVar, Generic
 
 import torch
 
-from agents.utils import Phase, EvaluationPhase
+from agents.utils import Phase, EvaluationPhase, Loggable
 from .encoder import Encoder as StateEncoder, Input, State
 from .model import Model, Action, Result
 
 
-class Agent(metaclass=ABCMeta):
+class Agent(Loggable, metaclass=ABCMeta):
 
     def __init__(self,
                  model: Model[Input, State, Action, Result],
@@ -18,6 +19,16 @@ class Agent(metaclass=ABCMeta):
         self.model = model
         self.memory = memory
         self.phase = EvaluationPhase()
+        super().__init__()
+
+    def with_logger(self, logger: logging.Logger):
+        super().with_logger(logger)
+
+        for module in [self.memory, self.model, self.state_encoder]:
+            if isinstance(module, Loggable):
+                module.with_logger(logger)
+
+        return self
 
     def update(self, phase: Phase):
         self.phase = phase

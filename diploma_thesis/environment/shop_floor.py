@@ -7,6 +7,7 @@ import torch
 
 import environment
 from .utils import ShopFloorFactory
+from typing import Set
 
 
 @dataclass
@@ -15,7 +16,8 @@ class State:
 
     job_id: int = 0
 
-    number_of_jobs_in_system: int = 0
+    in_system_job_ids: Set[int] = field(default_factory=set)
+
 
     @property
     def dispatched_job_count(self):
@@ -29,13 +31,13 @@ class State:
 
         return self
 
-    def with_new_job_in_system(self):
-        self.number_of_jobs_in_system += 1
+    def with_new_job_in_system(self, job_id: int = 0):
+        self.in_system_job_ids.add(job_id)
 
         return self
 
-    def with_job_completed(self):
-        self.number_of_jobs_in_system -= 1
+    def with_job_completed(self, job_id: int):
+        self.in_system_job_ids.remove(job_id)
 
         return self
 
@@ -147,6 +149,16 @@ class ShopFloor:
     def machines(self) -> List['environment.Machine']:
         return self._machines
 
+    @property
+    def in_system_jobs(self) -> List['environment.Job']:
+        return [self.history.job(job_id) for job_id in self.state.in_system_job_ids]
+
+    def work_center(self, idx: int) -> 'environment.WorkCenter':
+        return self.work_centers[idx]
+
+    def machine(self, work_center_idx: int, machine_idx: int) -> 'environment.Machine':
+        return self.work_centers[work_center_idx].machines[machine_idx]
+
     def work_in_next_queue(self, job: environment.Job) -> float:
         work_center_idx = job.next_work_center_idx
 
@@ -162,7 +174,6 @@ class ShopFloor:
             return 0
 
         return self.work_centers[work_center_idx].average_waiting_time
-
 
     # Navigation
 
@@ -186,13 +197,13 @@ class ShopFloor:
                 )
             )
 
-            self.state.with_job_completed()
+            self.state.with_job_completed(job.id)
             self.did_complete(job)
 
         self.logger.info(
             f"Job {job.id} {job.current_step_idx} has been {'completed' if job.is_completed else 'produced'} "
             f"on machine {from_.state.machine_idx} in work-center {from_.state.work_center_idx}. "
-            f"Jobs in system {self.state.number_of_jobs_in_system}"
+            f"Jobs in system {len(self.state.in_system_job_ids)}"
         )
 
     # Decision methods
@@ -228,10 +239,10 @@ class ShopFloor:
         self.delegate.did_complete(self.state.idx, job)
         self.__test_if_finished__()
 
-    def did_breakdown(self, machine: environment.Machine, repair_time: float):
+    def did_breakdown(self, machine: environment.Machine, repair_time: torch.FloatTensor):
         self.logger.info(
             f'Machine {machine.state.machine_idx} in work-center {machine.state.work_center_idx} '
-            f'has broken down. Repair time {repair_time}'
+            f'has broken down. Repair time {repair_time.item()}'
         )
 
         self.delegate.did_breakdown(self.state.idx, machine, repair_time)
@@ -292,7 +303,7 @@ class ShopFloor:
 
     def __test_if_finished__(self):
         has_dispatched_all_jobs = not self.__should_dispatch__()
-        is_no_jobs_in_system = self.state.number_of_jobs_in_system == 0
+        is_no_jobs_in_system = len(self.state.in_system_job_ids) == 0
 
         if not self.did_finish_simulation_event.triggered and has_dispatched_all_jobs and is_no_jobs_in_system:
             self.delegate.did_finish_simulation(self.state.idx)
@@ -310,6 +321,6 @@ class ShopFloor:
         return timespan < self.configuration.problem.timespan
 
     def __dispatch__(self, job: environment.Job, work_center: environment.WorkCenter):
-        self.state.with_new_job_in_system()
+        self.state.with_new_job_in_system(job.id)
 
         work_center.receive(job)

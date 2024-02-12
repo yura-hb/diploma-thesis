@@ -324,6 +324,10 @@ class Machine:
         return self.state.work_center_idx
 
     @property
+    def work_center(self) -> 'environment.WorkCenter':
+        return self.shop_floor.work_center(self.work_center_idx)
+
+    @property
     def machine_idx(self) -> int:
         return self.state.machine_idx
 

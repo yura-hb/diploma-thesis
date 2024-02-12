@@ -1,3 +1,4 @@
+import logging
 
 from .encoder import StateEncoder
 from dataclasses import dataclass

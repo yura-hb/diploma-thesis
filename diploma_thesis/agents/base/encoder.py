@@ -1,12 +1,13 @@
 from abc import abstractmethod
-
 from typing import TypeVar, Generic
+
+from agents.utils import Loggable
 
 Input = TypeVar('Input')
 State = TypeVar('State')
 
 
-class Encoder(Generic[Input, State]):
+class Encoder(Loggable, Generic[Input, State]):
 
     @abstractmethod
     def encode(self, parameters: Input) -> State:

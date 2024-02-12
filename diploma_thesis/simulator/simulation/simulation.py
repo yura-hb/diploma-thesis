@@ -9,7 +9,7 @@ class Simulation(metaclass=ABCMeta):
 
     def __init__(self, name: str, logger: Logger):
         self.name = name
-        self.logger = logger.getChild(f'simulation {name}')
+        self.logger = logger.getChild(f'Simulation {name}')
         self.shop_floor: ShopFloor = None
 
     @property
