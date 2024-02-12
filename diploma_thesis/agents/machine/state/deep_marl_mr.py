@@ -8,7 +8,7 @@ from environment import JobReductionStrategy, Job, Machine
 from .encoder import StateEncoder
 
 
-class DEEPMARLDirectStateEncoder(StateEncoder):
+class DEEPMARLMinimumRepetitionStateEncoder(StateEncoder):
     """
     Encoded state is a tensor of dimension (5, 5) where:
     1. First 4 rows contain the following information:
@@ -79,10 +79,7 @@ class DEEPMARLDirectStateEncoder(StateEncoder):
         return state[:, 1:], state[:, 0]
 
     def __make_arriving_job_state__(self, machine: Machine, now: float) -> torch.FloatTensor:
-        arriving_jobs = [
-            job for job in machine.shop_floor.in_system_jobs
-            if job.next_work_center_idx == machine.work_center_idx and job.release_moment_on_machine is not None
-        ]
+        arriving_jobs = machine.arriving_jobs
 
         average_waiting_time = machine.work_center.average_waiting_time
 
@@ -93,19 +90,19 @@ class DEEPMARLDirectStateEncoder(StateEncoder):
 
         job = min(arriving_jobs, key=lambda job: job.release_moment_on_machine)
 
-        wait_time = job.release_moment_on_machine - now
+        time_till_arrival = job.release_moment_on_machine - now
 
-        if wait_time < -1:
-            self.log_error(f"Arriving job release moment is in the past: {wait_time}")
+        if time_till_arrival < -1:
+            self.log_error(f"Arriving job release moment is in the past: {time_till_arrival}")
 
-        wait_time = max(wait_time, 0)
+        time_till_arrival = max(time_till_arrival, 0)
 
         state = [
             job.next_operation_processing_time(self.reduction_strategy),
             job.next_remaining_processing_time(self.reduction_strategy),
             job.slack_upon_moment(now, self.reduction_strategy),
             average_waiting_time,
-            wait_time
+            time_till_arrival
         ]
 
         state = self.__to_list_of_tensors__(state)
@@ -128,4 +125,4 @@ class DEEPMARLDirectStateEncoder(StateEncoder):
 
     @staticmethod
     def from_cli(parameters: Dict):
-        return DEEPMARLDirectStateEncoder()
+        return DEEPMARLMinimumRepetitionStateEncoder()

@@ -195,7 +195,7 @@ class Job:
 
     def next_remaining_processing_time(self, strategy: ReductionStrategy = ReductionStrategy.mean):
         """
-        Returns: The remaining processing time of the operation excluding processing time on current work center
+        Returns: The remaining processing time of the operation excluding processing time on current machine
         """
         result = 0.0
         expected_processing_time = self.processing_times[max(self.current_step_idx + 1, 0):]
@@ -245,7 +245,7 @@ class Job:
         return self.current_step_idx >= 0
 
     @property
-    def tardiness(self) -> torch.FloatTensor:
+    def tardiness_upon_completion(self) -> torch.FloatTensor:
         """
         Returns: The tardiness of the job
         """
@@ -254,7 +254,7 @@ class Job:
         return torch.tensor([max(self.history.completed_at - self.due_at, 0.0)])
 
     @property
-    def flow_time(self) -> torch.FloatTensor:
+    def flow_time_upon_completion(self) -> torch.FloatTensor:
         """
         Returns: The flow time of the job
         """
@@ -263,7 +263,7 @@ class Job:
         return self.history.completed_at - self.history.dispatched_at
 
     @property
-    def is_tardy(self) -> bool:
+    def is_tardy_upon_completion(self) -> bool:
         """
         Returns: True if the job is tardy, False otherwise
         """
@@ -272,7 +272,7 @@ class Job:
         return self.due_at < self.history.completed_at
 
     @property
-    def earliness(self) -> torch.FloatTensor:
+    def earliness_upon_completion(self) -> torch.FloatTensor:
         """
         Returns: The earliness of the job
         """
@@ -286,6 +286,13 @@ class Job:
         Returns: The number of remaining operations
         """
         return max(self.step_idx.shape[0] - self.current_step_idx, 0)
+
+    @property
+    def processed_operations_count(self):
+        """
+        Returns: The number of processed operations
+        """
+        return self.current_step_idx
 
     @property
     def next_work_center_idx(self):
@@ -331,6 +338,25 @@ class Job:
         """
         return self.due_at - now
 
+    def is_tardy_at(self, now: torch.FloatTensor):
+        """
+        Args:
+            now: Current time
+
+        Returns: True if the job is tardy at the moment, False otherwise
+        """
+        return self.time_until_due(now) < 0
+
+    def is_expected_to_be_tardy_at(self, now: torch.FloatTensor, strategy: ReductionStrategy = ReductionStrategy.mean):
+        """
+        Args:
+            now: Current time
+            strategy: The strategy to use for calculating the slack
+
+        Returns: True if the job is expected to be tardy at the moment, False otherwise
+        """
+        return self.slack_upon_moment(now, strategy) < 0
+
     def current_operation_waiting_time_on_work_center(self, now: torch.FloatTensor):
         """
         Args:
@@ -360,6 +386,8 @@ class Job:
         The completion rate of the job based on the remaining processing time
         """
         return self.remaining_processing_time(strategy) / self.total_processing_time(strategy)
+
+    # State Update
 
     def with_event(self, event: Event):
         match event.kind:

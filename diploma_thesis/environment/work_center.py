@@ -58,7 +58,7 @@ class WorkCenter:
         for machine in self.machines:
             machine.simulate(break_down)
 
-        self.environment.process(self.dispatch())
+        self.environment.process(self.__dispatch__())
 
     def reset(self):
         self.state = State(idx=self.state.idx)
@@ -68,7 +68,48 @@ class WorkCenter:
         for machine in self.machines:
             machine.reset()
 
-    def dispatch(self):
+
+    def receive(self, job: environment.Job):
+        self.state.with_new_job(job)
+
+        job.with_event(
+            environment.JobEvent(
+                moment=self.environment.now,
+                kind=environment.JobEvent.Kind.arrival_on_work_center,
+                work_center_idx=self.state.idx
+            )
+        )
+
+        self.__did_receive_job__()
+
+    @property
+    def shop_floor(self) -> 'environment.ShopFloor':
+        return self._shop_floor()
+
+    @property
+    def work_center_idx(self) -> int:
+        return self.state.idx
+
+    @property
+    def machines(self) -> List['environment.Machine']:
+        return self._machines
+
+    @property
+    def work_load(self) -> torch.FloatTensor:
+        processing_times = [machine.cumulative_processing_time for machine in self.machines]
+        processing_times = torch.FloatTensor(processing_times)
+
+        return processing_times.mean()
+
+    @property
+    def average_waiting_time(self) -> torch.FloatTensor:
+        waiting_times = torch.FloatTensor([machine.time_till_available for machine in self.machines])
+
+        return waiting_times.mean()
+
+    # Timeline
+
+    def __dispatch__(self):
         assert self.shop_floor is not None, "Work center is not connected to the shop floor"
 
         while True:
@@ -96,46 +137,9 @@ class WorkCenter:
 
             self.on_route = self.environment.event()
 
-    def receive(self, job: environment.Job):
-        self.state.with_new_job(job)
+    # Utility
 
-        job.with_event(
-            environment.JobEvent(
-                moment=self.environment.now,
-                kind=environment.JobEvent.Kind.arrival_on_work_center,
-                work_center_idx=self.state.idx
-            )
-        )
-
-        self.did_receive_job()
-
-    @property
-    def shop_floor(self) -> 'environment.ShopFloor':
-        return self._shop_floor()
-
-    @property
-    def work_center_idx(self) -> int:
-        return self.state.idx
-
-    @property
-    def machines(self) -> List['environment.Machine']:
-        return self._machines
-
-    @property
-    def work_load(self) -> torch.FloatTensor:
-        processing_times = [machine.cumulative_processing_time for machine in self.machines]
-        processing_times = torch.FloatTensor(processing_times)
-
-        return processing_times.mean()
-
-    @property
-    def average_waiting_time(self) -> torch.FloatTensor:
-        waiting_times = [machine.time_till_available for machine in self.machines]
-        waiting_times = torch.FloatTensor(waiting_times)
-
-        return waiting_times.mean()
-
-    def did_receive_job(self):
+    def __did_receive_job__(self):
         # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the simulation
         # the machine shouldn't care
         try:

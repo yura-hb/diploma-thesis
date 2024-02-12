@@ -18,7 +18,6 @@ class State:
 
     in_system_job_ids: Set[int] = field(default_factory=set)
 
-
     @property
     def dispatched_job_count(self):
         return self.job_id
@@ -44,14 +43,6 @@ class State:
 
 @dataclass
 class History:
-    @dataclass
-    class Record:
-        job_id: int
-        created_at: torch.FloatTensor
-        duration: int
-        work_center_idx: int
-        machine_idx: int
-
     # A list of jobs, where each job is represented by the id of machine
     jobs: Dict[int, environment.Job] = field(default_factory=dict)
 
@@ -159,7 +150,7 @@ class ShopFloor:
     def machine(self, work_center_idx: int, machine_idx: int) -> 'environment.Machine':
         return self.work_centers[work_center_idx].machines[machine_idx]
 
-    def work_in_next_queue(self, job: environment.Job) -> float:
+    def work_in_next_queue(self, job: environment.Job) -> torch.FloatTensor:
         work_center_idx = job.next_work_center_idx
 
         if work_center_idx is None:
@@ -167,13 +158,47 @@ class ShopFloor:
 
         return self.work_centers[work_center_idx].work_load
 
-    def average_waiting_in_next_queue(self, job: environment.Job) -> float:
+    def average_waiting_in_next_queue(self, job: environment.Job) -> torch.FloatTensor:
         work_center_idx = job.next_work_center_idx
 
         if work_center_idx is None:
             return 0
 
         return self.work_centers[work_center_idx].average_waiting_time
+
+    @property
+    def completion_rate(self) -> torch.FloatTensor:
+        in_system_jobs = self.in_system_jobs
+
+        completed_operations_count = torch.LongTensor([
+            job.processed_operations_count for job in in_system_jobs
+        ]).sum()
+
+        remaining_operations_count = torch.LongTensor([
+            job.remaining_operations_count for job in in_system_jobs
+        ]).sum()
+
+        return completed_operations_count / remaining_operations_count
+
+    def tardy_rate(self, now: int) -> torch.FloatTensor:
+        in_system_jobs = self.in_system_jobs
+
+        tardy_jobs = torch.LongTensor([
+            job.is_tardy_at(now) for job in in_system_jobs
+        ]).sum()
+
+        return tardy_jobs / len(in_system_jobs)
+
+    def expected_tardy_rate(
+        self, now: float, reduction_strategy: environment.JobReductionStrategy
+    ) -> torch.FloatTensor:
+        in_system_jobs = self.in_system_jobs
+
+        expected_tardy_jobs = torch.LongTensor([
+            job.is_expected_to_be_tardy_at(now=now, strategy=reduction_strategy) for job in in_system_jobs
+        ]).sum()
+
+        return expected_tardy_jobs / len(in_system_jobs)
 
     # Navigation
 
@@ -269,7 +294,7 @@ class ShopFloor:
 
                 self.__dispatch__(job, work_center)
 
-            work_center.did_receive_job()
+            work_center.__did_receive_job__()
 
     def __dispatch_jobs__(self):
         while self.__should_dispatch__():

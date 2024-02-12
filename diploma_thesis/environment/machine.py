@@ -181,8 +181,14 @@ class Machine:
     def simulate(self, breakdown: 'environment.Breakdown'):
         self._breakdown = breakdown
 
-        self.environment.process(self.produce())
-        self.environment.process(self.breakdown())
+        self.environment.process(self.__produce__())
+        self.environment.process(self.__breakdown__())
+
+    def receive(self, job: environment.Job):
+        job.with_event(self.__new_event__(environment.JobEvent.Kind.arrival_on_machine))
+
+        self.state.with_new_job(job, self.environment.now)
+        self.__did_receive_job__()
 
     def reset(self):
         self.state = State(machine_idx=self.state.machine_idx, work_center_idx=self.state.work_center_idx)
@@ -190,126 +196,6 @@ class Machine:
         self.did_dispatch_event = self.environment.event()
         self.is_on_event = self.environment.event()
         self.is_on_event.succeed()
-
-    def receive(self, job: environment.Job):
-        job.with_event(self.__new_event__(environment.JobEvent.Kind.arrival_on_machine))
-
-        self.state.with_new_job(job, self.environment.now)
-        self.did_receive_job()
-
-    def produce(self):
-        if not self.did_dispatch_event.triggered and len(self.state.queue) == 0:
-            yield self.environment.process(self.starve())
-
-        while True:
-            did_breakdown = yield self.environment.process(self.breakdown_if_needed())
-            did_starve = yield self.environment.process(self.starve_if_needed())
-
-            if did_breakdown or did_starve:
-                continue
-
-            moment = self.environment.now
-
-            self.history.with_decision_time(moment)
-
-            job = self.select_job()
-
-            if isinstance(job, environment.WaitInfo):
-                yield self.environment.timeout(job.wait_time)
-                continue
-
-            self.__notify_job_about_production__(job, production_start=True)
-
-            self.shop_floor.will_produce(job, self)
-
-            processing_time = job.current_operation_processing_time_on_machine.item()
-
-            self.state.with_initiated_work(processing_time, moment)
-
-            # Perform the operation of the job
-            yield self.environment.timeout(processing_time)
-
-            self.__notify_job_about_production__(job, production_start=False)
-
-            self.state.with_runtime(processing_time)
-
-            self.forward(job)
-
-    def breakdown(self):
-        if self._breakdown is None:
-            return
-
-        while True:
-            if self.state.will_breakdown:
-                duration = max(self.state.free_at - self.environment.now, 10)
-                yield self.environment.timeout(duration)
-                continue
-
-            breakdown_arrival = self._breakdown.sample_next_breakdown_time(self)
-
-            yield self.environment.timeout(breakdown_arrival)
-
-            repair_duration = self._breakdown.sample_repair_duration(self)
-
-            self.state.with_repair_duration(repair_duration)
-
-    def starve(self):
-        self.did_dispatch_event = self.environment.event()
-
-        yield self.did_dispatch_event
-
-    def select_job(self):
-        if self.state.is_empty:
-            return environment.WaitInfo(wait_time=1)
-
-        if len(self.state.queue) == 1:
-            return self.state.queue[0]
-
-        job = self.shop_floor.schedule(self, self.environment.now)
-
-        return job
-
-    def breakdown_if_needed(self):
-        """
-        Breaks down the machine, if it is not broken down yet
-        """
-        if self.state.will_breakdown:
-            repair_duration = self.state.repair_duration
-
-            self.state.with_breakdown(self.environment.now)
-            self.history.with_breakdown_start(self.environment.now)
-            self.shop_floor.did_breakdown(self, repair_duration)
-
-            yield self.environment.timeout(repair_duration)
-
-            self.history.with_breakdown_end(self.environment.now)
-            self.shop_floor.did_repair(self)
-
-            return True
-
-        return False
-
-    def starve_if_needed(self):
-        """
-        Starves the machine, if there is no job in the queue
-        """
-        if self.state.is_empty:
-            yield self.environment.process(self.starve())
-            return True
-
-        return False
-
-    def forward(self, job: environment.Job):
-        """
-        Forwards the job to the next machine by sending it to the shop floor
-
-        Args:
-            job: Job to forward
-
-        Returns: None
-        """
-        self.state.without_job(job.id, now=self.environment.now)
-        self.shop_floor.forward(job, from_=self)
 
     @property
     def shop_floor(self) -> 'environment.ShopFloor':
@@ -336,18 +222,147 @@ class Machine:
         return len(self.state.queue)
 
     @property
-    def cumulative_processing_time(self) -> float:
+    def cumulative_processing_time(self) -> torch.FloatTensor:
         return self.state.total_processing_time
 
     @property
-    def time_till_available(self) -> float:
+    def time_till_available(self) -> torch.FloatTensor:
         return max(self.state.available_at - self.environment.now, 0)
 
     @property
-    def cumulative_run_time(self) -> float:
+    def cumulative_run_time(self) -> torch.FloatTensor:
         return self.state.run_time
 
-    def did_receive_job(self):
+    @property
+    def arriving_jobs(self) -> List[environment.Job]:
+        """
+        Returns: A list of jobs which are about to arrive at the machine, i.e. they were selected for processing on
+        the previous machine
+        """
+        return [
+            job for job in self.shop_floor.in_system_jobs
+            if job.next_work_center_idx == self.work_center_idx and job.release_moment_on_machine is not None
+        ]
+
+    # Timeline
+
+    def __produce__(self):
+        if not self.did_dispatch_event.triggered and len(self.state.queue) == 0:
+            yield self.environment.process(self.__starve__())
+
+        while True:
+            did_breakdown = yield self.environment.process(self.__breakdown_if_needed__())
+            did_starve = yield self.environment.process(self.__starve_if_needed__())
+
+            if did_breakdown or did_starve:
+                continue
+
+            moment = self.environment.now
+
+            self.history.with_decision_time(moment)
+
+            job = self.__select_job__()
+
+            if isinstance(job, environment.WaitInfo):
+                yield self.environment.timeout(job.wait_time)
+                continue
+
+            self.__notify_job_about_production__(job, production_start=True)
+
+            self.shop_floor.will_produce(job, self)
+
+            processing_time = job.current_operation_processing_time_on_machine.item()
+
+            self.state.with_initiated_work(processing_time, moment)
+
+            # Perform the operation of the job
+            yield self.environment.timeout(processing_time)
+
+            self.__notify_job_about_production__(job, production_start=False)
+
+            self.state.with_runtime(processing_time)
+
+            self.__forward__(job)
+
+    def __breakdown__(self):
+        if self._breakdown is None:
+            return
+
+        while True:
+            if self.state.will_breakdown:
+                duration = max(self.state.free_at - self.environment.now, 10)
+                yield self.environment.timeout(duration)
+                continue
+
+            breakdown_arrival = self._breakdown.sample_next_breakdown_time(self)
+
+            yield self.environment.timeout(breakdown_arrival)
+
+            repair_duration = self._breakdown.sample_repair_duration(self)
+
+            self.state.with_repair_duration(repair_duration)
+
+    def __starve__(self):
+        self.did_dispatch_event = self.environment.event()
+
+        yield self.did_dispatch_event
+
+    def __select_job__(self):
+        if self.state.is_empty:
+            return environment.WaitInfo(wait_time=1)
+
+        if len(self.state.queue) == 1:
+            return self.state.queue[0]
+
+        job = self.shop_floor.schedule(self, self.environment.now)
+
+        return job
+
+    def __breakdown_if_needed__(self):
+        """
+        Breaks down the machine, if it is not broken down yet
+        """
+        if self.state.will_breakdown:
+            repair_duration = self.state.repair_duration
+
+            self.state.with_breakdown(self.environment.now)
+            self.history.with_breakdown_start(self.environment.now)
+            self.shop_floor.did_breakdown(self, repair_duration)
+
+            yield self.environment.timeout(repair_duration)
+
+            self.history.with_breakdown_end(self.environment.now)
+            self.shop_floor.did_repair(self)
+
+            return True
+
+        return False
+
+    def __starve_if_needed__(self):
+        """
+        Starves the machine, if there is no job in the queue
+        """
+        if self.state.is_empty:
+            yield self.environment.process(self.__starve__())
+            return True
+
+        return False
+
+    def __forward__(self, job: environment.Job):
+        """
+        Forwards the job to the next machine by sending it to the shop floor
+
+        Args:
+            job: Job to forward
+
+        Returns: None
+        """
+        self.state.without_job(job.id, now=self.environment.now)
+        self.shop_floor.forward(job, from_=self)
+
+    # Utility
+
+    def __did_receive_job__(self):
         # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the simulation
         # the machine shouldn't care
         try:

@@ -150,7 +150,7 @@ class Statistics:
         """
         job_ids = self.__completed_job_ids__(predicate)
 
-        return self.__reduce_jobs__(job_ids, weighted_by_priority, lambda job: job.flow_time)
+        return self.__reduce_jobs__(job_ids, weighted_by_priority, lambda job: job.flow_time_upon_completion)
 
     def total_tardiness(self, weighted_by_priority: bool = False, predicate: Predicate = Predicate()) -> float:
         """
@@ -162,7 +162,7 @@ class Statistics:
         """
         job_ids = self.__completed_job_ids__(predicate)
 
-        return self.__reduce_jobs__(job_ids, weighted_by_priority, lambda job: job.tardiness)
+        return self.__reduce_jobs__(job_ids, weighted_by_priority, lambda job: job.tardiness_upon_completion)
 
     def total_earliness(self, weighted_by_priority: bool = False, predicate: Predicate = Predicate()) -> float:
         """
@@ -176,7 +176,7 @@ class Statistics:
         """
         job_ids = self.__completed_job_ids__(predicate)
 
-        return self.__reduce_jobs__(job_ids, weighted_by_priority, lambda job: job.earliness)
+        return self.__reduce_jobs__(job_ids, weighted_by_priority, lambda job: job.earliness_upon_completion)
 
     def total_number_of_tardy_jobs(
         self,
@@ -195,12 +195,14 @@ class Statistics:
 
         return self.__reduce_jobs__(job_ids,
                                     weighted_by_priority,
-                                    lambda job: torch.LongTensor([1 if job.is_tardy else 0]))
+                                    lambda job: torch.LongTensor([1 if job.is_tardy_upon_completion else 0]))
 
     def report(self, time_predicate: Predicate.TimePredicate = Predicate.TimePredicate()) -> st.Report:
         report_factory = st.ReportFactory(self, self.shop_floor, time_predicate)
 
         return report_factory.make()
+
+    # Utility methods
 
     def __filter__(self, predicate: Predicate) -> pd.DataFrame:
         logs = None

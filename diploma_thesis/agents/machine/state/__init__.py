@@ -4,12 +4,12 @@ from typing import Dict
 
 from .encoder import StateEncoder
 from .plain import PlainEncoder
-from .deep_marl_direct import DEEPMARLDirectStateEncoder
+from .deep_marl_mr import DEEPMARLMinimumRepetitionStateEncoder
 from .deep_marl_indirect import DEEPMARLIndirectStateEncoder
 
 key_to_class = {
     "plain": PlainEncoder,
-    "deep_marl_direct": DEEPMARLDirectStateEncoder,
+    "deep_marl_mr": DEEPMARLMinimumRepetitionStateEncoder,
     "deep_marl_indirect": DEEPMARLIndirectStateEncoder
 }
 

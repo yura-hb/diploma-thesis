@@ -56,7 +56,7 @@ task:
         parameters:
           rule: 'random'
       encoder:
-        kind: 'deep_marl_direct'
+        kind: 'deep_marl_indirect'
 
   work_center_agent:
     kind: 'static'
