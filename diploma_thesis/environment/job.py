@@ -179,15 +179,34 @@ class Job:
         """
         Returns: The total processing time of the remaining operations
         """
-        # Since we don't know, to which machine inside work-center the job will be dispatched next, we
-        # approximate it with the average
         if self.is_completed:
             return 0
 
-        expected_processing_time = self.processing_times[max(self.current_step_idx, 0):]
-        expected_processing_time = reduce(expected_processing_time.float(), strategy)
+        result = 0.0
 
-        return expected_processing_time.sum()
+        if self.current_machine_idx >= 0:
+            result += self.current_operation_processing_time_on_machine
+        else:
+            result += self.current_operation_processing_time_in_work_center(strategy)
+
+        result += self.next_remaining_processing_time(strategy)
+
+        return result
+
+    def next_remaining_processing_time(self, strategy: ReductionStrategy = ReductionStrategy.mean):
+        """
+        Returns: The remaining processing time of the operation excluding processing time on current work center
+        """
+        result = 0.0
+        expected_processing_time = self.processing_times[max(self.current_step_idx + 1, 0):]
+
+        if expected_processing_time.numel() == 0:
+            return result
+
+        expected_processing_time = reduce(expected_processing_time.float(), strategy)
+        result += expected_processing_time.sum()
+
+        return result
 
     def total_processing_time(self, strategy: ReductionStrategy = ReductionStrategy.mean):
         """

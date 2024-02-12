@@ -8,7 +8,7 @@ class MSSchedulingRule(SchedulingRule):
 
     def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
         slack = torch.FloatTensor(
-            [job.slack_upon_moment(now) for job in machine.queue]
+            [job.slack_upon_moment(now, self.reduction_strategy) for job in machine.queue]
         )
 
         index = torch.argmin(slack)

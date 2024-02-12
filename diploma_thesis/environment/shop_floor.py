@@ -147,6 +147,23 @@ class ShopFloor:
     def machines(self) -> List['environment.Machine']:
         return self._machines
 
+    def work_in_next_queue(self, job: environment.Job) -> float:
+        work_center_idx = job.next_work_center_idx
+
+        if work_center_idx is None:
+            return 0
+
+        return self.work_centers[work_center_idx].work_load
+
+    def average_waiting_in_next_queue(self, job: environment.Job) -> float:
+        work_center_idx = job.next_work_center_idx
+
+        if work_center_idx is None:
+            return 0
+
+        return self.work_centers[work_center_idx].average_waiting_time
+
+
     # Navigation
 
     def forward(self, job: environment.Job, from_: environment.Machine):
@@ -283,7 +300,9 @@ class ShopFloor:
             self.did_finish_simulation_event.succeed()
 
     def __should_dispatch__(self):
-        if number_of_jobs := self.configuration.sampler.number_of_jobs():
+        number_of_jobs = self.configuration.sampler.number_of_jobs()
+
+        if number_of_jobs is not None:
             return self.state.dispatched_job_count < number_of_jobs
 
         timespan = self.configuration.environment.now - self.history.started_at

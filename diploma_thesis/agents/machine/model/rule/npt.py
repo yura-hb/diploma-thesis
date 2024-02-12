@@ -8,7 +8,9 @@ class NPTSchedulingRule(SchedulingRule):
     """
 
     def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
-        values = torch.FloatTensor([job.next_operation_processing_time() for job in machine.queue])
+        values = torch.FloatTensor([
+            job.next_operation_processing_time(self.reduction_strategy) for job in machine.queue
+        ])
         idx = torch.argmin(values)
 
         return machine.queue[idx]

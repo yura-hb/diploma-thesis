@@ -17,10 +17,10 @@ class ATCSchedulingRule(SchedulingRule):
             [job.time_until_due(now) for job in machine.queue]
         )
 
-        cost = due_times - now - processing_times
-        cost = torch.clip(cost, min=0)
+        slack = due_times - now - processing_times
+        slack = torch.clip(slack, min=0)
 
-        priority = torch.exp(-cost / (0.05 * torch.mean(processing_times)))
+        priority = torch.exp(-slack / (0.05 * torch.mean(processing_times)))
         priority /= processing_times
 
         index = torch.argmax(priority)

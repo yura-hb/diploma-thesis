@@ -110,12 +110,30 @@ class WorkCenter:
         self.did_receive_job()
 
     @property
-    def shop_floor(self):
+    def shop_floor(self) -> 'environment.ShopFloor':
         return self._shop_floor()
+
+    @property
+    def work_center_idx(self) -> int:
+        return self.state.idx
 
     @property
     def machines(self) -> List['environment.Machine']:
         return self._machines
+
+    @property
+    def work_load(self) -> torch.FloatTensor:
+        processing_times = [machine.cumulative_processing_time for machine in self.machines]
+        processing_times = torch.FloatTensor(processing_times)
+
+        return processing_times.mean()
+
+    @property
+    def average_waiting_time(self) -> torch.FloatTensor:
+        waiting_times = [machine.time_till_available for machine in self.machines]
+        waiting_times = torch.FloatTensor(waiting_times)
+
+        return waiting_times.mean()
 
     def did_receive_job(self):
         # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the simulation

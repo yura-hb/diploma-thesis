@@ -15,7 +15,7 @@ class MODSchedulingRule(SchedulingRule):
         operation_completed_at = processing_times + now
         stacked = torch.vstack([due_times, operation_completed_at])
 
-        mod, _ = torch.max(stacked, dim=1)
+        mod, _ = torch.max(stacked, dim=0)
         index = torch.argmin(mod)
 
         return machine.queue[index]

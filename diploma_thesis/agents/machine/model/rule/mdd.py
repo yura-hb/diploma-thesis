@@ -9,14 +9,14 @@ class MDDSchedulingRule(SchedulingRule):
 
     def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
         processing_times = torch.FloatTensor(
-            [job.current_operation_processing_time_on_machine for job in machine.queue]
+            [job.next_remaining_processing_time(self.reduction_strategy) for job in machine.queue]
         )
         due_times = torch.FloatTensor([job.due_at for job in machine.queue])
 
         finish_at = processing_times + now
 
         stacked = torch.vstack([due_times, finish_at])
-        mod, _ = torch.max(stacked, dim=1)
+        mod, _ = torch.max(stacked, dim=0)
         index = torch.argmin(mod)
 
         return machine.queue[index]

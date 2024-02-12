@@ -4,7 +4,7 @@ simulation_1: &simulation_1
   kind: 'dynamic'
   parameters:
     configuration:
-      timespan: 10000
+      timespan: 1000
       machines_per_work_center: 2
       work_center_count: 10
       pre_assign_initial_jobs: False

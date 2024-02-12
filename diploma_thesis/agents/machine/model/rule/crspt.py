@@ -1,8 +1,6 @@
 from .scheduling_rule import *
 
 
-# TODO: Pass Reduction strategy
-
 class CRSPTSchedulingRule(SchedulingRule):
     """
     Critical Ratio + Shortest Processing Time scheduling rule, i.e.
@@ -11,13 +9,16 @@ class CRSPTSchedulingRule(SchedulingRule):
 
     def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
         remaining_processing_times = torch.FloatTensor(
-            [job.remaining_processing_time() for job in machine.queue]
+            [job.remaining_processing_time(self.reduction_strategy) for job in machine.queue]
         )
         due_times = torch.FloatTensor(
             [job.time_until_due(now) for job in machine.queue]
         )
+        processing_times = torch.FloatTensor(
+            [job.current_operation_processing_time_on_machine for job in machine.queue]
+        )
 
-        ratio = due_times / remaining_processing_times
+        ratio = due_times / remaining_processing_times + processing_times
         index = torch.argmin(ratio)
 
         return machine.queue[index]

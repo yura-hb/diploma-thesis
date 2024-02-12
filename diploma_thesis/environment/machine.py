@@ -312,7 +312,7 @@ class Machine:
         self.shop_floor.forward(job, from_=self)
 
     @property
-    def shop_floor(self):
+    def shop_floor(self) -> 'environment.ShopFloor':
         return self._shop_floor()
 
     @property
@@ -328,19 +328,19 @@ class Machine:
         return self.state.machine_idx
 
     @property
-    def cumulative_processing_time(self) -> int:
-        return self.state.total_processing_time
-
-    @property
-    def time_till_available(self) -> int:
-        return self.state.available_at - self.environment.now
-
-    @property
     def queue_size(self) -> int:
         return len(self.state.queue)
 
     @property
-    def cumulative_run_time(self) -> int:
+    def cumulative_processing_time(self) -> float:
+        return self.state.total_processing_time
+
+    @property
+    def time_till_available(self) -> float:
+        return max(self.state.available_at - self.environment.now, 0)
+
+    @property
+    def cumulative_run_time(self) -> float:
         return self.state.run_time
 
     def did_receive_job(self):
