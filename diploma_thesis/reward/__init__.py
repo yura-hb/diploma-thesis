@@ -1,1 +1,1 @@
-from .reward_model import RewardModel
+from reward.base.reward_model import RewardModel

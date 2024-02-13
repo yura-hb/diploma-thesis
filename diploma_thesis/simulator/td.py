@@ -1,8 +1,15 @@
-from typing import List
+from typing import List, Dict, TypeVar
+
+from dataclasses import dataclass
+
+import torch
 
 from agents import MachineInput, WorkCenterInput
 from environment import Job, WorkCenter, Machine, WaitInfo
 from .simulator import Simulator
+
+State = TypeVar('State')
+Action = TypeVar('Action')
 
 
 class TDSimulator(Simulator):
@@ -11,10 +18,33 @@ class TDSimulator(Simulator):
     possible
     """
 
+    @dataclass(frozen=True)
+    class Key:
+        shop_floor_id: str
+        job_id: int
+        work_center_id: int
+        machine_id: int
+
+    @dataclass
+    class Record:
+        state: State
+        action: Action
+        next_state: State
+        reward: torch.FloatTensor
+        done: bool
+
+    def __post_init__(self):
+        self.queue: Dict[TDSimulator.Key, TDSimulator.Record] = {}
+
     def schedule(self, shop_floor_id: str, machine: Machine, now: int) -> Job | WaitInfo:
         parameters = MachineInput(machine, now)
+        result = self.machine.schedule(parameters)
 
-        return self.machine.schedule(parameters).result
+        if self.machine.is_trainable:
+
+            pass
+
+        return result.result
 
     def route(self, shop_floor_id: str, job: Job, work_center_idx: int, machines: List[Machine]) -> 'Machine | None':
         parameters = WorkCenterInput(job, work_center_idx, machines)
@@ -43,7 +73,7 @@ class TDSimulator(Simulator):
         pass
 
     def did_finish_simulation(self, shop_floor_id: str):
-        Simulator.did_finish_simulation(self, shop_floor_id)
+        pass
 
     def did_breakdown(self, shop_floor_id: str, machine: Machine, repair_time: float):
         pass

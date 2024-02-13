@@ -45,7 +45,7 @@ class EpisodicSimulator(Simulator):
         pass
 
     def did_finish_simulation(self, shop_floor_id: str):
-        Simulator.did_finish_simulation(self, shop_floor_id)
+        pass
 
     def did_breakdown(self, shop_floor_id: str, machine: Machine, repair_time: float):
         pass

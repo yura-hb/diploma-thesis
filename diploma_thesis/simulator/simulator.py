@@ -1,13 +1,14 @@
 import logging
 from abc import ABCMeta
-from typing import Callable, List
+from typing import Callable, List, TypeVar
 
 import simpy
 
+from abc import abstractmethod
 from agents import WorkCenter, Machine, TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
 from environment import Delegate, Agent
 from .configuration import RunConfiguration, EvaluateConfiguration
-from .reward import RewardModel
+from reward import RewardModel
 from .simulation import Simulation
 
 
@@ -15,17 +16,25 @@ class Simulator(Agent, Delegate, metaclass=ABCMeta):
 
     def __init__(
         self,
-        work_center: WorkCenter,
         machine: Machine,
-        reward_model: RewardModel,
+        machine_reward: RewardModel,
+        work_center: WorkCenter,
+        work_center_reward: RewardModel,
         environment: simpy.Environment,
         logger: logging.Logger
     ):
         self.work_center = work_center
         self.machine = machine
-        self.reward_model = reward_model
+        self.machine_reward = machine_reward
+        self.work_center_reward = work_center_reward
         self.environment = environment
         self.logger = logger
+
+        self.__post_init__()
+
+    @abstractmethod
+    def __post_init__(self):
+        pass
 
     def train(self, config: RunConfiguration):
         # TODO: - Revert

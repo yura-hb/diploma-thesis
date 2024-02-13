@@ -30,7 +30,7 @@ class NNCLI(nn.Module):
                 return NNCLI.Configuration.Linear(
                     dim=parameters['dim'],
                     activation=parameters['activation'],
-                    dropout=parameters['dropout']
+                    dropout=parameters.get('dropout', 0.0)
                 )
 
         layers: list[Layer]
@@ -82,9 +82,9 @@ class NNCLI(nn.Module):
                 raise ValueError(f"Unknown layer type {layer}")
 
     def __make_linear_layer__(self, input_dim, output_dim, activation, dropout):
-        result = nn.Sequential([
+        result = nn.Sequential(
             nn.Linear(input_dim, output_dim)
-        ])
+        )
 
         if activation := self.__make_activation__(activation):
             result = result.append(activation)

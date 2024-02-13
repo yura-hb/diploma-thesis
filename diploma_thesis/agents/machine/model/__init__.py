@@ -1,9 +1,7 @@
-import logging
-
 from .model import MachineModel
-from .static import StaticModel as StaticMachineModel
 from .multi_rule_linear import MultiRuleLinear as MultiRuleLinearModel
 from .rule import SchedulingRule
+from .static import StaticModel as StaticMachineModel
 
 key_to_class = {
     "static": StaticMachineModel,

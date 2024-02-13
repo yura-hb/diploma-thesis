@@ -24,6 +24,7 @@ class EvaluationPhase(Phase):
 
 def from_cli(parameters: Dict) -> Phase:
     key = parameters['kind']
+    parameters = parameters.get('parameters', {})
 
     match key:
         case 'warm_up':

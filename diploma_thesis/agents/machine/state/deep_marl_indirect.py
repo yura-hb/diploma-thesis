@@ -5,14 +5,15 @@ from functools import reduce
 
 import torch
 
+from agents.base.state import TensorState
 from .encoder import StateEncoder
 
 
 class DEEPMARLIndirectStateEncoder(StateEncoder):
 
     @dataclass
-    class State:
-        state: torch.FloatTensor
+    class State(TensorState):
+        pass
 
     def __init__(self, strategy: JobReductionStrategy = JobReductionStrategy.mean):
         super().__init__()

@@ -4,9 +4,9 @@ from typing import Tuple
 
 import simpy
 
+from environment import JobSampler, Configuration as Problem
 from sampler import (NumericSampler, Permutation, Exponential, Constant,
                      numeric_sampler_from_cli, permutation_sampler_from_cli)
-from environment import JobSampler, Configuration as Problem
 from .builder import Builder
 
 

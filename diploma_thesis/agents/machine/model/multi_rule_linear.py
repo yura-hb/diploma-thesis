@@ -3,17 +3,18 @@ from typing import List, Dict
 
 import torch
 
+from agents.base.state import TensorState
 from agents.utils import NNCLI, Phase, PhaseUpdatable
 from agents.utils.action import ActionSelector, from_cli as action_selector_from_cli
 from .model import *
-from .rule import ALL_SCHEDULING_RULES
-from .rule import SchedulingRule
+from .rule import ALL_SCHEDULING_RULES, SchedulingRule
 
 
 class MultiRuleLinear(Model, PhaseUpdatable):
 
     def __init__(self, rules: List[SchedulingRule], model: NNCLI, action_selector: ActionSelector):
         super().__init__()
+
         self.rules = rules
         self.model = model
         self.action_selector = action_selector
@@ -26,13 +27,13 @@ class MultiRuleLinear(Model, PhaseUpdatable):
                 module.update(phase)
 
     def __call__(self, state: State, parameters: MachineModel.Input) -> MachineModel.Record:
+        assert isinstance(state, TensorState), f"State must conform to TensorState"
+
         if not self.model.is_connected:
-            self.__connect__(state.shape)
+            self.__connect__(state.state.shape[-1])
 
-        distribution = self.model(state, parameters)
-
-        action, _ = self.action_selector(distribution)
-
+        values = self.model(state.state)
+        action, _ = self.action_selector(values)
         rule = self.rules[action]
 
         return MachineModel.Record(
@@ -59,10 +60,9 @@ class MultiRuleLinear(Model, PhaseUpdatable):
         else:
             rules = [ALL_SCHEDULING_RULES[rule]() for rule in rules]
 
-        nn_cli = NNCLI.Configuration.from_cli(parameters['nn'])
+        nn_cli = NNCLI.from_cli(parameters['nn'])
 
         action_selector = action_selector_from_cli(parameters['action_selector'])
 
         return MultiRuleLinear(rules, nn_cli, action_selector)
-
 

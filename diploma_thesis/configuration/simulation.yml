@@ -29,7 +29,7 @@ simulation: &simulation
             sampler:
               kind: 'uniform'
               parameters:
-                uniform: [ 1, 100 ]
+                uniform: [ 1, 10 ]
 
     breakdown:
       kind: 'dynamic'
@@ -49,12 +49,59 @@ task:
   kind: 'task'
 
   machine_agent:
-    kind: 'static'
+    kind: 'dqn'
     parameters:
       model:
-        kind: 'static'
+        kind: 'multi_rule_linear'
         parameters:
-          rule: 'random'
+          rules: 'all'
+          nn:
+            layers:
+              - kind: 'linear'
+                parameters:
+                  dim: 48
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 36
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 36
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 24
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 12
+                  activation: 'tanh'
+          action_selector:
+            kind: 'phase_selector'
+            parameters:
+              default:
+                kind: 'greedy'
+              phases:
+                - phase:
+                    kind: 'training'
+                  action_selector:
+                    kind: 'epsilon_greedy'
+                    parameters:
+                      epsilon: 0.1
+                - phase:
+                    kind: 'warm_up'
+                    parameters:
+                      step: 0
+                  action_selector:
+                    kind: 'uniform'
+                - phase:
+                    kind: 'warm_up'
+                    parameters:
+                      step: 1
+                  action_selector:
+                    kind: 'uniform'
+
       encoder:
         kind: 'deep_marl_indirect'
 
@@ -69,14 +116,14 @@ task:
         kind: 'plain'
 
   simulator:
-    # Can be 'td'. Important for reinforcement learning
-    kind: 'episodic'
+    # Can be 'td'. Important for return estimation
+    kind: 'td'
 
   run:
     timeline:
       warmup:
-        - 10
-        - 100
+        - 1000
+        - 1000
 
       duration: 10000
 

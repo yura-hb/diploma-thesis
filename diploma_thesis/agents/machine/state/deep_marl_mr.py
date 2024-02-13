@@ -1,9 +1,9 @@
-import logging
 from dataclasses import dataclass
 from typing import Dict
 
 import torch
 
+from agents.base.state import TensorState
 from environment import JobReductionStrategy, Job, Machine
 from .encoder import StateEncoder
 
@@ -25,8 +25,7 @@ class DEEPMARLMinimumRepetitionStateEncoder(StateEncoder):
     """
 
     @dataclass
-    class State:
-        state: torch.FloatTensor
+    class State(TensorState):
         job_idx: torch.LongTensor
 
     def __init__(self, strategy: JobReductionStrategy = JobReductionStrategy.mean):

@@ -6,6 +6,7 @@ from .configuration import RunConfiguration, EvaluateConfiguration
 from .simulation import Simulation
 from agents import Machine, WorkCenter
 from typing import Dict
+from reward import RewardModel
 
 import logging
 import simpy

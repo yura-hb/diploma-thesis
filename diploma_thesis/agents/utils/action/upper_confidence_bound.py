@@ -1,4 +1,4 @@
-from action_selector import *
+from .action_selector import *
 
 
 class UpperConfidenceBound:
