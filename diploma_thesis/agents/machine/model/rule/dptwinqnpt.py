@@ -6,7 +6,10 @@ class DPTWINQNPTSchedulingRule(SchedulingRule):
     Double Processing Time + Work In Next Queue + Next Processing Time
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmin
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         processing_times = torch.FloatTensor(
             [job.current_operation_processing_time_on_machine for job in machine.queue]
         )
@@ -18,6 +21,5 @@ class DPTWINQNPTSchedulingRule(SchedulingRule):
         )
 
         result = 2 * processing_times + winq + next_operation_processing_times
-        index = torch.argmin(result)
 
-        return machine.queue[index]
+        return result

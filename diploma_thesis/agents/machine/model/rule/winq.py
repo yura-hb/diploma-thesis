@@ -6,8 +6,10 @@ class WINQSchedulingRule(SchedulingRule):
     Work In Next Queue scheduling rule
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
-        values = torch.FloatTensor([machine.shop_floor.work_in_next_queue(job) for job in machine.queue])
-        idx = torch.argmin(values)
+    def selector(self):
+        return torch.argmin
 
-        return machine.queue[idx]
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
+        values = torch.FloatTensor([machine.shop_floor.work_in_next_queue(job) for job in machine.queue])
+
+        return values

@@ -6,7 +6,10 @@ class PTWINQSSchedulingRule(SchedulingRule):
     Processing Time + Work In Next Queue + Slack
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmin
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         processing_time = torch.FloatTensor([
             job.current_operation_processing_time_on_machine for job in machine.queue
         ])
@@ -16,6 +19,5 @@ class PTWINQSSchedulingRule(SchedulingRule):
         slack = torch.FloatTensor([
             job.slack_upon_moment(now, self.reduction_strategy) for job in machine.queue
         ])
-        idx = torch.argmin(winq + processing_time + slack)
 
-        return machine.queue[idx]
+        return winq + processing_time + slack

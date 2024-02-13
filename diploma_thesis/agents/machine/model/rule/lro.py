@@ -6,8 +6,10 @@ class LROSchedulingRule(SchedulingRule):
     Least Remaining Operations rule, i.e. selects jobs, which has the smallest number of remaining operations
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
-        values = torch.FloatTensor([job.remaining_operations_count for job in machine.queue])
-        idx = torch.argmin(values)
+    def selector(self):
+        return torch.argmin
 
-        return machine.queue[idx]
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
+        values = torch.FloatTensor([job.remaining_operations_count for job in machine.queue])
+
+        return values

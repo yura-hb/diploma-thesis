@@ -1,3 +1,4 @@
+import torch
 
 from .scheduling_rule import *
 
@@ -9,7 +10,10 @@ class ATCSchedulingRule(SchedulingRule):
     Source: https://www.jstor.org/stable/2632177
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmax
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         processing_times = torch.FloatTensor(
             [job.current_operation_processing_time_on_machine for job in machine.queue]
         )
@@ -23,6 +27,4 @@ class ATCSchedulingRule(SchedulingRule):
         priority = torch.exp(-slack / (0.05 * torch.mean(processing_times)))
         priority /= processing_times
 
-        index = torch.argmax(priority)
-
-        return machine.queue[index]
+        return priority

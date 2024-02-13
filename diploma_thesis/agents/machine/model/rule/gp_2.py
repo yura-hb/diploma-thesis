@@ -6,7 +6,10 @@ class GP2SchedulingRule(SchedulingRule):
     Genetic Programming 2 scheduling rule. Taken from external/PhD-Thesis-Projects/FJSP/sequencing.py
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmin
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         operation_processing_time = torch.FloatTensor(
             [job.current_operation_processing_time_on_machine for job in machine.queue]
         )
@@ -39,6 +42,5 @@ class GP2SchedulingRule(SchedulingRule):
         s4 *= torch.max(torch.vstack([winq, next_remaining_processing_time]), dim=0)[0]
 
         values = s1 * s2 + s3 * s4
-        idx = torch.argmin(values)
 
-        return machine.queue[idx]
+        return values

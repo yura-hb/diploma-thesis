@@ -6,7 +6,10 @@ class SPMWKSchedulingRule(SchedulingRule):
     Slack per Remaining Work scheduling rule
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmin
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         slack = torch.FloatTensor(
             [job.slack_upon_moment(now, self.reduction_strategy) for job in machine.queue]
         )
@@ -16,6 +19,4 @@ class SPMWKSchedulingRule(SchedulingRule):
 
         ratio = slack / remaining_processing_times
 
-        index = torch.argmin(ratio)
-
-        return machine.queue[index]
+        return ratio

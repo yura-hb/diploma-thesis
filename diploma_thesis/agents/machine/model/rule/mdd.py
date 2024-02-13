@@ -7,7 +7,10 @@ class MDDSchedulingRule(SchedulingRule):
         selects job with the smallest value of max(due_at, operation_completed_at)
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmin
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         processing_times = torch.FloatTensor(
             [job.next_remaining_processing_time(self.reduction_strategy) for job in machine.queue]
         )
@@ -17,6 +20,5 @@ class MDDSchedulingRule(SchedulingRule):
 
         stacked = torch.vstack([due_times, finish_at])
         mod, _ = torch.max(stacked, dim=0)
-        index = torch.argmin(mod)
 
-        return machine.queue[index]
+        return mod

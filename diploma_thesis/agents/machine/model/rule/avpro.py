@@ -6,7 +6,10 @@ class AVPROSchedulingRule(SchedulingRule):
     Average Processing Time per Operation scheduling rule
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmin
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         remaining_processing_times = torch.FloatTensor(
             [job.remaining_processing_time(self.reduction_strategy) for job in machine.queue]
         )
@@ -17,6 +20,4 @@ class AVPROSchedulingRule(SchedulingRule):
 
         ratio = remaining_processing_times / operation_count
 
-        index = torch.argmin(ratio)
-
-        return machine.queue[index]
+        return ratio

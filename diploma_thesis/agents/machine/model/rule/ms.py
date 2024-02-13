@@ -6,11 +6,12 @@ class MSSchedulingRule(SchedulingRule):
     Minimum Slack scheduling rule, i.e. the rule selects jobs with the minimum slack
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmin
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         slack = torch.FloatTensor(
             [job.slack_upon_moment(now, self.reduction_strategy) for job in machine.queue]
         )
 
-        index = torch.argmin(slack)
-
-        return machine.queue[index]
+        return slack

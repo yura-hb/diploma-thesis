@@ -7,10 +7,12 @@ class NPTSchedulingRule(SchedulingRule):
     the smallest
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmin
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         values = torch.FloatTensor([
             job.next_operation_processing_time(self.reduction_strategy) for job in machine.queue
         ])
-        idx = torch.argmin(values)
 
-        return machine.queue[idx]
+        return values

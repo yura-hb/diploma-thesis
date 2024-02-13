@@ -7,7 +7,10 @@ class COVERTSchedulingRule(SchedulingRule):
     We assume that the cost is
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmax
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         processing_times = torch.FloatTensor([
             job.current_operation_processing_time_on_machine for job in machine.queue
         ])
@@ -20,6 +23,4 @@ class COVERTSchedulingRule(SchedulingRule):
         priority = torch.clip(priority, 0, None)
         priority /= processing_times
 
-        index = torch.argmax(priority)
-
-        return machine.queue[index]
+        return priority

@@ -6,8 +6,12 @@ class SPTSchedulingRule(SchedulingRule):
     Shortest Processing Time rule, i.e. selects jobs, in which current operation has the smallest operation time
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
-        values = [job.current_operation_processing_time_on_machine for job in machine.queue]
-        idx = torch.argmin(values)
+    def selector(self):
+        return torch.argmin
 
-        return machine.queue[idx]
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
+        values = torch.FloatTensor([
+            job.current_operation_processing_time_on_machine for job in machine.queue
+        ])
+
+        return values

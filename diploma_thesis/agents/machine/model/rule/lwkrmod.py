@@ -6,7 +6,10 @@ class LWRKMODSchedulingRule(SchedulingRule):
     Least Work Remaining + Modified Operational Due date rule. Check implementation of the rules separately.
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmin
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         due_at = torch.FloatTensor([job.due_at for job in machine.queue])
         processing_times = torch.FloatTensor([
             job.current_operation_processing_time_on_machine for job in machine.queue
@@ -17,6 +20,6 @@ class LWRKMODSchedulingRule(SchedulingRule):
         finish_at = processing_times + now
 
         mod, _ = torch.max(torch.vstack([due_at, finish_at]), dim=0)
-        index = torch.argmin(mod + remaining_processing_times)
+        values = mod + remaining_processing_times
 
-        return machine.queue[index]
+        return values

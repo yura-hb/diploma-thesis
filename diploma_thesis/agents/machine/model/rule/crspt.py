@@ -7,7 +7,10 @@ class CRSPTSchedulingRule(SchedulingRule):
     the rule selects jobs with the lowest ratio of due time to remaining processing time and current operation time
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmin
+
+    def criterion(self, machine: 'Machine', now: float) -> torch.FloatTensor:
         remaining_processing_times = torch.FloatTensor(
             [job.remaining_processing_time(self.reduction_strategy) for job in machine.queue]
         )
@@ -19,6 +22,5 @@ class CRSPTSchedulingRule(SchedulingRule):
         )
 
         ratio = due_times / remaining_processing_times + processing_times
-        index = torch.argmin(ratio)
 
-        return machine.queue[index]
+        return ratio

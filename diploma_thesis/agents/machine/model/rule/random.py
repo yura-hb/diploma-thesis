@@ -1,9 +1,12 @@
+import torch
+
 from .scheduling_rule import *
 
 
 class RandomSchedulingRule(SchedulingRule):
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
-        index = torch.randint(0, len(machine.queue), (1,)).item()
+    def selector(self):
+        return lambda x: torch.randint(0, len(x), (1,))
 
-        return machine.queue[index]
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
+        return torch.zeros(len(machine.queue))

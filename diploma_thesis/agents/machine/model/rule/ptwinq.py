@@ -6,13 +6,15 @@ class PTWINQSchedulingRule(SchedulingRule):
     Processing Time + Work In Next Queue
     """
 
-    def __call__(self, machine: Machine, now: float) -> Job | WaitInfo:
+    def selector(self):
+        return torch.argmin
+
+    def criterion(self, machine: Machine, now: float) -> torch.FloatTensor:
         processing_time = torch.FloatTensor([
             job.current_operation_processing_time_on_machine for job in machine.queue
         ])
         winq = torch.FloatTensor([
             machine.shop_floor.work_in_next_queue(job) for job in machine.queue
         ])
-        idx = torch.argmin(winq + processing_time)
 
-        return machine.queue[idx]
+        return winq + processing_time
