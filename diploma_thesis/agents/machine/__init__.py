@@ -3,10 +3,12 @@ import logging
 from .utils import Input as MachineInput
 from .machine import Machine
 from .static import StaticMachine
+from .dqn import DeepQAgent
 
 
 key_to_class = {
-    "static": StaticMachine
+    "static": StaticMachine,
+    'dqn': DeepQAgent
 }
 
 

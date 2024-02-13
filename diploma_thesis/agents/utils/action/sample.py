@@ -1,0 +1,24 @@
+import torch.distributions
+
+from .action_selector import *
+
+
+class Sample(ActionSelector):
+
+    def __init__(self, is_distribution: bool = True):
+        super().__init__()
+        self.is_distribution = is_distribution
+
+    def __call__(self, distribution: torch.FloatTensor) -> int:
+        if self.is_distribution:
+            distribution = torch.distributions.Categorical(probs=distribution)
+        else:
+            distribution = torch.distributions.Categorical(logits=distribution)
+
+        action = distribution.sample()
+
+        return action, distribution.probs[action]
+
+    @staticmethod
+    def from_cli(parameters: Dict):
+        return Sample(is_distribution=parameters['is_distribution'])

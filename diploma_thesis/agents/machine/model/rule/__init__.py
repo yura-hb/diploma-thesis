@@ -30,7 +30,7 @@ from .winq import WINQSchedulingRule
 from .scheduling_rule import SchedulingRule
 from typing import Dict
 
-ALL_SCHEDULING_RULES: Dict[str, SchedulingRule] = {
+ALL_SCHEDULING_RULES: Dict[str, SchedulingRule.__class__] = {
     'atc': ATCSchedulingRule,
     'avpro': AVPROSchedulingRule,
     'covert': COVERTSchedulingRule,

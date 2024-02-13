@@ -4,12 +4,12 @@ from abc import ABCMeta, abstractmethod
 
 import torch
 
-from agents.utils import Phase, EvaluationPhase, Loggable
+from agents.utils import Phase, EvaluationPhase, Loggable, PhaseUpdatable
 from .encoder import Encoder as StateEncoder, Input, State
 from .model import Model, Action, Result
 
 
-class Agent(Loggable, metaclass=ABCMeta):
+class Agent(Loggable, PhaseUpdatable, metaclass=ABCMeta):
 
     def __init__(self,
                  model: Model[Input, State, Action, Result],
@@ -32,6 +32,10 @@ class Agent(Loggable, metaclass=ABCMeta):
 
     def update(self, phase: Phase):
         self.phase = phase
+
+        for module in [self.memory, self.model, self.state_encoder]:
+            if isinstance(module, PhaseUpdatable):
+                module.update(phase)
 
     @property
     @abstractmethod
