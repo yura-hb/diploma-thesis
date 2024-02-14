@@ -35,3 +35,4 @@ class Memory(metaclass=ABCMeta):
 
     def __len__(self) -> int:
         return len(self.buffer)
+

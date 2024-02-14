@@ -1,18 +1,14 @@
 
 from .action_selector import *
-from agents.utils import Phase
+from agents.utils import Phase, PhaseUpdatable
 
 
-class PhaseSelector(ActionSelector):
+class PhaseSelector(ActionSelector, PhaseUpdatable):
 
     def __init__(self, default: ActionSelector, phase_to_action_selector: Dict[Phase, ActionSelector]):
         super().__init__()
-        self.phase = None
         self.default = default
         self.phase_to_action_selector = phase_to_action_selector
-
-    def update(self, phase: Phase):
-        self.phase = phase
 
     def __call__(self, distribution: torch.FloatTensor) -> Tuple[int, torch.FloatTensor]:
         if self.phase in self.phase_to_action_selector:

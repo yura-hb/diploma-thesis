@@ -2,11 +2,12 @@
 import logging
 from abc import ABCMeta, abstractmethod
 
-from agents.utils import Phase, EvaluationPhase, Loggable, PhaseUpdatable
+from agents.utils import Phase, EvaluationPhase, PhaseUpdatable
 from agents.utils.memory import Memory, Record
 from .encoder import Encoder as StateEncoder, Input, State
 from .model import Model, Action, Result
 from typing import TypeVar, Generic
+from utils import Loggable
 
 Key = TypeVar('Key')
 
@@ -22,6 +23,10 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
         self.memory = memory
         self.phase = EvaluationPhase()
         super().__init__()
+        self.__post_init__()
+
+    def __post_init__(self):
+        pass
 
     def with_logger(self, logger: logging.Logger):
         super().with_logger(logger)
@@ -35,7 +40,7 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
     def update(self, phase: Phase):
         self.phase = phase
 
-        for module in [self.memory, self.model, self.state_encoder]:
+        for module in [self.model, self.state_encoder, self.memory]:
             if isinstance(module, PhaseUpdatable):
                 module.update(phase)
 
@@ -49,7 +54,8 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
         pass
 
     def store(self, key: Key, record: Record):
-        pass
+        if self.is_trainable:
+            self.memory.store(record.view(-1))
 
     def schedule(self, parameters: Input) -> Model.Record:
         state = self.encode_state(parameters)

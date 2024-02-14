@@ -21,11 +21,9 @@ class Simulation(Workflow):
         environment = simpy.Environment()
         logger = self.__make_logger__(name='', environment=environment, log_stdout=True)
 
-        machine = machine_from_cli(parameters=self.parameters['machine_agent']).with_logger(logger)
-        work_center = work_center_from_cli(parameters=self.parameters['work_center_agent']).with_logger(logger)
+        machine = machine_from_cli(parameters=self.parameters['machine_agent'])
+        work_center = work_center_from_cli(parameters=self.parameters['work_center_agent'])
         tape = TapeModel.from_cli(parameters=self.parameters['tape'])
-
-        simulator_logger = logger.getChild('Simulator')
 
         run_logger = logger.getChild('Run')
         run_logger.setLevel(logging.INFO)
@@ -38,9 +36,10 @@ class Simulation(Workflow):
             work_center=work_center,
             tape=tape,
             environment=environment,
-            logger=simulator_logger,
             parameters=self.parameters['simulator']
         )
+
+        simulator.with_logger(logger)
 
         if run_config := self.parameters.get('run'):
             run_config = RunConfiguration.from_cli(run_logger, run_config)

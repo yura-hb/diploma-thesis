@@ -9,10 +9,10 @@ class EpisodicSimulator(Simulator):
     After the simulation is finished returns are estimated and passed to the agent for training.
     """
 
-    def did_prepare_machine_reward(self, shop_floor: ShopFloor, machine: Machine, record: Record):
+    def did_prepare_machine_record(self, shop_floor: ShopFloor, machine: Machine, record: Record):
         # self.machine.store(machine.key, record)
         pass
 
-    def did_prepare_work_center_reward(self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record):
+    def did_prepare_work_center_record(self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record):
         # self.work_center.store(work_center.key, record)
         pass

@@ -1,4 +1,4 @@
-from .model import MachineModel
+from .model import MachineModel, NNMachineModel
 from .multi_rule_linear import MultiRuleLinear as MultiRuleLinearModel
 from .rule import SchedulingRule
 from .static import StaticModel as StaticMachineModel

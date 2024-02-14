@@ -7,3 +7,8 @@ from agents.machine import MachineInput
 class MachineModel(Model[MachineInput, State, Action, Job | WaitInfo], metaclass=ABCMeta):
 
     Input = MachineInput
+
+
+class NNMachineModel(Model[MachineInput, State, Action, Job | WaitInfo], metaclass=ABCMeta):
+
+    Input = MachineInput

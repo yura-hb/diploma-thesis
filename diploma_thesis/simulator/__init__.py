@@ -21,8 +21,7 @@ def from_cli(machine: Machine,
              work_center: WorkCenter,
              tape: TapeModel,
              environment: simpy.Environment,
-             logger: logging.Logger,
              parameters: Dict):
     cls = key_to_class[parameters['kind']]
 
-    return cls(machine, work_center, tape, environment, logger)
+    return cls(machine, work_center, tape, environment)

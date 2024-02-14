@@ -17,7 +17,7 @@ class No(MachineReward):
         """
         return None
 
-    def reward_after_completion(self, context: List[Context]) -> torch.FloatTensor | None:
+    def reward_after_completion(self, contexts: List[Context]) -> torch.FloatTensor | None:
         return None
 
     @staticmethod

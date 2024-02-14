@@ -6,8 +6,16 @@ import torch
 
 from environment import Job, Machine, ShopFloor
 from dataclasses import dataclass
+from tensordict.prototype import tensorclass
 
 Context = TypeVar('Context')
+
+
+@tensorclass
+class RewardList:
+    work_center_idx: torch.LongTensor
+    machine_idx: torch.LongTensor
+    reward: torch.FloatTensor
 
 
 class MachineReward(metaclass=ABCMeta):
@@ -22,12 +30,12 @@ class MachineReward(metaclass=ABCMeta):
     @abstractmethod
     def reward_after_production(self, context: Context) -> torch.FloatTensor | None:
         """
-
+        Returns: A reward for step represented by context
         """
         pass
 
     @abstractmethod
-    def reward_after_completion(self, context: List[Context]) -> torch.FloatTensor | None:
+    def reward_after_completion(self, contexts: List[Context]) -> RewardList | None:
         """
         Returns: A tensor for each machine in job path, i.e. of dim (Job.step_idx.shape) or none if reward
                  can't be computed

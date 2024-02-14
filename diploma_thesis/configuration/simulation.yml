@@ -57,6 +57,7 @@ task:
           rules: 'all'
           nn:
             layers:
+              - kind: 'instance_norm'
               - kind: 'linear'
                 parameters:
                   dim: 48
@@ -88,7 +89,7 @@ task:
                   action_selector:
                     kind: 'epsilon_greedy'
                     parameters:
-                      epsilon: 0.1
+                      epsilon: 0.95
                 - phase:
                     kind: 'warm_up'
                     parameters:
@@ -108,10 +109,19 @@ task:
       memory:
         kind: 'replay'
         parameters:
-          size: 1024
-          batch_size: 32
+          size: 8192
+          batch_size: 64
 
+      loss:
+        kind: 'mse'
 
+      optimizer:
+        kind: 'adam'
+        parameters:
+          lr: 0.001
+
+      parameters:
+        gamma: 0.4
 
   work_center_agent:
     kind: 'static'

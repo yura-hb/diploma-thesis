@@ -7,8 +7,15 @@ import torch
 from typing import List
 from environment import Job, WorkCenter, ShopFloor
 from dataclasses import dataclass
+from tensordict.prototype import tensorclass
 
 Context = TypeVar('Context')
+
+
+@tensorclass
+class RewardList:
+    work_center_idx: torch.LongTensor
+    reward: torch.FloatTensor
 
 
 class WorkCenterReward(metaclass=ABCMeta):
@@ -22,5 +29,5 @@ class WorkCenterReward(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def reward_after_completion(self, context: List[Context]) -> torch.FloatTensor | None:
+    def reward_after_completion(self, context: List[Context]) -> RewardList | None:
         pass

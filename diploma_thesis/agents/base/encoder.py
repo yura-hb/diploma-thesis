@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import TypeVar, Generic
 
-from agents.utils import Loggable
+from utils import Loggable
 
 Input = TypeVar('Input')
 State = TypeVar('State')

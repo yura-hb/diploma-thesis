@@ -1,3 +1,6 @@
+
+import torch
+
 from typing import Dict
 
 from agents.machine.state import PlainEncoder
@@ -19,6 +22,9 @@ class StaticModel(WorkCenterModel[PlainEncoder.State, None]):
             state=state,
             action=None
         )
+
+    def values(self, state: State) -> torch.FloatTensor:
+        return torch.zeros(1, dtype=torch.float32)
 
     @staticmethod
     def from_cli(parameters: Dict):

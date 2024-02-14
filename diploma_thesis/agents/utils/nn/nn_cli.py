@@ -1,6 +1,9 @@
 
+import torch
+
 from torch import nn
 from dataclasses import dataclass
+from copy import deepcopy
 
 
 class NNCLI(nn.Module):
@@ -17,7 +20,10 @@ class NNCLI(nn.Module):
 
         @dataclass
         class InstanceNorm:
-            pass
+
+            @staticmethod
+            def from_cli(parameters: dict):
+                return NNCLI.Configuration.InstanceNorm()
 
         @dataclass
         class Linear:
@@ -35,28 +41,41 @@ class NNCLI(nn.Module):
 
         layers: list[Layer]
 
+        optimizer_parameters: dict
+
         @staticmethod
         def from_cli(parameters: dict):
             key_to_cls = {
-                'linear': NNCLI.Configuration.Linear
+                'linear': NNCLI.Configuration.Linear,
+                'instance_norm': NNCLI.Configuration.InstanceNorm
             }
 
             return NNCLI.Configuration(
-                layers=[key_to_cls[layer['kind']].from_cli(layer['parameters']) for layer in parameters['layers']]
+                layers=[
+                    key_to_cls[layer['kind']].from_cli(layer.get('parameters', dict()))
+                    for layer in parameters['layers']
+                ],
+                optimizer_parameters=parameters.get('optimizer_parameters', dict())
             )
 
     def __init__(self, configuration: Configuration):
         super().__init__()
 
         self.model = None
+        self._input_dim = None
         self.configuration = configuration
 
     @property
     def is_connected(self):
         return self.model is not None
 
+    @property
+    def input_dim(self):
+        return self.input_dim
+
     def connect(self, input_dim: int, output_layer: Configuration.Linear):
         self.model = nn.Sequential()
+        self._input_dim = input_dim
 
         previous_dim = input_dim
 
@@ -72,10 +91,25 @@ class NNCLI(nn.Module):
         )
 
     def forward(self, x):
-        return self.model(x)
+        return self.model(torch.atleast_2d(x))
+
+    def parameters(self, recurse: bool = True):
+        return [{'params': self.model.parameters(recurse), **self.configuration.optimizer_parameters}]
+
+    def copy_parameters(self, other: 'NNCLI', decay: float = 1.0):
+        with torch.no_grad():
+            for param, other_param in zip(self.model.parameters(), other.model.parameters()):
+                param.data.copy_(param.data * (1 - decay) + other_param.data * decay)
+
+    def clone(self):
+        return deepcopy(self)
+
+    # Utils
 
     def __make_layer__(self, input_dim, layer: Configuration.Layer):
         match layer:
+            case NNCLI.Configuration.InstanceNorm():
+                return nn.InstanceNorm1d(input_dim), input_dim
             case NNCLI.Configuration.Linear(output_dim, activation, dropout):
                 return self.__make_linear_layer__(input_dim, output_dim, activation, dropout), output_dim
             case _:

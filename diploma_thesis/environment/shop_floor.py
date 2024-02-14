@@ -76,7 +76,7 @@ class ShopFloor:
         environment: simpy.Environment = field(default_factory=simpy.Environment)
 
     def __init__(self, idx: str, configuration: Configuration, logger: logging.Logger):
-        self.id = id
+        self.id = idx
         self.configuration = configuration
         self.logger = logger
         self.agent = configuration.agent

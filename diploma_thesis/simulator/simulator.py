@@ -12,9 +12,10 @@ from environment import Agent, ShopFloor, Job, WaitInfo, Machine, WorkCenter
 from tape import TapeModel, SimulatorInterface
 from .configuration import RunConfiguration, EvaluateConfiguration
 from .simulation import Simulation
+from utils import Loggable
 
 
-class Simulator(Agent, SimulatorInterface, metaclass=ABCMeta):
+class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
     def __init__(
         self,
@@ -22,15 +23,24 @@ class Simulator(Agent, SimulatorInterface, metaclass=ABCMeta):
         work_center: WorkCenterAgent,
         tape_model: TapeModel,
         environment: simpy.Environment,
-        logger: logging.Logger
     ):
+        super().__init__()
+
         self.work_center = work_center
         self.machine = machine
         self.tape_model = tape_model
         self.environment = environment
-        self.logger = logger
 
         self.tape_model.connect(self)
+
+    def with_logger(self, logger: logging.Logger):
+        super().with_logger(logger)
+
+        self.work_center.with_logger(logger)
+        self.machine.with_logger(logger)
+        self.tape_model.with_logger(logger)
+
+        return self
 
     def train(self, config: RunConfiguration):
         assert self.machine.is_trainable or self.work_center.is_trainable, 'At least one agent should be trainable'
@@ -81,11 +91,11 @@ class Simulator(Agent, SimulatorInterface, metaclass=ABCMeta):
         return self.work_center.encode_state(parameters)
 
     @abstractmethod
-    def did_prepare_machine_reward(self, shop_floor: ShopFloor, machine: Machine, record: Record):
+    def did_prepare_machine_record(self, shop_floor: ShopFloor, machine: Machine, record: Record):
         pass
 
     @abstractmethod
-    def did_prepare_work_center_reward(self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record):
+    def did_prepare_work_center_record(self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record):
         pass
 
     # Agent

@@ -1,3 +1,4 @@
+import logging
 import weakref
 from abc import ABCMeta
 
@@ -5,17 +6,17 @@ from agents.machine.model import MachineModel
 from agents.workcenter.model import WorkCenterModel
 from environment import Job, ShopFloor, Machine, Delegate, WorkCenter, DelegateContext
 from .machine import MachineReward, from_cli as machine_reward_from_cli
-from .utils import *
 from .work_center import WorkCenterReward, from_cli as work_center_reward_from_cli
+from .queue import MachineQueue, WorkCenterQueue
+from .utils import *
+from utils import Loggable
 
-ShopFloorId = str
-# TODO: - Now suppose it to be job id, but should be actual action id
-ActionId = int
 
-
-class TapeModel(Delegate, metaclass=ABCMeta):
+class TapeModel(Delegate, Loggable, metaclass=ABCMeta):
 
     def __init__(self, machine_reward: MachineReward, work_center_reward: WorkCenterReward):
+        super().__init__()
+
         self.machine_reward = machine_reward
         self.work_center_reward = work_center_reward
 
@@ -23,6 +24,14 @@ class TapeModel(Delegate, metaclass=ABCMeta):
 
         self.machine_queue = MachineQueue(machine_reward)
         self.work_center_queue = WorkCenterQueue(work_center_reward)
+
+    def with_logger(self, logger: logging.Logger):
+        super().with_logger(logger)
+
+        self.machine_queue.with_logger(logger)
+        self.work_center_queue.with_logger(logger)
+
+        return self
 
     def connect(self, simulator: SimulatorInterface):
         self._simulator = weakref.ref(simulator)
@@ -43,8 +52,8 @@ class TapeModel(Delegate, metaclass=ABCMeta):
         self.work_center_queue.prepare(context.shop_floor)
 
     def did_produce(self, context: DelegateContext, job: Job, machine: Machine):
-        self.machine_queue.record_state(context, machine, job)
-        self.work_center_queue.record_state(context, machine, job)
+        self.machine_queue.record_next_state(context, machine, job)
+        self.work_center_queue.record_next_state(context, machine, job)
 
         self.machine_queue.emit_intermediate_reward(context, machine, job)
         self.work_center_queue.emit_intermediate_reward(context, machine, job)

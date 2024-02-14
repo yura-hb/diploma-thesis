@@ -13,10 +13,10 @@ class No(WorkCenterReward):
     def record_job_action(self, job: Job, work_center: WorkCenter) -> Context:
         return self.Context()
 
-    def reward_after_production(self, context: Context) -> torch.FloatTensor | None:
+    def reward_after_production(self, context: Context):
         pass
 
-    def reward_after_completion(self, context: List[Context]) -> torch.FloatTensor | None:
+    def reward_after_completion(self, context: List[Context]):
         pass
 
     @staticmethod
