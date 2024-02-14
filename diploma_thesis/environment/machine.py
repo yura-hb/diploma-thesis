@@ -158,6 +158,12 @@ class History:
         return self
 
 
+@dataclass(frozen=True)
+class Key:
+    work_center_id: int
+    machine_id: int
+
+
 class Machine:
 
     def __init__(self, environment: simpy.Environment, machine_idx: int, work_center_idx: int):
@@ -210,12 +216,16 @@ class Machine:
         return self.state.work_center_idx
 
     @property
-    def work_center(self) -> 'environment.WorkCenter':
-        return self.shop_floor.work_center(self.work_center_idx)
-
-    @property
     def machine_idx(self) -> int:
         return self.state.machine_idx
+
+    @property
+    def key(self) -> Key:
+        return Key(work_center_id=self.work_center_idx, machine_id=self.machine_idx)
+
+    @property
+    def work_center(self) -> 'environment.WorkCenter':
+        return self.shop_floor.work_center(self.work_center_idx)
 
     @property
     def queue_size(self) -> int:
@@ -279,9 +289,7 @@ class Machine:
             yield self.environment.timeout(processing_time)
 
             self.__notify_job_about_production__(job, production_start=False)
-
             self.state.with_runtime(processing_time)
-
             self.shop_floor.did_produce(job, self)
 
             self.__forward__(job)

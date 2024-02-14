@@ -7,6 +7,7 @@ class CRSPTSchedulingRule(SchedulingRule):
     the rule selects jobs with the lowest ratio of due time to remaining processing time and current operation time
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

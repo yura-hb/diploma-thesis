@@ -6,6 +6,7 @@ class AVPROSchedulingRule(SchedulingRule):
     Average Processing Time per Operation scheduling rule
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

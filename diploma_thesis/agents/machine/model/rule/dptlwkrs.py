@@ -6,6 +6,7 @@ class DPTLWKRSSchedulingRule(SchedulingRule):
     Double Processing Time + Least Work Remaining + Slack
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

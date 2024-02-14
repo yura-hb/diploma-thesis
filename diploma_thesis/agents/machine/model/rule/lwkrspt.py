@@ -7,6 +7,7 @@ class LWRKSPTSchedulingRule(SchedulingRule):
         i.e. selects jobs, in which satisfy both criteria (for reference check lwrk.py and spt.py)
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

@@ -6,6 +6,7 @@ class GP2SchedulingRule(SchedulingRule):
     Genetic Programming 2 scheduling rule. Taken from external/PhD-Thesis-Projects/FJSP/sequencing.py
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

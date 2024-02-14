@@ -6,6 +6,7 @@ class SPMWKSchedulingRule(SchedulingRule):
     Slack per Remaining Work scheduling rule
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

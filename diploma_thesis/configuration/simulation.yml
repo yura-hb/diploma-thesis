@@ -5,8 +5,8 @@ simulation: &simulation
   parameters:
     configuration:
       timespan: 5000
-      machines_per_work_center: 5
-      work_center_count: 5
+      machines_per_work_center: 1
+      work_center_count: 10
       pre_assign_initial_jobs: True
 
     job_sampler:
@@ -105,6 +105,14 @@ task:
       encoder:
         kind: 'deep_marl_indirect'
 
+      memory:
+        kind: 'replay'
+        parameters:
+          size: 1024
+          batch_size: 32
+
+
+
   work_center_agent:
     kind: 'static'
     parameters:
@@ -115,8 +123,14 @@ task:
       encoder:
         kind: 'plain'
 
+  tape:
+    machine_reward:
+      kind: 'global_tardiness'
+
+    work_center_reward:
+      kind: 'no'
+
   simulator:
-    # Can be 'td'. Important for return estimation
     kind: 'td'
 
   run:

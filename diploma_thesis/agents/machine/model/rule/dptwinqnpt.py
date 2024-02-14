@@ -6,6 +6,7 @@ class DPTWINQNPTSchedulingRule(SchedulingRule):
     Double Processing Time + Work In Next Queue + Next Processing Time
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

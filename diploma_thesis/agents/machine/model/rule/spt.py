@@ -6,6 +6,7 @@ class SPTSchedulingRule(SchedulingRule):
     Shortest Processing Time rule, i.e. selects jobs, in which current operation has the smallest operation time
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

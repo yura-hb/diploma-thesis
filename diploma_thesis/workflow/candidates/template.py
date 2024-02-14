@@ -10,8 +10,8 @@ from agents import Machine, WorkCenter
 @dataclass
 class Candidate:
     name: str
-    work_center: WorkCenter
     machine: Machine
+    work_center: WorkCenter
 
 
 class Template(metaclass=ABCMeta):

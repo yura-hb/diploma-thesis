@@ -7,6 +7,7 @@ class CRSchedulingRule(SchedulingRule):
     processing time
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

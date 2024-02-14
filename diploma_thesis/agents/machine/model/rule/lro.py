@@ -6,6 +6,7 @@ class LROSchedulingRule(SchedulingRule):
     Least Remaining Operations rule, i.e. selects jobs, which has the smallest number of remaining operations
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

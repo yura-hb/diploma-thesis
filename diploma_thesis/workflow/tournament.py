@@ -1,20 +1,21 @@
 import logging
-import math
 import multiprocessing
 from functools import reduce
 from typing import Dict
 from typing import List
 
+import numpy as np
 import pandas as pd
 import simpy
-import numpy as np
-from tabulate import tabulate
 from joblib import Parallel, delayed
+from tabulate import tabulate
 
 from simulator import EvaluateConfiguration, EpisodicSimulator, Simulation
 from workflow.candidates import from_cli as candidates_from_cli, Candidate
 from workflow.criterion import from_cli as criterion_from_cli, Criterion, Direction, Scale
 from .workflow import Workflow
+
+from tape import TapeModel, NoMachineReward, NoWorkCenterReward
 
 reward_suffix = '_reward'
 
@@ -68,7 +69,7 @@ class Tournament(Workflow):
         simulator = EpisodicSimulator(
             machine=candidate.machine,
             work_center=candidate.work_center,
-            reward_model=None,
+            tape_model=TapeModel(NoMachineReward(), NoWorkCenterReward()),
             environment=environment,
             logger=logger
         )
@@ -96,7 +97,7 @@ class Tournament(Workflow):
         return result
 
     def __reward__(self, metrics: pd.DataFrame, criteria: List['Criterion']) -> pd.DataFrame:
-        reward_parameters = self.parameters.get('reward', {})
+        reward_parameters = self.parameters.get('tape', {})
 
         top_k = reward_parameters.get('top_k', -1)
         points = reward_parameters.get('points', 1)

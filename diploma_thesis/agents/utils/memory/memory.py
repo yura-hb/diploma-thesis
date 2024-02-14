@@ -1,11 +1,10 @@
 
-import torch
-
-from torchrl.data import TensorDictReplayBuffer
-from abc import ABCMeta, abstractmethod
-from tensordict.prototype import tensorclass
+from abc import ABCMeta
 from typing import TypeVar
 
+import torch
+from tensordict.prototype import tensorclass
+from torchrl.data import TensorDictReplayBuffer
 
 State = TypeVar('State')
 Action = TypeVar('Action')
@@ -34,6 +33,5 @@ class Memory(metaclass=ABCMeta):
     def sample_n(self, batch_size: int) -> Record:
         return self.buffer.sample(batch_size=batch_size)
 
-    @abstractmethod
     def __len__(self) -> int:
-        pass
+        return len(self.buffer)

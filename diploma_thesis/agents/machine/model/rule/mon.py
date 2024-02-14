@@ -7,6 +7,7 @@ class MONSchedulingRule(SchedulingRule):
         i.e. SPT + additional slack factor
     """
 
+    @property
     def selector(self):
         return torch.argmax
 

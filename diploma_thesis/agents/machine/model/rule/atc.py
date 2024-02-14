@@ -1,5 +1,3 @@
-import torch
-
 from .scheduling_rule import *
 
 
@@ -10,6 +8,7 @@ class ATCSchedulingRule(SchedulingRule):
     Source: https://www.jstor.org/stable/2632177
     """
 
+    @property
     def selector(self):
         return torch.argmax
 

@@ -7,6 +7,7 @@ class COVERTSchedulingRule(SchedulingRule):
     We assume that the cost is
     """
 
+    @property
     def selector(self):
         return torch.argmax
 

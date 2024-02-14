@@ -1,40 +1,36 @@
 import logging
-from abc import ABCMeta
-from typing import Callable, List, TypeVar
+from abc import ABCMeta, abstractmethod
+from typing import Callable, List
 
 import simpy
 
-from abc import abstractmethod
-from agents import WorkCenter, Machine, TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
-from environment import Delegate, Agent
+from agents import MachineInput, WorkCenterInput
+from agents import TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
+from agents import Machine as MachineAgent, WorkCenter as WorkCenterAgent
+from agents.utils.memory import Record
+from environment import Agent, ShopFloor, Job, WaitInfo, Machine, WorkCenter
+from tape import TapeModel, SimulatorInterface
 from .configuration import RunConfiguration, EvaluateConfiguration
-from reward import RewardModel
 from .simulation import Simulation
 
 
-class Simulator(Agent, Delegate, metaclass=ABCMeta):
+class Simulator(Agent, SimulatorInterface, metaclass=ABCMeta):
 
     def __init__(
         self,
-        machine: Machine,
-        machine_reward: RewardModel,
-        work_center: WorkCenter,
-        work_center_reward: RewardModel,
+        machine: MachineAgent,
+        work_center: WorkCenterAgent,
+        tape_model: TapeModel,
         environment: simpy.Environment,
         logger: logging.Logger
     ):
         self.work_center = work_center
         self.machine = machine
-        self.machine_reward = machine_reward
-        self.work_center_reward = work_center_reward
+        self.tape_model = tape_model
         self.environment = environment
         self.logger = logger
 
-        self.__post_init__()
-
-    @abstractmethod
-    def __post_init__(self):
-        pass
+        self.tape_model.connect(self)
 
     def train(self, config: RunConfiguration):
         assert self.machine.is_trainable or self.work_center.is_trainable, 'At least one agent should be trainable'
@@ -76,6 +72,49 @@ class Simulator(Agent, Delegate, metaclass=ABCMeta):
 
         self.__log__(f'Evaluation Ended')
 
+    # Reward
+
+    def encode_machine_state(self, parameters: MachineInput):
+        return self.machine.encode_state(parameters)
+
+    def encode_work_center_state(self, parameters: WorkCenterInput):
+        return self.work_center.encode_state(parameters)
+
+    @abstractmethod
+    def did_prepare_machine_reward(self, shop_floor: ShopFloor, machine: Machine, record: Record):
+        pass
+
+    @abstractmethod
+    def did_prepare_work_center_reward(self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record):
+        pass
+
+    # Agent
+
+    def schedule(self, shop_floor: ShopFloor, machine: Machine, now: int) -> Job | WaitInfo:
+        parameters = MachineInput(machine, now)
+        result = self.machine.schedule(parameters)
+
+        if self.machine.is_trainable:
+            self.tape_model.register_machine_reward_preparation(shop_floor,
+                                                                machine=machine,
+                                                                record=result)
+
+        return result.result
+
+    def route(self, shop_floor: ShopFloor, job: Job, work_center_idx: int, machines: List[Machine]) -> 'Machine | None':
+        parameters = WorkCenterInput(job, work_center_idx, machines)
+        result = self.work_center.schedule(parameters)
+
+        if self.work_center.is_trainable:
+            self.tape_model.register_work_center_reward_preparation(shop_floor,
+                                                                    work_center=shop_floor.work_center(work_center_idx),
+                                                                    job=job,
+                                                                    record=result)
+
+        return result.result
+
+    # Timeline
+
     def __run__(self, run_event: simpy.Event, n_workers: int, simulations: List[Simulation]):
         resource = simpy.Resource(self.environment, capacity=n_workers)
 
@@ -85,7 +124,7 @@ class Simulator(Agent, Delegate, metaclass=ABCMeta):
 
                 self.__log__(f'Simulation Started {simulation.shop_floor_id}')
 
-                yield self.environment.process(simulation.run(self, self, self.environment))
+                yield self.environment.process(simulation.run(self, self.tape_model, self.environment))
 
                 self.__log__(f'Simulation Finished {simulation.shop_floor_id}')
 

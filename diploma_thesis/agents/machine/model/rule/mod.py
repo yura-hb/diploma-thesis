@@ -6,6 +6,7 @@ class MODSchedulingRule(SchedulingRule):
     Modified operational due date
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

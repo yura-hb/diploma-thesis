@@ -7,6 +7,7 @@ from typing import Dict
 
 from agents import work_center_from_cli, machine_from_cli
 from simulator import from_cli as simulator_from_cli, RunConfiguration, EvaluateConfiguration
+from tape import TapeModel
 
 
 class Simulation(Workflow):
@@ -22,6 +23,7 @@ class Simulation(Workflow):
 
         machine = machine_from_cli(parameters=self.parameters['machine_agent']).with_logger(logger)
         work_center = work_center_from_cli(parameters=self.parameters['work_center_agent']).with_logger(logger)
+        tape = TapeModel.from_cli(parameters=self.parameters['tape'])
 
         simulator_logger = logger.getChild('Simulator')
 
@@ -31,11 +33,10 @@ class Simulation(Workflow):
         evaluate_logger = logger.getChild('Evaluate')
         evaluate_logger.setLevel(logging.INFO)
 
-        # TODO: Implement Reward Model
         simulator = simulator_from_cli(
             machine=machine,
             work_center=work_center,
-            reward_model=None,
+            tape=tape,
             environment=environment,
             logger=simulator_logger,
             parameters=self.parameters['simulator']

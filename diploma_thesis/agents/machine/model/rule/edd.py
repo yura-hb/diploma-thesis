@@ -6,6 +6,7 @@ class EDDSchedulingRule(SchedulingRule):
     Earliest Due Date rule, i.e. selects jobs, in which due at is the shortest
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

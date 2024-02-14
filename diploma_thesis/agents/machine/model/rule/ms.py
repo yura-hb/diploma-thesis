@@ -6,6 +6,7 @@ class MSSchedulingRule(SchedulingRule):
     Minimum Slack scheduling rule, i.e. the rule selects jobs with the minimum slack
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

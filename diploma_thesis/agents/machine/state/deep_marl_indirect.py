@@ -35,7 +35,7 @@ class DEEPMARLIndirectStateEncoder(StateEncoder):
         state = torch.hstack(state).reshape(-1)
         state = torch.nan_to_num(state, nan=0.0, posinf=1, neginf=-1)
 
-        return self.State(state)
+        return self.State(state, batch_size=[])
 
     def __make_job_number_state__(self, parameters: StateEncoder.Input):
         state = [

@@ -2,7 +2,7 @@ from .scheduling_rule import *
 
 
 class LIFOSchedulingRule(SchedulingRule):
-
+    @property
     def selector(self):
         return lambda _: -1
 

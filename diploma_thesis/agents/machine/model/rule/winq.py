@@ -6,6 +6,7 @@ class WINQSchedulingRule(SchedulingRule):
     Work In Next Queue scheduling rule
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

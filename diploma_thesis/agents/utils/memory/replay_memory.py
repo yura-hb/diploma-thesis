@@ -19,4 +19,4 @@ class ReplayMemory(Memory):
     def from_cli(parameters: Dict) -> 'ReplayMemory':
         return ReplayMemory(size=parameters['size'],
                             batch_size=parameters['batch_size'],
-                            prefetch=parameters['prefetch'])
+                            prefetch=parameters.get('prefetch', 1))

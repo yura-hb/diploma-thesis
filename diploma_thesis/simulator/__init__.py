@@ -6,7 +6,7 @@ from .configuration import RunConfiguration, EvaluateConfiguration
 from .simulation import Simulation
 from agents import Machine, WorkCenter
 from typing import Dict
-from reward import RewardModel
+from tape import TapeModel
 
 import logging
 import simpy
@@ -19,10 +19,10 @@ key_to_class = {
 
 def from_cli(machine: Machine,
              work_center: WorkCenter,
-             reward_model,
+             tape: TapeModel,
              environment: simpy.Environment,
              logger: logging.Logger,
              parameters: Dict):
     cls = key_to_class[parameters['kind']]
 
-    return cls(work_center, machine, reward_model, environment, logger)
+    return cls(machine, work_center, tape, environment, logger)

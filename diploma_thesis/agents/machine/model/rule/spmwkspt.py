@@ -6,6 +6,7 @@ class SPMWKSPTSchedulingRule(SchedulingRule):
     Slack per Remaining Work + Shortest Processing Time scheduling rule
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

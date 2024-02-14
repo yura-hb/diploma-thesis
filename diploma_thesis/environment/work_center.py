@@ -38,6 +38,11 @@ class History:
         return self
 
 
+@dataclass(frozen=True)
+class Key:
+    work_center_id: int
+
+
 class WorkCenter:
 
     def __init__(self, environment: simpy.Environment, work_center_idx: int):
@@ -93,6 +98,10 @@ class WorkCenter:
     @property
     def machines(self) -> List['environment.Machine']:
         return self._machines
+
+    @property
+    def key(self) -> Key:
+        return Key(self.work_center_idx)
 
     @property
     def work_load(self) -> torch.FloatTensor:

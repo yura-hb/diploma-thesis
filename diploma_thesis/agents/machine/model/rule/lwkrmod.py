@@ -6,6 +6,7 @@ class LWRKMODSchedulingRule(SchedulingRule):
     Least Work Remaining + Modified Operational Due date rule. Check implementation of the rules separately.
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

@@ -61,15 +61,6 @@ class History:
 
         return self
 
-    def __make_record__(self, job: environment.Job, machine: environment.Machine, now: int):
-        return self.Record(
-            job_id=job.id,
-            created_at=now,
-            duration=job.current_operation_processing_time_on_machine,
-            work_center_idx=machine.state.work_center_idx,
-            machine_idx=machine.state.machine_idx
-        )
-
     def job(self, job_id: int):
         return self.jobs[job_id]
 
@@ -104,7 +95,7 @@ class ShopFloor:
         torch.manual_seed(self.configuration.problem.seed)
 
         self.history.with_started_at(self.configuration.environment.now)
-        self.delegate.did_start_simulation(self.state.idx)
+        self.delegate.did_start_simulation(context=self.__make_context__())
 
         if self.configuration.problem.pre_assign_initial_jobs:
             self.__assign_initial_jobs__()
@@ -234,34 +225,31 @@ class ShopFloor:
     # Decision methods
 
     def schedule(self, machine: environment.Machine, now: int) -> 'environment.Job | environment.WaitInfo':
-        return self.agent.schedule(self.state.idx, machine, now)
+        return self.agent.schedule(self, machine, now)
 
     def route(
         self, job: environment.Job, work_center_idx: int, machines: List['environment.Machine']
     ) -> 'environment.Machine | None':
-        return self.agent.route(self.state.idx, job, work_center_idx, machines)
+        return self.agent.route(self, job, work_center_idx, machines)
 
     # Events from subcomponents (WorkCenter, Machine)
-
-    # TODO: Rewrite with meta programming (Low Priority)
-
     def will_produce(self, job: environment.Job, machine: environment.Machine):
-        self.delegate.will_produce(self.state.idx, job, machine)
+        self.delegate.will_produce(context=self.__make_context__(), job=job,  machine=machine)
 
     def did_produce(self, job: environment.Job, machine: environment.Machine):
-        self.delegate.did_produce(self.state.idx, job, machine)
+        self.delegate.did_produce(context=self.__make_context__(), job=job, machine=machine)
 
     def will_dispatch(self, job: environment.Job, work_center: environment.WorkCenter):
-        self.delegate.will_dispatch(self.state.idx, job, work_center)
+        self.delegate.will_dispatch(context=self.__make_context__(), job=job, work_center=work_center)
 
     def did_dispatch(self, job: environment.Job, work_center: environment.WorkCenter, machine: environment.Machine):
-        self.delegate.did_dispatch(self.state.idx, job, work_center, machine)
+        self.delegate.did_dispatch(context=self.__make_context__(), job=job,  work_center=work_center, machine=machine)
 
     def did_finish_dispatch(self, work_center: environment.WorkCenter):
-        self.delegate.did_finish_dispatch(self.state.idx, work_center)
+        self.delegate.did_finish_dispatch(context=self.__make_context__(), work_center=work_center)
 
     def did_complete(self, job: environment.Job):
-        self.delegate.did_complete(self.state.idx, job)
+        self.delegate.did_complete(context=self.__make_context__(), job=job)
         self.__test_if_finished__()
 
     def did_breakdown(self, machine: environment.Machine, repair_time: torch.FloatTensor):
@@ -270,7 +258,7 @@ class ShopFloor:
             f'has broken down. Repair time {repair_time.item()}'
         )
 
-        self.delegate.did_breakdown(self.state.idx, machine, repair_time)
+        self.delegate.did_breakdown(context=self.__make_context__(), machine=machine, repair_time=repair_time)
 
     def did_repair(self, machine: environment.Machine):
         self.logger.info(
@@ -278,7 +266,7 @@ class ShopFloor:
             'has been repaired'
         )
 
-        self.delegate.did_repair(self.state.idx, machine)
+        self.delegate.did_repair(context=self.__make_context__(), machine=machine)
 
     # Utility methods
 
@@ -331,7 +319,7 @@ class ShopFloor:
         is_no_jobs_in_system = len(self.state.in_system_job_ids) == 0
 
         if not self.did_finish_simulation_event.triggered and has_dispatched_all_jobs and is_no_jobs_in_system:
-            self.delegate.did_finish_simulation(self.state.idx)
+            self.delegate.did_finish_simulation(context=self.__make_context__())
 
             self.did_finish_simulation_event.succeed()
 
@@ -349,3 +337,9 @@ class ShopFloor:
         self.state.with_new_job_in_system(job.id)
 
         work_center.receive(job)
+
+    def __make_context__(self) -> 'environment.DelegateContext':
+        return environment.DelegateContext(
+            shop_floor=self,
+            moment=self.configuration.environment.now
+        )

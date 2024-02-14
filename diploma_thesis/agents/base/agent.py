@@ -6,9 +6,12 @@ from agents.utils import Phase, EvaluationPhase, Loggable, PhaseUpdatable
 from agents.utils.memory import Memory, Record
 from .encoder import Encoder as StateEncoder, Input, State
 from .model import Model, Action, Result
+from typing import TypeVar, Generic
+
+Key = TypeVar('Key')
 
 
-class Agent(Loggable, PhaseUpdatable, metaclass=ABCMeta):
+class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
 
     def __init__(self,
                  model: Model[Input, State, Action, Result],
@@ -39,13 +42,13 @@ class Agent(Loggable, PhaseUpdatable, metaclass=ABCMeta):
     @property
     @abstractmethod
     def is_trainable(self):
-        pass
+        return self.phase != EvaluationPhase()
 
     @abstractmethod
     def train_step(self):
         pass
 
-    def store(self, record: Record):
+    def store(self, key: Key, record: Record):
         pass
 
     def schedule(self, parameters: Input) -> Model.Record:

@@ -4,7 +4,7 @@ from .scheduling_rule import *
 
 
 class RandomSchedulingRule(SchedulingRule):
-
+    @property
     def selector(self):
         return lambda x: torch.randint(0, len(x), (1,))
 

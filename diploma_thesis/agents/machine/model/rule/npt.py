@@ -7,6 +7,7 @@ class NPTSchedulingRule(SchedulingRule):
     the smallest
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

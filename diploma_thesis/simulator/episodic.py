@@ -1,8 +1,4 @@
-from typing import List
-
-from environment import Job, WorkCenter, Machine, WaitInfo
-from agents import MachineInput, WorkCenterInput
-from .simulator import Simulator
+from .simulator import *
 
 
 class EpisodicSimulator(Simulator):
@@ -13,42 +9,10 @@ class EpisodicSimulator(Simulator):
     After the simulation is finished returns are estimated and passed to the agent for training.
     """
 
-    def schedule(self, shop_floor_id: str, machine: Machine, now: int) -> Job | WaitInfo:
-        parameters = MachineInput(machine, now)
-
-        return self.machine.schedule(parameters).result
-
-    def route(self, shop_floor_id: str, job: Job, work_center_idx: int, machines: List[Machine]) -> 'Machine | None':
-        parameters = WorkCenterInput(job, work_center_idx, machines)
-
-        return self.work_center.schedule(parameters).result
-
-    def did_start_simulation(self, shop_floor_id: str):
+    def did_prepare_machine_reward(self, shop_floor: ShopFloor, machine: Machine, record: Record):
+        # self.machine.store(machine.key, record)
         pass
 
-    def will_produce(self, shop_floor_id: str, job: Job, machine: Machine):
-        pass
-
-    def did_produce(self, shop_floor_id: str, job: Job, machine: Machine):
-        pass
-
-    def will_dispatch(self, shop_floor_id: str, job: Job, work_center: WorkCenter):
-        pass
-
-    def did_dispatch(self, shop_floor_id: str, job: Job, work_center: WorkCenter, machine: Machine):
-        pass
-
-    def did_finish_dispatch(self, shop_floor_id: str, work_center: WorkCenter):
-        pass
-
-    def did_complete(self, shop_floor_id: str, job: Job):
-        pass
-
-    def did_finish_simulation(self, shop_floor_id: str):
-        pass
-
-    def did_breakdown(self, shop_floor_id: str, machine: Machine, repair_time: float):
-        pass
-
-    def did_repair(self, shop_floor_id: str, machine: Machine):
+    def did_prepare_work_center_reward(self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record):
+        # self.work_center.store(work_center.key, record)
         pass

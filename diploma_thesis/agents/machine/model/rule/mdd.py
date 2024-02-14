@@ -7,6 +7,7 @@ class MDDSchedulingRule(SchedulingRule):
         selects job with the smallest value of max(due_at, operation_completed_at)
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

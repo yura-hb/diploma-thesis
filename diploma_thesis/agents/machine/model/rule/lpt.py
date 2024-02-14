@@ -6,6 +6,7 @@ class LPTSchedulingRule(SchedulingRule):
     Longest Processing Time rule, i.e. selects jobs, in which current operation has the largest operation time
     """
 
+    @property
     def selector(self):
         return torch.argmax
 

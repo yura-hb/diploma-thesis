@@ -6,6 +6,7 @@ class LWRKSchedulingRule(SchedulingRule):
     Least Work Remaining rule, i.e. selects jobs, in which the remaining time of the job is the smallest.
     """
 
+    @property
     def selector(self):
         return torch.argmin
 

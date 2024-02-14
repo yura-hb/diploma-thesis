@@ -12,7 +12,8 @@ class SchedulingRule(metaclass=ABCMeta):
 
     def __call__(self, machine: 'Machine', now: float) -> Job | WaitInfo:
         value = self.criterion(machine, now)
-        idx = self.selector(value)
+        selector = self.selector
+        idx = selector(value)
 
         return machine.queue[idx]
 

@@ -7,7 +7,7 @@ from typing import Dict
 class DeepQAgent(Machine):
 
     def is_trainable(self):
-        return True
+        return super().is_trainable()
 
     def train_step(self):
         pass
@@ -18,5 +18,5 @@ class DeepQAgent(Machine):
         encoder = state_encoder_from_cli(parameters['encoder'])
         memory = memory_from_cli(parameters['memory'])
 
-        return DeepQAgent(model=model, state_encoder=encoder, memory=None)
+        return DeepQAgent(model=model, state_encoder=encoder, memory=memory)
 

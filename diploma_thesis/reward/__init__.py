@@ -1,1 +1,0 @@
-from reward.base.reward_model import RewardModel

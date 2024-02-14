@@ -6,6 +6,7 @@ class PTWINQSSchedulingRule(SchedulingRule):
     Processing Time + Work In Next Queue + Slack
     """
 
+    @property
     def selector(self):
         return torch.argmin
 
