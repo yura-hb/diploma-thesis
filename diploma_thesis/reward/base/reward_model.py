@@ -1,22 +1,31 @@
 
-from abc import ABCMeta, abstractmethod
+import torch
 
-# There are two types of rewards:
-# 1. Reward can be assigned on the job completion using decomposition
-# 2. Reward can be assigned on the operation completion using surrogate reward shaping
-# Note that it is either the first method or the second one but not both
+from abc import ABCMeta
+from typing import TypeVar
+from dataclasses import dataclass
+from simulator import Simulation
+
+State = TypeVar('State')
+Action = TypeVar('Action')
+
+
+@dataclass
+class Record:
+    state: State
+    action: Action
+    next_state: State
+    reward: torch.FloatTensor
+    done: bool
 
 
 class RewardModel(metaclass=ABCMeta):
 
-    @abstractmethod
-    def prepare_context_before_operation(self):
+    def __init__(self):
         pass
 
-    @abstractmethod
-    def prepare_context_after_operation(self):
+    def connect(self, simulator: 'Simulator'):
         pass
 
-    @abstractmethod
-    def reward(self):
+    def did_record_state(self):
         pass

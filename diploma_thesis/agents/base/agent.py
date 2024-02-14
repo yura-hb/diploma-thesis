@@ -2,9 +2,8 @@
 import logging
 from abc import ABCMeta, abstractmethod
 
-import torch
-
 from agents.utils import Phase, EvaluationPhase, Loggable, PhaseUpdatable
+from agents.utils.memory import Memory, Record
 from .encoder import Encoder as StateEncoder, Input, State
 from .model import Model, Action, Result
 
@@ -14,7 +13,7 @@ class Agent(Loggable, PhaseUpdatable, metaclass=ABCMeta):
     def __init__(self,
                  model: Model[Input, State, Action, Result],
                  state_encoder: StateEncoder[Input, State],
-                 memory):
+                 memory: Memory):
         self.state_encoder = state_encoder
         self.model = model
         self.memory = memory
@@ -46,11 +45,7 @@ class Agent(Loggable, PhaseUpdatable, metaclass=ABCMeta):
     def train_step(self):
         pass
 
-    def store(self,
-              state: State,
-              action: Action,
-              next_state: State,
-              reward: torch.FloatTensor):
+    def store(self, record: Record):
         pass
 
     def schedule(self, parameters: Input) -> Model.Record:

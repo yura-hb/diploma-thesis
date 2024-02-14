@@ -1,17 +1,17 @@
-from dataclasses import dataclass
-from typing import Dict
-from environment import JobReductionStrategy
 from functools import reduce
+from typing import Dict
 
 import torch
+from tensordict.prototype import tensorclass
 
 from agents.base.state import TensorState
+from environment import JobReductionStrategy
 from .encoder import StateEncoder
 
 
 class DEEPMARLIndirectStateEncoder(StateEncoder):
 
-    @dataclass
+    @tensorclass
     class State(TensorState):
         pass
 

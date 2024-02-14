@@ -1,14 +1,15 @@
 import torch
 
 from dataclasses import dataclass
+from tensordict.prototype import tensorclass
 
 
-@dataclass
+@tensorclass
 class TensorState:
     state: torch.FloatTensor
 
 
-@dataclass
+@tensorclass
 class GraphState:
     graph: torch.FloatTensor
 

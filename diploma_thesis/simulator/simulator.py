@@ -37,8 +37,7 @@ class Simulator(Agent, Delegate, metaclass=ABCMeta):
         pass
 
     def train(self, config: RunConfiguration):
-        # TODO: - Revert
-        # assert self.machine.is_trainable or self.work_center.is_trainable, 'At least one agent should be trainable'
+        assert self.machine.is_trainable or self.work_center.is_trainable, 'At least one agent should be trainable'
 
         env = self.environment
         warmup_end = env.event()

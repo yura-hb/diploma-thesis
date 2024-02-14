@@ -282,6 +282,8 @@ class Machine:
 
             self.state.with_runtime(processing_time)
 
+            self.shop_floor.did_produce(job, self)
+
             self.__forward__(job)
 
     def __breakdown__(self):

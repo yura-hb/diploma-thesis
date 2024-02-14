@@ -2,11 +2,12 @@ from dataclasses import dataclass
 from typing import Dict
 
 from .encoder import StateEncoder
+from tensordict.prototype import tensorclass
 
 
 class PlainEncoder(StateEncoder):
 
-    @dataclass
+    @tensorclass
     class State:
         pass
 

@@ -1,7 +1,7 @@
-from dataclasses import dataclass
 from typing import Dict
 
 import torch
+from tensordict.prototype import tensorclass
 
 from agents.base.state import TensorState
 from environment import JobReductionStrategy, Job, Machine
@@ -24,7 +24,7 @@ class DEEPMARLMinimumRepetitionStateEncoder(StateEncoder):
     2. Arriving job info represents information of the job that is about to arrive at the machine
     """
 
-    @dataclass
+    @tensorclass
     class State(TensorState):
         job_idx: torch.LongTensor
 
