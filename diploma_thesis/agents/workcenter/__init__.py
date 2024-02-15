@@ -3,10 +3,12 @@ import logging
 from .utils import Input as WorkCenterInput
 from .work_center import WorkCenter
 from .static import StaticWorkCenter
+from .persisted import PersistedWorkCenter
 
 
 key_to_class = {
-    "static": StaticWorkCenter
+    "static": StaticWorkCenter,
+    'persisted': PersistedWorkCenter
 }
 
 

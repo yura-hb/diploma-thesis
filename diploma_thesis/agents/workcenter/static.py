@@ -1,9 +1,8 @@
-import logging
+from typing import Dict
 
-from .work_center import WorkCenter
 from .model import StaticWorkCenterModel, from_cli as model_from_cli
 from .state import StateEncoder, from_cli as state_encoder_from_cli
-from typing import Dict
+from .work_center import WorkCenter
 
 
 class StaticWorkCenter(WorkCenter):

@@ -70,8 +70,6 @@ class Tournament(Workflow):
             machine=candidate.machine,
             work_center=candidate.work_center,
             tape_model=TapeModel(NoMachineReward(), NoWorkCenterReward()),
-            environment=environment,
-            logger=logger
         )
 
         simulator.evaluate(configuration)

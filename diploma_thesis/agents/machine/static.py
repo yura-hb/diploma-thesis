@@ -15,22 +15,9 @@ class StaticMachine(Machine):
     def train_step(self):
         pass
 
-    def state_dict(self):
-        return {
-            'model': self.model,
-            'encoder': self.state_encoder
-        }
-
     @staticmethod
     def from_cli(parameters: Dict):
         model = model_from_cli(parameters['model'])
         encoder = state_encoder_from_cli(parameters['encoder'])
 
         return StaticMachine(model=model, state_encoder=encoder)
-
-    @classmethod
-    def load(cls, parameters: Dict):
-        return StaticMachine(
-            model=parameters['model'],
-            state_encoder=parameters['encoder']
-        )

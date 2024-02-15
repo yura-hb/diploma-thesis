@@ -3,16 +3,13 @@ import shutil
 from typing import Dict, List
 
 import simpy
-import torch
 
-import environment
 import simulator
-
 from agents import work_center_from_cli, machine_from_cli
 from simulator import from_cli as simulator_from_cli, RunConfiguration, EvaluateConfiguration, Simulator
 from tape import TapeModel
+from utils import save
 from .workflow import Workflow
-from utils import save, load
 
 
 class Simulation(Workflow):

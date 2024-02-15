@@ -2,10 +2,12 @@ from .utils import Input as MachineInput
 from .dqn import DeepQAgent
 from .machine import Machine
 from .static import StaticMachine
+from .persisted import PersistedMachine
 
 key_to_class = {
     "static": StaticMachine,
-    'dqn': DeepQAgent
+    'dqn': DeepQAgent,
+    'persisted': PersistedMachine
 }
 
 
