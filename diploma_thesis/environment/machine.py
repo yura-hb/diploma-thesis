@@ -329,7 +329,7 @@ class Machine:
         if len(self.state.queue) == 1:
             return self.state.queue[0]
 
-        job = self.shop_floor.schedule(self, self.environment.now)
+        job = self.shop_floor.schedule(self)
 
         return job
 

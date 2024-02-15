@@ -2,7 +2,7 @@ import weakref
 import torch
 from abc import ABCMeta
 
-from environment import Job, ShopFloor, Machine, DelegateContext
+from environment import Job, ShopFloor, Machine, Context
 from tape.utils.simulator_interface import SimulatorInterface
 from utils import Loggable
 
@@ -25,13 +25,13 @@ class Queue(Loggable, metaclass=ABCMeta):
     def clear(self, shop_floor: ShopFloor):
         pass
 
-    def record_next_state(self, context: DelegateContext, machine: Machine, job: Job):
+    def record_next_state(self, context: Context, machine: Machine, job: Job):
         pass
 
-    def emit_intermediate_reward(self, context: DelegateContext, machine: Machine, job: Job):
+    def emit_intermediate_reward(self, context: Context, machine: Machine, job: Job):
         pass
 
-    def emit_reward_after_completion(self, context: DelegateContext, job: Job):
+    def emit_reward_after_completion(self, context: Context, job: Job):
         pass
 
     @property

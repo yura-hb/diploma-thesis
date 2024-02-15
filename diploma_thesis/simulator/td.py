@@ -8,8 +8,16 @@ class TDSimulator(Simulator):
     possible
     """
 
-    def did_prepare_machine_record(self, shop_floor: ShopFloor, machine: Machine, record: Record):
+    def did_prepare_machine_record(self,
+                                   shop_floor: ShopFloor,
+                                   machine: Machine,
+                                   record: Record,
+                                   moment: float):
         self.machine.store(machine.key, record)
 
-    def did_prepare_work_center_record(self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record):
+    def did_prepare_work_center_record(self,
+                                       shop_floor: ShopFloor,
+                                       work_center: WorkCenter,
+                                       record: Record,
+                                       moment: float):
         self.work_center.store(work_center.key, record)

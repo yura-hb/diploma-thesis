@@ -10,5 +10,6 @@ Context = TypeVar('Context')
 
 @dataclass
 class TapeRecord:
+    moment: int
     record: Record
     context: Context

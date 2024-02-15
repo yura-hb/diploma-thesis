@@ -8,7 +8,7 @@ from agents import MachineInput, WorkCenterInput
 from agents import TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
 from agents import Machine as MachineAgent, WorkCenter as WorkCenterAgent
 from agents.utils.memory import Record
-from environment import Agent, ShopFloor, Job, WaitInfo, Machine, WorkCenter
+from environment import Agent, ShopFloor, Job, WaitInfo, Machine, WorkCenter, Context
 from tape import TapeModel, SimulatorInterface
 from .configuration import RunConfiguration, EvaluateConfiguration
 from .simulation import Simulation
@@ -131,33 +131,41 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         return self.work_center.encode_state(parameters)
 
     @abstractmethod
-    def did_prepare_machine_record(self, shop_floor: ShopFloor, machine: Machine, record: Record):
+    def did_prepare_machine_record(self,
+                                   shop_floor: ShopFloor,
+                                   machine: Machine,
+                                   record: Record,
+                                   moment: float):
         pass
 
     @abstractmethod
-    def did_prepare_work_center_record(self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record):
+    def did_prepare_work_center_record(self,
+                                       shop_floor: ShopFloor,
+                                       work_center: WorkCenter,
+                                       record: Record,
+                                       moment: float):
         pass
 
     # Agent
 
-    def schedule(self, shop_floor: ShopFloor, machine: Machine, now: int) -> Job | WaitInfo:
-        parameters = MachineInput(machine, now)
+    def schedule(self, context: Context, machine: Machine) -> Job | WaitInfo:
+        parameters = MachineInput(machine, context.moment)
         result = self.machine.schedule(parameters)
 
         if self.machine.is_trainable:
-            self.tape_model.register_machine_reward_preparation(shop_floor,
+            self.tape_model.register_machine_reward_preparation(context=context,
                                                                 machine=machine,
                                                                 record=result)
 
         return result.result
 
-    def route(self, shop_floor: ShopFloor, job: Job, work_center_idx: int, machines: List[Machine]) -> 'Machine | None':
-        parameters = WorkCenterInput(job, work_center_idx, machines)
+    def route(self, context: Context, work_center: WorkCenter, job: Job) -> 'Machine | None':
+        parameters = WorkCenterInput(work_center, job)
         result = self.work_center.schedule(parameters)
 
         if self.work_center.is_trainable:
-            self.tape_model.register_work_center_reward_preparation(shop_floor,
-                                                                    work_center=shop_floor.work_center(work_center_idx),
+            self.tape_model.register_work_center_reward_preparation(context=context,
+                                                                    work_center=work_center,
                                                                     job=job,
                                                                     record=result)
 

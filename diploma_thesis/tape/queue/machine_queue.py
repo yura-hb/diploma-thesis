@@ -33,10 +33,10 @@ class MachineQueue(Queue):
 
     # Reward Emit
 
-    @filter(lambda self, shop_floor, *args, **kwargs: shop_floor.id in self.queue)
+    @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.queue)
     @filter(lambda self, _, __, record: isinstance(record.result, Job))
-    def register(self, shop_floor: ShopFloor, machine: Machine, record: MachineModel.Record):
-        self.queue[shop_floor.id][machine.key][record.result.id] = TapeRecord(
+    def register(self, context: Context, machine: Machine, record: MachineModel.Record):
+        self.queue[context.shop_floor.id][machine.key][record.result.id] = TapeRecord(
             record=Record(
                 state=record.state,
                 action=record.action,
@@ -45,18 +45,19 @@ class MachineQueue(Queue):
                 done=False,
                 batch_size=[]
             ),
-            context=self.reward.record_job_action(record.result, machine)
+            context=self.reward.record_job_action(record.result, machine),
+            moment=context.moment
         )
 
     @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.key])
-    def record_next_state(self, context: DelegateContext, machine: Machine, job: Job):
+    def record_next_state(self, context: Context, machine: Machine, job: Job):
         parameters = MachineInput(machine, context.moment)
         state = self.simulator.encode_machine_state(parameters)
 
         self.queue[context.shop_floor.id][machine.key][job.id].record.next_state = state
 
     @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.key])
-    def emit_intermediate_reward(self, context: DelegateContext, machine: Machine, job: Job):
+    def emit_intermediate_reward(self, context: Context, machine: Machine, job: Job):
         record = self.queue[context.shop_floor.id][machine.key][job.id]
         reward = self.reward.reward_after_production(record.context)
 
@@ -65,7 +66,7 @@ class MachineQueue(Queue):
 
         self.__emit_reward_to_machine__(context, machine, job, reward)
 
-    def emit_reward_after_completion(self, context: DelegateContext, job: Job):
+    def emit_reward_after_completion(self, context: Context, job: Job):
         contexts = self.__fetch_contexts_from_job_path__(context, job)
 
         if len(contexts) == 0:
@@ -81,7 +82,7 @@ class MachineQueue(Queue):
 
     # Utility
 
-    def __fetch_contexts_from_job_path__(self, context: DelegateContext, job: Job):
+    def __fetch_contexts_from_job_path__(self, context: Context, job: Job):
         contexts = []
 
         def fn(index, machine):
@@ -98,7 +99,8 @@ class MachineQueue(Queue):
 
         return contexts
 
-    def __emit_reward__(self, context: DelegateContext,
+    def __emit_reward__(self,
+                        context: Context,
                         work_center_idx: int,
                         machine_idx: int,
                         job: Job,
@@ -109,20 +111,25 @@ class MachineQueue(Queue):
 
     @filter(lambda self, context, machine, job, _: job.id in self.queue[context.shop_floor.id][machine.key])
     def __emit_reward_to_machine__(self,
-                                   context: DelegateContext,
+                                   context: Context,
                                    machine: Machine,
                                    job: Job,
                                    reward: torch.FloatTensor):
         record = self.queue[context.shop_floor.id][machine.key][job.id]
-        record = record.record
-        record.reward = reward
+        result = record.record
+        result.reward = reward
 
-        self.simulator.did_prepare_machine_record(context.shop_floor, machine, record)
+        self.simulator.did_prepare_machine_record(
+            shop_floor=context.shop_floor,
+            machine=machine,
+            record=result,
+            moment=record.moment
+        )
 
         del self.queue[context.shop_floor.id][machine.key][job.id]
 
     @staticmethod
-    def __enumerate_job_path__(context: DelegateContext, job: Job, fn):
+    def __enumerate_job_path__(context: Context, job: Job, fn):
         for index, _ in enumerate(job.step_idx):
             work_center_idx = job.step_idx[index]
             machine_idx = job.history.arrived_machine_idx[index]

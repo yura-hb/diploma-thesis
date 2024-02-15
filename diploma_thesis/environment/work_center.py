@@ -77,7 +77,6 @@ class WorkCenter:
         for machine in self.machines:
             machine.reset()
 
-
     def receive(self, job: environment.Job):
         self.state.with_new_job(job)
 
@@ -139,7 +138,7 @@ class WorkCenter:
                 self.shop_floor.will_dispatch(job, self)
 
                 # TODO: React on None
-                machine = self.shop_floor.route(job, work_center_idx=self.state.idx, machines=self.machines)
+                machine = self.shop_floor.route(work_center=self, job=job)
                 machine.receive(job)
 
                 self.shop_floor.did_dispatch(job, self, machine)

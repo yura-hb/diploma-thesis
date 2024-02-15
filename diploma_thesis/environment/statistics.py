@@ -319,6 +319,8 @@ class Statistics:
 
         return value.item()
 
+    # I/O
+
     def save(self, path: str):
         info = TensorDict({
             'shop_floor_history': self.shop_floor_history,

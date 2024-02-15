@@ -1,11 +1,9 @@
 
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
-from typing import List
 
 import environment
-
-from environment import Job, Machine
+from environment import Job, Context
 
 
 @dataclass
@@ -22,13 +20,9 @@ class Agent(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def schedule(self, shop_floor: 'environment.ShopFloor', machine: Machine, now: int) -> Job | WaitInfo:
+    def schedule(self, context: Context, machine: 'environment.Machine') -> Job | WaitInfo:
         pass
 
     @abstractmethod
-    def route(self,
-              shop_floor: 'environment.ShopFloor',
-              job: Job,
-              work_center_idx: int,
-              machines: List[Machine]) -> 'Machine | None':
+    def route(self, context: Context, work_center: 'environment.WorkCenter', job: Job) -> 'Machine | None':
         pass

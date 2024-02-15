@@ -1,11 +1,10 @@
 
 from dataclasses import dataclass
-from environment import Job, Machine
-from typing import List
+
+from environment import WorkCenter, Job
 
 
 @dataclass
 class Input:
+    work_center: WorkCenter
     job: Job
-    work_center_idx: int
-    machines: List[Machine]

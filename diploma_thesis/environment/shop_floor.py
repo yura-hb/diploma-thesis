@@ -253,13 +253,11 @@ class ShopFloor:
 
     # Decision methods
 
-    def schedule(self, machine: environment.Machine, now: int) -> 'environment.Job | environment.WaitInfo':
-        return self.agent.schedule(self, machine, now)
+    def schedule(self, machine: environment.Machine) -> 'environment.Job | environment.WaitInfo':
+        return self.agent.schedule(self.__make_context__(), machine)
 
-    def route(
-        self, job: environment.Job, work_center_idx: int, machines: List['environment.Machine']
-    ) -> 'environment.Machine | None':
-        return self.agent.route(self, job, work_center_idx, machines)
+    def route(self, work_center: 'environment.WorkCenter', job: environment.Job) -> 'environment.Machine | None':
+        return self.agent.route(self.__make_context__(), job=job, work_center=work_center)
 
     # Events from subcomponents (WorkCenter, Machine)
     def will_produce(self, job: environment.Job, machine: environment.Machine):
@@ -367,8 +365,8 @@ class ShopFloor:
 
         work_center.receive(job)
 
-    def __make_context__(self) -> 'environment.DelegateContext':
-        return environment.DelegateContext(
+    def __make_context__(self) -> 'environment.Context':
+        return environment.Context(
             shop_floor=self,
             moment=self.configuration.environment.now
         )
