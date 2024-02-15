@@ -9,8 +9,7 @@ from .machine import MachineReward, from_cli as machine_reward_from_cli
 from .work_center import WorkCenterReward, from_cli as work_center_reward_from_cli
 from .queue import MachineQueue, WorkCenterQueue
 from .utils import *
-from utils import Loggable
-
+from utils import Loggable, filter
 
 class TapeModel(Delegate, Loggable, metaclass=ABCMeta):
 
@@ -22,6 +21,7 @@ class TapeModel(Delegate, Loggable, metaclass=ABCMeta):
 
         self._simulator = None
 
+        self.registered_shop_floor_ids = set()
         self.machine_queue = MachineQueue(machine_reward)
         self.work_center_queue = WorkCenterQueue(work_center_reward)
 
@@ -39,18 +39,29 @@ class TapeModel(Delegate, Loggable, metaclass=ABCMeta):
         self.machine_queue.connect(simulator)
         self.work_center_queue.connect(simulator)
 
+    def register(self, shop_floor: ShopFloor):
+        self.registered_shop_floor_ids.add(shop_floor.id)
+
+        self.machine_queue.prepare(shop_floor)
+        self.work_center_queue.prepare(shop_floor)
+
+    def clear_all(self):
+        self.registered_shop_floor_ids.clear()
+
+        self.machine_queue.clear_all()
+        self.work_center_queue.clear_all()
+
+    @filter(lambda self, shop_floor, *args, **kwargs: shop_floor.id in self.registered_shop_floor_ids)
     def register_machine_reward_preparation(self, shop_floor: ShopFloor, machine: Machine, record: MachineModel.Record):
         self.machine_queue.register(shop_floor, machine, record)
 
+    @filter(lambda self, shop_floor, *args, **kwargs: shop_floor.id in self.registered_shop_floor_ids)
     def register_work_center_reward_preparation(
         self, shop_floor: ShopFloor, job: Job, work_center: WorkCenter, record: WorkCenterModel.Record
     ):
         self.work_center_queue.register(shop_floor, job, work_center, record)
 
-    def did_start_simulation(self, context: DelegateContext):
-        self.machine_queue.prepare(context.shop_floor)
-        self.work_center_queue.prepare(context.shop_floor)
-
+    @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.registered_shop_floor_ids)
     def did_produce(self, context: DelegateContext, job: Job, machine: Machine):
         self.machine_queue.record_next_state(context, machine, job)
         self.work_center_queue.record_next_state(context, machine, job)
@@ -58,11 +69,15 @@ class TapeModel(Delegate, Loggable, metaclass=ABCMeta):
         self.machine_queue.emit_intermediate_reward(context, machine, job)
         self.work_center_queue.emit_intermediate_reward(context, machine, job)
 
+    @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.registered_shop_floor_ids)
     def did_complete(self, context: DelegateContext, job: Job):
         self.machine_queue.emit_reward_after_completion(context, job)
         self.work_center_queue.emit_reward_after_completion(context, job)
 
+    @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.registered_shop_floor_ids)
     def did_finish_simulation(self, context: DelegateContext):
+        self.registered_shop_floor_ids.remove(context.shop_floor.id)
+
         self.machine_queue.clear(context.shop_floor)
         self.work_center_queue.clear(context.shop_floor)
 

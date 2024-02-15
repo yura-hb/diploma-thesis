@@ -1,15 +1,13 @@
 
-from .simulator import Simulator
-from .episodic import EpisodicSimulator
-from .td import TDSimulator
-from .configuration import RunConfiguration, EvaluateConfiguration
-from .simulation import Simulation
-from agents import Machine, WorkCenter
 from typing import Dict
-from tape import TapeModel
 
-import logging
-import simpy
+from agents import Machine, WorkCenter
+from tape import TapeModel
+from .configuration import RunConfiguration, EvaluateConfiguration
+from .episodic import EpisodicSimulator
+from .simulation import Simulation
+from .simulator import Simulator
+from .td import TDSimulator
 
 key_to_class = {
     "episodic": EpisodicSimulator,
@@ -17,11 +15,7 @@ key_to_class = {
 }
 
 
-def from_cli(machine: Machine,
-             work_center: WorkCenter,
-             tape: TapeModel,
-             environment: simpy.Environment,
-             parameters: Dict):
+def from_cli(machine: Machine, work_center: WorkCenter, tape: TapeModel, parameters: Dict):
     cls = key_to_class[parameters['kind']]
 
-    return cls(machine, work_center, tape, environment)
+    return cls(machine, work_center, tape)

@@ -3,6 +3,7 @@ import torch
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
+from tensordict.prototype import tensorclass
 
 
 class ReductionStrategy(Enum):
@@ -51,19 +52,19 @@ class JobEvent:
     work_center_idx: int = None
 
 
-@dataclass
+@tensorclass
 class Job:
 
     Event = JobEvent
 
-    @dataclass
+    @tensorclass
     class History:
         # The creation time of the job
-        created_at: torch.FloatTensor = 0
+        created_at: torch.FloatTensor = torch.FloatTensor([0.0])
         # The time, when job was pushed into system
-        dispatched_at: torch.FloatTensor = 0
+        dispatched_at: torch.FloatTensor = torch.FloatTensor([0.0])
         # The creation time of the job
-        completed_at: torch.FloatTensor = 0
+        completed_at: torch.FloatTensor = torch.FloatTensor([0.0])
         # The list of the times, when operation was started to be processed on the machine
         started_at: torch.FloatTensor = field(default_factory=torch.FloatTensor)
         # The list of the times, when operation has finished to be processed on the machine
@@ -88,9 +89,9 @@ class Job:
 
             match event.kind:
                 case JobEvent.Kind.creation:
-                    self.created_at = event.moment
+                    self.created_at = torch.FloatTensor([event.moment])
                 case JobEvent.Kind.dispatch:
-                    self.dispatched_at = event.moment
+                    self.dispatched_at = torch.FloatTensor([event.moment])
                 case JobEvent.Kind.arrival_on_work_center:
                     idx = get_work_center_idx()
 
@@ -109,33 +110,38 @@ class Job:
 
                     self.finished_at[idx] = event.moment
                 case JobEvent.Kind.completion:
-                    self.completed_at = event.moment
+                    self.completed_at = torch.FloatTensor([event.moment])
                 case _:
                     pass
 
             return self
 
     # Id of the job
-    id: int
+    id: torch.LongTensor = torch.tensor(-1)
     # The sequence of work-centers ids, which job must visit in order to be complete
-    step_idx: torch.LongTensor
-    # The processing time of the job in workcenter & machine,
-    # i.e. the tensor of shape (num_workcenters, num_machines_per_workcenter)
-    processing_times: torch.LongTensor
+    step_idx: torch.LongTensor = field(default_factory=torch.LongTensor)
+    # The processing time of the job in work_center & machine,
+    # i.e. the tensor of shape (num_work_centers, num_machines_per_work_center)
+    processing_times: torch.LongTensor = field(default_factory=torch.LongTensor)
     # The step in job sequence, which is currently being processed
-    current_step_idx: int = -1
+    current_step_idx: int = torch.tensor(-1)
     # The index of the machine in the work-center where the job is being processed
-    current_machine_idx: int = -1
+    current_machine_idx: int = torch.tensor(-1)
     # The priority of the Job
-    priority: float = 1.0
+    priority: torch.FloatTensor = torch.tensor([1.0])
     # The due time of the job, i.e. deadline
-    due_at: torch.FloatTensor = 0
+    due_at: torch.FloatTensor = torch.tensor([0.0])
     # History of the job
     history: History = None
 
     def __post_init__(self):
-        self.history = self.History()
-        self.history.configure(self.step_idx)
+        if not torch.is_tensor(self.id):
+            self.id = torch.tensor(self.id)
+
+        if self.history is None:
+            self.history = Job.History(batch_size=[])
+            self.history.configure(self.step_idx)
+            self.history = self.history.reshape(self.batch_size)
 
         assert 0.0 <= self.priority <= 1.0, "Priority must be in range [0, 1]"
 
@@ -179,10 +185,10 @@ class Job:
         """
         Returns: The total processing time of the remaining operations
         """
-        if self.is_completed:
-            return 0
+        result = torch.FloatTensor([0.0])
 
-        result = 0.0
+        if self.is_completed:
+            return result
 
         if self.current_machine_idx >= 0:
             result += self.current_operation_processing_time_on_machine
@@ -197,7 +203,7 @@ class Job:
         """
         Returns: The remaining processing time of the operation excluding processing time on current machine
         """
-        result = 0.0
+        result = torch.tensor(0.0, dtype=torch.float)
         expected_processing_time = self.processing_times[max(self.current_step_idx + 1, 0):]
 
         if expected_processing_time.numel() == 0:
@@ -278,14 +284,14 @@ class Job:
         """
         assert self.is_completed, "Job must be completed in order to compute earliness"
 
-        return torch.tensor([max(self.due_at - self.history.completed_at, 0)])
+        return torch.tensor(max(self.due_at - self.history.completed_at, 0.0))
 
     @property
     def remaining_operations_count(self):
         """
         Returns: The number of remaining operations
         """
-        return max(self.step_idx.shape[0] - self.current_step_idx, 0)
+        return torch.tensor(max(self.step_idx.shape[0] - self.current_step_idx, 0.0))
 
     @property
     def processed_operations_count(self):
@@ -313,7 +319,7 @@ class Job:
         next_idx = self.current_step_idx + 1
 
         if next_idx >= len(self.step_idx):
-            return 0
+            return torch.tensor(0.0, dtype=torch.float)
 
         pt = self.processing_times[next_idx]
 
@@ -392,12 +398,12 @@ class Job:
     def with_event(self, event: Event):
         match event.kind:
             case JobEvent.Kind.dispatch:
-                self.current_step_idx = 0
+                self.current_step_idx = torch.tensor(0)
             case JobEvent.Kind.forward:
                 self.current_step_idx += 1
-                self.current_machine_idx = -1
+                self.current_machine_idx = torch.tensor(-1)
             case JobEvent.Kind.arrival_on_machine:
-                self.current_machine_idx = event.machine_idx
+                self.current_machine_idx = torch.tensor(event.machine_idx)
             case _:
                 pass
 
@@ -405,7 +411,7 @@ class Job:
 
         return self
 
-    def with_due_at(self, due_at):
-        self.due_at = due_at
+    def with_due_at(self, due_at: torch.FloatTensor):
+        self.due_at = torch.FloatTensor([due_at])
 
         return self

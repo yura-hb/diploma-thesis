@@ -15,7 +15,7 @@ def from_cli(parameters: Dict, logger: Logger):
     return cls.from_cli(name=parameters.get('name', ''), parameters=parameters['parameters'], logger=logger)
 
 
-def from_cli_list(parameters: List[Dict], logger: Logger):
+def from_cli_list(prefix: str, parameters: List[Dict], logger: Logger):
     simulation_names = [parameter.get('name', '') for parameter in parameters]
     names = dict()
 
@@ -27,6 +27,6 @@ def from_cli_list(parameters: List[Dict], logger: Logger):
             names[key] = 1
             key += '[0]'
 
-        parameters[idx]['name'] = key
+        parameters[idx]['name'] = prefix + key
 
     return [from_cli(parameter, logger) for parameter in parameters]

@@ -15,21 +15,28 @@ from .simulation import Simulation
 from utils import Loggable
 
 
+def reset_tape():
+    def decorator(func):
+        def wrapper(self, *args, **kwargs):
+            self.tape_model.clear_all()
+            result = func(self, *args, **kwargs)
+            self.tape_model.clear_all()
+
+            return result
+
+        return wrapper
+
+    return decorator
+
+
 class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
-    def __init__(
-        self,
-        machine: MachineAgent,
-        work_center: WorkCenterAgent,
-        tape_model: TapeModel,
-        environment: simpy.Environment,
-    ):
+    def __init__(self, machine: MachineAgent, work_center: WorkCenterAgent, tape_model: TapeModel):
         super().__init__()
 
         self.work_center = work_center
         self.machine = machine
         self.tape_model = tape_model
-        self.environment = environment
 
         self.tape_model.connect(self)
 
@@ -42,17 +49,23 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
         return self
 
-    def train(self, config: RunConfiguration):
+    @reset_tape()
+    def train(self, environment: simpy.Environment, config: RunConfiguration):
         assert self.machine.is_trainable or self.work_center.is_trainable, 'At least one agent should be trainable'
 
-        env = self.environment
+        env = environment
         warmup_end = env.event()
         machine_training_end = env.event()
         work_center_train_end = env.event()
         run_end = env.event()
         all_of_event = simpy.AllOf(env, [warmup_end, machine_training_end, work_center_train_end, run_end])
 
-        env.process(self.__main_timeline__(warm_up_event=warmup_end, run_event=run_end, configuration=config.timeline))
+        env.process(self.__main_timeline__(
+            warm_up_event=warmup_end,
+            run_event=run_end,
+            configuration=config.timeline,
+            environment=env
+        ))
 
         ids = ['machine', 'work_center']
         schedules = [config.machine_train_schedule, config.work_center_train_schedule]
@@ -60,25 +73,52 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         train_steps = [self.machine.train_step, self.work_center.train_step]
 
         for idx, schedule, end_of_train_event, train_step in zip(ids, schedules, end_training_events, train_steps):
-            env.process(self.__train_timeline__(idx, schedule, warmup_end, end_of_train_event, run_end, train_step))
+            env.process(self.__train_timeline__(
+                environment=env,
+                name=idx,
+                configuration=schedule,
+                warm_up_event=warmup_end,
+                training_event=end_of_train_event,
+                run_event=run_end,
+                train_fn=train_step
+            ))
 
-        env.process(self.__run__(run_event=run_end, n_workers=config.n_workers, simulations=config.simulations))
-        env.process(self.__terminate_if_needed__(run_event=run_end, delay=config.timeline.duration))
+        env.process(
+            self.__run__(
+                environment=env,
+                run_event=run_end,
+                n_workers=config.n_workers,
+                simulations=config.simulations,
+                is_training=True
+            )
+        )
+        env.process(self.__terminate_if_needed__(
+            environment=env,
+            run_event=run_end,
+            delay=config.timeline.duration
+        ))
 
         env.run(all_of_event)
 
-    def evaluate(self, configuration: EvaluateConfiguration):
+    @reset_tape()
+    def evaluate(self, environment: simpy.Environment, config: EvaluateConfiguration):
         self.__log__(f'Evaluation Started')
 
         self.__update__(EvaluationPhase())
 
-        run_end = self.environment.event()
+        run_end = environment.event()
 
-        self.environment.process(
-            self.__run__(run_end, n_workers=configuration.n_workers, simulations=configuration.simulations)
+        environment.process(
+            self.__run__(
+                environment=environment,
+                run_event=run_end,
+                n_workers=config.n_workers,
+                simulations=config.simulations,
+                is_training=False
+            )
         )
 
-        self.environment.run(run_end)
+        environment.run(run_end)
 
         self.__log__(f'Evaluation Ended')
 
@@ -125,22 +165,32 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
     # Timeline
 
-    def __run__(self, run_event: simpy.Event, n_workers: int, simulations: List[Simulation]):
-        resource = simpy.Resource(self.environment, capacity=n_workers)
+    def __run__(self,
+                environment: simpy.Environment,
+                run_event: simpy.Event,
+                n_workers: int,
+                simulations: List[Simulation],
+                is_training: bool):
+        resource = simpy.Resource(environment, capacity=n_workers)
 
         def consume(simulation: Simulation):
             with resource.request() as req:
                 yield req
 
-                self.__log__(f'Simulation Started {simulation.shop_floor_id}')
+                simulation.prepare(self, self.tape_model, environment)
 
-                yield self.environment.process(simulation.run(self, self.tape_model, self.environment))
+                if is_training:
+                    self.tape_model.register(simulation.shop_floor)
 
-                self.__log__(f'Simulation Finished {simulation.shop_floor_id}')
+                self.__log__(f'Simulation Started {simulation.simulation_id}')
 
-        processes = [self.environment.process(consume(simulation)) for simulation in simulations]
+                yield environment.process(simulation.run())
 
-        yield simpy.AllOf(self.environment, events=processes)
+                self.__log__(f'Simulation Finished {simulation.simulation_id}')
+
+        processes = [environment.process(consume(simulation)) for simulation in simulations]
+
+        yield simpy.AllOf(environment, events=processes)
 
         self.__log__(f'All simulations finished')
 
@@ -150,13 +200,14 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
             pass
 
     def __main_timeline__(self,
+                          environment: simpy.Environment,
                           warm_up_event: simpy.Event,
                           run_event: simpy.Event,
                           configuration: RunConfiguration.TimelineSchedule):
         for index, phase in enumerate(configuration.warm_up_phases):
             self.__update__(WarmUpPhase(index))
             self.__log__(f'Warm-up phase {index} started')
-            yield self.environment.timeout(phase)
+            yield environment.timeout(phase)
 
         self.__log__('Warm-up finished')
         self.__log__('Training started')
@@ -173,6 +224,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
     def __train_timeline__(
         self,
+        environment: simpy.Environment,
         name: str,
         configuration: RunConfiguration.TrainSchedule,
         warm_up_event: simpy.Event,
@@ -190,7 +242,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         while (training_steps < configuration.max_training_steps
                and not run_event.triggered
                and not training_event.triggered):
-            yield self.environment.timeout(configuration.train_interval)
+            yield environment.timeout(configuration.train_interval)
 
             self.__log__(f'Training Step {training_steps} at {name} ', logging.DEBUG)
 
@@ -208,8 +260,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
         self.__log__(f'Training finished {name}')
 
-    def __terminate_if_needed__(self, run_event: simpy.Event, delay: float):
-        yield self.environment.timeout(delay)
+    def __terminate_if_needed__(self, environment: simpy.Environment, run_event: simpy.Event, delay: float):
+        yield environment.timeout(delay)
 
         self.__log__('Terminating simulation due to max duration reached')
 

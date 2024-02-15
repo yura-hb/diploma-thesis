@@ -12,7 +12,21 @@ class Workflow(metaclass=ABCMeta):
     def run(self):
         pass
 
-    def __make_logger__(self, name: str, environment: simpy.Environment, log_stdout: bool) -> logging.Logger:
+    def __make_logger__(self, name: str, log_stdout: bool) -> logging.Logger:
+        logger = logging.getLogger(name)
+        logger.setLevel(logging.INFO)
+
+        if log_stdout:
+            formatter = logging.Formatter('%(asctime)s | | %(name)s | %(levelname)s | %(message)s')
+            stdout_handler = logging.StreamHandler(sys.stdout)
+            stdout_handler.setLevel(logging.DEBUG)
+            stdout_handler.setFormatter(formatter)
+
+            logger.addHandler(stdout_handler)
+
+        return logger
+
+    def __make_time_logger__(self, name: str, environment: simpy.Environment, log_stdout: bool) -> logging.Logger:
         class _Formatter(logging.Formatter):
 
             def format(self, record):

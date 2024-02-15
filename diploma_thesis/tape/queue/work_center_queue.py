@@ -7,6 +7,7 @@ from environment import WorkCenter, WorkCenterKey
 from tape.work_center import WorkCenterReward
 from tape.queue.queue import *
 from tape.utils.tape_record import TapeRecord
+from utils import filter
 
 
 class WorkCenterQueue(Queue):
@@ -28,38 +29,36 @@ class WorkCenterQueue(Queue):
     def clear(self, shop_floor: ShopFloor):
         del self.queue[shop_floor.id]
 
+    def clear_all(self):
+        self.queue = dict()
+
     # Utility
 
+    @filter(lambda self, shop_floor, *args, **kwargs: shop_floor.id in self.queue)
     def register(self, shop_floor: ShopFloor, job: Job, work_center: WorkCenter, record: WorkCenterModel.Record):
-        if isinstance(record.result, Job):
-            self.queue[shop_floor.id][work_center.key][job.id] = TapeRecord(
-                record=Record(
-                    state=record.state,
-                    action=record.action,
-                    next_state=None,
-                    reward=None,
-                    done=False,
-                ),
-                context=self.reward.record_job_action(record.result, work_center)
-            )
+        self.queue[shop_floor.id][work_center.key][job.id] = TapeRecord(
+            record=Record(
+                state=record.state,
+                action=record.action,
+                next_state=None,
+                reward=None,
+                done=False,
+            ),
+            context=self.reward.record_job_action(record.result, work_center)
+        )
 
+    @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.work_center.key])
     def record_next_state(self, context: DelegateContext, machine: Machine, job: Job):
         work_center = machine.work_center
-
-        if job.id not in self.queue[context.shop_floor.id][work_center.key]:
-            return
-
-        parameters = WorkCenterInput(job, machine.work_center_idx, machine.work_center.machines)
+        parameters = WorkCenterInput(job, work_center.work_center_idx, work_center.machines)
         state = self.simulator.encode_work_center_state(parameters)
 
         self.queue[context.shop_floor.id][work_center.key][job.id].record.next_state = state
 
+    @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.work_center.key])
     def emit_intermediate_reward(self, context: DelegateContext, machine: Machine, job: Job):
         work_center = machine.work_center
         record = self.queue[context.shop_floor.id][work_center.key].get(job.id)
-
-        if record is None or record.context is None:
-            return
 
         reward = self.reward.reward_after_production(record.context)
 
@@ -85,7 +84,7 @@ class WorkCenterQueue(Queue):
     def __fetch_contexts_from_job_path__(self, context: DelegateContext, job: Job):
         contexts = []
 
-        def fn(index, work_center):
+        def fn(_, work_center):
             nonlocal contexts
 
             record = self.queue[context.shop_floor.id][work_center.key].get(job.id)
@@ -107,6 +106,7 @@ class WorkCenterQueue(Queue):
 
         self.__emit_reward_to_work_center__(context, work_center, job, reward)
 
+    @filter(lambda self, context, work_center, job, _: job.id in self.queue[context.shop_floor.id][work_center.key])
     def __emit_reward_to_work_center__(self,
                                        context: DelegateContext,
                                        work_center: WorkCenter,
@@ -131,4 +131,3 @@ class WorkCenterQueue(Queue):
             work_center = context.shop_floor.work_center(work_center_idx)
 
             fn(index, work_center)
-

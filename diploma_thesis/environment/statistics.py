@@ -1,4 +1,5 @@
 
+import os
 from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
@@ -6,9 +7,14 @@ from typing import List, Callable, Tuple, Iterable
 
 import pandas as pd
 import torch
+import torchsnapshot
+from tensordict import TensorDict
 
 import environment
 import environment.utils as st
+
+INFO_KEY = 'info'
+PRODUCTION_LOG_KEY = 'production_logs.feather'
 
 
 class Statistics:
@@ -52,13 +58,17 @@ class Statistics:
         worker_predicate: WorkerPredicate = field(default_factory=WorkerPredicate)
         time_predicate: TimePredicate = field(default_factory=TimePredicate)
 
-    def __init__(self, shop_floor: environment.ShopFloor):
-        self.shop_floor = shop_floor
-        self.shop_floor_history = deepcopy(shop_floor.history)
-        self.work_center_history = deepcopy([work_center.history for work_center in shop_floor.work_centers])
-        self.machine_history = deepcopy([machine.history for machine in shop_floor.machines])
-
-        self.production_logs = st.ProductionLogFactory().make(shop_floor)
+    def __init__(self,
+                 shop_floor_history: 'environment.ShopFloorHistory',
+                 map: 'environment.ShopFloorMap',
+                 work_center_history: List['environment.WorkCenterHistory'],
+                 machine_history: List['environment.MachineHistory'],
+                 production_logs: pd.DataFrame):
+        self.shop_floor_history = deepcopy(shop_floor_history)
+        self.shop_floor_map = map
+        self.work_center_history = deepcopy(work_center_history)
+        self.machine_history = deepcopy(machine_history)
+        self.production_logs = production_logs
 
     def jobs(self, predicate: Predicate = Predicate()) -> List[environment.Job]:
         """
@@ -70,7 +80,7 @@ class Statistics:
 
         job_ids = logs['job_id'].unique()
         job_ids = job_ids[job_ids >= 0]
-        unfinished_job = [self.shop_floor_history.jobs[job_id] for job_id in job_ids]
+        unfinished_job = [self.shop_floor_history.job(job_id) for job_id in job_ids]
 
         return unfinished_job
 
@@ -198,7 +208,7 @@ class Statistics:
                                     lambda job: torch.LongTensor([1 if job.is_tardy_upon_completion else 0]))
 
     def report(self, time_predicate: Predicate.TimePredicate = Predicate.TimePredicate()) -> st.Report:
-        report_factory = st.ReportFactory(self, self.shop_floor, time_predicate)
+        report_factory = st.ReportFactory(self, self.shop_floor_map, time_predicate)
 
         return report_factory.make()
 
@@ -308,3 +318,62 @@ class Statistics:
             value /= total_weights
 
         return value.item()
+
+    def save(self, path: str):
+        info = TensorDict({
+            'shop_floor_history': self.shop_floor_history,
+            'shop_floor_map': self.shop_floor_map,
+            'work_center_history': self.__encode_list__(self.work_center_history),
+            'machine_history': self.__encode_list__(self.machine_history)
+        }, batch_size=[])
+
+        info_path = os.path.join(path, INFO_KEY)
+        info.memmap(prefix=info_path)
+
+        production_log_path = os.path.join(path, PRODUCTION_LOG_KEY)
+        self.production_logs.to_feather(production_log_path)
+
+    @staticmethod
+    def load(path: str):
+        info_path = os.path.join(path, INFO_KEY)
+        info = TensorDict.load_memmap(prefix=info_path)
+
+        production_log_path = os.path.join(path, PRODUCTION_LOG_KEY)
+        production_logs = pd.read_feather(production_log_path)
+
+        work_center_history = Statistics.__decode_list__(info['work_center_history'])
+        machine_history = Statistics.__decode_list__(info['machine_history'])
+
+        return Statistics(
+            shop_floor_history=info['shop_floor_history'],
+            map=info['shop_floor_map'],
+            work_center_history=work_center_history,
+            machine_history=machine_history,
+            production_logs=production_logs
+        )
+
+    @staticmethod
+    def __encode_list__(l: List):
+        return TensorDict({str(i): x for i, x in enumerate(l)}, batch_size=[])
+
+    @staticmethod
+    def __decode_list__(l: TensorDict):
+        result = [(int(index), value) for index, value in l.items()]
+        result = sorted(result, key=lambda x: int(x[0]))
+
+        return [value for _, value in result]
+
+    @staticmethod
+    def from_shop_floor(shop_floor: 'environment.shop_floor.ShopFloor'):
+        shop_floor_history = shop_floor.history
+        map = shop_floor.map
+        work_center_history = [work_center.history for work_center in shop_floor.work_centers]
+        machine_history = [machine.history for machine in shop_floor.machines]
+        production_logs = st.ProductionLogFactory().make(shop_floor)
+
+        return Statistics(shop_floor_history=shop_floor_history,
+                          map=map,
+                          work_center_history=work_center_history,
+                          machine_history=machine_history,
+                          production_logs=production_logs)
+

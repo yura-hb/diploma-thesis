@@ -7,6 +7,8 @@ from agents.utils import TrainingPhase, OptimizerCLI, LossCLI
 
 from dataclasses import dataclass
 
+from utils import filter
+
 
 class DeepQAgent(Machine):
 
@@ -47,10 +49,9 @@ class DeepQAgent(Machine):
     def is_trainable(self):
         return True
 
+    @filter(lambda self: self.phase == TrainingPhase())
+    @filter(lambda self: len(self.memory) > 0)
     def train_step(self):
-        if self.phase != TrainingPhase():
-            return
-
         batch, info = self.memory.sample(return_info=True)
         batch = torch.squeeze(batch)
 

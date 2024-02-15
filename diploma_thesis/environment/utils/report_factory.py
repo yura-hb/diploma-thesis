@@ -63,10 +63,10 @@ class ReportFactory:
 
     def __init__(self,
                  statistics: 'environment.Statistics',
-                 shop_floor: 'environment.ShopFloor',
+                 shop_floor_map: 'environment.ShopFloorMap',
                  time_predicate: 'environment.Statistics.Predicate.TimePredicate'):
         self.statistics = statistics
-        self.shop_floor = shop_floor
+        self.shop_floor_map = shop_floor_map
         self.time_predicate = time_predicate
 
     def make(self) -> Report:
@@ -78,24 +78,28 @@ class ReportFactory:
     def __make_machine_records__(self):
         records = []
 
-        for machine in self.shop_floor.machines:
-            worker_predicate = environment.Statistics.Predicate.MachinePredicate(
-                machine_idx=machine.state.machine_idx, work_center_idx=machine.state.work_center_idx
-            )
+        for work_center in self.shop_floor_map.work_centers:
+            for machine_idx in work_center.machines:
+                machine_idx = machine_idx.item()
+                work_center_idx = work_center.idx.item()
 
-            records += [
-                OrderedDict(
-                    work_center_idx=machine.state.work_center_idx,
-                    machine_idx=machine.state.machine_idx,
-                    runtime=self.statistics.run_time(time_predicate=self.time_predicate, predicate=worker_predicate),
-                    utilization_rate=self.statistics.utilization_rate(
-                        time_predicate=self.time_predicate, predicate=worker_predicate
-                    ),
-                    number_of_processed_operations=self.statistics.total_number_of_processed_operations(
-                        time_predicate=self.time_predicate, predicate=worker_predicate
-                    )
+                worker_predicate = environment.Statistics.Predicate.MachinePredicate(
+                    machine_idx=machine_idx, work_center_idx=work_center_idx
                 )
-            ]
+
+                records += [
+                    OrderedDict(
+                        work_center_idx=work_center_idx,
+                        machine_idx=machine_idx,
+                        runtime=self.statistics.run_time(time_predicate=self.time_predicate, predicate=worker_predicate),
+                        utilization_rate=self.statistics.utilization_rate(
+                            time_predicate=self.time_predicate, predicate=worker_predicate
+                        ),
+                        number_of_processed_operations=self.statistics.total_number_of_processed_operations(
+                            time_predicate=self.time_predicate, predicate=worker_predicate
+                        )
+                    )
+                ]
 
         return pd.DataFrame(records)
 

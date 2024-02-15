@@ -86,7 +86,7 @@ class Tournament(Workflow):
         for simulation in simulations:
             record = {
                 'candidate': candidate.name,
-                'simulation': simulation.shop_floor_id,
+                'simulation': simulation.simulation_id,
             }
 
             statistics = simulation.shop_floor.statistics

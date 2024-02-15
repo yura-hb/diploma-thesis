@@ -25,10 +25,10 @@ class DynamicSimulation(Simulation):
         self.configuration = configuration
 
     @property
-    def shop_floor_id(self):
+    def simulation_id(self):
         return self.name
 
-    def run(self, agent: Agent, delegate: Delegate, env: simpy.Environment):
+    def prepare(self, agent: Agent, delegate: Delegate, env: simpy.Environment):
         problem = self.configuration.configuration
         problem = environment.Configuration.from_cli_arguments(problem)
 
@@ -44,8 +44,9 @@ class DynamicSimulation(Simulation):
             breakdown=breakdown
         )
 
-        self.shop_floor = ShopFloor(self.shop_floor_id, configuration, self.logger)
+        self.shop_floor = ShopFloor(self.simulation_id, configuration, self.logger)
 
+    def run(self):
         yield self.shop_floor.simulate()
 
     @classmethod

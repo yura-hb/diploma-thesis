@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from functools import reduce
 from typing import List
+from tensordict.prototype import tensorclass
 
 import simpy
 import torch
@@ -8,31 +9,35 @@ import torch
 import environment
 
 
-@dataclass
+@tensorclass
 class State:
     """
     Support class representing the state of the machine
     """
     # The index of the machine
-    machine_idx: int = 0
+    machine_idx: torch.LongTensor
     # The index of work_center, where the machine is located
-    work_center_idx: int = 0
+    work_center_idx: torch.LongTensor
     # The list of jobs, which are queued on the machine
     queue: List[environment.Job] = field(default_factory=list)
     # Total processing time for each job in the queue
-    total_processing_time: int = 0
+    total_processing_time: torch.LongTensor = torch.LongTensor([0])
     # Expected moment of machine availability, i.e. without breakdowns and maintenances
-    available_at: torch.FloatTensor = 0
+    available_at: torch.FloatTensor = torch.FloatTensor([0])
     # Moment, when the machine will be free working or breakdown
-    free_at: torch.FloatTensor = 0
+    free_at: torch.FloatTensor = torch.FloatTensor([0])
     # The time of machine recover from breakdown
-    restart_at: torch.FloatTensor = 0
+    restart_at: torch.FloatTensor = torch.FloatTensor([0])
     # Total runtime
-    run_time: int = 0
+    run_time: torch.FloatTensor = torch.FloatTensor([0])
     # Breakdown duration
-    repair_duration: int = 0
+    repair_duration: torch.FloatTensor = torch.FloatTensor([0])
 
-    def with_new_job(self, job: environment.Job, now: int):
+    def __post_init__(self):
+        self.machine_idx = torch.LongTensor([self.machine_idx])
+        self.work_center_idx = torch.LongTensor([self.work_center_idx])
+
+    def with_new_job(self, job: environment.Job, now: torch.FloatTensor):
         """
         Adds new job to the queue
 
@@ -82,12 +87,12 @@ class State:
         self.free_at = self.restart_at
         self.repair_duration = 0
 
-    def with_runtime(self, operation_processing_time: int):
+    def with_runtime(self, operation_processing_time: torch.FloatTensor):
         self.run_time += operation_processing_time
 
         return self
 
-    def with_repair_duration(self, duration: float):
+    def with_repair_duration(self, duration: torch.FloatTensor):
         assert duration > 0, "Repair duration must be positive"
 
         self.repair_duration = duration
@@ -127,7 +132,7 @@ class State:
         return self.with_updated_information(now)
 
 
-@dataclass
+@tensorclass
 class History:
     decision_times: torch.FloatTensor = field(default_factory=lambda: torch.FloatTensor([]))
     breakdown_start_at: torch.FloatTensor = field(default_factory=lambda: torch.FloatTensor([]))
@@ -169,8 +174,8 @@ class Machine:
     def __init__(self, environment: simpy.Environment, machine_idx: int, work_center_idx: int):
         self.environment = environment
 
-        self.state = State(machine_idx=machine_idx, work_center_idx=work_center_idx)
-        self.history = History()
+        self.state = State(machine_idx=machine_idx, work_center_idx=work_center_idx, batch_size=[])
+        self.history = History(batch_size=[])
         self._shop_floor = None
         self._breakdown: 'environment.Breakdown' = None
 
@@ -212,11 +217,11 @@ class Machine:
         return self.state.queue
 
     @property
-    def work_center_idx(self) -> int:
+    def work_center_idx(self) -> torch.LongTensor:
         return self.state.work_center_idx
 
     @property
-    def machine_idx(self) -> int:
+    def machine_idx(self) -> torch.LongTensor:
         return self.state.machine_idx
 
     @property

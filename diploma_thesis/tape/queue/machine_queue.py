@@ -7,6 +7,7 @@ from environment import MachineKey
 from tape.machine import MachineReward
 from tape.queue.queue import *
 from tape.utils.tape_record import TapeRecord
+from utils import filter
 
 
 class MachineQueue(Queue):
@@ -27,35 +28,36 @@ class MachineQueue(Queue):
     def clear(self, shop_floor: ShopFloor):
         del self.queue[shop_floor.id]
 
+    def clear_all(self):
+        self.queue = dict()
+
+    # Reward Emit
+
+    @filter(lambda self, shop_floor, *args, **kwargs: shop_floor.id in self.queue)
+    @filter(lambda self, _, __, record: isinstance(record.result, Job))
     def register(self, shop_floor: ShopFloor, machine: Machine, record: MachineModel.Record):
-        if isinstance(record.result, Job):
-            self.queue[shop_floor.id][machine.key][record.result.id] = TapeRecord(
-                record=Record(
-                    state=record.state,
-                    action=record.action,
-                    next_state=None,
-                    reward=None,
-                    done=False,
-                    batch_size=[]
-                ),
-                context=self.reward.record_job_action(record.result, machine)
-            )
+        self.queue[shop_floor.id][machine.key][record.result.id] = TapeRecord(
+            record=Record(
+                state=record.state,
+                action=record.action,
+                next_state=None,
+                reward=None,
+                done=False,
+                batch_size=[]
+            ),
+            context=self.reward.record_job_action(record.result, machine)
+        )
 
+    @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.key])
     def record_next_state(self, context: DelegateContext, machine: Machine, job: Job):
-        if job.id not in self.queue[context.shop_floor.id][machine.key]:
-            return
-
         parameters = MachineInput(machine, context.moment)
         state = self.simulator.encode_machine_state(parameters)
 
         self.queue[context.shop_floor.id][machine.key][job.id].record.next_state = state
 
+    @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.key])
     def emit_intermediate_reward(self, context: DelegateContext, machine: Machine, job: Job):
-        record = self.queue[context.shop_floor.id][machine.key].get(job.id)
-
-        if record is None or record.context is None:
-            return
-
+        record = self.queue[context.shop_floor.id][machine.key][job.id]
         reward = self.reward.reward_after_production(record.context)
 
         if reward is None:
@@ -105,16 +107,13 @@ class MachineQueue(Queue):
 
         self.__emit_reward_to_machine__(context, machine, job, reward)
 
+    @filter(lambda self, context, machine, job, _: job.id in self.queue[context.shop_floor.id][machine.key])
     def __emit_reward_to_machine__(self,
                                    context: DelegateContext,
                                    machine: Machine,
                                    job: Job,
                                    reward: torch.FloatTensor):
-        record = self.queue[context.shop_floor.id][machine.key].get(job.id)
-
-        if record is None:
-            return
-
+        record = self.queue[context.shop_floor.id][machine.key][job.id]
         record = record.record
         record.reward = reward
 

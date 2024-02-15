@@ -14,8 +14,13 @@ class Simulation(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def shop_floor_id(self):
+    def simulation_id(self):
+        return self.name
+
+    @abstractmethod
+    def prepare(self, agent: Agent, delegate: Delegate, env: simpy.Environment):
         pass
 
-    def run(self, agent: Agent, delegate: Delegate, env: simpy.Environment):
+    @abstractmethod
+    def run(self):
         pass

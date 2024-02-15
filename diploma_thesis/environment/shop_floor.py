@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass, field
 from typing import List, Dict
+from tensordict.prototype import tensorclass
 
 import simpy
 import torch
@@ -10,7 +11,7 @@ from .utils import ShopFloorFactory
 from typing import Set
 
 
-@dataclass
+@tensorclass
 class State:
     idx: str = 0
 
@@ -41,7 +42,7 @@ class State:
         return self
 
 
-@dataclass
+@tensorclass
 class History:
     # A list of jobs, where each job is represented by the id of machine
     jobs: Dict[int, environment.Job] = field(default_factory=dict)
@@ -52,7 +53,7 @@ class History:
         return self
 
     def with_new_job(self, job: environment.Job):
-        self.jobs[job.id] = job
+        self.jobs[job.id.item()] = job
 
         return self
 
@@ -62,7 +63,20 @@ class History:
         return self
 
     def job(self, job_id: int):
+        if isinstance(job_id, torch.Tensor):
+            job_id = job_id.item()
+
         return self.jobs[job_id]
+
+
+@tensorclass
+class Map:
+    @tensorclass
+    class WorkCenter:
+        idx: torch.LongTensor
+        machines: torch.LongTensor
+
+    work_centers: List[WorkCenter]
 
 
 class ShopFloor:
@@ -85,8 +99,8 @@ class ShopFloor:
         self._work_centers: List[environment.WorkCenter] = []
         self._machines: List[environment.Machine] = []
 
-        self.state = State(idx=idx)
-        self.history = History()
+        self.state = State(idx=idx, batch_size=[])
+        self.history = History(batch_size=[])
         self._work_centers, self._machines = ShopFloorFactory(self.configuration, self).make()
 
         self.did_finish_simulation_event = configuration.environment.event()
@@ -121,7 +135,7 @@ class ShopFloor:
     def statistics(self) -> 'environment.Statistics':
         from .statistics import Statistics
 
-        return Statistics(self)
+        return Statistics.from_shop_floor(self)
 
     @property
     def work_centers(self) -> List['environment.WorkCenter']:
@@ -130,6 +144,20 @@ class ShopFloor:
     @property
     def machines(self) -> List['environment.Machine']:
         return self._machines
+
+    @property
+    def map(self) -> Map:
+        return Map(
+            work_centers=[
+                Map.WorkCenter(
+                    idx=work_center.work_center_idx,
+                    machines=torch.cat([machine.state.machine_idx for machine in work_center.machines]),
+                    batch_size=[]
+                )
+                for work_center in self.work_centers
+            ],
+            batch_size=[]
+        )
 
     @property
     def in_system_jobs(self) -> List['environment.Job']:
@@ -217,8 +245,9 @@ class ShopFloor:
             self.did_complete(job)
 
         self.logger.info(
-            f"Job {job.id} {job.current_step_idx} has been {'completed' if job.is_completed else 'produced'} "
-            f"on machine {from_.state.machine_idx} in work-center {from_.state.work_center_idx}. "
+            f"Job {job.id.item()} has been "
+            f"{'completed' if job.is_completed else 'produced'} "
+            f"on machine {from_.state.machine_idx.item()} in work-center {from_.state.work_center_idx.item()}. "
             f"Jobs in system {len(self.state.in_system_job_ids)}"
         )
 
@@ -254,7 +283,7 @@ class ShopFloor:
 
     def did_breakdown(self, machine: environment.Machine, repair_time: torch.FloatTensor):
         self.logger.info(
-            f'Machine {machine.state.machine_idx} in work-center {machine.state.work_center_idx} '
+            f'Machine {machine.state.machine_idx.item()} in work-center {machine.state.work_center_idx.item()} '
             f'has broken down. Repair time {repair_time.item()}'
         )
 
@@ -262,7 +291,7 @@ class ShopFloor:
 
     def did_repair(self, machine: environment.Machine):
         self.logger.info(
-            f'Machine {machine.state.machine_idx} in work-center {machine.state.work_center_idx} '
+            f'Machine {machine.state.machine_idx.item()} in work-center {machine.state.work_center_idx.item()} '
             'has been repaired'
         )
 
