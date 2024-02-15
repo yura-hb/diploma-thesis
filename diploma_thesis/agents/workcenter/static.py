@@ -18,6 +18,12 @@ class StaticWorkCenter(WorkCenter):
     def train_step(self):
         pass
 
+    def state_dict(self):
+        return {
+            'model': self.model,
+            'encoder': self.state_encoder
+        }
+
     @staticmethod
     def from_cli(parameters: Dict):
         model = model_from_cli(parameters['model'])
@@ -25,3 +31,12 @@ class StaticWorkCenter(WorkCenter):
 
         return StaticWorkCenter(model=model, state_encoder=encoder)
 
+    @classmethod
+    def load_from_parameters(cls, parameters):
+        model = parameters['model']
+        encoder = parameters['encoder']
+
+        return StaticWorkCenter(
+            model=model,
+            state_encoder=encoder
+        )

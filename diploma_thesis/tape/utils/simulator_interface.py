@@ -16,12 +16,16 @@ class SimulatorInterface:
     def encode_work_center_state(self, parameters: WorkCenterInput) -> WorkCenterState:
         pass
 
-    def did_prepare_machine_record(self, shop_floor: ShopFloor, machine: Machine, record: Record, moment: int):
+    def did_prepare_machine_record(self,
+                                   shop_floor: ShopFloor,
+                                   machine: Machine,
+                                   record: Record,
+                                   decision_moment: int):
         pass
 
     def did_prepare_work_center_record(self,
                                        shop_floor: ShopFloor,
                                        work_center: WorkCenter,
                                        record: Record,
-                                       moment: int):
+                                       decision_moment: int):
         pass

@@ -125,7 +125,7 @@ class WorkCenterQueue(Queue):
             shop_floor=context.shop_floor,
             work_center=work_center,
             record=record,
-            moment=record.moment
+            decision_moment=record.moment
         )
 
         del self.queue[context.shop_floor.id][work_center.key][job.id]

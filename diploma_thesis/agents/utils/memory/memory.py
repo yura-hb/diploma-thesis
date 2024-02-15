@@ -1,5 +1,5 @@
 
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from typing import TypeVar
 
 import torch
@@ -8,6 +8,7 @@ from torchrl.data import TensorDictReplayBuffer
 
 State = TypeVar('State')
 Action = TypeVar('Action')
+Configuration = TypeVar('Configuration')
 
 
 @tensorclass
@@ -21,8 +22,9 @@ class Record:
 
 class Memory(metaclass=ABCMeta):
 
-    def __init__(self, buffer: TensorDictReplayBuffer):
-        self.buffer = buffer
+    def __init__(self, configuration: Configuration):
+        self.configuration = configuration
+        self.buffer = self.__make_buffer__()
 
     def store(self, record: Record):
         self.buffer.extend(record)
@@ -36,6 +38,17 @@ class Memory(metaclass=ABCMeta):
     def update_priority(self, indices: torch.LongTensor, priorities: torch.FloatTensor):
         self.buffer.update_priority(indices, priorities)
 
+    @abstractmethod
+    def __make_buffer__(self) -> TensorDictReplayBuffer:
+        pass
+
     def __len__(self) -> int:
         return len(self.buffer)
 
+    # TorchRL buffer isn't yet pickable. Hence, we recreate it from the configuration
+
+    def __getstate__(self):
+        return self.configuration
+
+    def __setstate__(self, state):
+        self.configuration = state

@@ -157,7 +157,7 @@ task:
       train_interval: 100
       max_training_steps: 1000
 
-    n_workers: 2
+    n_workers: 1
     simulations:
       - <<: *simulation
       - <<: *simulation
@@ -165,7 +165,7 @@ task:
       - <<: *simulation
       - <<: *simulation
 
-  evaluate:
-    n_workers: 2
-    simulations:
-      - <<: *simulation
+#  evaluate:
+#    n_workers: 2
+#    simulations:
+#      - <<: *simulation

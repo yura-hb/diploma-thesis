@@ -123,7 +123,7 @@ class MachineQueue(Queue):
             shop_floor=context.shop_floor,
             machine=machine,
             record=result,
-            moment=record.moment
+            decision_moment=record.moment
         )
 
         del self.queue[context.shop_floor.id][machine.key][job.id]

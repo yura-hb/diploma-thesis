@@ -4,6 +4,7 @@ import torch
 from .machine import *
 from typing import Dict
 from agents.utils import TrainingPhase, OptimizerCLI, LossCLI
+from agents.utils.memory import Record
 
 from dataclasses import dataclass
 
@@ -34,10 +35,10 @@ class DeepQAgent(Machine):
                  memory: Memory,
                  optimizer: OptimizerCLI,
                  loss: LossCLI,
-                 parameters: Configuration):
+                 configuration: Configuration):
         super().__init__(model, state_encoder, memory)
 
-        self.parameters = parameters
+        self.configuration = configuration
         self.loss = loss
         self.optimizer = optimizer
         self.target_model = None
@@ -53,7 +54,7 @@ class DeepQAgent(Machine):
     @filter(lambda self: len(self.memory) > 0)
     def train_step(self):
         batch, info = self.memory.sample(return_info=True)
-        batch = torch.squeeze(batch)
+        batch: Record | torch.Tensor = torch.squeeze(batch)
 
         # Note:
         # The idea is that we compute the Q-values only for performed actions. Other actions wouldn't be updated,
@@ -66,7 +67,7 @@ class DeepQAgent(Machine):
             target = self.target_model.values(batch.next_state)
             target = target.max(dim=1).values
 
-            q = batch.reward + self.parameters.gamma * target * (1 - batch.done)
+            q = batch.reward + self.configuration.gamma * target * (1 - batch.done)
             q_values[range(batch.shape[0]), batch.action] = q
 
         if not self.optimizer.is_connected:
@@ -81,11 +82,11 @@ class DeepQAgent(Machine):
 
         self.optimizer.step()
 
-        if self.optimizer.step_count % self.parameters.update_steps == 0:
-            self.target_model.copy_parameters(self.model, self.parameters.decay)
+        if self.optimizer.step_count % self.configuration.update_steps == 0:
+            self.target_model.copy_parameters(self.model, self.configuration.decay)
 
         with torch.no_grad():
-            td_error = torch.square(q - orig_q) + self.parameters.prior_eps
+            td_error = torch.square(q - orig_q) + self.configuration.prior_eps
 
             self.memory.update_priority(info['index'], td_error)
 
@@ -97,6 +98,17 @@ class DeepQAgent(Machine):
 
         return result
 
+    def state_dict(self):
+        return {
+            'model': self.model,
+            'target_model': self.target_model,
+            'encoder': self.state_encoder,
+            'optimizer': self.optimizer,
+            'memory': self.memory,
+            'loss': self.loss,
+            'parameters': self.configuration
+        }
+
     @staticmethod
     def from_cli(parameters: Dict):
         model = model_from_cli(parameters['model'])
@@ -104,7 +116,7 @@ class DeepQAgent(Machine):
         memory = memory_from_cli(parameters['memory'])
         loss = LossCLI.from_cli(parameters['loss'])
         optimizer = OptimizerCLI.from_cli(parameters['optimizer'])
-        parameters = DeepQAgent.Configuration.from_cli(parameters['parameters'])
+        configuration = DeepQAgent.Configuration.from_cli(parameters['parameters'])
 
         assert isinstance(model, NNMachineModel), f"Model must conform to NNModel"
 
@@ -113,5 +125,21 @@ class DeepQAgent(Machine):
                           memory=memory,
                           loss=loss,
                           optimizer=optimizer,
-                          parameters=parameters)
+                          configuration=configuration)
 
+    @classmethod
+    def load_from_parameters(cls, parameters):
+        model = parameters['model']
+        encoder = parameters['encoder']
+        # memory = parameters['memory']
+        loss = parameters['loss']
+        optimizer = parameters['optimizer']
+        configuration = parameters['parameters']
+
+        return DeepQAgent(model=model,
+                          state_encoder=encoder,
+                          memory=None,
+                          # memory=memory,
+                          loss=loss,
+                          optimizer=optimizer,
+                          configuration=configuration)

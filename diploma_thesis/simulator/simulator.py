@@ -135,7 +135,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                                    shop_floor: ShopFloor,
                                    machine: Machine,
                                    record: Record,
-                                   moment: float):
+                                   decision_moment: float):
         pass
 
     @abstractmethod
@@ -143,7 +143,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                                        shop_floor: ShopFloor,
                                        work_center: WorkCenter,
                                        record: Record,
-                                       moment: float):
+                                       decision_moment: float):
         pass
 
     # Agent

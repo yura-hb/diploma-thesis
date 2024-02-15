@@ -1,13 +1,13 @@
 
 import logging
 from abc import ABCMeta, abstractmethod
+from typing import TypeVar, Generic
 
 from agents.utils import Phase, EvaluationPhase, PhaseUpdatable
 from agents.utils.memory import Memory, Record
+from utils import Loggable
 from .encoder import Encoder as StateEncoder, Input, State
 from .model import Model, Action, Result
-from typing import TypeVar, Generic
-from utils import Loggable
 
 Key = TypeVar('Key')
 
@@ -64,3 +64,5 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
 
     def encode_state(self, parameters: Input) -> State:
         return self.state_encoder.encode(parameters)
+
+
