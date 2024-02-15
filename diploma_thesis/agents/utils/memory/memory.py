@@ -27,11 +27,14 @@ class Memory(metaclass=ABCMeta):
     def store(self, record: Record):
         self.buffer.extend(record)
 
-    def sample(self) -> Record:
-        return self.buffer.sample()
+    def sample(self, return_info: bool = False) -> Record:
+        return self.buffer.sample(return_info=return_info)
 
     def sample_n(self, batch_size: int) -> Record:
         return self.buffer.sample(batch_size=batch_size)
+
+    def update_priority(self, indices: torch.LongTensor, priorities: torch.FloatTensor):
+        self.buffer.update_priority(indices, priorities)
 
     def __len__(self) -> int:
         return len(self.buffer)

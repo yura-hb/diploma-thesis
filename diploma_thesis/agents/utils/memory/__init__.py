@@ -2,9 +2,11 @@
 from .memory import Record, Memory
 from typing import Dict
 from .replay_memory import ReplayMemory
+from .prioritized_replay_memory import PrioritizedReplayMemory
 
 key_to_cls = {
-    'replay': ReplayMemory
+    'replay': ReplayMemory,
+    'prioritized_replay': PrioritizedReplayMemory
 }
 
 

@@ -27,7 +27,7 @@ class MultiRuleLinear(NNMachineModel, PhaseUpdatable):
                 module.update(phase)
 
     def __call__(self, state: State, parameters: MachineModel.Input) -> MachineModel.Record:
-        values = self.values(state)
+        values = self.values(state).view(-1)
         action, _ = self.action_selector(values)
         action = torch.tensor(action, dtype=torch.long)
         rule = self.rules[action]
@@ -44,7 +44,9 @@ class MultiRuleLinear(NNMachineModel, PhaseUpdatable):
         if not self.model.is_connected:
             self.__connect__(len(self.rules), self.model, state.state.shape[-1])
 
-        return self.model(state.state)
+        tensor = torch.atleast_2d(state.state)
+
+        return self.model(tensor)
 
     def parameters(self, recurse: bool = True):
         return self.model.parameters(recurse)

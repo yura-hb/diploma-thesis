@@ -107,7 +107,7 @@ task:
         kind: 'deep_marl_indirect'
 
       memory:
-        kind: 'replay'
+        kind: 'prioritized_replay'
         parameters:
           size: 8192
           batch_size: 64
