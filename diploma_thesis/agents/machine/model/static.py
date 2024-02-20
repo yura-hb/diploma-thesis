@@ -1,7 +1,5 @@
 from typing import Dict
 
-import torch
-
 from agents.machine.state import PlainEncoder
 from .model import MachineModel
 from .rule import SchedulingRule, ALL_SCHEDULING_RULES

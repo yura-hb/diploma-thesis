@@ -1,6 +1,5 @@
 import torch
 
-from dataclasses import dataclass
 from tensordict.prototype import tensorclass
 
 

@@ -1,11 +1,9 @@
-import logging
-
 from typing import Dict
 
+from .deep_marl_indirect import DEEPMARLIndirectStateEncoder
+from .deep_marl_mr import DEEPMARLMinimumRepetitionStateEncoder
 from .encoder import StateEncoder
 from .plain import PlainEncoder
-from .deep_marl_mr import DEEPMARLMinimumRepetitionStateEncoder
-from .deep_marl_indirect import DEEPMARLIndirectStateEncoder
 
 key_to_class = {
     "plain": PlainEncoder,

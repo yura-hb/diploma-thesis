@@ -1,8 +1,6 @@
 
 from typing import List, Dict
 
-import torch
-
 from agents.base.state import TensorState
 from agents.utils import NNCLI, Phase, PhaseUpdatable
 from agents.utils.action import ActionSelector, from_cli as action_selector_from_cli

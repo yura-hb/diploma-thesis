@@ -98,17 +98,6 @@ class DeepQAgent(Machine):
 
         return result
 
-    def state_dict(self):
-        return {
-            'model': self.model,
-            'target_model': self.target_model,
-            'encoder': self.state_encoder,
-            'optimizer': self.optimizer,
-            'memory': self.memory,
-            'loss': self.loss,
-            'parameters': self.configuration
-        }
-
     @staticmethod
     def from_cli(parameters: Dict):
         model = model_from_cli(parameters['model'])
@@ -123,23 +112,6 @@ class DeepQAgent(Machine):
         return DeepQAgent(model=model,
                           state_encoder=encoder,
                           memory=memory,
-                          loss=loss,
-                          optimizer=optimizer,
-                          configuration=configuration)
-
-    @classmethod
-    def load_from_parameters(cls, parameters):
-        model = parameters['model']
-        encoder = parameters['encoder']
-        # memory = parameters['memory']
-        loss = parameters['loss']
-        optimizer = parameters['optimizer']
-        configuration = parameters['parameters']
-
-        return DeepQAgent(model=model,
-                          state_encoder=encoder,
-                          memory=None,
-                          # memory=memory,
                           loss=loss,
                           optimizer=optimizer,
                           configuration=configuration)
