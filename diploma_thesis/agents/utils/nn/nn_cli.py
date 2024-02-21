@@ -79,16 +79,12 @@ class NNCLI(nn.Module):
 
         previous_dim = input_dim
 
-        for layer in self.configuration.layers:
+        for layer in self.configuration.layers + [output_layer]:
             layer, output_dim = self.__make_layer__(previous_dim, layer)
 
             self.model = self.model.append(layer)
 
             previous_dim = output_dim
-
-        self.model.append(
-            self.__make_layer__(previous_dim, output_layer)[0]
-        )
 
     def forward(self, x):
         return self.model(torch.atleast_2d(x))

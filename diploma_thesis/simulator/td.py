@@ -7,16 +7,20 @@ class TDSimulator(Simulator):
     possible
     """
 
-    def did_prepare_machine_record(self,
-                                   shop_floor: ShopFloor,
-                                   machine: Machine,
-                                   record: Record,
-                                   decision_moment: float):
+    def did_prepare_machine_record(
+            self, shop_floor: ShopFloor, machine: Machine, record: Record, decision_moment: float
+    ):
+        super().did_prepare_machine_record(shop_floor, machine, record, decision_moment)
+
         self.machine.store(machine.key, record)
 
-    def did_prepare_work_center_record(self,
-                                       shop_floor: ShopFloor,
-                                       work_center: WorkCenter,
-                                       record: Record,
-                                       decision_moment: float):
+    def did_prepare_work_center_record(
+            self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record, decision_moment: float
+    ):
+        super().did_prepare_work_center_record(shop_floor, work_center, record, decision_moment)
+
         self.work_center.store(work_center.key, record)
+
+    @staticmethod
+    def from_cli(parameters, *args, **kwargs) -> Simulator:
+        return TDSimulator(*args, **kwargs)

@@ -32,6 +32,28 @@ def reset_tape():
     return decorator
 
 
+@tensorclass
+class RewardCache:
+    @tensorclass
+    class Record:
+        shop_floor_id: torch.Tensor = torch.tensor([])
+        action: torch.Tensor = torch.tensor([])
+        reward: torch.Tensor = torch.tensor([])
+        moment: torch.Tensor = torch.tensor([])
+        work_center_id: torch.Tensor = torch.tensor([])
+
+    @tensorclass
+    class MachineRecord(Record):
+        machine_id: torch.Tensor = torch.tensor([])
+
+    @tensorclass
+    class WorkCenterRecord(Record):
+        work_center_id: torch.Tensor = torch.tensor([])
+
+    machines: MachineRecord = field(default_factory=lambda: RewardCache.MachineRecord(batch_size=[]))
+    work_centers: WorkCenterRecord = field(default_factory=lambda: RewardCache.WorkCenterRecord(batch_size=[]))
+
+
 class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
     def __init__(self, machine: MachineAgent, work_center: WorkCenterAgent, tape_model: TapeModel):
@@ -40,8 +62,9 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         self.work_center = work_center
         self.machine = machine
         self.tape_model = tape_model
-
         self.tape_model.connect(self)
+
+        self.cache = None
 
     def with_logger(self, logger: logging.Logger):
         super().with_logger(logger)
@@ -55,6 +78,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
     @reset_tape()
     def train(self, environment: simpy.Environment, config: RunConfiguration):
         assert self.machine.is_trainable or self.work_center.is_trainable, 'At least one agent should be trainable'
+
+        self.cache = RewardCache(batch_size=[])
 
         env = environment
         warmup_end = env.event()
@@ -103,6 +128,10 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
         env.run(all_of_event)
 
+        reward_record, self.cache = self.cache, None
+
+        return reward_record
+
     @reset_tape()
     def evaluate(self, environment: simpy.Environment, config: EvaluateConfiguration):
         self.__log__(f'Evaluation Started')
@@ -134,20 +163,37 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         return self.work_center.encode_state(parameters)
 
     @abstractmethod
-    def did_prepare_machine_record(self,
-                                   shop_floor: ShopFloor,
-                                   machine: Machine,
-                                   record: Record,
-                                   decision_moment: float):
-        pass
+    def did_prepare_machine_record(
+            self, shop_floor: ShopFloor, machine: Machine, record: Record, decision_moment: float
+    ):
+        if self.cache is None:
+            return
+
+        self.cache.machines = self.__update_cache__(
+            self.cache.machines,
+            RewardCache.MachineRecord,
+            shop_floor,
+            record,
+            decision_moment,
+            machine.work_center_idx,
+            machine_id=machine.machine_idx
+        )
 
     @abstractmethod
-    def did_prepare_work_center_record(self,
-                                       shop_floor: ShopFloor,
-                                       work_center: WorkCenter,
-                                       record: Record,
-                                       decision_moment: float):
-        pass
+    def did_prepare_work_center_record(
+        self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record, decision_moment: float
+    ):
+        if self.cache is None:
+            return
+
+        self.cache.work_centers = self.__update_cache__(
+            self.cache.work_centers,
+            RewardCache.WorkCenterRecord,
+            shop_floor,
+            record,
+            decision_moment,
+            work_center.work_center_idx
+        )
 
     # Agent
 
@@ -156,9 +202,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         result = self.machine.schedule(parameters)
 
         if self.machine.is_trainable:
-            self.tape_model.register_machine_reward_preparation(context=context,
-                                                                machine=machine,
-                                                                record=result)
+            self.tape_model.register_machine_reward_preparation(context=context, machine=machine, record=result)
 
         return result.result
 
@@ -234,14 +278,14 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         self.__update__(EvaluationPhase())
 
     def __train_timeline__(
-        self,
-        environment: simpy.Environment,
-        name: str,
-        configuration: RunConfiguration.TrainSchedule,
-        warm_up_event: simpy.Event,
-        training_event: simpy.Event,
-        run_event: simpy.Event,
-        train_fn: Callable
+            self,
+            environment: simpy.Environment,
+            name: str,
+            configuration: RunConfiguration.TrainSchedule,
+            warm_up_event: simpy.Event,
+            training_event: simpy.Event,
+            run_event: simpy.Event,
+            train_fn: Callable
     ):
         yield warm_up_event
 
@@ -288,3 +332,23 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
     def __log__(self, message: str, level: int = logging.INFO):
         self.logger.log(level=level, msg=message)
 
+    def __update_cache__(self, cache, cls, shop_floor, record, decision_moment, work_center_idx, **kwargs):
+        if torch.is_tensor(decision_moment):
+            decision_moment = decision_moment.view([])
+        else:
+            decision_moment = torch.tensor(decision_moment)
+
+        record = cls(
+            shop_floor_id=shop_floor.id,
+            action=record.action,
+            reward=record.reward,
+            moment=decision_moment,
+            work_center_id=work_center_idx,
+            **kwargs,
+            batch_size=[]
+        ).view(-1)
+
+        if not cache.batch_size:
+            return record
+
+        return torch.cat([cache, record])
