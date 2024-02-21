@@ -3,13 +3,13 @@ from .criterion import Criterion, Direction, Scale
 from .makespan import Makespan
 from .tardiness import Tardiness
 
+from functools import partial
+from utils import from_cli
+
 key_to_cls = {
     Makespan.key: Makespan,
     Tardiness.key: Tardiness
 }
 
 
-def from_cli(parameters: dict) -> list[Criterion]:
-    cls = key_to_cls[parameters['kind']]
-
-    return cls.from_cli(parameters['parameters'])
+from_cli = partial(from_cli, key_to_class=key_to_cls)

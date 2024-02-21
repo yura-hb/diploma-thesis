@@ -1,5 +1,6 @@
-from typing import Dict
+from functools import partial
 
+from utils import from_cli
 from .deep_marl_indirect import DEEPMARLIndirectStateEncoder
 from .deep_marl_mr import DEEPMARLMinimumRepetitionStateEncoder
 from .encoder import StateEncoder
@@ -11,8 +12,4 @@ key_to_class = {
     "deep_marl_indirect": DEEPMARLIndirectStateEncoder
 }
 
-
-def from_cli(parameters: Dict) -> StateEncoder:
-    cls = key_to_class[parameters['kind']]
-
-    return cls.from_cli(parameters.get('parameters', {}))
+from_cli = partial(from_cli, key_to_class=key_to_class)

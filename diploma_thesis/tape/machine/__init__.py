@@ -1,10 +1,10 @@
 
-from .reward import MachineReward
+from functools import partial
 
+from utils import from_cli
 from .global_tardiness_reward import GlobalTardiness
 from .no import No
-
-from typing import Dict
+from .reward import MachineReward
 
 key_to_cls = {
     'global_tardiness': GlobalTardiness,
@@ -12,7 +12,4 @@ key_to_cls = {
 }
 
 
-def from_cli(parameters: Dict) -> MachineReward:
-    cls = key_to_cls[parameters['kind']]
-
-    return cls.from_cli(parameters.get('parameters', {}))
+from_cli = partial(from_cli, key_to_class=key_to_cls)

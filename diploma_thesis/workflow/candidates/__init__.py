@@ -1,14 +1,16 @@
+from functools import partial
+
+from utils import from_cli
 from .agent import Agent
+from .multi_agent import MultiAgent
 from .static import StaticCandidates
 from .template import Template, Candidate
 
 key_to_cls = {
     "agent": Agent,
     "static": StaticCandidates,
+    "multi": MultiAgent
 }
 
 
-def from_cli(parameters: dict) -> list[Candidate]:
-    cls = key_to_cls[parameters['kind']]
-
-    return cls.from_cli(parameters['parameters'])
+from_cli = partial(from_cli, key_to_class=key_to_cls)

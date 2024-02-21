@@ -8,7 +8,7 @@ class Delegate(metaclass=ABCMeta):
 
     def did_start_simulation(self, context: Context):
         """
-        Will be triggered after the start of simulation
+        Will be triggered after the start of run
         """
         pass
 

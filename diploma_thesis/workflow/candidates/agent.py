@@ -1,6 +1,5 @@
-import logging
-
 from typing import Dict
+
 from agents import machine_from_cli, work_center_from_cli
 from .template import Template, Candidate
 

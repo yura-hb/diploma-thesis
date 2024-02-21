@@ -1,16 +1,14 @@
 
+from functools import partial
+
+from utils import from_cli
 from .memory import Record, Memory
-from typing import Dict
-from .replay_memory import ReplayMemory
 from .prioritized_replay_memory import PrioritizedReplayMemory
+from .replay_memory import ReplayMemory
 
 key_to_cls = {
     'replay': ReplayMemory,
     'prioritized_replay': PrioritizedReplayMemory
 }
 
-
-def from_cli(parameters: Dict) -> Memory:
-    cls = key_to_cls[parameters['kind']]
-
-    return cls.from_cli(parameters['parameters'])
+from_cli = partial(from_cli, key_to_class=key_to_cls)

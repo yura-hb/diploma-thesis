@@ -271,7 +271,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
     def __terminate_if_needed__(self, environment: simpy.Environment, run_event: simpy.Event, delay: float):
         yield environment.timeout(delay)
 
-        self.__log__('Terminating simulation due to max duration reached')
+        self.__log__('Terminating run due to max duration reached')
 
         try:
             run_event.succeed()

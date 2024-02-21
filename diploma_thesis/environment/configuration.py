@@ -4,13 +4,13 @@ from typing import Dict
 
 @dataclass
 class Configuration:
-    # The duration of the simulation in the number of jobs
+    # The duration of the run in the number of jobs
     timespan: int = 2000
     # The number of machines per work center
     machines_per_work_center: int = 1
     # The number of work centers
     work_center_count: int = 1
-    # Whether each work center on shop_floor will have a job in the beginning of simulation
+    # Whether each work center on shop_floor will have a job in the beginning of run
     pre_assign_initial_jobs: bool = False
     # The seed for the random number generator
     seed: int = 0

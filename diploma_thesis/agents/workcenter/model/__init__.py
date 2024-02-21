@@ -1,15 +1,13 @@
-import logging
+from functools import partial
 
+from utils import from_cli
 from .model import WorkCenterModel
-from .static import StaticModel as StaticWorkCenterModel
 from .rule import RoutingRule
+from .static import StaticModel as StaticWorkCenterModel
 
 key_to_class = {
     "static": StaticWorkCenterModel
 }
 
 
-def from_cli(parameters) -> WorkCenterModel:
-    cls = key_to_class[parameters['kind']]
-
-    return cls.from_cli(parameters['parameters'])
+from_cli = partial(from_cli, key_to_class=key_to_class)

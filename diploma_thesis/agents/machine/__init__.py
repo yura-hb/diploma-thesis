@@ -1,17 +1,17 @@
-from .utils import Input as MachineInput
+from functools import partial
+
+from utils import from_cli
 from .dqn import DeepQAgent
 from .machine import Machine
-from .static import StaticMachine
 from .persisted import PersistedMachine
+from .static import StaticMachine
+from .utils import Input as MachineInput
 
 key_to_class = {
     "static": StaticMachine,
     'dqn': DeepQAgent,
-    'persisted': PersistedMachine
+    'persisted': PersistedMachine,
 }
 
 
-def from_cli(parameters) -> Machine:
-    cls = key_to_class[parameters['kind']]
-
-    return cls.from_cli(parameters['parameters'])
+from_cli = partial(from_cli, key_to_class=key_to_class)

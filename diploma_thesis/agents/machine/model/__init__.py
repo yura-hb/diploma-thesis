@@ -1,3 +1,6 @@
+from functools import partial
+
+from utils import from_cli
 from .model import MachineModel, NNMachineModel
 from .multi_rule_linear import MultiRuleLinear as MultiRuleLinearModel
 from .rule import SchedulingRule
@@ -8,9 +11,4 @@ key_to_class = {
     'multi_rule_linear': MultiRuleLinearModel
 }
 
-
-def from_cli(parameters) -> MachineModel:
-    cls = key_to_class[parameters['kind']]
-
-    return cls.from_cli(parameters['parameters'])
-
+from_cli = partial(from_cli, key_to_class=key_to_class)

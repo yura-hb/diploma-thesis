@@ -1,0 +1,5 @@
+
+machine_agent:
+  parameters:
+    loss:
+      kind: 'smooth_l1'

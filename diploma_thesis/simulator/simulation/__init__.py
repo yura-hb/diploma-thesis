@@ -1,32 +1,36 @@
-from .simulation import Simulation
-from .dynamic_simulation import DynamicSimulation
 from typing import Dict, List
 from logging import Logger
+from functools import reduce
+
+from .simulation import Simulation
+from .multi_value import MultiValueCLITemplate
 
 
 key_to_class = {
-    'dynamic': DynamicSimulation
+    'simulation': Simulation,
+    'multi_value': MultiValueCLITemplate,
 }
 
 
-def from_cli(parameters: Dict, logger: Logger):
+def from_cli(parameters: Dict, logger: Logger) -> [Simulation]:
     cls = key_to_class[parameters['kind']]
 
-    return cls.from_cli(name=parameters.get('name', ''), parameters=parameters['parameters'], logger=logger)
+    result = cls.from_cli(name=parameters.get('name', ''), parameters=parameters['parameters'], logger=logger)
+
+    if isinstance(result, list):
+        return result
+
+    return [result]
 
 
-def from_cli_list(prefix: str, parameters: List[Dict], logger: Logger):
-    simulation_names = [parameter.get('name', '') for parameter in parameters]
-    names = dict()
+def from_cli_list(prefix: str, parameters: List[Dict], logger: Logger) -> [Simulation]:
+    simulations = reduce(lambda x, y: x + from_cli(y, logger), parameters, [])
 
-    for idx, key in enumerate(simulation_names):
-        if key in names:
-            names[key] += 1
-            key += '[' + str(names[key]) + ']'
-        else:
-            names[key] = 1
-            key += '[0]'
+    ids = dict()
 
-        parameters[idx]['name'] = prefix + key
+    for simulation in simulations:
+        ids[simulation.simulation_id] = ids.get(simulation.simulation_id, 0) + 1
+
+        simulation.update(prefix + simulation.simulation_id + '_' + str(ids[simulation.simulation_id]))
 
     return [from_cli(parameter, logger) for parameter in parameters]

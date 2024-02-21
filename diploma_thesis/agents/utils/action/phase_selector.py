@@ -18,7 +18,7 @@ class PhaseSelector(ActionSelector, PhaseUpdatable):
 
     @staticmethod
     def from_cli(parameters: Dict):
-        from .cli import from_cli
+        from . import from_cli
         from agents.utils.phase import from_cli as phase_from_cli
 
         default = from_cli(parameters['default'])

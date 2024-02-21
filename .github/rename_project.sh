@@ -32,5 +32,5 @@ done
 
 mv diploma_thesis $name
 
-# This command runs only once on GHA!
+# This command training_schedules only once on GHA!
 rm -rf .github/template.yml

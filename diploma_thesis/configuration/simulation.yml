@@ -1,47 +1,3 @@
-
-simulation: &simulation
-  name: ''
-  kind: 'dynamic'
-  parameters:
-    configuration:
-      timespan: 5000
-      machines_per_work_center: 10
-      work_center_count: 5
-      pre_assign_initial_jobs: True
-
-    job_sampler:
-      kind: 'dynamic'
-      parameters:
-        processing_times: # Sampler
-          kind: 'uniform'
-          parameters:
-            uniform: [ 10, 30 ]
-            noise: [ 0, 3 ]
-        permutation:
-          uneveness: 5
-        due_time: # Sampler
-          kind: 'uniform'
-          parameters:
-            uniform: [ 0.1, 0.3 ]
-        job_arrival_time_on_machine:
-          kind: 'expected_utilization'
-          parameters:
-            value: 0.95
-
-    breakdown:
-      kind: 'dynamic'
-      parameters:
-        breakdown_arrival:
-          kind: 'exponential'
-          parameters:
-              mean: 1000
-        repair_duration:
-          kind: 'uniform'
-          parameters:
-              uniform: [ 200, 500 ]
-
-    seed: 42
-
 task:
   kind: 'task'
 
@@ -49,75 +5,12 @@ task:
   output_dir: 'tmp'
 
   machine_agent:
-    kind: 'dqn'
+    kind: 'mod'
     parameters:
-      model:
-        kind: 'multi_rule_linear'
-        parameters:
-          rules: 'all'
-          nn:
-            layers:
-              - kind: 'instance_norm'
-              - kind: 'linear'
-                parameters:
-                  dim: 16
-                  activation: 'tanh'
-              - kind: 'linear'
-                parameters:
-                  dim: 16
-                  activation: 'tanh'
-              - kind: 'linear'
-                parameters:
-                  dim: 16
-                  activation: 'tanh'
-              - kind: 'linear'
-                parameters:
-                  dim: 24
-                  activation: 'tanh'
-          action_selector:
-            kind: 'phase_selector'
-            parameters:
-              default:
-                kind: 'greedy'
-              phases:
-                - phase:
-                    kind: 'training'
-                  action_selector:
-                    kind: 'epsilon_greedy'
-                    parameters:
-                      epsilon: 0.95
-                - phase:
-                    kind: 'warm_up'
-                    parameters:
-                      step: 0
-                  action_selector:
-                    kind: 'uniform'
-                - phase:
-                    kind: 'warm_up'
-                    parameters:
-                      step: 1
-                  action_selector:
-                    kind: 'uniform'
+      base_path: 'diploma_thesis/configuration/mods/machine_agent/model.yml'
+      mods:
+        - 'encoding/as.yml'
 
-      encoder:
-        kind: 'deep_marl_indirect'
-
-      memory:
-        kind: 'prioritized_replay'
-        parameters:
-          size: 8192
-          batch_size: 128
-
-      loss:
-        kind: 'mse'
-
-      optimizer:
-        kind: 'adam'
-        parameters:
-          lr: 0.001
-
-      parameters:
-        gamma: 0.4
 
   work_center_agent:
     kind: 'static'
@@ -140,32 +33,8 @@ task:
     kind: 'td'
 
   run:
-    timeline:
-      warmup:
-        - 100
-        - 100
-
-      duration: 1000
-
-    machine_train_schedule:
-      pretrain_steps: 10
-      train_interval: 100
-      max_training_steps: 1000
-
-    work_center_train_schedule:
-      pretrain_steps: 10
-      train_interval: 100
-      max_training_steps: 1000
-
-    n_workers: 1
-    simulations:
-      - <<: *simulation
-      - <<: *simulation
-      - <<: *simulation
-      - <<: *simulation
-      - <<: *simulation
-
-#  evaluate:
-#    n_workers: 2
-#    simulations:
-#      - <<: *simulation
+    kind: 'mod'
+    parameters:
+      base_path: 'diploma_thesis/configuration/mods/run/jsp/run.yml'
+      mods:
+        - 'util_70.yml'

@@ -1,0 +1,6 @@
+
+
+machine_agent:
+  parameters:
+    encoder:
+      kind: 'deep_marl_mr'

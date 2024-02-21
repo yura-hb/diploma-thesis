@@ -84,7 +84,7 @@ class Tournament(Workflow):
         for simulation in simulations:
             record = {
                 'candidate': candidate.name,
-                'simulation': simulation.simulation_id,
+                'run': simulation.simulation_id,
             }
 
             statistics = simulation.shop_floor.statistics
@@ -100,8 +100,8 @@ class Tournament(Workflow):
         top_k = reward_parameters.get('top_k', -1)
         points = reward_parameters.get('points', 1)
 
-        for simulation in metrics['simulation'].unique():
-            mask = metrics['simulation'] == simulation
+        for simulation in metrics['run'].unique():
+            mask = metrics['run'] == simulation
             simulation_metrics = metrics[mask]
 
             for criterion in criteria:

@@ -152,7 +152,7 @@ class WorkCenter:
     # Utility
 
     def __did_receive_job__(self):
-        # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the simulation
+        # Simpy doesn't allow repeated triggering of the same event. Yet, in context of the run
         # the machine shouldn't care
         try:
             self.on_route.succeed()

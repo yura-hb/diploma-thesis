@@ -1,0 +1,70 @@
+machine_agent:
+  kind: 'dqn'
+  parameters:
+    model:
+      kind: 'multi_rule_linear'
+      parameters:
+        rules: 'all'
+        nn:
+          layers:
+            - kind: 'instance_norm'
+            - kind: 'linear'
+              parameters:
+                dim: 16
+                activation: 'tanh'
+            - kind: 'linear'
+              parameters:
+                dim: 16
+                activation: 'tanh'
+            - kind: 'linear'
+              parameters:
+                dim: 16
+                activation: 'tanh'
+            - kind: 'linear'
+              parameters:
+                dim: 24
+                activation: 'tanh'
+        action_selector:
+          kind: 'phase_selector'
+          parameters:
+            default:
+              kind: 'greedy'
+            phases:
+              - phase:
+                  kind: 'training'
+                action_selector:
+                  kind: 'epsilon_greedy'
+                  parameters:
+                    epsilon: 0.95
+              - phase:
+                  kind: 'warm_up'
+                  parameters:
+                    step: 0
+                action_selector:
+                  kind: 'uniform'
+              - phase:
+                  kind: 'warm_up'
+                  parameters:
+                    step: 1
+                action_selector:
+                  kind: 'uniform'
+
+    encoder:
+      kind: 'deep_marl_indirect'
+
+    memory:
+      kind: 'prioritized_replay'
+      parameters:
+        size: 8192
+        batch_size: 128
+
+    loss:
+      kind: 'mse'
+
+    optimizer:
+      kind: 'adam'
+      parameters:
+        lr: 0.001
+
+    parameters:
+      gamma: 0.4

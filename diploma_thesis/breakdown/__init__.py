@@ -1,17 +1,13 @@
+from functools import partial
 
-from environment import Breakdown
-from .no import No as NoBreakdown
+from utils import from_cli
 from .dynamic import Dynamic as DynamicBreakdown
-
-from typing import Dict
+from .no import No as NoBreakdown
 
 key_to_cls = {
     'no': NoBreakdown,
     'dynamic': DynamicBreakdown
 }
 
+from_cli = partial(from_cli, key_to_class=key_to_cls)
 
-def from_cli(parameters: Dict) -> Breakdown:
-    cls = key_to_cls[parameters['kind']]
-
-    return cls.from_cli(parameters.get('parameters', dict()))

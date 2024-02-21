@@ -11,7 +11,7 @@ class RunConfiguration:
     class TimelineSchedule:
         # List of durations for warm up phases
         warm_up_phases: List[float] = field(default_factory=list)
-        # Maximum Duration of simulation
+        # Maximum Duration of run
         duration: int = 1000
 
         @staticmethod

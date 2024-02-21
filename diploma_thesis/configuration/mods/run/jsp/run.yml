@@ -1,0 +1,78 @@
+# JSP training based on the DEEP-MARL thesis
+
+simulation: &simulation
+  name: ''
+  kind: 'multi_value'
+  parameters:
+    base:
+      configuration:
+        timespan: 100000
+        machines_per_work_center: 1
+        work_center_count: 10
+        pre_assign_initial_jobs: True
+
+      job_sampler:
+        kind: 'dynamic'
+        parameters:
+          processing_times: # Sampler
+            kind: 'uniform'
+            parameters:
+              uniform: [ 1, 50 ]
+              noise: [ 0, 10 ]
+          permutation:
+            uneveness: 5
+          due_time: # Sampler
+            kind: 'uniform'
+            parameters:
+              uniform: [ 0, 2 ]
+          job_arrival_time_on_machine:
+            kind: 'expected_utilization'
+            parameters:
+              value: 0.95
+
+      breakdown:
+        kind: 'dynamic'
+        parameters:
+          breakdown_arrival:
+            kind: 'exponential'
+            parameters:
+              mean: 1000
+          repair_duration:
+            kind: 'uniform'
+            parameters:
+              uniform: [ 200, 500 ]
+
+      seed: 42
+
+    values:
+      seed: [ 42 ]
+
+      job_sampler:
+        parameters:
+          job_arrival_time_on_machine:
+            parameters:
+              value: [ 0.7, 0.8, 0.9 ]
+
+
+
+run:
+  timeline:
+    warmup:
+      - 5000
+      - 5000
+
+    duration: 100000
+
+  machine_train_schedule:
+    pretrain_steps: 10
+    train_interval: 5
+    max_training_steps: 100000000
+
+  work_center_train_schedule:
+    pretrain_steps: 0
+    train_interval: 100
+    max_training_steps: 0
+
+  n_workers: 1
+  simulations:
+    - <<: *simulation

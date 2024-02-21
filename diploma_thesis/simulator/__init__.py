@@ -1,8 +1,6 @@
+from functools import partial
 
-from typing import Dict
-
-from agents import Machine, WorkCenter
-from tape import TapeModel
+from utils import from_cli
 from .configuration import RunConfiguration, EvaluateConfiguration
 from .episodic import EpisodicSimulator
 from .simulation import Simulation
@@ -15,7 +13,4 @@ key_to_class = {
 }
 
 
-def from_cli(machine: Machine, work_center: WorkCenter, tape: TapeModel, parameters: Dict):
-    cls = key_to_class[parameters['kind']]
-
-    return cls(machine, work_center, tape)
+from_cli = partial(from_cli, key_to_class=key_to_class)

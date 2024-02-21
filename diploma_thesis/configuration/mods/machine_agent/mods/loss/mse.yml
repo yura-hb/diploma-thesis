@@ -1,0 +1,6 @@
+
+
+machine_agent:
+  parameters:
+    loss:
+      kind: 'mse'

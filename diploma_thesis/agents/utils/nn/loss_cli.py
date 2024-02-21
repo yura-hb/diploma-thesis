@@ -26,6 +26,8 @@ class LossCLI:
                 cls = torch.nn.SmoothL1Loss
             case 'mse':
                 cls = torch.nn.MSELoss
+            case 'huber':
+                cls = torch.nn.HuberLoss
             case 'cross_entropy':
                 cls = torch.nn.CrossEntropyLoss
             case _:

@@ -1,0 +1,5 @@
+# JSP training based on the DEEP-MARL thesis. However, all simulations are performed concurrently.
+
+
+run:
+  n_workers: 1

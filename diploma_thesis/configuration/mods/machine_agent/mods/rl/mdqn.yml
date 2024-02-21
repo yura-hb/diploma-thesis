@@ -1,0 +1,5 @@
+
+machine_agent:
+  kind: 'mdqn'
+  parameters:
+    gamma: 0.95

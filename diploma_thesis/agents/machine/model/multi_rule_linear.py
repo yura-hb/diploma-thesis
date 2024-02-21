@@ -78,7 +78,7 @@ class MultiRuleLinear(NNMachineModel, PhaseUpdatable):
         else:
             rules = [ALL_SCHEDULING_RULES[rule]() for rule in rules]
 
-        nn_cli = NNCLI.from_cli(parameters['nn'])
+        nn_cli = NNCLI.from_cli(parameters['model'])
 
         action_selector = action_selector_from_cli(parameters['action_selector'])
 
