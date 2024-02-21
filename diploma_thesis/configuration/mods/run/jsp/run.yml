@@ -53,9 +53,8 @@ simulation: &simulation
             parameters:
               value: [ 0.7, 0.8, 0.9 ]
 
-
-
-run:
+kind: 'plain'
+parameters:
   timeline:
     warmup:
       - 5000

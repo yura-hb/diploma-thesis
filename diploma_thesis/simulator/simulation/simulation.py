@@ -1,14 +1,14 @@
 from dataclasses import dataclass
+from logging import Logger
 from typing import Dict
 
 import simpy
 
 import environment
-from .cli import CLITemplate
+from breakdown import from_cli as breakdown_from_cli
 from environment import Agent, Delegate, ShopFloor
 from job_sampler import from_cli as job_sampler_from_cli
-from breakdown import from_cli as breakdown_from_cli
-from logging import Logger
+from .cli import CLITemplate
 
 
 class Simulation(CLITemplate):
@@ -19,7 +19,8 @@ class Simulation(CLITemplate):
         job_sampler: Dict
         breakdown: Dict
 
-    def __init__(self, name: str, logger: Logger, configuration: Configuration):
+    def __init__(self, index: int, name: str, logger: Logger, configuration: Configuration):
+        self.index = index
         self.name = name
         self.logger = logger
         self.shop_floor: ShopFloor = None
@@ -35,8 +36,8 @@ class Simulation(CLITemplate):
         problem = self.configuration.configuration
         problem = environment.Configuration.from_cli_arguments(problem)
 
-        sampler = job_sampler_from_cli(problem, env, self.configuration.job_sampler)
-        breakdown = breakdown_from_cli(self.configuration.breakdown)
+        sampler = job_sampler_from_cli(parameters=self.configuration.job_sampler, problem=problem, environment=env)
+        breakdown = breakdown_from_cli(parameters=self.configuration.breakdown)
 
         configuration = ShopFloor.Configuration(
             problem=problem,
@@ -47,17 +48,21 @@ class Simulation(CLITemplate):
             breakdown=breakdown
         )
 
-        self.shop_floor = ShopFloor(self.simulation_id, configuration, self.logger)
+        self.shop_floor = ShopFloor(self.index, self.simulation_id, configuration, self.logger)
 
     def run(self):
         yield self.shop_floor.simulate()
 
-    def update(self, name: str):
+    def update_name(self, name: str):
         self.name = name
+
+    def update_index(self, index: int):
+        self.index = index
 
     @classmethod
     def from_cli(cls, name: str, logger: Logger, parameters: Dict):
         return cls(
+            index=0,
             name=name,
             logger=logger,
             configuration=cls.Configuration(

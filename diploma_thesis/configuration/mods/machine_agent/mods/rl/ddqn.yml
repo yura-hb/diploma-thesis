@@ -1,5 +1,3 @@
-
-machine_agent:
-  kind: 'ddqn'
-  parameters:
-    gamma: 0.95
+kind: 'ddqn'
+parameters:
+  gamma: 0.95

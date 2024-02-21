@@ -9,10 +9,20 @@ class EpisodicSimulator(Simulator):
     After the run is finished returns are estimated and passed to the agent for training.
     """
 
-    def did_prepare_machine_record(self, shop_floor: ShopFloor, machine: Machine, record: Record):
-        # self.machine.store(machine.key, record)
+    def did_prepare_machine_record(self,
+                                   shop_floor: ShopFloor,
+                                   machine: Machine,
+                                   record: Record,
+                                   decision_moment: float):
+       pass
+
+    def did_prepare_work_center_record(self,
+                                       shop_floor: ShopFloor,
+                                       work_center: WorkCenter,
+                                       record: Record,
+                                       decision_moment: float):
         pass
 
-    def did_prepare_work_center_record(self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record):
-        # self.work_center.store(work_center.key, record)
-        pass
+    @staticmethod
+    def from_cli(parameters, *args, **kwargs) -> Simulator:
+        return EpisodicSimulator(*args, **kwargs)

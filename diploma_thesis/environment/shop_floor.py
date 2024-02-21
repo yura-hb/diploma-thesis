@@ -89,8 +89,9 @@ class ShopFloor:
         delegate: 'environment.Delegate'
         environment: simpy.Environment = field(default_factory=simpy.Environment)
 
-    def __init__(self, idx: str, configuration: Configuration, logger: logging.Logger):
-        self.id = idx
+    def __init__(self, id: int, name: str, configuration: Configuration, logger: logging.Logger):
+        self.id = torch.tensor(id)
+        self.name = name
         self.configuration = configuration
         self.logger = logger
         self.agent = configuration.agent
@@ -99,7 +100,7 @@ class ShopFloor:
         self._work_centers: List[environment.WorkCenter] = []
         self._machines: List[environment.Machine] = []
 
-        self.state = State(idx=idx, batch_size=[])
+        self.state = State(idx=id, batch_size=[])
         self.history = History(batch_size=[])
         self._work_centers, self._machines = ShopFloorFactory(self.configuration, self).make()
 

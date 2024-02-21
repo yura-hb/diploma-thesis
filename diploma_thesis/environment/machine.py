@@ -34,8 +34,8 @@ class State:
     repair_duration: torch.FloatTensor = torch.FloatTensor([0])
 
     def __post_init__(self):
-        self.machine_idx = torch.LongTensor([self.machine_idx])
-        self.work_center_idx = torch.LongTensor([self.work_center_idx])
+        self.machine_idx = torch.tensor(self.machine_idx)
+        self.work_center_idx = torch.tensor(self.work_center_idx)
 
     def with_new_job(self, job: environment.Job, now: torch.FloatTensor):
         """

@@ -1,9 +1,6 @@
-
-
-machine_agent:
-  parameters:
-    memory:
-      kind: 'prioritized_replay'
-      parameters:
-        size: 8192
-        batch_size: 128
+parameters:
+  memory:
+    kind: 'prioritized_replay'
+    parameters:
+      size: 8192
+      batch_size: 128

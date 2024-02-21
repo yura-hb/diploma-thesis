@@ -6,7 +6,8 @@ import simpy
 
 import simulator
 from agents import work_center_from_cli, machine_from_cli
-from simulator import from_cli as simulator_from_cli, RunConfiguration, EvaluateConfiguration, Simulator
+from simulator import from_cli as simulator_from_cli, Simulator
+from simulator import run_configuration_from_cli, evaluate_configuration_from_cli
 from tape import TapeModel
 from utils import save
 from .workflow import Workflow
@@ -38,7 +39,7 @@ class Simulation(Workflow):
         environment = simpy.Environment()
         logger = self.__make_time_logger__(name='Run', environment=environment, log_stdout=True)
 
-        config = RunConfiguration.from_cli(logger, config)
+        config = run_configuration_from_cli(config, logger=logger)
 
         simulator.train(environment, config)
 
@@ -57,7 +58,7 @@ class Simulation(Workflow):
         environment = simpy.Environment()
         logger = self.__make_time_logger__(name='Evaluate', environment=environment, log_stdout=True)
 
-        config = EvaluateConfiguration.from_cli(logger, config)
+        config = evaluate_configuration_from_cli(config, logger=logger)
 
         simulator.evaluate(environment, config)
 
@@ -68,9 +69,8 @@ class Simulation(Workflow):
         machine = machine_from_cli(parameters=self.parameters['machine_agent'])
         work_center = work_center_from_cli(parameters=self.parameters['work_center_agent'])
         tape = TapeModel.from_cli(parameters=self.parameters['tape'])
-
         simulator = simulator_from_cli(
-            machine=machine, work_center=work_center, tape=tape, parameters=self.parameters['simulator']
+            machine=machine, work_center=work_center, tape_model=tape, parameters=self.parameters['simulator']
         )
 
         return simulator

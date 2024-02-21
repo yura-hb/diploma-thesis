@@ -41,7 +41,7 @@ class CLI:
         n_jobs: int
 
     @staticmethod
-    def from_cli(problem: Problem, environment: simpy.Environment, parameters: dict) -> JobSampler:
+    def from_cli(parameters: dict, problem: Problem, environment: simpy.Environment) -> JobSampler:
         configuration = CLI.configuration_from_cli_arguments(problem, parameters)
 
         builder = Builder(problem, environment)

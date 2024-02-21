@@ -12,7 +12,24 @@ key_to_class = {
 }
 
 
-def from_cli(parameters: Dict, logger: Logger) -> [Simulation]:
+def from_cli(prefix: str, parameters: List[Dict], logger: Logger) -> [Simulation]:
+    if isinstance(parameters, dict):
+        parameters = [parameters]
+
+    simulations = reduce(lambda x, y: x + _from_cli(y, logger), parameters, [])
+
+    ids = dict()
+
+    for index, simulation in enumerate(simulations):
+        ids[simulation.simulation_id] = ids.get(simulation.simulation_id, 0) + 1
+
+        simulation.update_name(prefix + simulation.simulation_id + '_' + str(ids[simulation.simulation_id]))
+        simulation.update_index(index)
+
+    return simulations
+
+
+def _from_cli(parameters: Dict, logger: Logger) -> [Simulation]:
     cls = key_to_class[parameters['kind']]
 
     result = cls.from_cli(name=parameters.get('name', ''), parameters=parameters['parameters'], logger=logger)
@@ -21,16 +38,3 @@ def from_cli(parameters: Dict, logger: Logger) -> [Simulation]:
         return result
 
     return [result]
-
-
-def from_cli_list(prefix: str, parameters: List[Dict], logger: Logger) -> [Simulation]:
-    simulations = reduce(lambda x, y: x + from_cli(y, logger), parameters, [])
-
-    ids = dict()
-
-    for simulation in simulations:
-        ids[simulation.simulation_id] = ids.get(simulation.simulation_id, 0) + 1
-
-        simulation.update(prefix + simulation.simulation_id + '_' + str(ids[simulation.simulation_id]))
-
-    return [from_cli(parameter, logger) for parameter in parameters]

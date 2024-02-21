@@ -1,18 +1,21 @@
 import logging
 from abc import ABCMeta, abstractmethod
+from dataclasses import field
 from typing import Callable, List
 
 import simpy
+import torch
+from tensordict.prototype import tensorclass
 
+from agents import Machine as MachineAgent, WorkCenter as WorkCenterAgent
 from agents import MachineInput, WorkCenterInput
 from agents import TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
-from agents import Machine as MachineAgent, WorkCenter as WorkCenterAgent
 from agents.utils.memory import Record
 from environment import Agent, ShopFloor, Job, WaitInfo, Machine, WorkCenter, Context
 from tape import TapeModel, SimulatorInterface
+from utils import Loggable
 from .configuration import RunConfiguration, EvaluateConfiguration
 from .simulation import Simulation
-from utils import Loggable
 
 
 def reset_tape():

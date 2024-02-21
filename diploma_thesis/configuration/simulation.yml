@@ -7,9 +7,9 @@ task:
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'diploma_thesis/configuration/mods/machine_agent/model.yml'
+      base_path: 'configuration/mods/machine_agent/model.yml'
       mods:
-        - 'encoding/as.yml'
+        - 'encoding/mr.yml'
 
 
   work_center_agent:
@@ -35,6 +35,6 @@ task:
   run:
     kind: 'mod'
     parameters:
-      base_path: 'diploma_thesis/configuration/mods/run/jsp/run.yml'
+      base_path: 'configuration/mods/run/jsp/run.yml'
       mods:
-        - 'util_70.yml'
+        - 'test.yml'

@@ -1,9 +1,7 @@
 
 from abc import ABCMeta, abstractmethod
-from typing import Dict
 from logging import Logger
-from flatdict import FlatDict
-from itertools import product
+from typing import Dict
 
 
 class CLITemplate(metaclass=ABCMeta):

@@ -16,7 +16,7 @@ class State:
     queue: List[environment.Job] = field(default_factory=list)
 
     def __post_init__(self):
-        self.idx = torch.LongTensor([self.idx])
+        self.idx = torch.tensor(self.idx)
 
     def with_new_job(self, job: environment.Job):
         self.queue += [job]

@@ -6,7 +6,7 @@ from environment import Job, ShopFloor, Machine, Context
 from tape.utils.simulator_interface import SimulatorInterface
 from utils import Loggable
 
-ShopFloorId = str
+ShopFloorId = int
 ActionId = int
 
 

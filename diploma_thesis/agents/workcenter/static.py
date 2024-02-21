@@ -1,8 +1,8 @@
 from typing import Dict
 
-from .model import StaticWorkCenterModel, from_cli as model_from_cli
-from .state import StateEncoder, from_cli as state_encoder_from_cli
-from .work_center import WorkCenter
+from .model import StaticWorkCenterModel
+from .state import StateEncoder
+from .work_center import *
 
 
 class StaticWorkCenter(WorkCenter):
@@ -17,25 +17,9 @@ class StaticWorkCenter(WorkCenter):
     def train_step(self):
         pass
 
-    def state_dict(self):
-        return {
-            'model': self.model,
-            'encoder': self.state_encoder
-        }
-
     @staticmethod
     def from_cli(parameters: Dict):
         model = model_from_cli(parameters['model'])
         encoder = state_encoder_from_cli(parameters['encoder'])
 
         return StaticWorkCenter(model=model, state_encoder=encoder)
-
-    @classmethod
-    def load_from_parameters(cls, parameters):
-        model = parameters['model']
-        encoder = parameters['encoder']
-
-        return StaticWorkCenter(
-            model=model,
-            state_encoder=encoder
-        )

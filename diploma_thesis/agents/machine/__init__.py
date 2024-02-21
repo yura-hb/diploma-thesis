@@ -1,16 +1,16 @@
 from functools import partial
 
 from utils import from_cli
-from .dqn import DeepQAgent
-from .machine import Machine
-from .persisted import PersistedMachine
-from .static import StaticMachine
+
 from .utils import Input as MachineInput
+from .machine import Machine
+from .static import StaticMachine
+from .dqn import DeepQAgent
+
 
 key_to_class = {
     "static": StaticMachine,
     'dqn': DeepQAgent,
-    'persisted': PersistedMachine,
 }
 
 

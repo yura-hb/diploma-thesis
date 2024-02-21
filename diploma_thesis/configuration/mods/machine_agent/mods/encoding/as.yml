@@ -1,6 +1,4 @@
-
-machine_agent:
-  parameters:
-    encoder:
-      kind: 'deep_marl_indirect'
+parameters:
+  encoder:
+    kind: 'deep_marl_indirect'
 

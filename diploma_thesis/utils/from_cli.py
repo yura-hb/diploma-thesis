@@ -1,14 +1,26 @@
 
 from .modified import modified
+from .persistence import load
 
 
-def from_cli(key_to_cls, parameters, *args, **kwargs):
+def from_cli(parameters, key_to_class, return_params: bool = False, *args, **kwargs):
+
+    def wrap(value, params):
+        if return_params:
+            return value, params
+
+        return value
+
     kind = parameters['kind']
+    parameters = parameters.get('parameters', {})
 
     if kind == 'mod':
         parameters = modified(parameters)
-        return from_cli(parameters, *args, **kwargs)
+        return wrap(from_cli(parameters, key_to_class=key_to_class, *args, **kwargs), parameters)
 
-    cls = key_to_cls[parameters['kind']]
+    if kind == 'persisted':
+        return wrap(load(parameters['path']), {})
 
-    return cls.from_cli(parameters['parameters'], *args, **kwargs)
+    cls = key_to_class[kind]
+
+    return wrap(cls.from_cli(parameters, *args, **kwargs), parameters)
