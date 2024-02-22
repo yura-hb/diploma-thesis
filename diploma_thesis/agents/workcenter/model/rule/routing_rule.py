@@ -1,4 +1,3 @@
-from typing import List
 
 import torch
 
@@ -10,8 +9,6 @@ class RoutingRule(metaclass=ABCMeta):
     """
     Selects a machine at random
     """
-
-    @abstractmethod
     def __call__(self, job: Job, work_center: WorkCenter) -> Machine | None:
         value = self.criterion(job, work_center)
         selector = self.selector

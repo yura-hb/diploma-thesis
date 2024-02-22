@@ -18,7 +18,7 @@ class StaticModel(WorkCenterModel[PlainEncoder.State, None]):
 
     def __call__(self, state: State, parameters: WorkCenterModel.Input) -> WorkCenterModel.Record:
         return WorkCenterModel.Record(
-            result=self.rule(parameters.job, parameters.work_center.work_center_idx, parameters.work_center.machines),
+            result=self.rule(parameters.job, parameters.work_center),
             state=state,
             action=None
         )

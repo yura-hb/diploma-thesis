@@ -4,9 +4,11 @@ from utils import from_cli
 from .model import WorkCenterModel
 from .rule import RoutingRule
 from .static import StaticModel as StaticWorkCenterModel
+from .multi_rule_linear import MultiRuleLinear
 
 key_to_class = {
-    "static": StaticWorkCenterModel
+    "static": StaticWorkCenterModel,
+    "multi_rule_linear": MultiRuleLinear
 }
 
 
