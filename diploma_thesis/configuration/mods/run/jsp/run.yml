@@ -17,7 +17,7 @@ simulation: &simulation
           processing_times: # Sampler
             kind: 'uniform'
             parameters:
-              uniform: [ 1, 50 ]
+              uniform: [ 1, 5 ]
               noise: [ 0, 10 ]
           permutation:
             uneveness: 5
@@ -36,11 +36,11 @@ simulation: &simulation
           breakdown_arrival:
             kind: 'exponential'
             parameters:
-              mean: 1000
+              mean: 10000
           repair_duration:
             kind: 'uniform'
             parameters:
-              uniform: [ 200, 500 ]
+              uniform: [ 10, 200 ]
 
       seed: 42
 
@@ -64,7 +64,7 @@ parameters:
 
   machine_train_schedule:
     pretrain_steps: 10
-    train_interval: 5
+    train_interval: 20
     max_training_steps: 100000000
 
   work_center_train_schedule:
@@ -72,6 +72,6 @@ parameters:
     train_interval: 100
     max_training_steps: 0
 
-  n_workers: 1
+  n_workers: 3
   simulations:
     - <<: *simulation

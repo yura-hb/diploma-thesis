@@ -30,11 +30,7 @@ class MultiRuleLinear(NNMachineModel, PhaseUpdatable):
         action = torch.tensor(action, dtype=torch.long)
         rule = self.rules[action]
 
-        return MachineModel.Record(
-            result=rule(parameters.machine, parameters.now),
-            state=state,
-            action=action
-        )
+        return MachineModel.Record(result=rule(parameters.machine, parameters.now), state=state, action=action)
 
     def values(self, state: State) -> torch.FloatTensor:
         assert isinstance(state, TensorState), f"State must conform to TensorState"
@@ -61,11 +57,7 @@ class MultiRuleLinear(NNMachineModel, PhaseUpdatable):
 
     @staticmethod
     def __connect__(n_rules: int, model: NNCLI, input_shape: torch.Size):
-        output_layer = NNCLI.Configuration.Linear(
-            dim=n_rules,
-            activation='none',
-            dropout=0
-        )
+        output_layer = NNCLI.Configuration.Linear(dim=n_rules, activation='none', dropout=0)
 
         model.connect(input_shape, output_layer)
 

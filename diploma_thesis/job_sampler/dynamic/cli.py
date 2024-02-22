@@ -81,8 +81,7 @@ class CLI:
             case 'sampler':
                 sampler = numeric_sampler_from_cli(parameters['sampler'])
             case 'expected_utilization':
-                arrival_time = mean_processing_time * parameters['value']
-                arrival_time /= number_of_machines
+                arrival_time = mean_processing_time / (number_of_machines * parameters['value'])
 
                 sampler = Exponential(arrival_time)
             case 'even_arrival_time':

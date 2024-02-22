@@ -27,6 +27,10 @@ class Simulation(CLITemplate):
         self.configuration = configuration
 
     @property
+    def simulation_index(self):
+        return self.index
+
+    @property
     def simulation_id(self):
         return self.name
 

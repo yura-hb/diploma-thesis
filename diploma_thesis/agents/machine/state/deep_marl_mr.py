@@ -20,7 +20,7 @@ class DEEPMARLMinimumRepetitionStateEncoder(StateEncoder):
        Depending on the number of jobs in queue, the state is represented in the following way:
         1. If there are 0 jobs, then the state is a tensor of zeros
         2. If there is 1 job, then the state is a tensor of shape (4, 5) where the first row repeated
-        3. If there are more than 1 job, then the information of job minimum values of first 4 criterias are stored
+        3. If there are more than 1 job, then the information of job minimum values of first 4 criteria are stored
     2. Arriving job info represents information of the job that is about to arrive at the machine
     """
 
@@ -38,6 +38,7 @@ class DEEPMARLMinimumRepetitionStateEncoder(StateEncoder):
         arriving_job_state, _ = self.__make_arriving_job_state__(parameters.machine, parameters.now)
 
         state = torch.vstack([state, arriving_job_state])
+        state = torch.unsqueeze(state, 0)
 
         return self.State(state, job_idx, batch_size=[])
 

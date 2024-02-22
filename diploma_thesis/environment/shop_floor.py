@@ -1,14 +1,14 @@
 import logging
 from dataclasses import dataclass, field
 from typing import List, Dict
-from tensordict.prototype import tensorclass
+from typing import Set
 
 import simpy
 import torch
+from tensordict.prototype import tensorclass
 
 import environment
 from .utils import ShopFloorFactory
-from typing import Set
 
 
 @tensorclass
@@ -152,7 +152,8 @@ class ShopFloor:
             work_centers=[
                 Map.WorkCenter(
                     idx=work_center.work_center_idx,
-                    machines=torch.cat([machine.state.machine_idx for machine in work_center.machines]),
+                    machines=torch.cat([machine.state.machine_idx for machine in work_center.machines])
+                    if len(work_center.machines) > 1 else torch.atleast_1d(work_center.machines[0].state.machine_idx),
                     batch_size=[]
                 )
                 for work_center in self.work_centers
@@ -210,7 +211,7 @@ class ShopFloor:
         return tardy_jobs / len(in_system_jobs)
 
     def expected_tardy_rate(
-        self, now: float, reduction_strategy: environment.JobReductionStrategy
+            self, now: float, reduction_strategy: environment.JobReductionStrategy
     ) -> torch.FloatTensor:
         in_system_jobs = self.in_system_jobs
 
@@ -262,7 +263,7 @@ class ShopFloor:
 
     # Events from subcomponents (WorkCenter, Machine)
     def will_produce(self, job: environment.Job, machine: environment.Machine):
-        self.delegate.will_produce(context=self.__make_context__(), job=job,  machine=machine)
+        self.delegate.will_produce(context=self.__make_context__(), job=job, machine=machine)
 
     def did_produce(self, job: environment.Job, machine: environment.Machine):
         self.delegate.did_produce(context=self.__make_context__(), job=job, machine=machine)
@@ -271,7 +272,7 @@ class ShopFloor:
         self.delegate.will_dispatch(context=self.__make_context__(), job=job, work_center=work_center)
 
     def did_dispatch(self, job: environment.Job, work_center: environment.WorkCenter, machine: environment.Machine):
-        self.delegate.did_dispatch(context=self.__make_context__(), job=job,  work_center=work_center, machine=machine)
+        self.delegate.did_dispatch(context=self.__make_context__(), job=job, work_center=work_center, machine=machine)
 
     def did_finish_dispatch(self, work_center: environment.WorkCenter):
         self.delegate.did_finish_dispatch(context=self.__make_context__(), work_center=work_center)

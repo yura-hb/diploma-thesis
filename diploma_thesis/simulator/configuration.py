@@ -40,7 +40,7 @@ class RunConfiguration:
     timeline: TimelineSchedule
     machine_train_schedule: TrainSchedule
     work_center_train_schedule: TrainSchedule
-    n_workers: int = 4
+    n_workers: int = 1
     simulations: List[Simulation] = field(default_factory=list)
 
     @classmethod

@@ -6,6 +6,7 @@ from enum import Enum, auto
 from tensordict.prototype import tensorclass
 
 
+
 class ReductionStrategy(Enum):
     """
     Job doesn't know in advance on which machine it will be processed inside work-center. ReductionStrategy
@@ -403,7 +404,7 @@ class Job:
                 self.current_step_idx += 1
                 self.current_machine_idx = torch.tensor(-1)
             case JobEvent.Kind.arrival_on_machine:
-                self.current_machine_idx = torch.tensor(event.machine_idx)
+                self.current_machine_idx = event.machine_idx
             case _:
                 pass
 

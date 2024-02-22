@@ -199,6 +199,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
     def schedule(self, context: Context, machine: Machine) -> Job | WaitInfo:
         parameters = MachineInput(machine, context.moment)
+
         result = self.machine.schedule(parameters)
 
         if self.machine.is_trainable:

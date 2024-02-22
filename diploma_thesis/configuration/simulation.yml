@@ -3,13 +3,13 @@ task:
 
   name: 'test'
   output_dir: 'tmp'
+  log_stdout: False
 
   machine_agent:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/machine_agent/model.yml'
-      mods:
-        - 'encoding/mr.yml'
+      mods: []
 
 
   work_center_agent:
@@ -18,13 +18,15 @@ task:
       model:
         kind: 'static'
         parameters:
-          rule: 'random'
+          rule: 'et'
       encoder:
         kind: 'plain'
 
   tape:
     machine_reward:
       kind: 'global_tardiness'
+      parameters:
+        span: 512
 
     work_center_reward:
       kind: 'no'
@@ -36,5 +38,4 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/run/jsp/run.yml'
-      mods:
-        - 'test.yml'
+      mods: []

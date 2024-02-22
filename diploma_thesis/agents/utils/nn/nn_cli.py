@@ -39,6 +39,13 @@ class NNCLI(nn.Module):
                     dropout=parameters.get('dropout', 0.0)
                 )
 
+        @dataclass
+        class Flatten:
+
+            @staticmethod
+            def from_cli(parameters: dict):
+                return NNCLI.Configuration.Flatten()
+
         layers: list[Layer]
 
         optimizer_parameters: dict
@@ -47,7 +54,8 @@ class NNCLI(nn.Module):
         def from_cli(parameters: dict):
             key_to_cls = {
                 'linear': NNCLI.Configuration.Linear,
-                'instance_norm': NNCLI.Configuration.InstanceNorm
+                'instance_norm': NNCLI.Configuration.InstanceNorm,
+                'flatten': NNCLI.Configuration.Flatten
             }
 
             return NNCLI.Configuration(
@@ -106,6 +114,8 @@ class NNCLI(nn.Module):
         match layer:
             case NNCLI.Configuration.InstanceNorm():
                 return nn.InstanceNorm1d(input_dim), input_dim
+            case NNCLI.Configuration.Flatten():
+                return nn.Flatten(), input_dim
             case NNCLI.Configuration.Linear(output_dim, activation, dropout):
                 return self.__make_linear_layer__(input_dim, output_dim, activation, dropout), output_dim
             case _:

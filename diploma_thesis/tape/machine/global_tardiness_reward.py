@@ -13,6 +13,9 @@ class GlobalTardiness(MachineReward):
     Reward from Deep-MARL external/PhD-Thesis-Projects/JSP/machine.py:693
     """
 
+    def __init__(self, span: int = 256):
+        self.span = span
+
     def record_job_action(self, job: Job, machine: Machine) -> Context:
         return Context(job.current_step_idx, job, machine)
 
@@ -25,7 +28,7 @@ class GlobalTardiness(MachineReward):
         reward = torch.zeros_like(work_center_idx, dtype=torch.float)
 
         if contexts[0].job.is_tardy_upon_completion:
-            tardy_rate = - torch.clip(contexts[0].job.tardiness_upon_completion / 256, 0, 1)
+            tardy_rate = - torch.clip(contexts[0].job.tardiness_upon_completion / self.span, 0, 1)
 
             reward += tardy_rate
 
@@ -36,4 +39,4 @@ class GlobalTardiness(MachineReward):
 
     @staticmethod
     def from_cli(parameters) -> MachineReward:
-        return GlobalTardiness()
+        return GlobalTardiness(span=parameters.get('span', 256))

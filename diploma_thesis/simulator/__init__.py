@@ -5,7 +5,7 @@ from .configuration import RunConfiguration, EvaluateConfiguration
 from .configuration import run_configuration_from_cli, evaluate_configuration_from_cli
 from .episodic import EpisodicSimulator
 from .simulation import Simulation
-from .simulator import Simulator
+from .simulator import Simulator, RewardCache
 from .td import TDSimulator
 
 key_to_class = {

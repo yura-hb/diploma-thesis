@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from dataclasses import dataclass
 
+import torch
 import pandas as pd
 from tabulate import tabulate
 
@@ -108,10 +109,13 @@ class ReportFactory:
 
         shop_floor = []
 
+        jobs = self.statistics.jobs(predicate=predicate)
+
         for weighted_by_priority in [True, False]:
             shop_floor += [dict(
                 weighted_by_priority=weighted_by_priority,
-                total_jobs=len(self.statistics.jobs(predicate=predicate)),
+                total_jobs=len(jobs),
+                completed_jobs=len([job for job in jobs if job.is_completed]),
                 makespan=self.statistics.total_make_span(predicate=predicate),
                 flow_time=self.statistics.total_flow_time(
                     weighted_by_priority=weighted_by_priority, predicate=predicate
