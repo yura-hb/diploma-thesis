@@ -6,7 +6,9 @@ class SQRoutingRule(RoutingRule):
     Selects machine with the shortest queue
     """
 
-    def __call__(self, job: Job, work_center_idx: int, machines: List['Machine']) -> 'Machine | None':
-        machine = min(machines, key=lambda machine: len(machine.state.queue))
+    @property
+    def selector(self):
+        return torch.argmin
 
-        return machine
+    def criterion(self, job: Job, work_center: WorkCenter) -> torch.FloatTensor:
+        return torch.FloatTensor([len(machine.queue) for machine in work_center.machines])
