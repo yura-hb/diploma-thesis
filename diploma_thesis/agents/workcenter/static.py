@@ -1,14 +1,13 @@
 from typing import Dict
 
 from .model import StaticWorkCenterModel
-from .state import StateEncoder
 from .work_center import *
 
 
 class StaticWorkCenter(WorkCenter):
 
     def __init__(self, model: StaticWorkCenterModel, state_encoder: StateEncoder):
-        super().__init__(model=model, state_encoder=state_encoder, memory=None)
+        super().__init__(model=model, state_encoder=state_encoder)
 
     @property
     def is_trainable(self):

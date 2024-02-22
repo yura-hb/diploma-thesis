@@ -1,8 +1,7 @@
-import logging
-
-from .encoder import StateEncoder
 from dataclasses import dataclass
 from typing import Dict
+
+from .encoder import StateEncoder
 
 
 class PlainEncoder(StateEncoder):

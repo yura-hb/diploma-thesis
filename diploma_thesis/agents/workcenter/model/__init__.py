@@ -1,7 +1,7 @@
 from functools import partial
 
 from utils import from_cli
-from .model import WorkCenterModel
+from .model import WorkCenterModel, NNWorkCenterModel
 from .rule import RoutingRule
 from .static import StaticModel as StaticWorkCenterModel
 from .multi_rule_linear import MultiRuleLinear

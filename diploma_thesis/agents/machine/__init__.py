@@ -5,12 +5,12 @@ from utils import from_cli
 from .utils import Input as MachineInput
 from .machine import Machine
 from .static import StaticMachine
-from .dqn import DeepQAgent
+from .rl import RLMachine
 
 
 key_to_class = {
     "static": StaticMachine,
-    'dqn': DeepQAgent,
+    'rl': RLMachine,
 }
 
 

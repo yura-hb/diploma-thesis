@@ -6,7 +6,7 @@ from .machine import *
 class StaticMachine(Machine):
 
     def __init__(self, model: MachineModel, state_encoder: StateEncoder):
-        super().__init__(model=model, state_encoder=state_encoder, memory=None)
+        super().__init__(model=model, state_encoder=state_encoder)
 
     @property
     def is_trainable(self):

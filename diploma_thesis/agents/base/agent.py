@@ -16,11 +16,9 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
 
     def __init__(self,
                  model: Model[Input, State, Action, Result],
-                 state_encoder: StateEncoder[Input, State],
-                 memory: Memory):
+                 state_encoder: StateEncoder[Input, State]):
         self.state_encoder = state_encoder
         self.model = model
-        self.memory = memory
         self.phase = EvaluationPhase()
         super().__init__()
         self.__post_init__()
@@ -31,7 +29,7 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
     def with_logger(self, logger: logging.Logger):
         super().with_logger(logger)
 
-        for module in [self.memory, self.model, self.state_encoder]:
+        for module in [self.model, self.state_encoder]:
             if isinstance(module, Loggable):
                 module.with_logger(logger)
 
@@ -40,7 +38,7 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
     def update(self, phase: Phase):
         self.phase = phase
 
-        for module in [self.model, self.state_encoder, self.memory]:
+        for module in [self.model, self.state_encoder]:
             if isinstance(module, PhaseUpdatable):
                 module.update(phase)
 
@@ -53,9 +51,9 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
     def train_step(self):
         pass
 
+    @abstractmethod
     def store(self, key: Key, record: Record):
-        if self.is_trainable:
-            self.memory.store(record.view(-1))
+        pass
 
     def schedule(self, parameters: Input) -> Model.Record:
         state = self.encode_state(parameters)
