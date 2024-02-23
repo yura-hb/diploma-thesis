@@ -278,8 +278,8 @@ class Machine:
 
             job = self.__select_job__()
 
-            if isinstance(job, environment.WaitInfo):
-                yield self.environment.timeout(job.wait_time)
+            if job is None:
+                yield self.environment.process(self.__starve__())
                 continue
 
             self.__notify_job_about_production__(job, production_start=True)
@@ -324,7 +324,7 @@ class Machine:
 
     def __select_job__(self):
         if self.state.is_empty:
-            return environment.WaitInfo(wait_time=1)
+            return None
 
         if len(self.state.queue) == 1:
             return self.state.queue[0]

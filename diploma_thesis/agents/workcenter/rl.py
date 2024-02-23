@@ -7,7 +7,7 @@ from utils import filter
 from .work_center import *
 
 
-class RLWorkCenter(WorkCenter):
+class RLAgent(WorkCenter):
 
     def __init__(self, model: NNWorkCenterModel, state_encoder: StateEncoder, trainer: RLTrainer):
         super().__init__(model, state_encoder)

@@ -3,12 +3,9 @@ from abc import ABCMeta, abstractmethod
 from typing import TypeVar, List
 
 import torch
-
-from environment import Job, Machine, ShopFloor
-from dataclasses import dataclass
 from tensordict.prototype import tensorclass
 
-Context = TypeVar('Context')
+from environment import Job, Machine
 
 
 @tensorclass
@@ -20,8 +17,10 @@ class RewardList:
 
 class MachineReward(metaclass=ABCMeta):
 
+    Context = TypeVar('Context')
+
     @abstractmethod
-    def record_job_action(self, job: Job, machine: Machine) -> Context:
+    def record_job_action(self, job: Job, machine: Machine, moment: float) -> Context:
         """
         An action to be called when reward model need to capture metrics at the moment of job selection
         """

@@ -15,8 +15,4 @@ class MultiRuleLinear(NNMachineModel, DeepRule):
     def make_result(
         self, rule: SchedulingRule, parameters: MachineModel.Input, state: State, action: Action
     ) -> MachineModel.Record:
-        return MachineModel.Record(
-            result=rule(state, parameters),
-            state=state,
-            action=action
-        )
+        return MachineModel.Record(result=rule(state, parameters), state=state, action=action)

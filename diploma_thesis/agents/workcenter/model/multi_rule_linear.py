@@ -15,8 +15,4 @@ class MultiRuleLinear(NNWorkCenterModel, DeepRule):
     def make_result(
          self, rule: RoutingRule, parameters: WorkCenterModel.Input, state: State, action: Action
     ) -> WorkCenterModel.Record:
-        return WorkCenterModel.Record(
-            result=rule(state, parameters),
-            state=state,
-            action=action
-        )
+        return WorkCenterModel.Record(result=rule(state, parameters), state=state, action=action)

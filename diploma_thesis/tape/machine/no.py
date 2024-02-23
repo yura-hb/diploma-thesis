@@ -1,4 +1,10 @@
-from .reward import *
+from dataclasses import dataclass
+from typing import List
+
+import torch
+
+from environment import Job, Machine
+from .reward import MachineReward, RewardList
 
 
 class No(MachineReward):
@@ -7,8 +13,7 @@ class No(MachineReward):
     class Context:
         pass
 
-    @abstractmethod
-    def record_job_action(self, job: Job, machine: Machine) -> Context:
+    def record_job_action(self, job: Job, machine: Machine, moment: float) -> Context:
         return self.Context()
 
     def reward_after_production(self, context: Context) -> torch.FloatTensor | None:
@@ -17,7 +22,7 @@ class No(MachineReward):
         """
         return None
 
-    def reward_after_completion(self, contexts: List[Context]) -> torch.FloatTensor | None:
+    def reward_after_completion(self, contexts: List[Context]) -> RewardList | None:
         return None
 
     @staticmethod

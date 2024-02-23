@@ -125,8 +125,6 @@ class WorkCenter:
         assert self.shop_floor is not None, "Work center is not connected to the shop floor"
 
         while True:
-            yield self.on_route
-
             self.history.with_decision_time(self.environment.now)
 
             for job in self.state.queue:
@@ -137,8 +135,12 @@ class WorkCenter:
 
                 self.shop_floor.will_dispatch(job, self)
 
-                # TODO: React on None
                 machine = self.shop_floor.route(work_center=self, job=job)
+
+                # TODO: Implement correct idleness
+                if machine is None:
+                    continue
+
                 machine.receive(job)
 
                 self.shop_floor.did_dispatch(job, self, machine)
@@ -147,7 +149,12 @@ class WorkCenter:
 
             self.shop_floor.did_finish_dispatch(self)
 
-            self.on_route = self.environment.event()
+            self.__starve__()
+
+    def __starve__(self):
+        self.on_route = self.environment.event()
+
+        yield self.on_route
 
     # Utility
 

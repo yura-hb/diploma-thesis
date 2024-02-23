@@ -2,13 +2,19 @@
 from functools import partial
 
 from utils import from_cli
-from .global_tardiness_reward import GlobalTardiness
-from .no import No
+
 from .reward import MachineReward
+from .no import No
+from .global_tardiness_reward import GlobalTardiness
+from .global_decomposed_tardiness_reward import GlobalDecomposedTardiness
+from .surrogate_tardiness_reward import SurrogateTardinessReward
+
 
 key_to_cls = {
+    'no': No,
     'global_tardiness': GlobalTardiness,
-    'no': No
+    'global_decomposed_tardiness': GlobalDecomposedTardiness,
+    'surrogate_tardiness': SurrogateTardinessReward
 }
 
 

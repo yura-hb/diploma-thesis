@@ -1,7 +1,6 @@
 from collections import OrderedDict
 from dataclasses import dataclass
 
-import torch
 import pandas as pd
 from tabulate import tabulate
 

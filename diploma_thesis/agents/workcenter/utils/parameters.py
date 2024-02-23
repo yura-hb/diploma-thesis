@@ -6,5 +6,5 @@ from environment import WorkCenter, Job
 
 @dataclass
 class Input:
-    work_center: WorkCenter
     job: Job
+    work_center: WorkCenter

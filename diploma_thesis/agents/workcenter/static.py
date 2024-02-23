@@ -4,7 +4,7 @@ from .model import StaticWorkCenterModel
 from .work_center import *
 
 
-class StaticWorkCenter(WorkCenter):
+class Static(WorkCenter):
 
     def __init__(self, model: StaticWorkCenterModel, state_encoder: StateEncoder):
         super().__init__(model=model, state_encoder=state_encoder)
@@ -21,4 +21,4 @@ class StaticWorkCenter(WorkCenter):
         model = model_from_cli(parameters['model'])
         encoder = state_encoder_from_cli(parameters['encoder'])
 
-        return StaticWorkCenter(model=model, state_encoder=encoder)
+        return Static(model=model, state_encoder=encoder)

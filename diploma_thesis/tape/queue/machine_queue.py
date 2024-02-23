@@ -45,7 +45,7 @@ class MachineQueue(Queue):
                 done=False,
                 batch_size=[]
             ),
-            context=self.reward.record_job_action(record.result, machine),
+            context=self.reward.record_job_action(record.result, machine, context.moment),
             moment=context.moment
         )
 
