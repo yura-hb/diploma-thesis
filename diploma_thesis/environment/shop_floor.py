@@ -255,7 +255,7 @@ class ShopFloor:
 
     # Decision methods
 
-    def schedule(self, machine: environment.Machine) -> 'environment.Job | environment.WaitInfo':
+    def schedule(self, machine: environment.Machine) -> 'environment.Job | None':
         return self.agent.schedule(self.__make_context__(), machine)
 
     def route(self, work_center: 'environment.WorkCenter', job: environment.Job) -> 'environment.Machine | None':

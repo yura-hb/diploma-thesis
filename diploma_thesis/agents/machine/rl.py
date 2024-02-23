@@ -19,12 +19,11 @@ class RLMachine(Machine):
         return True
 
     @filter(lambda self: self.phase == TrainingPhase())
-    @filter(lambda self: len(self.memory) > 0)
     def train_step(self):
         self.trainer.train_step(self.model)
 
-    @filter(lambda self: self.phase == TrainingPhase())
-    def store(self, record: Record):
+    @filter(lambda self, *args: self.phase == TrainingPhase())
+    def store(self, key: MachineKey, record: Record):
         self.trainer.store(record)
 
     def schedule(self, parameters):

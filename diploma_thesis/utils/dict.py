@@ -14,6 +14,19 @@ def merge_dicts(lhs: Dict, rhs: Dict) -> Dict:
     for key, value in rhs.items():
         if key in result and isinstance(result[key], dict) and isinstance(value, dict):
             result[key] = merge_dicts(result[key], value)
+        elif key in result and isinstance(result[key], list) and isinstance(value, list):
+            lhs = result[key]
+            rhs = value
+
+            # Merge existing elements
+            for i in range(min(len(lhs), len(rhs))):
+                lhs[i] = merge_dicts(lhs[i], rhs[i])
+
+            # Pad with not presented elements
+            if len(lhs) < len(rhs):
+                lhs += rhs[len(lhs):]
+
+            result[key] = lhs
         else:
             result[key] = value
 

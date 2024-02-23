@@ -35,6 +35,10 @@ class DeepRule(Generic[Rule, Input, Record], PhaseUpdatable, metaclass=ABCMeta):
     def make_result(self, rule: Rule, parameters: Input, state: State, action) -> Record:
         pass
 
+    @abstractmethod
+    def clone(self):
+        pass
+
     # Main
 
     def update(self, phase: Phase):
@@ -67,11 +71,6 @@ class DeepRule(Generic[Rule, Input, Record], PhaseUpdatable, metaclass=ABCMeta):
 
     def copy_parameters(self, other: 'DeepRule', decay: float = 1.0):
         self.model.copy_parameters(other.model, decay)
-
-    def clone(self):
-        new_model = self.model.clone()
-
-        return DeepRule(rules=self.rules, model=new_model, action_selector=self.action_selector)
 
     # Utilities
 

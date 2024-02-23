@@ -355,7 +355,8 @@ class Job:
 
         Returns: The time that the operation has been waiting for processing on machine
         """
-        assert step_idx < self.current_step_idx, "Operation must be started on machine to compute wait time"
+        assert step_idx < self.current_step_idx or self.is_completed,\
+              "Operation must be started on machine to compute wait time"
 
         return self.history.started_at[step_idx] - self.history.arrived_at_machine[step_idx]
 
@@ -393,14 +394,15 @@ class Job:
     # State Update
 
     def with_event(self, event: Event):
+        # Clone tensors to avoid in-place modification
         match event.kind:
             case JobEvent.Kind.dispatch:
                 self.current_step_idx = torch.tensor(0)
             case JobEvent.Kind.forward:
-                self.current_step_idx += 1
+                self.current_step_idx = self.current_step_idx.clone() + 1
                 self.current_machine_idx = torch.tensor(-1)
             case JobEvent.Kind.arrival_on_machine:
-                self.current_machine_idx = event.machine_idx
+                self.current_machine_idx = event.machine_idx.clone()
             case _:
                 pass
 
@@ -465,7 +467,7 @@ class Job:
         Returns: The remaining processing time of the next operation
         """
         result = torch.tensor(0.0, dtype=torch.float)
-        expected_processing_time = self.processing_times[max(self.step_idx + 1, 0):]
+        expected_processing_time = self.processing_times[max(step_idx + 1, 0):]
 
         if expected_processing_time.numel() == 0:
             return result

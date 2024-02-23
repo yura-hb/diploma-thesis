@@ -16,10 +16,10 @@ key_to_class = {
 
 
 def from_cli(parameters):
-    _parameters = parameters
+    _parameters = parameters['parameters']
 
-    memory = memory_from_cli(parameters['memory'])
-    loss = LossCLI.from_cli(parameters['loss'])
-    optimizer = OptimizerCLI.from_cli(parameters['optimizer'])
+    memory = memory_from_cli(_parameters['memory'])
+    loss = LossCLI.from_cli(_parameters['loss'])
+    optimizer = OptimizerCLI.from_cli(_parameters['optimizer'])
 
     return partial(_from_cli, key_to_class=key_to_class, memory=memory, loss=loss, optimizer=optimizer)(parameters)

@@ -2,6 +2,8 @@ from typing import Dict
 
 from .model import StaticWorkCenterModel
 from .work_center import *
+from ..base.agent import Key
+from ..utils.memory import Record
 
 
 class Static(WorkCenter):
@@ -14,6 +16,9 @@ class Static(WorkCenter):
         return False
 
     def train_step(self):
+        pass
+
+    def store(self, key: Key, record: Record):
         pass
 
     @staticmethod

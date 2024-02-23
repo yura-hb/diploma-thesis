@@ -18,6 +18,9 @@ class RLTrainer:
     def configure(self, model: NNModel):
         self._is_configured = True
 
+        if not self.optimizer.is_connected:
+            self.optimizer.connect(model.parameters())
+
     @property
     def is_configured(self):
         return self._is_configured

@@ -4,6 +4,7 @@ from typing import Dict
 import tensordict
 import torch
 
+from utils import filter
 from agents.utils.rl.rl import *
 
 
@@ -37,17 +38,15 @@ class DeepQTrainer(RLTrainer):
     def configure(self, model: NNModel):
         super().configure(model)
 
-        self.target_model = model.copy()
+        self.target_model = model.clone()
 
+    @filter(lambda self, *args: len(self.memory) > 0)
     def train_step(self, model: NNModel):
         batch, info = self.memory.sample(return_info=True)
         batch: Record | torch.Tensor = torch.squeeze(batch)
 
         with torch.no_grad():
             q_values, td_error = self.estimate_q(model, batch)
-
-        if not self.optimizer.is_connected:
-            self.optimizer.connect(model.parameters())
 
         values = model.values(batch.state)
         loss = self.loss(values, q_values)
@@ -83,6 +82,6 @@ class DeepQTrainer(RLTrainer):
 
         return q_values, td_error
 
-    @staticmethod
-    def from_cli(parameters, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):
-        return DeepQTrainer(memory, optimizer, loss, DeepQTrainer.Configuration.from_cli(parameters))
+    @classmethod
+    def from_cli(cls, parameters, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):
+        return cls(memory, optimizer, loss, DeepQTrainer.Configuration.from_cli(parameters))

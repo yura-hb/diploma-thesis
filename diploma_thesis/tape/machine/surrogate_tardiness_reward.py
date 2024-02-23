@@ -84,7 +84,7 @@ class SurrogateTardinessReward(MachineReward):
         critical_level_loser = critical_level[~context.chosen]
 
         earned_slack_chosen = torch.mean(context.processing_time[~context.chosen])
-        earned_slack_chosen *= critical_level_chosen
+        earned_slack_chosen = earned_slack_chosen * critical_level_chosen
 
         consumed_slack_loser = context.processing_time[context.chosen] * critical_level_loser.mean()
 
@@ -95,8 +95,8 @@ class SurrogateTardinessReward(MachineReward):
 
         reward = ((reward_slack + reward_winq) / self.configuration.span).clip(-1, 1)
 
-        return reward
+        return reward.view([])
 
     @staticmethod
     def from_cli(parameters) -> MachineReward:
-        return SurrogateTardinessReward(SurrogateTardinessReward.Configuration.from_cli(parameters))
+        return SurrogateTardinessReward(configuration=SurrogateTardinessReward.Configuration.from_cli(parameters))

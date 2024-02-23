@@ -2,7 +2,7 @@
 import torch
 
 from abc import ABCMeta, abstractmethod
-from environment import Machine, Job, WaitInfo, JobReductionStrategy
+from environment import Machine, Job, JobReductionStrategy
 
 
 class SchedulingRule(metaclass=ABCMeta):

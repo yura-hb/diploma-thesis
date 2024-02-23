@@ -146,10 +146,9 @@ class WorkCenter:
                 self.shop_floor.did_dispatch(job, self, machine)
 
             self.state.with_flushed_queue()
-
             self.shop_floor.did_finish_dispatch(self)
 
-            self.__starve__()
+            yield self.environment.process(self.__starve__())
 
     def __starve__(self):
         self.on_route = self.environment.event()

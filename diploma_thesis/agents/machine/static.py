@@ -1,6 +1,8 @@
 from typing import Dict
 
 from .machine import *
+from ..base.agent import Key
+from ..utils.memory import Record
 
 
 class StaticMachine(Machine):
@@ -13,6 +15,9 @@ class StaticMachine(Machine):
         return False
 
     def train_step(self):
+        pass
+
+    def store(self, key: Key, record: Record):
         pass
 
     @staticmethod

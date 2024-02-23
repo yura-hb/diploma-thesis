@@ -11,7 +11,7 @@ from agents import Machine as MachineAgent, WorkCenter as WorkCenterAgent
 from agents import MachineInput, WorkCenterInput
 from agents import TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
 from agents.utils.memory import Record
-from environment import Agent, ShopFloor, Job, WaitInfo, Machine, WorkCenter, Context
+from environment import Agent, ShopFloor, Job, Machine, WorkCenter, Context
 from tape import TapeModel, SimulatorInterface
 from utils import Loggable
 from .configuration import RunConfiguration, EvaluateConfiguration
@@ -197,7 +197,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
     # Agent
 
-    def schedule(self, context: Context, machine: Machine) -> Job | WaitInfo:
+    def schedule(self, context: Context, machine: Machine) -> Job | None:
         parameters = MachineInput(machine, context.moment)
 
         result = self.machine.schedule(parameters)

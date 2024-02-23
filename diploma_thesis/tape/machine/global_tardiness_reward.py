@@ -39,7 +39,8 @@ class GlobalTardiness(MachineReward):
         return None
 
     def reward_after_completion(self, contexts: List[Context]):
-        work_center_idx = torch.tensor([c.step_idx for c in contexts])
+        job = contexts[0].job
+        work_center_idx = torch.tensor([job.step_idx[c.step_idx] for c in contexts])
         machine_idx = torch.tensor([c.job.history.arrived_machine_idx[c.step_idx] for c in contexts])
         reward = torch.zeros_like(work_center_idx, dtype=torch.float)
 
