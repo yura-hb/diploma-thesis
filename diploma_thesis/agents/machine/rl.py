@@ -1,38 +1,13 @@
 from typing import Dict
 
-from agents.utils import TrainingPhase
-from agents.utils.memory import Record
-from agents.utils.rl import RLTrainer, from_cli as rl_trainer_from_cli
-from utils import filter
-from .machine import *
+from agents.base.rl_agent import RLAgent
+from agents.utils.rl import from_cli as rl_trainer_from_cli
+from environment import MachineKey
+from .model import NNMachineModel, from_cli as model_from_cli
+from .state import from_cli as state_encoder_from_cli
 
 
-class RLMachine(Machine):
-
-    def __init__(self, model: NNMachineModel, state_encoder: StateEncoder, trainer: RLTrainer):
-        super().__init__(model, state_encoder)
-
-        self.trainer = trainer
-
-    @property
-    def is_trainable(self):
-        return True
-
-    @filter(lambda self: self.phase == TrainingPhase())
-    def train_step(self):
-        self.trainer.train_step(self.model)
-
-    @filter(lambda self, *args: self.phase == TrainingPhase())
-    def store(self, key: MachineKey, record: Record):
-        self.trainer.store(record)
-
-    def schedule(self, parameters):
-        result = super().schedule(parameters)
-
-        if not self.trainer.is_configured:
-            self.trainer.configure(self.model)
-
-        return result
+class RLMachine(RLAgent[MachineKey]):
 
     @staticmethod
     def from_cli(parameters: Dict):

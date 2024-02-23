@@ -57,6 +57,8 @@ class DeepQTrainer(RLTrainer):
 
         self.optimizer.step()
 
+        self.record_loss(loss)
+
         if self.optimizer.step_count % self.configuration.update_steps == 0:
             self.target_model.copy_parameters(model, self.configuration.decay)
 

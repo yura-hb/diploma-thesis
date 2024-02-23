@@ -7,7 +7,7 @@ import simpy
 import torch
 from tensordict.prototype import tensorclass
 
-from agents import Machine as MachineAgent, WorkCenter as WorkCenterAgent
+from agents import MachineAgent, WorkCenterAgent
 from agents import MachineInput, WorkCenterInput
 from agents import TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
 from agents.utils.memory import Record

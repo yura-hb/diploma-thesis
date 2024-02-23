@@ -7,7 +7,7 @@ from agents.machine.model import StaticMachineModel, SchedulingRule
 from agents.machine.state import PlainEncoder
 from agents.machine.model.rule import ALL_SCHEDULING_RULES
 
-from agents.workcenter import Static
+from agents.workcenter import StaticWorkCenter
 from agents.workcenter.model import StaticWorkCenterModel, RoutingRule
 from agents.workcenter.state import PlainEncoder
 from agents.workcenter.model.rule import ALL_ROUTING_RULES
@@ -32,7 +32,7 @@ class StaticCandidates(Template):
                     model=StaticMachineModel(scheduling_rule),
                     state_encoder=PlainEncoder()
                 ),
-                work_center=Static(
+                work_center=StaticWorkCenter(
                     model=StaticWorkCenterModel(routing_rule),
                     state_encoder=PlainEncoder()
                 )

@@ -5,6 +5,8 @@ from torch import nn
 from dataclasses import dataclass
 from copy import deepcopy
 
+from agents.utils.layers import MARLASInstanceNorm
+
 
 class NNCLI(nn.Module):
     """
@@ -24,6 +26,20 @@ class NNCLI(nn.Module):
             @staticmethod
             def from_cli(parameters: dict):
                 return NNCLI.Configuration.InstanceNorm()
+
+        @dataclass
+        class MARLASInstanceNorm:
+
+            @staticmethod
+            def from_cli(parameters: dict):
+                return NNCLI.Configuration.MARLASInstanceNorm()
+
+        @dataclass
+        class LayerNorm:
+
+            @staticmethod
+            def from_cli(parameters: dict):
+                return NNCLI.Configuration.LayerNorm()
 
         @dataclass
         class Linear:
@@ -55,6 +71,8 @@ class NNCLI(nn.Module):
             key_to_cls = {
                 'linear': NNCLI.Configuration.Linear,
                 'instance_norm': NNCLI.Configuration.InstanceNorm,
+                'layer_norm': NNCLI.Configuration.LayerNorm,
+                'marlas_instance_norm': NNCLI.Configuration.MARLASInstanceNorm,
                 'flatten': NNCLI.Configuration.Flatten
             }
 
@@ -114,8 +132,12 @@ class NNCLI(nn.Module):
         match layer:
             case NNCLI.Configuration.InstanceNorm():
                 return nn.InstanceNorm1d(input_dim), input_dim
+            case NNCLI.Configuration.LayerNorm():
+                return nn.LayerNorm(input_dim), input_dim
             case NNCLI.Configuration.Flatten():
                 return nn.Flatten(), input_dim
+            case NNCLI.Configuration.MARLASInstanceNorm():
+                return MARLASInstanceNorm(), input_dim
             case NNCLI.Configuration.Linear(output_dim, activation, dropout):
                 return self.__make_linear_layer__(input_dim, output_dim, activation, dropout), output_dim
             case _:

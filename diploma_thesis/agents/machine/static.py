@@ -1,11 +1,13 @@
 from typing import Dict
 
-from .machine import *
-from ..base.agent import Key
-from ..utils.memory import Record
+from agents.base.agent import Agent
+from agents.utils.memory import Record
+from environment import MachineKey
+from .model import MachineModel, from_cli as model_from_cli
+from .state import StateEncoder, from_cli as state_encoder_from_cli
 
 
-class StaticMachine(Machine):
+class StaticMachine(Agent[MachineKey]):
 
     def __init__(self, model: MachineModel, state_encoder: StateEncoder):
         super().__init__(model=model, state_encoder=state_encoder)
@@ -17,7 +19,7 @@ class StaticMachine(Machine):
     def train_step(self):
         pass
 
-    def store(self, key: Key, record: Record):
+    def store(self, key: MachineKey, record: Record):
         pass
 
     @staticmethod

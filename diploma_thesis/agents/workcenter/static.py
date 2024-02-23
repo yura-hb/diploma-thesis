@@ -1,14 +1,15 @@
 from typing import Dict
 
-from .model import StaticWorkCenterModel
-from .work_center import *
-from ..base.agent import Key
-from ..utils.memory import Record
+from agents.base.agent import Agent
+from agents.utils.memory import Record
+from environment import WorkCenterKey
+from .model import WorkCenterModel, from_cli as model_from_cli
+from .state import StateEncoder, from_cli as state_encoder_from_cli
 
 
-class Static(WorkCenter):
+class StaticWorkCenter(Agent[WorkCenterKey]):
 
-    def __init__(self, model: StaticWorkCenterModel, state_encoder: StateEncoder):
+    def __init__(self, model: WorkCenterModel, state_encoder: StateEncoder):
         super().__init__(model=model, state_encoder=state_encoder)
 
     @property
@@ -18,7 +19,7 @@ class Static(WorkCenter):
     def train_step(self):
         pass
 
-    def store(self, key: Key, record: Record):
+    def store(self, key: WorkCenterKey, record: Record):
         pass
 
     @staticmethod
@@ -26,4 +27,4 @@ class Static(WorkCenter):
         model = model_from_cli(parameters['model'])
         encoder = state_encoder_from_cli(parameters['encoder'])
 
-        return Static(model=model, state_encoder=encoder)
+        return StaticWorkCenter(model=model, state_encoder=encoder)

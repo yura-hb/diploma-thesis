@@ -9,7 +9,9 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/machine_agent/model.yml'
-      mods: []
+      mods: [
+#        'encoding/mr.yml'
+      ]
 
 
   work_center_agent:
@@ -38,4 +40,4 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/run/jsp/run.yml'
-      mods: ['util_70.yml']
+      mods: ['test.yml']

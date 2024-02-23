@@ -3,7 +3,6 @@ from functools import partial
 from utils import from_cli
 
 from .utils import Input as MachineInput
-from .machine import Machine
 from .static import StaticMachine
 from .rl import RLMachine
 

@@ -1,6 +1,9 @@
 
 from abc import abstractmethod
 
+import pandas as pd
+import torch
+
 from agents.base.model import NNModel
 from agents.utils.memory import Record, Memory
 from agents.utils.nn import LossCLI, OptimizerCLI
@@ -13,6 +16,7 @@ class RLTrainer:
         self.loss = loss
         self.optimizer = optimizer
         self._is_configured = False
+        self.loss_cache = []
 
     @abstractmethod
     def configure(self, model: NNModel):
@@ -29,9 +33,23 @@ class RLTrainer:
     def train_step(self, model: NNModel):
         pass
 
+    def loss_record(self) -> pd.DataFrame:
+        return pd.DataFrame(self.loss_cache)
+
     def store(self, record: Record):
         self.memory.store(record.view(-1))
+
+    def clear(self):
+        self.loss_cache = []
+        self.memory.clear()
 
     @staticmethod
     def from_cli(parameters, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):
         pass
+
+    def record_loss(self, loss: torch.FloatTensor, **kwargs):
+        self.loss_cache += [dict(
+            value=loss.detach().item(),
+            optimizer_step=self.optimizer.step_count,
+            **kwargs
+        )]

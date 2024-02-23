@@ -4,14 +4,14 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 from typing import List
 
-from agents import Machine, WorkCenter
+from agents import MachineAgent, WorkCenterAgent
 
 
 @dataclass
 class Candidate:
     name: str
-    machine: Machine
-    work_center: WorkCenter
+    machine: MachineAgent
+    work_center: WorkCenterAgent
 
 
 class Template(metaclass=ABCMeta):

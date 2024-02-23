@@ -9,6 +9,7 @@ import torch
 
 import simulator
 from agents import work_center_from_cli, machine_from_cli
+from agents.base.rl_agent import RLAgent
 from simulator import from_cli as simulator_from_cli, Simulator, RewardCache
 from simulator import run_configuration_from_cli, evaluate_configuration_from_cli
 from tape import TapeModel
@@ -70,6 +71,13 @@ class Simulation(Workflow):
             self.__store_simulations__(config.simulations, reward_cache, simulation_output_dir)
 
         agent_output_dir = os.path.join(output_dir, 'agent')
+
+        try:
+            os.makedirs(agent_output_dir)
+        except:
+            pass
+
+        self.__process_rl_agents__(simulator, agent_output_dir)
         self.__store_agents__(simulator, agent_output_dir)
 
     def __evaluate__(self, simulator: Simulator, output_dir: str):
@@ -160,14 +168,23 @@ class Simulation(Workflow):
 
     @staticmethod
     def __store_agents__(simulator: Simulator, output_dir: str):
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
         machine_path = os.path.join(output_dir, 'machine.pt')
         save(obj=simulator.machine, path=machine_path)
 
         work_center_path = os.path.join(output_dir, 'work_center.pt')
         save(obj=simulator.work_center, path=work_center_path)
+
+    @staticmethod
+    def __process_rl_agents__(simulator: Simulator, output_dir: str):
+        models = [simulator.machine, simulator.work_center]
+        loss_paths = ['machine_loss.csv', 'work_center_loss.csv']
+
+        for model, loss_path in zip(models, loss_paths):
+            if isinstance(model, RLAgent):
+                loss = model.trainer.loss_record()
+                path = os.path.join(output_dir, loss_path)
+                loss.to_csv(path, index=True)
+                model.clear_memory()
 
     @staticmethod
     def __store_reward_record__(output_path, df, shop_floor_id, filename):

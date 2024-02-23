@@ -42,6 +42,9 @@ class Memory(metaclass=ABCMeta):
     def __make_buffer__(self) -> TensorDictReplayBuffer:
         pass
 
+    def clear(self):
+        self.buffer.empty()
+
     def __len__(self) -> int:
         return len(self.buffer)
 
