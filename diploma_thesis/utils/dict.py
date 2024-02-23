@@ -1,7 +1,12 @@
 
+import copy
+
 from typing import Dict
 from flatdict import FlatDict
 from itertools import product
+
+
+FACTORY_SUFFIX = '__factory__'
 
 
 def merge_dicts(lhs: Dict, rhs: Dict) -> Dict:
@@ -9,7 +14,7 @@ def merge_dicts(lhs: Dict, rhs: Dict) -> Dict:
     Recursively merge two dictionaries
     """
 
-    result = lhs.copy()
+    result = copy.deepcopy(lhs)
 
     for key, value in rhs.items():
         if key in result and isinstance(result[key], dict) and isinstance(value, dict):
@@ -20,7 +25,10 @@ def merge_dicts(lhs: Dict, rhs: Dict) -> Dict:
 
             # Merge existing elements
             for i in range(min(len(lhs), len(rhs))):
-                lhs[i] = merge_dicts(lhs[i], rhs[i])
+                if isinstance(lhs[i], dict) and isinstance(rhs[i], dict):
+                    lhs[i] = merge_dicts(lhs[i], rhs[i])
+                else:
+                    lhs[i] = rhs[i]
 
             # Pad with not presented elements
             if len(lhs) < len(rhs):
@@ -42,6 +50,11 @@ def iterate_all_combinations(value: Dict) -> [Dict]:
     flatten = FlatDict(value, delimiter=delimiter)
 
     for key, value in flatten.items():
+        if key.endswith(FACTORY_SUFFIX):
+            flatten[key.rstrip("." + FACTORY_SUFFIX)] = __parse_factory__(value)
+
+            continue
+
         if not isinstance(value, list):
             flatten[key] = [value]
 
@@ -52,3 +65,20 @@ def iterate_all_combinations(value: Dict) -> [Dict]:
         result = FlatDict(zip(keys, combination), delimiter=delimiter)
 
         yield result.as_dict()
+
+
+def __parse_factory__(parameters):
+    result = []
+
+    for combination in product(*parameters):
+        values = []
+
+        for parameter in combination:
+            if isinstance(parameter, list):
+                values.extend(parameter)
+            else:
+                values.append(parameter)
+
+        result.append(values)
+
+    return result

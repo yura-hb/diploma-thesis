@@ -27,6 +27,7 @@ from .random import RandomSchedulingRule
 from .spmwk import SPMWKSchedulingRule
 from .spmwkspt import SPMWKSPTSchedulingRule
 from .winq import WINQSchedulingRule
+from .spt import  SPTSchedulingRule
 from .scheduling_rule import SchedulingRule
 from typing import Dict
 
@@ -59,5 +60,6 @@ ALL_SCHEDULING_RULES: Dict[str, SchedulingRule.__class__] = {
     'random': RandomSchedulingRule,
     'spmwk': SPMWKSchedulingRule,
     'spmwkspt': SPMWKSPTSchedulingRule,
+    'spt': SPTSchedulingRule,
     'winq': WINQSchedulingRule
 }

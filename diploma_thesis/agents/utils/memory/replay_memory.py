@@ -22,7 +22,6 @@ class ReplayMemory(Memory):
                 prefetch=parameters.get('prefetch', 1)
             )
 
-    @property
     def __make_buffer__(self) -> TensorDictReplayBuffer:
         storage = LazyMemmapStorage(max_size=self.configuration.size)
 

@@ -1,3 +1,5 @@
 parameters:
-  loss:
-    kind: 'huber'
+  trainer:
+    parameters:
+      loss:
+        kind: 'huber'

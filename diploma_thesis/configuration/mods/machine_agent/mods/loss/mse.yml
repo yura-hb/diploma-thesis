@@ -1,3 +1,5 @@
 parameters:
-  loss:
-    kind: 'mse'
+  trainer:
+    parameters:
+      loss:
+        kind: 'mse'

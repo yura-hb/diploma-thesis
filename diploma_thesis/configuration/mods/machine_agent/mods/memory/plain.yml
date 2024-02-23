@@ -1,6 +1,8 @@
 parameters:
-  memory:
-    kind: 'replay'
+  trainer:
     parameters:
-      size: 8192
-      batch_size: 128
+      memory:
+        kind: 'replay'
+        parameters:
+          size: 8192
+          batch_size: 128

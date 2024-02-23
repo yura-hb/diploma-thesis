@@ -1,4 +1,4 @@
-kind: 'dqn'
+kind: 'rl'
 parameters:
   model:
     kind: 'multi_rule_linear'
@@ -26,10 +26,6 @@ parameters:
           - kind: 'linear'
             parameters:
               dim: 24
-              activation: 'tanh'
-          - kind: 'linear'
-            parameters:
-              dim: 12
               activation: 'tanh'
       action_selector:
         kind: 'phase_selector'
@@ -61,19 +57,23 @@ parameters:
   encoder:
     kind: 'deep_marl_indirect'
 
-  memory:
-    kind: 'prioritized_replay'
+  trainer:
+    kind: 'ddqn'
     parameters:
-      size: 8192
-      batch_size: 128
+      memory:
+        kind: 'prioritized_replay'
+        parameters:
+          size: 8192
+          batch_size: 128
 
-  loss:
-    kind: 'smooth_l1'
+      loss:
+        kind: 'smooth_l1'
 
-  optimizer:
-    kind: 'adam'
-    parameters:
-      lr: 0.001
+      optimizer:
+        kind: 'adam'
+        parameters:
+          lr: 0.001
 
-  parameters:
-    gamma: 0.95
+      gamma: 0.95
+
+

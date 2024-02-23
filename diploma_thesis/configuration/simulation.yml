@@ -24,9 +24,9 @@ task:
 
   tape:
     machine_reward:
-      kind: 'global_tardiness'
+      kind: 'surrogate_tardiness'
       parameters:
-        span: 512
+        span: 256
 
     work_center_reward:
       kind: 'no'
@@ -38,4 +38,4 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/run/jsp/run.yml'
-      mods: []
+      mods: ['util_70.yml']

@@ -13,6 +13,8 @@ def make_workflow(configuration: Dict) -> Workflow:
     match configuration['kind']:
         case "task":
             return Simulation(configuration)
+        case "multi_task":
+            return MultiSimulation(configuration)
         case 'tournament':
             return Tournament(configuration)
         case _:

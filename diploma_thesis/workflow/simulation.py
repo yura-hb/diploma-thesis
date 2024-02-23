@@ -3,6 +3,7 @@ import shutil
 from typing import Dict, List
 
 import simpy
+import yaml
 import pandas as pd
 import torch
 
@@ -26,6 +27,10 @@ class Simulation(Workflow):
     def log_stdout(self):
         return self.parameters.get('log_stdout', False)
 
+    @property
+    def is_debug(self):
+        return self.parameters.get('debug', False)
+
     def run(self):
         output_dir = self.__make_output_dir__()
         log_file = os.path.join(output_dir, 'log.txt')
@@ -33,6 +38,11 @@ class Simulation(Workflow):
         simulator = self.__make_simulator__()
         logger = self.__make_logger__(name='Simulation', filename=log_file, log_stdout=self.log_stdout)
         simulator.with_logger(logger)
+
+        parameters_file = os.path.join(output_dir, 'parameters.yml')
+
+        with open(parameters_file, 'w') as file:
+            yaml.dump(self.parameters, file)
 
         self.__run__(simulator, output_dir)
         self.__evaluate__(simulator, output_dir)
@@ -53,9 +63,11 @@ class Simulation(Workflow):
                                            log_stdout=self.log_stdout)
 
         config = run_configuration_from_cli(config, logger=logger)
-        reward_cache = simulator.train(environment, config)
 
-        self.__store_simulations__(config.simulations, reward_cache, simulation_output_dir)
+        if not self.is_debug:
+            reward_cache = simulator.train(environment, config)
+
+            self.__store_simulations__(config.simulations, reward_cache, simulation_output_dir)
 
         agent_output_dir = os.path.join(output_dir, 'agent')
         self.__store_agents__(simulator, agent_output_dir)
@@ -78,9 +90,10 @@ class Simulation(Workflow):
 
         config = evaluate_configuration_from_cli(config, logger=logger)
 
-        simulator.evaluate(environment, config)
+        if not self.is_debug:
+            simulator.evaluate(environment, config)
 
-        self.__store_simulations__(config.simulations, reward_cache=None, output_dir=simulation_output_dir)
+            self.__store_simulations__(config.simulations, reward_cache=None, output_dir=simulation_output_dir)
 
     def __make_simulator__(self):
         machine = machine_from_cli(parameters=self.parameters['machine_agent'])

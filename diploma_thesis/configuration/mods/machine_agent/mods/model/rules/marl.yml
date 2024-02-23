@@ -1,0 +1,10 @@
+
+
+parameters:
+  model:
+    parameters:
+      rules:
+        - 'spt'
+        - 'winq'
+        - 'cr'
+        - 'ms'

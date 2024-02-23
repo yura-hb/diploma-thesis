@@ -1,3 +1,5 @@
 parameters:
-  loss:
-    kind: 'smooth_l1'
+  trainer:
+    parameters:
+      loss:
+        kind: 'smooth_l1'

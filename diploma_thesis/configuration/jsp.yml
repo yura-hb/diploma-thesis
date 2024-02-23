@@ -1,0 +1,122 @@
+# Action Sets:
+
+# - [MARL, All, All + Idle]
+
+# Agents
+
+# - [DQN, DDQN, Reinforce, Reinforce Baseline]
+
+# Rewards
+
+# - [Global Tardiness, Global Decomposed Reward, Surrogate Reward]
+
+# State encoders
+
+# - [MR, AS]
+
+# Memory
+
+#  - [Plain, Prioritized]
+
+task:
+  kind: 'multi_task'
+  n_workers: 8
+  debug: False
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: 'tmp/jsp_util_70'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'global_tardiness'
+              parameters:
+                span: 256
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/run/jsp/run.yml'
+              mods: [ ]
+
+        values:
+          machine_agent:
+            parameters:
+              mods:
+                # Reserved keywords to build GridFactory resulting a list
+                __factory__:
+                  # RL Agents
+                  - [
+                    'rl/dqn.yml',
+                    'rl/ddqn.yml'
+                  ]
+                  # Memory
+                  - [
+                    'memory/plain.yml',
+                    'memory/prioritized.yml'
+                  ]
+                  # Loss
+                  - [
+                    'loss/huber.yml',
+                    'loss/mse.yml', '
+                    loss/smooth_l1.yml'
+                  ]
+                  # Optimizer
+                  - [
+                    'optimizer/adam.yml',
+                    'optimizer/sgd.yml'
+                  ]
+                  # State Encoding
+                  - [
+                    'encoding/as.yml'
+                  ]
+                  # Action Set
+                  - [
+                    'model/rules/all.yml',
+                    'model/rules/marl.yml'
+                  ]
+                  # Model
+                  - [
+                    'model/model/marl.yml'
+                  ]
+
+          tape:
+            machine_reward:
+              - kind: 'global_tardiness'
+              - kind: 'global_decomposed_tardiness'
+              - kind: 'surrogate_tardiness'
+
+          run:
+            parameters:
+              mods:
+                - [ 'util_70.yml' ]
+                - [ 'util_80.yml' ]
+                - [ 'util_90.yml' ]
+                - [ 'multi.yml' ]
+                - [ 'multi.yml', 'concurrent.yml' ]

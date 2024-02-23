@@ -1,0 +1,5 @@
+
+parameters:
+  timeline:
+    duration: 100000
+  n_workers: 3

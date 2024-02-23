@@ -1,5 +1,13 @@
 # JSP training based on the DEEP-MARL thesis. However, all simulations are performed concurrently.
 
+parameters:
+  timeline:
+    duration: 300000
 
-
-n_workers: 1
+  simulations:
+    - values:
+        job_sampler:
+          parameters:
+            job_arrival_time_on_machine:
+              parameters:
+                value: [0.7, 0.8, 0.9]
