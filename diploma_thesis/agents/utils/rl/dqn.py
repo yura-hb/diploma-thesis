@@ -1,15 +1,13 @@
-import tensordict
-
-from .rl import *
-
-import torch
-
 from dataclasses import dataclass
 from typing import Dict
 
+import tensordict
+import torch
+
+from agents.utils.rl.rl import *
+
 
 class DeepQTrainer(RLTrainer):
-
     @dataclass
     class Configuration:
         gamma: float
@@ -27,10 +25,10 @@ class DeepQTrainer(RLTrainer):
             )
 
     def __init__(self,
-                    memory: Memory,
-                    optimizer: OptimizerCLI,
-                    loss: LossCLI,
-                    configuration: Configuration):
+                 memory: Memory,
+                 optimizer: OptimizerCLI,
+                 loss: LossCLI,
+                 configuration: Configuration):
         super().__init__(memory, loss, optimizer)
 
         self.target_model = None
@@ -45,12 +43,8 @@ class DeepQTrainer(RLTrainer):
         batch, info = self.memory.sample(return_info=True)
         batch: Record | torch.Tensor = torch.squeeze(batch)
 
-        # Note:
-        # The idea is that we compute the Q-values only for performed actions. Other actions wouldn't be updated,
-        # because there will be zero loss and so zero gradient
-
         with torch.no_grad():
-            q_values, td_error = self.estimate_q(batch)
+            q_values, td_error = self.estimate_q(model, batch)
 
         if not self.optimizer.is_connected:
             self.optimizer.connect(model.parameters())
@@ -65,15 +59,18 @@ class DeepQTrainer(RLTrainer):
         self.optimizer.step()
 
         if self.optimizer.step_count % self.configuration.update_steps == 0:
-            self.target_model.copy_parameters(self.model, self.configuration.decay)
+            self.target_model.copy_parameters(model, self.configuration.decay)
 
         with torch.no_grad():
             td_error += self.configuration.prior_eps
 
             self.memory.update_priority(info['index'], td_error)
 
-    def estimate_q(self, batch: Record | tensordict.TensorDictBase):
-        q_values = self.model.values(batch.next_state)
+    def estimate_q(self, model: NNModel, batch: Record | tensordict.TensorDictBase):
+        # Note:
+        # The idea is that we compute the Q-values only for performed actions. Other actions wouldn't be updated,
+        # because there will be zero loss and so zero gradient
+        q_values = model.values(batch.next_state)
         orig_q = q_values.clone()[range(batch.shape[0]), batch.action]
 
         target = self.target_model.values(batch.next_state)
@@ -82,7 +79,9 @@ class DeepQTrainer(RLTrainer):
         q = batch.reward + self.configuration.gamma * target * (1 - batch.done)
         q_values[range(batch.shape[0]), batch.action] = q
 
-        return q_values, orig_q
+        td_error = torch.square(orig_q - q)
+
+        return q_values, td_error
 
     @staticmethod
     def from_cli(parameters, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):

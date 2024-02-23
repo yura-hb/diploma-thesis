@@ -5,8 +5,8 @@ from agents.utils.memory import from_cli as memory_from_cli
 from agents.utils.nn import LossCLI, OptimizerCLI
 
 from utils import from_cli as _from_cli
-from .ddqn import DoubleDeepQTrainer
-from .dqn import DeepQTrainer
+from agents.utils.rl.ddqn import DoubleDeepQTrainer
+from agents.utils.rl.dqn import DeepQTrainer
 from .rl import RLTrainer
 
 key_to_class = {
