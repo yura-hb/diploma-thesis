@@ -38,7 +38,7 @@ class DEEPMARLMinimumRepetitionStateEncoder(StateEncoder):
         arriving_job_state, _ = self.__make_arriving_job_state__(parameters.machine, parameters.now)
 
         state = torch.vstack([state, arriving_job_state])
-        state = torch.unsqueeze(state, 0)
+        state = state.unsqueeze(0)
 
         return self.State(state, job_idx, batch_size=[])
 

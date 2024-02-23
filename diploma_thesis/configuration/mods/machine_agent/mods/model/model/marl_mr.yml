@@ -1,0 +1,30 @@
+
+
+parameters:
+  model:
+    kind: 'multi_rule_linear'
+    parameters:
+      model:
+        layers:
+          - kind: 'layer_norm'
+          - kind: 'flatten'
+          - kind: 'linear'
+            parameters:
+              dim: 64
+              activation: 'tanh'
+          - kind: 'linear'
+            parameters:
+              dim: 48
+              activation: 'tanh'
+          - kind: 'linear'
+            parameters:
+              dim: 48
+              activation: 'tanh'
+          - kind: 'linear'
+            parameters:
+              dim: 36
+              activation: 'tanh'
+          - kind: 'linear'
+            parameters:
+              dim: 24
+              activation: 'tanh'

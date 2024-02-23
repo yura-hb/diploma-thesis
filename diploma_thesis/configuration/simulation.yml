@@ -10,7 +10,8 @@ task:
     parameters:
       base_path: 'configuration/mods/machine_agent/model.yml'
       mods: [
-#        'encoding/mr.yml'
+        'encoding/mr.yml',
+        'model/model/marl_mr.yml'
       ]
 
 

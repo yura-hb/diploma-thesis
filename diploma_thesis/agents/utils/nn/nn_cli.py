@@ -5,8 +5,6 @@ from torch import nn
 from dataclasses import dataclass
 from copy import deepcopy
 
-from agents.utils.layers import MARLASInstanceNorm
-
 
 class NNCLI(nn.Module):
     """
@@ -26,13 +24,6 @@ class NNCLI(nn.Module):
             @staticmethod
             def from_cli(parameters: dict):
                 return NNCLI.Configuration.InstanceNorm()
-
-        @dataclass
-        class MARLASInstanceNorm:
-
-            @staticmethod
-            def from_cli(parameters: dict):
-                return NNCLI.Configuration.MARLASInstanceNorm()
 
         @dataclass
         class LayerNorm:
@@ -72,7 +63,6 @@ class NNCLI(nn.Module):
                 'linear': NNCLI.Configuration.Linear,
                 'instance_norm': NNCLI.Configuration.InstanceNorm,
                 'layer_norm': NNCLI.Configuration.LayerNorm,
-                'marlas_instance_norm': NNCLI.Configuration.MARLASInstanceNorm,
                 'flatten': NNCLI.Configuration.Flatten
             }
 
@@ -99,7 +89,7 @@ class NNCLI(nn.Module):
     def input_dim(self):
         return self.input_dim
 
-    def connect(self, input_dim: int, output_layer: Configuration.Linear):
+    def connect(self, input_dim: torch.Size, output_layer: Configuration.Linear):
         self.model = nn.Sequential()
         self._input_dim = input_dim
 
@@ -135,9 +125,7 @@ class NNCLI(nn.Module):
             case NNCLI.Configuration.LayerNorm():
                 return nn.LayerNorm(input_dim), input_dim
             case NNCLI.Configuration.Flatten():
-                return nn.Flatten(), input_dim
-            case NNCLI.Configuration.MARLASInstanceNorm():
-                return MARLASInstanceNorm(), input_dim
+                return nn.Flatten(), torch.prod(torch.tensor(input_dim)).item()
             case NNCLI.Configuration.Linear(output_dim, activation, dropout):
                 return self.__make_linear_layer__(input_dim, output_dim, activation, dropout), output_dim
             case _:

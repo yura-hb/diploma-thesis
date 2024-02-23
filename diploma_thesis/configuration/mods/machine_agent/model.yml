@@ -6,7 +6,7 @@ parameters:
       rules: 'all'
       model:
         layers:
-          - kind: 'instance_norm'
+          - kind: 'layer_norm'
           - kind: 'linear'
             parameters:
               dim: 64

@@ -75,16 +75,18 @@ task:
                   ]
                   # State Encoding
                   - [
-                    'encoding/indirect.yml'
+                    'encoding/indirect.yml',
+                    'encoding/mr.yml'
                   ]
                   # Action Set
                   - [
                     'model/rules/all.yml',
-                    'model/rules/marl.yml'
+                    'model/rules/marl_as.yml'
                   ]
                   # Model
                   - [
-                    'model/model/marl.yml'
+                    'model/model/marl_as.yml'
+                    'model/model/marl_mr.yml'
                   ]
 
           tape:

@@ -60,7 +60,7 @@ class DeepRule(Generic[Rule, Input, Record], PhaseUpdatable, metaclass=ABCMeta):
         assert isinstance(state, TensorState), f"State must conform to TensorState"
 
         if not self.model.is_connected:
-            self.__connect__(len(self.rules), self.model, state.state.shape[-1])
+            self.__connect__(len(self.rules), self.model, state.state.shape)
 
         tensor = torch.atleast_2d(state.state)
 
