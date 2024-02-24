@@ -1,11 +1,10 @@
 import os
-import shutil
 from typing import Dict, List
 
-import simpy
-import yaml
 import pandas as pd
+import simpy
 import torch
+import yaml
 
 import simulator
 from agents import work_center_from_cli, machine_from_cli
@@ -37,7 +36,7 @@ class Simulation(Workflow):
         return self.parameters.get('debug', False)
 
     def run(self):
-        output_dir = self.__make_output_dir__()
+        output_dir = self.__make_output_dir__(self.parameters['name'], self.parameters['output_dir'])
         log_file = os.path.join(output_dir, 'log.txt')
 
         simulator = self.__make_simulator__()
@@ -116,19 +115,6 @@ class Simulation(Workflow):
         )
 
         return simulator
-
-    def __make_output_dir__(self):
-        name = self.parameters['name']
-        output_dir = self.parameters.get('output_dir')
-
-        output_path = os.path.join(output_dir, name)
-
-        if os.path.exists(output_path):
-            shutil.rmtree(output_path)
-
-        os.makedirs(output_path)
-
-        return output_path
 
     @staticmethod
     def __store_simulations__(simulations: List[simulator.Simulation], reward_cache: RewardCache, output_dir: str):

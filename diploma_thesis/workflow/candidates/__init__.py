@@ -2,14 +2,14 @@ from functools import partial
 
 from utils import from_cli
 from .agent import Agent
-from .multi_agent import MultiAgent
+from .persisted import PersistedAgent
 from .static import StaticCandidates
 from .template import Template, Candidate
 
 key_to_cls = {
     "agent": Agent,
     "static": StaticCandidates,
-    "multi": MultiAgent
+    "persisted_agents": PersistedAgent
 }
 
 

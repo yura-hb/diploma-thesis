@@ -24,7 +24,7 @@ class Permutation(Sampler):
             idx = torch.hstack([initial_work_center_idx, idx])
 
         if self.uneveness > 0:
-            cut_off = torch.randint(0, self.uneveness, (1,))
+            cut_off = torch.randint(0, self.uneveness, (1,), generator=self.generator)
             cut_off = int(cut_off)
 
             if cut_off > 0:

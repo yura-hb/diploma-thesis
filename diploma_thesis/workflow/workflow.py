@@ -1,10 +1,11 @@
 import logging
-import sys
-import torch
 import os
+import shutil
+import sys
 from abc import ABCMeta, abstractmethod
 
 import simpy
+import torch
 
 
 class Workflow(metaclass=ABCMeta):
@@ -78,3 +79,13 @@ class Workflow(metaclass=ABCMeta):
         logger.setLevel(logging.INFO)
 
         return logger
+
+    def __make_output_dir__(self, name: str, output_dir: str):
+        output_path = os.path.join(output_dir, name)
+
+        if os.path.exists(output_path):
+            shutil.rmtree(output_path)
+
+        os.makedirs(output_path)
+
+        return output_path

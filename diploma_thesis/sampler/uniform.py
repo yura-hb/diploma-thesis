@@ -28,7 +28,7 @@ class Uniform(NumericSampler):
         if self.normal is not None:
             result += torch.zeros(shape).normal_(self.normal[0], self.normal[1], generator=self.generator)
             # Don't allow values to go out of bounds
-            result = torch.clip(result, self.uniform[0], self.uniform[0])
+            result = torch.clip(result, self.uniform[0], self.uniform[1])
 
         return result
 

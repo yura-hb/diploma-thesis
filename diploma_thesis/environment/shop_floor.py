@@ -108,7 +108,7 @@ class ShopFloor:
 
     def simulate(self):
         generator = torch.Generator()
-        generator.manual_seed(self.configuration.problem.seed)
+        generator = generator.manual_seed(self.configuration.problem.seed)
 
         self.configuration.breakdown.connect(generator)
         self.configuration.sampler.connect(generator)

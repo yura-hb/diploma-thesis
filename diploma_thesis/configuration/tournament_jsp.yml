@@ -1,0 +1,96 @@
+task:
+  kind: 'tournament'
+
+  n_workers: 8
+  name: 'jsp_tournament'
+  output_dir: 'tmp'
+  debug: False
+
+  candidates:
+    - kind: 'static'
+      parameters:
+        scheduling: 'all'
+        routing:
+          - 'ct'
+    - kind: 'persisted_agents'
+      parameters:
+        path: 'tmp/jsp'
+
+
+  criteria:
+    - kind: 'makespan'
+      parameters:
+        weight: 1
+        direction: 'minimize'
+        scale: 'linear'
+    - kind: 'tardiness'
+      parameters:
+        weight: 1
+        direction: 'minimize'
+        scale: 'linear'
+
+  reward:
+    top_k: -1
+    points: 1
+
+  simulator:
+    n_workers: 1
+    simulations:
+      - name: ''
+        kind: 'multi_value'
+        parameters:
+          base:
+            configuration:
+              timespan: 10000
+              machines_per_work_center: 1
+              work_center_count: 10
+              pre_assign_initial_jobs: True
+
+            job_sampler:
+              kind: 'dynamic'
+              parameters:
+                n_jobs: 200
+                processing_times: # Sampler
+                  kind: 'uniform'
+                  parameters:
+                    uniform: [ 1, 50 ]
+                    noise: [ 0, 10 ]
+                permutation:
+                  uneveness: 2
+                due_time: # Sampler
+                  kind: 'uniform'
+                  parameters:
+                    uniform: [ 0, 2 ]
+                job_arrival_time_on_machine:
+                  kind: 'expected_utilization'
+                  parameters:
+                    value: 0.95
+
+            breakdown:
+              kind: 'dynamic'
+              parameters:
+                breakdown_arrival:
+                  kind: 'exponential'
+                  parameters:
+                    mean: 1000
+                repair_duration:
+                  kind: 'uniform'
+                  parameters:
+                    uniform: [ 10, 50 ]
+
+          values:
+            seed:
+              - 0
+              - 2
+              - 1
+              - 5
+              - 10
+
+            job_sampler:
+              parameters:
+                job_arrival_time_on_machine:
+                  parameters:
+                    value:
+                      - 0.7
+                      - 0.8
+                      - 0.9
