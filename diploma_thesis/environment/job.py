@@ -258,15 +258,18 @@ class Job:
         """
         assert self.is_completed, "Job must be completed in order to compute earliness"
 
-        return torch.tensor(max(self.due_at - self.history.completed_at, 0.0))
+        result = max(self.due_at - self.history.completed_at, 0.0)
+
+        return result if torch.is_tensor(result) else torch.tensor(result)
 
     @property
     def remaining_operations_count(self):
         """
         Returns: The number of remaining operations
         """
-        return torch.tensor(max(self.step_idx.shape[0] - self.current_step_idx, 0.0))
+        result = max(self.step_idx.shape[0] - self.current_step_idx, 0.0)
 
+        return result if torch.is_tensor(result) else torch.tensor(result)
     @property
     def processed_operations_count(self):
         """

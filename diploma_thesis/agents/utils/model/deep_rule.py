@@ -56,7 +56,7 @@ class DeepRule(Generic[Rule, Input, Record], PhaseUpdatable, metaclass=ABCMeta):
     def __call__(self, state: State, parameters: Input) -> Record:
         values = self.values(state).view(-1)
         action, _ = self.action_selector(values)
-        action = torch.tensor(action, dtype=torch.long)
+        action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
         rule = self.rules[action]
 
         return self.make_result(rule, parameters, state, action)

@@ -30,7 +30,7 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
 
     def setup(self, shop_floor: ShopFloor):
         if self.is_configured:
-            is_key_set_equal = set(self.keys) == set(self.iterate_keys(shop_floor))
+            is_key_set_equal = self.keys == list(self.iterate_keys(shop_floor))
             is_evaluating_with_centralized_model = self.phase == EvaluationPhase() and not self.is_model_distributed
 
             assert is_key_set_equal or is_evaluating_with_centralized_model, \

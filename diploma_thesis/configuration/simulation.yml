@@ -10,8 +10,8 @@ task:
     parameters:
       base_path: 'configuration/mods/machine_agent/model.yml'
       mods: [
-        'encoding/mr.yml',
-        'model/model/marl_mr.yml',
+        'encoding/indirect.yml',
+        'model/model/marl_as.yml',
         'rl/agent/multi_agent.yml'
       ]
 
@@ -42,4 +42,4 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/run/jsp/run.yml'
-      mods: ['test.yml']
+      mods: ['multi.yml', 'concurrent.yml']

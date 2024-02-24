@@ -131,7 +131,7 @@ task:
               *reward
 
           run:
-            paramemeters:
+            parameters:
               *run
 
     # MR

@@ -226,7 +226,7 @@ class Machine:
 
     @property
     def key(self) -> Key:
-        return Key(work_center_id=self.work_center_idx, machine_id=self.machine_idx)
+        return Key(work_center_id=self.work_center_idx.item(), machine_id=self.machine_idx.item())
 
     @property
     def work_center(self) -> 'environment.WorkCenter':

@@ -104,7 +104,7 @@ class WorkCenter:
 
     @property
     def key(self) -> Key:
-        return Key(self.work_center_idx)
+        return Key(work_center_id=self.work_center_idx.item())
 
     @property
     def work_load(self) -> torch.FloatTensor:

@@ -124,12 +124,13 @@ class DEEPMARLIndirectStateEncoder(StateEncoder):
 
     def __moments__(self, values: torch.FloatTensor):
         mean = values.mean()
+        correction = 0 if values.numel() == 1 else 1
 
         return [
             values.sum(),
             mean,
             values.min(),
-            values.std() / mean
+            values.std(correction=correction) / mean
         ]
 
     @staticmethod

@@ -9,8 +9,8 @@ class Exponential(NumericSampler):
     def __init__(self, mean: float):
         super().__init__()
 
-        self._mean = torch.tensor(mean)
-        self.rate = torch.tensor(1 / mean)
+        self._mean = mean if torch.is_tensor(mean) else torch.tensor(mean)
+        self.rate = 1 / self._mean
 
     def sample(self, shape):
         return torch.zeros(shape).exponential_(lambd=self.rate, generator=self.generator)
@@ -22,6 +22,7 @@ class Exponential(NumericSampler):
     @property
     def variance(self):
         return self.mean ** 2
+
     @staticmethod
     def from_cli(parameters):
         return Exponential(parameters['mean'])

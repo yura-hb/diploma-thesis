@@ -16,6 +16,7 @@ from workflow.criterion import from_cli as criterion_from_cli, Criterion, Direct
 from .workflow import Workflow
 
 from tape import TapeModel, NoMachineReward, NoWorkCenterReward
+from utils import task
 
 reward_suffix = '_reward'
 
@@ -59,10 +60,11 @@ class Tournament(Workflow):
 
         return reduce(lambda x, y: x + [criterion_from_cli(y)], criteria, [])
 
+    @task(lambda candidate, _: candidate.name)
     def __evaluate__(self, candidate: Candidate, criteria: List[Criterion]):
         environment = simpy.Environment()
 
-        logger = self.__make_logger__(name=candidate.name, environment=environment, log_stdout=True)
+        logger = self.__make_logger__(name=candidate.name, log_stdout=True)
         logger.setLevel(logging.INFO)
 
         configuration = EvaluateConfiguration.from_cli(logger, self.parameters['simulator'])
@@ -76,7 +78,7 @@ class Tournament(Workflow):
             tape_model=TapeModel(NoMachineReward(), NoWorkCenterReward()),
         )
 
-        simulator.evaluate(configuration)
+        simulator.evaluate(environment=environment, config=configuration)
 
         return self.__evaluate_criteria__(candidate, configuration.simulations, criteria)
 
