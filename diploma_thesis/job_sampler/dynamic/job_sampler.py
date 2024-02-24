@@ -5,6 +5,7 @@ import simpy
 import torch
 
 from environment import Configuration, Job, JobSampler as JSampler
+from sampler import Sampler
 
 
 class JobSampler(JSampler):
@@ -16,7 +17,12 @@ class JobSampler(JSampler):
         self._processing_time_sampler: Callable[[Tuple[int]], torch.FloatTensor] = None
         self._step_sampler: Callable[[int], torch.LongTensor] = None
         self._due_time_sampler: Callable[['Job', int], torch.FloatTensor] = None
+        self.samplers: [Sampler] = []
         self.arrival_time_sampler = None
+
+    def connect(self, generator: torch.Generator):
+        for sampler in self.samplers:
+            sampler.connect(generator)
 
     def number_of_jobs(self):
         return self._number_of_jobs
@@ -39,3 +45,6 @@ class JobSampler(JSampler):
 
     def sample_next_arrival_time(self) -> torch.FloatTensor:
         return self.arrival_time_sampler()
+
+    def store(self, sampler: Sampler):
+        self.samplers += [sampler]

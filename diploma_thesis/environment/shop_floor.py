@@ -107,7 +107,11 @@ class ShopFloor:
         self.did_finish_simulation_event = configuration.environment.event()
 
     def simulate(self):
-        torch.manual_seed(self.configuration.problem.seed)
+        generator = torch.Generator()
+        generator.manual_seed(self.configuration.problem.seed)
+
+        self.configuration.breakdown.connect(generator)
+        self.configuration.sampler.connect(generator)
 
         self.history.with_started_at(self.configuration.environment.now)
         self.delegate.did_start_simulation(context=self.__make_context__())

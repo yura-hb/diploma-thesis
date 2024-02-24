@@ -9,13 +9,14 @@ class Permutation(Sampler):
 
     def __init__(self, uneveness: float = 0):
         super().__init__()
+
         self.uneveness = uneveness
         self.initial_idx = None
 
     def sample(self, shape: torch.Size | Tuple) -> torch.LongTensor:
         assert len(shape) == 1, "Shape must be a single number"
 
-        idx = torch.randperm(shape[0])
+        idx = torch.randperm(shape[0], generator=self.generator)
 
         if self.initial_idx is not None:
             initial_work_center_idx = torch.LongTensor([self.initial_idx])

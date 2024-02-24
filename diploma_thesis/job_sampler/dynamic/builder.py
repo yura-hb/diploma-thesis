@@ -22,6 +22,7 @@ class Builder:
             return sampler.sample([self.problem.work_center_count])
 
         self.job_sampler._step_sampler = sample
+        self.job_sampler.store(sampler)
 
         return self
 
@@ -33,6 +34,7 @@ class Builder:
             return times
 
         self.job_sampler._processing_time_sampler = sample
+        self.job_sampler.store(sampler)
 
         return self
 
@@ -47,6 +49,7 @@ class Builder:
             return torch.round(weight * tightness + moment)
 
         self.job_sampler._due_time_sampler = sample
+        self.job_sampler.store(sampler)
 
         return self
 
@@ -56,6 +59,7 @@ class Builder:
 
         self.job_sampler.arrival_time_sampler = sample
         self.job_sampler._number_of_jobs = n_jobs
+        self.job_sampler.store(sampler)
 
         return self
 

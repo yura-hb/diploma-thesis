@@ -6,6 +6,8 @@ from .numeric_sampler import NumericSampler
 class Constant(NumericSampler):
 
     def __init__(self, value: float):
+        super().__init__()
+
         self.value = value
 
     def sample(self, shape):

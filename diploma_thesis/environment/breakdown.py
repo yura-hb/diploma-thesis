@@ -1,7 +1,12 @@
+import torch
+from abc import ABCMeta
 import environment
 
 
-class Breakdown:
+class Breakdown(metaclass=ABCMeta):
+
+    def connect(self, generator: torch.Generator):
+        pass
 
     def sample_next_breakdown_time(self, machine: 'environment.Machine') -> float:
         pass

@@ -1,9 +1,13 @@
+import torch
 
 from environment import Breakdown, Machine
 from typing import Dict
 
 
 class No(Breakdown):
+
+    def connect(self, generator: torch.Generator):
+        pass
 
     def sample_next_breakdown_time(self, machine: Machine):
         return float('inf')

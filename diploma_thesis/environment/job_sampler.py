@@ -14,6 +14,10 @@ class JobSampler(metaclass=ABCMeta):
         self.problem = problem
         self.environment = environment
 
+    def connect(self, generator: torch.Generator):
+        pass
+
+    @abstractmethod
     def number_of_jobs(self):
         return
 
