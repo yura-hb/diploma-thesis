@@ -2,7 +2,7 @@ from typing import List
 
 from agents.utils import DeepRule, NNCLI, ActionSelector
 from .model import *
-from .rule import ALL_ROUTING_RULES, RoutingRule
+from .rule import ALL_ROUTING_RULES, RoutingRule, IdleRoutingRule
 
 
 class MultiRuleLinear(NNWorkCenterModel, DeepRule):
@@ -17,6 +17,10 @@ class MultiRuleLinear(NNWorkCenterModel, DeepRule):
     @classmethod
     def all_rules(cls):
         return ALL_ROUTING_RULES
+
+    @classmethod
+    def idle_rule(cls):
+        return IdleRoutingRule()
 
     def make_result(
          self, rule: RoutingRule, parameters: WorkCenterModel.Input, state: State, action: Action

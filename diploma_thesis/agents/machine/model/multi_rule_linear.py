@@ -18,6 +18,10 @@ class MultiRuleLinear(NNMachineModel, DeepRule):
     def all_rules(cls):
         return ALL_SCHEDULING_RULES
 
+    @classmethod
+    def idle_rule(cls):
+        return IdleSchedulingRule()
+
     def make_result(
         self, rule: SchedulingRule, parameters: MachineModel.Input, state: State, action: Action
     ) -> MachineModel.Record:

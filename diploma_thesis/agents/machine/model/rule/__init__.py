@@ -10,6 +10,7 @@ from .edd import EDDSchedulingRule
 from .fifo import FIFOSchedulingRule
 from .gp_1 import GP1SchedulingRule
 from .gp_2 import GP2SchedulingRule
+from .idle import IdleSchedulingRule
 from .lifo import LIFOSchedulingRule
 from .lpt import LPTSchedulingRule
 from .lro import LROSchedulingRule
@@ -24,12 +25,11 @@ from .npt import NPTSchedulingRule
 from .ptwinq import PTWINQSchedulingRule
 from .ptwinqs import PTWINQSSchedulingRule
 from .random import RandomSchedulingRule
+from .scheduling_rule import SchedulingRule
 from .spmwk import SPMWKSchedulingRule
 from .spmwkspt import SPMWKSPTSchedulingRule
+from .spt import SPTSchedulingRule
 from .winq import WINQSchedulingRule
-from .spt import  SPTSchedulingRule
-from .scheduling_rule import SchedulingRule
-from typing import Dict
 
 ALL_SCHEDULING_RULES: Dict[str, SchedulingRule.__class__] = {
     'atc': ATCSchedulingRule,

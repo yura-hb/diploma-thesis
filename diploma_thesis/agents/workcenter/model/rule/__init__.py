@@ -6,6 +6,7 @@ from .ea import EARoutingRule
 from .ct import CTRoutingRule
 from .et import ETRoutingRule
 from .ut import UTRoutingRule
+from .idle import IdleRoutingRule
 
 ALL_ROUTING_RULES = {
     'sq': SQRoutingRule,

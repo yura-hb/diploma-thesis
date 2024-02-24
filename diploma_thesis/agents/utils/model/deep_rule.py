@@ -31,6 +31,11 @@ class DeepRule(Generic[Rule, Input, Record], PhaseUpdatable, metaclass=ABCMeta):
     def all_rules(cls):
         pass
 
+    @classmethod
+    @abstractmethod
+    def idle_rule(cls):
+        pass
+
     @abstractmethod
     def make_result(self, rule: Rule, parameters: Input, state: State, action) -> Record:
         pass
@@ -90,6 +95,9 @@ class DeepRule(Generic[Rule, Input, Record], PhaseUpdatable, metaclass=ABCMeta):
             rules = [rule() for rule in all_rules.values()]
         else:
             rules = [all_rules[rule]() for rule in rules]
+
+        if parameters.get('idle', False):
+            rules = [cls.idle_rule()] + rules
 
         nn_cli = NNCLI.from_cli(parameters['model'])
 
