@@ -128,11 +128,6 @@ class WorkCenter:
             self.history.with_decision_time(self.environment.now)
 
             for job in self.state.queue:
-                if len(self.machines) == 1:
-                    machine = self.machines[0]
-                    machine.receive(job)
-                    continue
-
                 self.shop_floor.will_dispatch(job, self)
 
                 machine = self.shop_floor.route(work_center=self, job=job)

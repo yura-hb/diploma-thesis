@@ -36,18 +36,19 @@ class MachineQueue(Queue):
     @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.queue)
     @filter(lambda self, _, __, record: isinstance(record.result, Job))
     def register(self, context: Context, machine: Machine, record: MachineModel.Record):
-        self.queue[context.shop_floor.id][machine.key][record.result.id] = TapeRecord(
-            record=Record(
-                state=record.state,
-                action=record.action,
-                next_state=None,
-                reward=None,
-                done=False,
-                batch_size=[]
-            ),
-            context=self.reward.record_job_action(record.result, machine, context.moment),
-            moment=context.moment
-        )
+        if record.result:
+            self.queue[context.shop_floor.id][machine.key][record.result.id] = TapeRecord(
+                record=Record(
+                    state=record.state,
+                    action=record.action,
+                    next_state=None,
+                    reward=None,
+                    done=False,
+                    batch_size=[]
+                ),
+                context=self.reward.record_job_action(record.result, machine, context.moment),
+                moment=context.moment
+            )
 
     @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.key])
     def record_next_state(self, context: Context, machine: Machine, job: Job):

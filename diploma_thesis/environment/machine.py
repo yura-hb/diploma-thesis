@@ -326,9 +326,6 @@ class Machine:
         if self.state.is_empty:
             return None
 
-        if len(self.state.queue) == 1:
-            return self.state.queue[0]
-
         job = self.shop_floor.schedule(self)
 
         return job
