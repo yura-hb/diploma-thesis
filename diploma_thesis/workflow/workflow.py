@@ -13,9 +13,13 @@ class Workflow(metaclass=ABCMeta):
     def run(self):
         pass
 
+    @property
+    @abstractmethod
+    def workflow_id(self) -> str:
+        pass
+
     def __make_logger__(self, name: str, filename: str = None, log_stdout: bool = False) -> logging.Logger:
-        logger = logging.getLogger(name)
-        logger.setLevel(logging.INFO)
+        logger = self.__get_logger__(name)
 
         formatter = logging.Formatter('%(asctime)s | | %(name)s | %(levelname)s | %(message)s')
 
@@ -39,8 +43,7 @@ class Workflow(metaclass=ABCMeta):
                 record.time = str(time)
                 return super(_Formatter, self).format(record)
 
-        logger = logging.getLogger(name)
-        logger.setLevel(logging.INFO)
+        logger = self.__get_logger__(name)
 
         formatter = _Formatter('%(asctime)s | %(time)s | %(name)s | %(levelname)s | %(message)s')
 
@@ -67,3 +70,11 @@ class Workflow(metaclass=ABCMeta):
             file_handler.setFormatter(formatter)
 
             logger.addHandler(file_handler)
+
+    def __get_logger__(self, name):
+        workflow_id = self.workflow_id
+
+        logger = logging.Logger(name + '_' + self.workflow_id if len(workflow_id) > 0 else name)
+        logger.setLevel(logging.INFO)
+
+        return logger

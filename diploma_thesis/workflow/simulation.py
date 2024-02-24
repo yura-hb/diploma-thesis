@@ -25,6 +25,10 @@ class Simulation(Workflow):
         self.parameters = parameters
 
     @property
+    def workflow_id(self) -> str:
+        return self.parameters.get('name', '')
+
+    @property
     def log_stdout(self):
         return self.parameters.get('log_stdout', False)
 
@@ -151,6 +155,8 @@ class Simulation(Workflow):
         def __to_dataframe__(data):
             if data.batch_size == torch.Size([]):
                 return pd.DataFrame(columns=['shop_floor_id'])
+
+            data = data.to_dict()
 
             return pd.DataFrame(data)
 

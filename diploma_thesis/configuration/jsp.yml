@@ -81,11 +81,11 @@ task:
                   # Action Set
                   - [
                     'model/rules/all.yml',
-                    'model/rules/marl_as.yml'
+                    'model/rules/marl.yml'
                   ]
                   # Model
                   - [
-                    'model/model/marl_as.yml'
+                    'model/model/marl_as.yml',
                     'model/model/marl_mr.yml'
                   ]
 
@@ -98,8 +98,10 @@ task:
           run:
             parameters:
               mods:
+#                - ['test.yml']
+                - [ 'multi.yml' ]
+#                - [ 'multi.yml', 'concurrent.yml' ]
 #                - [ 'util_70.yml' ]
 #                - [ 'util_80.yml' ]
 #                - [ 'util_90.yml' ]
-#                - [ 'multi.yml' ]
-                - [ 'multi.yml', 'concurrent.yml' ]
+

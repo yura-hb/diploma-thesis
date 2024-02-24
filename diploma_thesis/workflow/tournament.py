@@ -25,6 +25,10 @@ class Tournament(Workflow):
     def __init__(self, parameters: Dict):
         self.parameters = parameters
 
+    @property
+    def workflow_id(self) -> str:
+        return ''
+
     def run(self):
         candidates = self.__make_candidates__()
         criteria = self.__make_criteria__()
