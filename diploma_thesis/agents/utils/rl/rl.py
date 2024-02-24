@@ -5,7 +5,7 @@ import pandas as pd
 import torch
 
 from agents.base.model import NNModel
-from agents.utils.memory import Record, Memory
+from agents.utils.memory import Record, Memory, NotReadyException
 from agents.utils.nn import LossCLI, OptimizerCLI
 
 

@@ -74,7 +74,7 @@ class Workflow(metaclass=ABCMeta):
     def __get_logger__(self, name):
         workflow_id = self.workflow_id
 
-        logger = logging.Logger(name + '_' + self.workflow_id if len(workflow_id) > 0 else name)
+        logger = logging.getLogger(name + '_' + self.workflow_id if len(workflow_id) > 0 else name)
         logger.setLevel(logging.INFO)
 
         return logger

@@ -11,7 +11,8 @@ task:
       base_path: 'configuration/mods/machine_agent/model.yml'
       mods: [
         'encoding/mr.yml',
-        'model/model/marl_mr.yml'
+        'model/model/marl_mr.yml',
+        'rl/agent/multi_agent.yml'
       ]
 
 
@@ -27,7 +28,7 @@ task:
 
   tape:
     machine_reward:
-      kind: 'surrogate_tardiness'
+      kind: 'global_decomposed_tardiness'
       parameters:
         span: 256
 

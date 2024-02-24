@@ -187,7 +187,7 @@ class Simulation(Workflow):
 
         for model, loss_path in zip(models, loss_paths):
             if isinstance(model, RLAgent):
-                loss = model.trainer.loss_record()
+                loss = model.loss_record()
                 path = os.path.join(output_dir, loss_path)
                 loss.to_csv(path, index=True)
                 model.clear_memory()

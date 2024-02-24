@@ -76,6 +76,11 @@ class SurrogateTardinessReward(MachineReward):
         )
 
     def __compute_reward__(self, context: Context):
+        # Note: Potentially, it may happen that there was only one job in the queue. In this case the machine doesn't
+        # perform any decision.
+        if context.chosen.numel() == 1:
+            return torch.tensor(0.0)
+
         slack = context.slack
 
         critical_level = 1 - slack / (torch.abs(slack) + self.configuration.critical_level_factor)
@@ -89,9 +94,9 @@ class SurrogateTardinessReward(MachineReward):
         consumed_slack_loser = context.processing_time[context.chosen] * critical_level_loser.mean()
 
         reward_slack = earned_slack_chosen - consumed_slack_loser
-        reward_winq = (
-            context.winq[~context.chosen].mean() - context.winq[context.chosen]
-        ) * self.configuration.winq_factor
+
+        reward_winq = (context.winq[~context.chosen].mean() - context.winq[context.chosen])
+        reward_winq = reward_winq * self.configuration.winq_factor
 
         reward = ((reward_slack + reward_winq) / self.configuration.span).clip(-1, 1)
 

@@ -20,16 +20,23 @@ class Record:
     done: torch.BoolTensor
 
 
+class NotReadyException(BaseException):
+    pass
+
+
 class Memory(metaclass=ABCMeta):
 
     def __init__(self, configuration: Configuration):
         self.configuration = configuration
-        self.buffer = self.__make_buffer__()
+        self.buffer: TensorDictReplayBuffer = self.__make_buffer__()
 
     def store(self, record: Record):
         self.buffer.extend(record)
 
     def sample(self, return_info: bool = False) -> Record:
+        if len(self.buffer) < self.buffer._batch_size:
+            raise NotReadyException()
+
         return self.buffer.sample(return_info=return_info)
 
     def sample_n(self, batch_size: int) -> Record:
@@ -55,3 +62,4 @@ class Memory(metaclass=ABCMeta):
 
     def __setstate__(self, state):
         self.configuration = state
+        self.buffer = self.__make_buffer__()

@@ -2,7 +2,7 @@
 from functools import partial
 
 from utils import from_cli
-from .memory import Record, Memory
+from .memory import Record, Memory, NotReadyException
 from .prioritized_replay_memory import PrioritizedReplayMemory
 from .replay_memory import ReplayMemory
 

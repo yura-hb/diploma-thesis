@@ -36,7 +36,7 @@ class MachineQueue(Queue):
     @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.queue)
     @filter(lambda self, _, __, record: isinstance(record.result, Job))
     def register(self, context: Context, machine: Machine, record: MachineModel.Record):
-        if record.result:
+        if record.result is not None:
             self.queue[context.shop_floor.id][machine.key][record.result.id] = TapeRecord(
                 record=Record(
                     state=record.state,

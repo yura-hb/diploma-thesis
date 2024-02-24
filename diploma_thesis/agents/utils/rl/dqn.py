@@ -40,10 +40,12 @@ class DeepQTrainer(RLTrainer):
 
         self.target_model = model.clone()
 
-    @filter(lambda self, *args: len(self.memory) > 0)
     def train_step(self, model: NNModel):
-        batch, info = self.memory.sample(return_info=True)
-        batch: Record | torch.Tensor = torch.squeeze(batch)
+        try:
+            batch, info = self.memory.sample(return_info=True)
+            batch: Record | torch.Tensor = torch.squeeze(batch)
+        except NotReadyException:
+            return
 
         with torch.no_grad():
             q_values, td_error = self.estimate_q(model, batch)

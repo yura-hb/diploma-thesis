@@ -1,17 +1,19 @@
 import copy
 from typing import Dict
 
+import pandas as pd
+
 from agents.utils import TrainingPhase
 from agents.utils.rl import RLTrainer
 from utils import filter
-from .agent import *
+from .rl_agent import *
 from .model import NNModel
 
 
-class MARLAgent(Generic[Key], Agent[Key]):
+class MARLAgent(Generic[Key], RLAgent[Key]):
 
     def __init__(self, model: NNModel, state_encoder: StateEncoder, trainer: RLTrainer, is_model_distributed: bool):
-        super().__init__(model, state_encoder)
+        super().__init__(model, state_encoder, trainer)
 
         self.trainer: RLTrainer | Dict[Key, RLTrainer] = trainer
         self.is_model_distributed = is_model_distributed
@@ -34,6 +36,7 @@ class MARLAgent(Generic[Key], Agent[Key]):
             assert is_key_set_equal or is_evaluating_with_centralized_model, \
                 ("Multi-Agent model should be configured for the same shop floor architecture "
                  "or have centralized action network")
+
             return
 
         self.is_configured = True
@@ -61,9 +64,17 @@ class MARLAgent(Generic[Key], Agent[Key]):
         self.trainer[key].store(record)
 
     def loss_record(self):
-        result = [self.trainer[key].loss_record() for key in self.keys]
+        result = []
 
-        return result
+        for key in self.keys:
+            loss_record = self.trainer[key].loss_record()
+
+            for k, v in key.__dict__.items():
+                loss_record[k] = int(v)
+
+            result += [loss_record]
+
+        return pd.concat(result)
 
     def clear_memory(self):
         for key in self.keys:
@@ -71,11 +82,11 @@ class MARLAgent(Generic[Key], Agent[Key]):
 
     def schedule(self, key: Key, parameters):
         state = self.encode_state(parameters)
-
-        result = self.__model_for_key__(key)(state, parameters)
+        model = self.__model_for_key__(key)
+        result = model(state, parameters)
 
         if not self.trainer[key].is_configured:
-            self.trainer[key].configure(self.model)
+            self.trainer[key].configure(model)
 
         return result
 

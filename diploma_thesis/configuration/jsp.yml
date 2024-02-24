@@ -1,7 +1,7 @@
 
 task:
   kind: 'multi_task'
-  n_workers: 10
+  n_workers: 8
   debug: False
 
   tasks:
@@ -52,10 +52,16 @@ task:
               mods:
                 # Reserved keywords to build GridFactory resulting a list
                 __factory__:
-                  # RL Agents
+                  # RL Trainers
                   - [
-                    'rl/dqn.yml',
-                    'rl/ddqn.yml'
+                    'rl/trainer/dqn.yml',
+                    'rl/trainer/ddqn.yml'
+                  ]
+                  # RL Agent Kind
+                  - [
+                    'rl/agent/single.yml',
+#                   'rl/agent/multi_agent.yml',
+#                   'rl/agent/centralized.yml'
                   ]
                   # Memory
                   - [
