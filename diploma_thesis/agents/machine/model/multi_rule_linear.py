@@ -2,7 +2,7 @@ from typing import List
 
 from agents.utils import DeepRule, NNCLI, ActionSelector
 from .model import *
-from .rule import ALL_SCHEDULING_RULES, SchedulingRule
+from .rule import ALL_SCHEDULING_RULES, SchedulingRule, IdleSchedulingRule
 
 
 class MultiRuleLinear(NNMachineModel, DeepRule):

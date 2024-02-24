@@ -30,8 +30,8 @@ class RLAgent(Generic[Key], Agent[Key]):
     def clear_memory(self):
         self.trainer.clear()
 
-    def schedule(self, parameters):
-        result = super().schedule(parameters)
+    def schedule(self, key, parameters):
+        result = super().schedule(key, parameters)
 
         if not self.trainer.is_configured:
             self.trainer.configure(self.model)

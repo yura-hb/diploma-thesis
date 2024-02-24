@@ -10,7 +10,7 @@ class RoutingRule(metaclass=ABCMeta):
     Selects a machine at random
     """
     def __call__(self, job: Job, work_center: WorkCenter) -> Machine | None:
-        value = self.criterion(job, work_center)
+        value = self.criterion(job=job, work_center=work_center)
         selector = self.selector
         idx = selector(value)
 

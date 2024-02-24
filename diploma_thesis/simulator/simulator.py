@@ -198,9 +198,9 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
     # Agent
 
     def schedule(self, context: Context, machine: Machine) -> Job | None:
-        parameters = MachineInput(machine, context.moment)
+        parameters = MachineInput(machine=machine, now=context.moment)
 
-        result = self.machine.schedule(parameters)
+        result = self.machine.schedule(machine.key, parameters)
 
         if self.machine.is_trainable:
             self.tape_model.register_machine_reward_preparation(context=context, machine=machine, record=result)
@@ -208,8 +208,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         return result.result
 
     def route(self, context: Context, work_center: WorkCenter, job: Job) -> 'Machine | None':
-        parameters = WorkCenterInput(work_center, job)
-        result = self.work_center.schedule(parameters)
+        parameters = WorkCenterInput(work_center=work_center, job=job)
+        result = self.work_center.schedule(work_center.key, parameters)
 
         if self.work_center.is_trainable:
             self.tape_model.register_work_center_reward_preparation(context=context,
@@ -234,6 +234,9 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                 yield req
 
                 simulation.prepare(self, self.tape_model, environment)
+
+                self.machine.setup(simulation.shop_floor)
+                self.work_center.setup(simulation.shop_floor)
 
                 if is_training:
                     self.tape_model.register(simulation.shop_floor)

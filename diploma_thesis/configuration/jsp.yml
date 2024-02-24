@@ -1,7 +1,7 @@
 
 task:
   kind: 'multi_task'
-  n_workers: 8
+  n_workers: 10
   debug: False
 
   tasks:

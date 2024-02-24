@@ -11,7 +11,7 @@ class SchedulingRule(metaclass=ABCMeta):
         self.reduction_strategy = reduction_strategy
 
     def __call__(self, machine: 'Machine', now: float) -> Job | None:
-        value = self.criterion(machine, now)
+        value = self.criterion(machine=machine, now=now)
         selector = self.selector
         idx = selector(value)
 

@@ -8,6 +8,7 @@ from agents.utils.memory import Memory, Record
 from utils import Loggable
 from .encoder import Encoder as StateEncoder, Input, State
 from .model import Model, Action, Result
+from environment import ShopFloor
 
 Key = TypeVar('Key')
 
@@ -42,6 +43,9 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
             if isinstance(module, PhaseUpdatable):
                 module.update(phase)
 
+    def setup(self, shop_floor: ShopFloor):
+        pass
+
     @property
     @abstractmethod
     def is_trainable(self):
@@ -55,7 +59,7 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
     def store(self, key: Key, record: Record):
         pass
 
-    def schedule(self, parameters: Input) -> Model.Record:
+    def schedule(self, key: Key, parameters: Input) -> Model.Record:
         state = self.encode_state(parameters)
 
         return self.model(state, parameters)

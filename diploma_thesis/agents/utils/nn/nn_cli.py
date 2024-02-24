@@ -131,6 +131,12 @@ class NNCLI(nn.Module):
                 raise ValueError(f"Unknown layer type {layer}")
 
     def __make_linear_layer__(self, input_dim, output_dim, activation, dropout):
+        if isinstance(input_dim, torch.Size):
+            if len(input_dim) == 1:
+                input_dim = input_dim[0]
+            else:
+                raise ValueError(f"Input dim must be 1D tensor, got {input_dim}")
+
         result = nn.Sequential(
             nn.Linear(input_dim, output_dim)
         )
@@ -164,4 +170,3 @@ class NNCLI(nn.Module):
         configuration = NNCLI.Configuration.from_cli(parameters)
 
         return NNCLI(configuration)
-
