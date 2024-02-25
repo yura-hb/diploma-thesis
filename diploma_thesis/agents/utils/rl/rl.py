@@ -8,10 +8,14 @@ from agents.base.model import NNModel
 from agents.utils.memory import Record, Memory, NotReadyException
 from agents.utils.nn import LossCLI, OptimizerCLI
 
+from utils import Loggable
 
-class RLTrainer:
+
+class RLTrainer(Loggable):
 
     def __init__(self, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):
+        super().__init__()
+
         self.memory = memory
         self.loss = loss
         self.optimizer = optimizer
@@ -51,5 +55,6 @@ class RLTrainer:
         self.loss_cache += [dict(
             value=loss.detach().item(),
             optimizer_step=self.optimizer.step_count,
+            lr=self.optimizer.learning_rate,
             **kwargs
         )]

@@ -4,6 +4,7 @@ task:
   name: 'test'
   output_dir: 'tmp'
   log_stdout: False
+  log_run: True
 
   machine_agent:
     kind: 'mod'
@@ -12,7 +13,8 @@ task:
       mods: [
         'encoding/indirect.yml',
         'model/model/marl_as.yml',
-        'rl/agent/multi_agent.yml'
+#        'rl/agent/multi_agent.yml',
+        'scheduler/constant.yml'
       ]
 
 
@@ -42,4 +44,4 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/run/jsp/run.yml'
-      mods: ['multi.yml', 'concurrent.yml']
+      mods: ['test.yml']

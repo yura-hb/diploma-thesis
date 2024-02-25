@@ -31,6 +31,12 @@ class Simulation(Workflow):
     def log_stdout(self):
         return self.parameters.get('log_stdout', False)
 
+    def run_log_file(self, output_dir):
+        if not self.parameters.get('log_run', False):
+            return None
+
+        return os.path.join(output_dir, 'log.txt')
+
     @property
     def is_debug(self):
         return self.parameters.get('debug', False)
@@ -59,11 +65,9 @@ class Simulation(Workflow):
 
         environment = simpy.Environment()
         simulation_output_dir = os.path.join(output_dir, 'run')
-        simulation_log_file = os.path.join(simulation_output_dir, 'log.txt')
-
         logger = self.__make_time_logger__(name='Run',
                                            environment=environment,
-                                           filename=simulation_log_file,
+                                           filename=self.run_log_file(simulation_output_dir),
                                            log_stdout=self.log_stdout)
 
         config = run_configuration_from_cli(config, logger=logger)

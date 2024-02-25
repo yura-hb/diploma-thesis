@@ -27,7 +27,7 @@ def __evaluate__(tournament: 'Tournament', candidate: Candidate, criteria: List[
     environment = simpy.Environment()
     candidate_output_dir = os.path.join(output_dir, 'candidates', candidate.name)
 
-    log_file = os.path.join(candidate_output_dir, 'log.txt')
+    log_file = tournament.run_log_file(candidate_output_dir)
     logger = tournament.__make_logger__(name=candidate.name, filename=log_file, log_stdout=False)
 
     configuration = EvaluateConfiguration.from_cli(parameters=tournament.parameters['simulator'], logger=logger)
@@ -59,6 +59,12 @@ class Tournament(Workflow):
     @property
     def workflow_id(self) -> str:
         return ''
+
+    def run_log_file(self, output_dir):
+        if not self.parameters.get('log_run', False):
+            return None
+
+        return os.path.join(output_dir, 'log.txt')
 
     @property
     def debug(self) -> bool:

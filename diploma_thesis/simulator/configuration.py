@@ -8,7 +8,24 @@ from .simulation import Simulation, from_cli as simulation_from_cli
 
 
 @dataclass
-class RunConfiguration:
+class BaseConfiguration:
+    n_workers: int = 1
+    log_tick: int = 10000
+    simulations: List[Simulation] = field(default_factory=list)
+
+    @staticmethod
+    def parse_base_parameters(parameters, logger):
+        return dict(
+            n_workers=parameters['n_workers'],
+            log_tick=parameters.get('log_tick', 10000),
+            simulations=simulation_from_cli(prefix=parameters.get('prefix', ''),
+                                            parameters=parameters['simulations'],
+                                            logger=logger)
+        )
+
+
+@dataclass
+class RunConfiguration(BaseConfiguration):
     @dataclass
     class TimelineSchedule:
         # List of durations for warm up phases
@@ -37,11 +54,9 @@ class RunConfiguration:
                 max_training_steps=parameters['max_training_steps']
             )
 
-    timeline: TimelineSchedule
-    machine_train_schedule: TrainSchedule
-    work_center_train_schedule: TrainSchedule
-    n_workers: int = 1
-    simulations: List[Simulation] = field(default_factory=list)
+    timeline: TimelineSchedule = None
+    machine_train_schedule: TrainSchedule = None
+    work_center_train_schedule: TrainSchedule = None
 
     @classmethod
     def from_cli(cls, parameters: Dict, logger: Logger):
@@ -49,25 +64,16 @@ class RunConfiguration:
             timeline=cls.TimelineSchedule.from_cli(parameters['timeline']),
             machine_train_schedule=cls.TrainSchedule.from_cli(parameters['machine_train_schedule']),
             work_center_train_schedule=cls.TrainSchedule.from_cli(parameters['work_center_train_schedule']),
-            n_workers=parameters['n_workers'],
-            simulations=simulation_from_cli(prefix=parameters.get('prefix', ''),
-                                            parameters=parameters['simulations'],
-                                            logger=logger)
+            **BaseConfiguration.parse_base_parameters(parameters, logger)
         )
 
 
 @dataclass
-class EvaluateConfiguration:
-    n_workers: int = 4
-    simulations: List[Simulation] = field(default_factory=list)
-
+class EvaluateConfiguration(BaseConfiguration):
     @classmethod
     def from_cli(cls, logger: Logger, parameters: Dict):
         return cls(
-            n_workers=parameters['n_workers'],
-            simulations=simulation_from_cli(prefix=parameters.get('prefix', ''),
-                                            parameters=parameters['simulations'],
-                                            logger=logger)
+            **BaseConfiguration.parse_base_parameters(parameters, logger)
         )
 
 

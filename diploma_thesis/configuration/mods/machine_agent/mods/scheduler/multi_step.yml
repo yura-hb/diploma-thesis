@@ -1,0 +1,11 @@
+
+
+parameters:
+  trainer:
+    parameters:
+      optimizer:
+        scheduler:
+          kind: 'multi_step'
+          parameters:
+            milestones: [10000, 20000, 30000, 40000, 50000, 60000]
+            gamma: 0.99

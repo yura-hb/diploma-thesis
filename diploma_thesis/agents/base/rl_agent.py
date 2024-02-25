@@ -12,6 +12,15 @@ class RLAgent(Generic[Key], Agent[Key]):
 
         self.trainer = trainer
 
+    def with_logger(self, logger: logging.Logger):
+        super().with_logger(logger)
+
+        for module in [self.model, self.state_encoder, self.trainer]:
+            if isinstance(module, Loggable):
+                module.with_logger(logger)
+
+        return self
+
     @property
     def is_trainable(self):
         return True

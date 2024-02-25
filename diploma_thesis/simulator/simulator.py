@@ -126,6 +126,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
             delay=config.timeline.duration
         ))
 
+        environment.process(self.__log_time__(environment=environment, log_tick=config.log_tick))
+
         env.run(all_of_event)
 
         reward_record, self.cache = self.cache, None
@@ -149,6 +151,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                 is_training=False
             )
         )
+
+        environment.process(self.__log_time__(environment=environment, log_tick=config.log_tick))
 
         environment.run(run_end)
 
@@ -318,6 +322,12 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
             pass
 
         self.__log__(f'Training finished {name}')
+
+    def __log_time__(self, environment: simpy.Environment, log_tick: float):
+        while True:
+            self.__log__(f'Timeline {environment.now}')
+
+            yield environment.timeout(log_tick)
 
     def __terminate_if_needed__(self, environment: simpy.Environment, run_event: simpy.Event, delay: float):
         yield environment.timeout(delay)

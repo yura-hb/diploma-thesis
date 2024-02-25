@@ -1,0 +1,10 @@
+
+parameters:
+  trainer:
+    parameters:
+      optimizer:
+        scheduler:
+          kind: 'constant'
+          parameters:
+            factor: 0.1
+            total_iters: 100

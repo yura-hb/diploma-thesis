@@ -4,6 +4,5 @@ parameters:
     parameters:
       optimizer:
         model:
-          kind: 'adam'
           parameters:
-            lr: 0.001
+            lr: 0.0001

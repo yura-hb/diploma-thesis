@@ -32,7 +32,7 @@ task:
       parameters:
         weight: 1
         direction: 'minimize'
-        scale: 'linear'
+        scale: 'exponential'
 
   reward:
     top_k: -1

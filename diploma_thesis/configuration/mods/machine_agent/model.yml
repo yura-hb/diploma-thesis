@@ -70,9 +70,10 @@ parameters:
         kind: 'smooth_l1'
 
       optimizer:
-        kind: 'adam'
-        parameters:
-          lr: 0.001
+        model:
+          kind: 'adam'
+          parameters:
+            lr: 0.001
 
       gamma: 0.95
 

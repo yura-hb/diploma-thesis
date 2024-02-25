@@ -1,9 +1,11 @@
 
+
 parameters:
   trainer:
     parameters:
       optimizer:
         model:
-          kind: 'adam'
+          kind: 'adamax'
           parameters:
             lr: 0.001
+            momentum: 0.9

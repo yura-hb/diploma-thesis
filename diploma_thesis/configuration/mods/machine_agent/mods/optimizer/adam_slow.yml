@@ -1,9 +1,0 @@
-
-
-parameters:
-  trainer:
-    parameters:
-      optimizer:
-        kind: 'adam'
-        parameters:
-          lr: 0.0001
