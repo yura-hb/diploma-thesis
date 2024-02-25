@@ -10,6 +10,7 @@ class PersistedAgent(Template):
     @classmethod
     def from_cli(cls, parameters: Dict) -> List[Candidate]:
         path = parameters['path']
+        prefix = parameters.get('prefix', '')
         result = []
 
         for file in os.listdir(path):
@@ -29,7 +30,7 @@ class PersistedAgent(Template):
                 machine = load(machine_file)
                 work_center = load(work_center_file)
 
-                result += [Candidate(file, machine=machine, work_center=work_center)]
+                result += [Candidate(prefix + '_' + file, machine=machine, work_center=work_center)]
             except:
                 pass
 

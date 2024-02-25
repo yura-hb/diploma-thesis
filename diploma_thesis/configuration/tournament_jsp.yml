@@ -14,7 +14,12 @@ task:
           - 'ct'
     - kind: 'persisted_agents'
       parameters:
-        path: 'tmp/jsp'
+        prefix: 'multi-concurrent'
+        path: 'tmp/jsp_multi_concurrent'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: 'multi'
+        path: 'tmp/jsp_multi'
 
 
   criteria:
@@ -79,12 +84,14 @@ task:
                     uniform: [ 10, 50 ]
 
           values:
-            seed:
-              - 0
-              - 2
-              - 1
-              - 5
-              - 10
+
+            configuration:
+              seed:
+                - 122341523
+                - 314123123
+                - 431234231
+                - 646547353
+                - 745634563
 
             job_sampler:
               parameters:

@@ -2,9 +2,7 @@ from dataclasses import dataclass
 from typing import Dict
 
 import tensordict
-import torch
 
-from utils import filter
 from agents.utils.rl.rl import *
 
 

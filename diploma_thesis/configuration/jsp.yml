@@ -1,6 +1,6 @@
 jsp: &jsp
   name: 'model'
-  output_dir: 'tmp/jsp'
+  output_dir: 'tmp/jsp_multi'
   log_stdout: False
 
   machine_agent:
@@ -82,8 +82,8 @@ reward: &reward
 
 run: &run
   mods:
-#    - [ 'multi.yml' ]
-    - [ 'multi.yml', 'concurrent.yml' ]
+    - [ 'multi.yml' ]
+#    - [ 'multi.yml', 'concurrent.yml' ]
 #    - [ 'util_70.yml' ]
 #    - [ 'util_80.yml' ]
 #    - [ 'util_90.yml' ]
