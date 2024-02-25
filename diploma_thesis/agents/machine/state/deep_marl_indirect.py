@@ -21,18 +21,35 @@ class DEEPMARLIndirectStateEncoder(StateEncoder):
         self.reduction_strategy = strategy
 
     def encode(self, parameters: StateEncoder.Input) -> State:
-        state = [
-            self.__make_job_number_state__(parameters),
-            self.__make_system_state__(parameters),
-            self.__make_arriving_job_info__(parameters),
-            self.__make_processing_time_info__(parameters),
-            self.__make_average_waiting_in_next_queue_info__(parameters),
-            self.__make_time_till_due_state__(parameters)
+        job_number_state = self.__make_job_number_state__(parameters)
+        system_state = self.__make_system_state__(parameters)
+        arriving_info_state = self.__make_arriving_job_info__(parameters)
+        processing_time_info_state = self.__make_processing_time_info__(parameters)
+        average_waiting_state = self.__make_average_waiting_in_next_queue_info__(parameters)
+        time_till_due_state = self.__make_time_till_due_state__(parameters)
+
+        # Regroup variables so not normalized features are in the beginning of the state and normalized one
+        # are in the end
+
+        not_normalized_state = [
+            job_number_state,
+            arriving_info_state,
+            processing_time_info_state[0:3],
+            processing_time_info_state[4:7],
+            average_waiting_state[0:3],
+            time_till_due_state[0:3]
         ]
 
-        state = reduce(lambda x, y: x + y, state, [])
+        normalized = [
+            system_state,
+            [processing_time_info_state[3], processing_time_info_state[-1],
+             average_waiting_state[-1], time_till_due_state[-1]],
+        ]
+
+        state = reduce(lambda x, y: x + y, not_normalized_state + normalized, [])
         state = self.__to_list_of_tensors__(state)
         state = torch.hstack(state).reshape(-1)
+
         state = torch.nan_to_num(state, nan=0.0, posinf=1, neginf=-1)
 
         return self.State(state, batch_size=[])

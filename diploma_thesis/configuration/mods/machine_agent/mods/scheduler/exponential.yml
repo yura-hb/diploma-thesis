@@ -1,0 +1,11 @@
+
+
+
+parameters:
+  trainer:
+    parameters:
+      optimizer:
+        scheduler:
+          kind: 'exponential'
+          parameters:
+            gamma: 0.99996

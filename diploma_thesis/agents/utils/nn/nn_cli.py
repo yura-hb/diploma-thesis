@@ -4,6 +4,8 @@ from torch import nn
 from dataclasses import dataclass
 from copy import deepcopy
 
+from agents.utils.layers import PartialInstanceNorm1d
+
 
 class NNCLI(nn.Module):
     """
@@ -30,6 +32,14 @@ class NNCLI(nn.Module):
             @staticmethod
             def from_cli(parameters: dict):
                 return NNCLI.Configuration.LayerNorm()
+
+        @dataclass
+        class PartialInstanceNorm:
+            channels: int
+
+            @staticmethod
+            def from_cli(parameters: dict):
+                return NNCLI.Configuration.PartialInstanceNorm(channels=parameters['channels'])
 
         @dataclass
         class Linear:
@@ -62,6 +72,7 @@ class NNCLI(nn.Module):
                 'linear': NNCLI.Configuration.Linear,
                 'instance_norm': NNCLI.Configuration.InstanceNorm,
                 'layer_norm': NNCLI.Configuration.LayerNorm,
+                'partial_instance_norm': NNCLI.Configuration.PartialInstanceNorm,
                 'flatten': NNCLI.Configuration.Flatten
             }
 
@@ -125,6 +136,8 @@ class NNCLI(nn.Module):
                 return nn.LayerNorm(input_dim), input_dim
             case NNCLI.Configuration.Flatten():
                 return nn.Flatten(), torch.prod(torch.tensor(input_dim)).item()
+            case NNCLI.Configuration.PartialInstanceNorm(channels):
+                return PartialInstanceNorm1d(channels), input_dim
             case NNCLI.Configuration.Linear(output_dim, activation, dropout):
                 return self.__make_linear_layer__(input_dim, output_dim, activation, dropout), output_dim
             case _:

@@ -13,8 +13,7 @@ task:
       mods: [
         'encoding/indirect.yml',
         'model/model/marl_as.yml',
-#        'rl/agent/multi_agent.yml',
-        'scheduler/constant.yml'
+        'scheduler/exponential.yml'
       ]
 
 

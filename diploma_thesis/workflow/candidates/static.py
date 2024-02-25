@@ -51,7 +51,7 @@ class StaticCandidates(Template):
     @classmethod
     def __make_routing_rules__(cls, routing: str | List[str]) -> dict:
         if routing == "all":
-            return [rule() for rule in ALL_ROUTING_RULES.values()]
+            return [rule() for rule in ALL_ROUTING_RULES.predict()]
 
         return [ALL_ROUTING_RULES[rule]() for rule in routing]
 

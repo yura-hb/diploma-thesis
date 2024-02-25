@@ -3,5 +3,5 @@ parameters:
   trainer:
     kind: 'ddqn'
     parameters:
-      update_steps: 100
+      update_steps: 50
       gamma: 0.95

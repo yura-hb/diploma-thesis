@@ -5,7 +5,9 @@ parameters:
     parameters:
       model:
         layers:
-          - kind: 'instance_norm'
+          - kind: 'partial_instance_norm'
+            parameters:
+              channels: 17
           - kind: 'linear'
             parameters:
               dim: 64

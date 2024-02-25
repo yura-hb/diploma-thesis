@@ -1,6 +1,6 @@
 jsp: &jsp
   name: 'model'
-  output_dir: 'tmp/jsp_multi'
+  output_dir: 'tmp/jsp_deep_marl'
   log_stdout: False
 
   machine_agent:
@@ -45,54 +45,41 @@ rl_agents: &rl_agents
 
 memory: &memory
   [
-    'memory/plain.yml',
-    'memory/prioritized.yml'
+    ['memory/plain.yml', 'memory/small.yml'],
+    ['memory/prioritized.yml', 'memory/small.yml'],
   ]
 
 loss: &loss
   [
-#    'loss/huber.yml',
-    'loss/mse.yml',
-#    'loss/smooth_l1.yml'
+    'loss/huber.yml',
   ]
 
 agent: &agent
   [
-    'rl/agent/single.yml',
     'rl/agent/multi_agent.yml',
-    'rl/agent/centralized.yml'
+    'rl/agent/single.yml',
   ]
 
 optimizer: &optimizer
   [
-    'optimizer/adam.yml',
-#    'optimizer/sgd.yml'
-  ]
-
-scheduler: &scheduler
-  [
-    ['scheduler/exponential.yml'],
-    []
+    'optimizer/sgd.yml',
+    'optimizer/adam.yml'
   ]
 
 action_set: &action_set
   [
-    'model/rules/all.yml',
     'model/rules/marl.yml'
   ]
 
 reward: &reward
   - kind: 'global_tardiness'
   - kind: 'global_decomposed_tardiness'
-  - kind: 'surrogate_tardiness'
 
 run: &run
   mods:
-    - [ 'multi.yml' ]
-#    - [ 'multi.yml', 'concurrent.yml' ]
-#    - [ 'util_70.yml' ]
-#    - [ 'util_80.yml' ]
-#    - [ 'util_90.yml' ]
+    - [ 'util_70.yml' ]
+    - [ 'util_80.yml' ]
+    - [ 'util_90.yml' ]
 
 task:
   kind: 'multi_task'
@@ -121,8 +108,6 @@ task:
                   - *loss
                   # Optimizer
                   - *optimizer
-                  # Scheduler
-                  - *scheduler
                   # State Encoding
                   - [
                     'encoding/indirect.yml',
@@ -164,8 +149,6 @@ task:
                   - *loss
                   # Optimizer
                   - *optimizer
-                  # Scheduler
-                  - *scheduler
                   # State Encoding
                   - [
                     'encoding/mr.yml'
