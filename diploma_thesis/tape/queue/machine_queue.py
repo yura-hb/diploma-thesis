@@ -41,6 +41,7 @@ class MachineQueue(Queue):
                 record=Record(
                     state=record.state,
                     action=record.action,
+                    action_values=record.action_values,
                     next_state=None,
                     reward=None,
                     done=False,

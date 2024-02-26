@@ -15,6 +15,7 @@ Configuration = TypeVar('Configuration')
 class Record:
     state: State
     action: Action
+    action_values: torch.FloatTensor
     next_state: State
     reward: torch.FloatTensor
     done: torch.BoolTensor

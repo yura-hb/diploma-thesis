@@ -12,14 +12,14 @@ task:
         scheduling: 'all'
         routing:
           - 'ct'
+#    - kind: 'persisted_agents'
+#      parameters:
+#        prefix: 'multi-concurrent'
+#        path: 'tmp/jsp_multi_concurrent'
     - kind: 'persisted_agents'
       parameters:
-        prefix: 'multi-concurrent'
-        path: 'tmp/jsp_multi_concurrent'
-    - kind: 'persisted_agents'
-      parameters:
-        prefix: 'multi'
-        path: 'tmp/jsp_multi'
+        prefix: 'deep_marl'
+        path: 'tmp/jsp_deep_marl'
 
 
   criteria:
@@ -27,12 +27,12 @@ task:
       parameters:
         weight: 1
         direction: 'minimize'
-        scale: 'linear'
+        scale: 'log'
     - kind: 'tardiness'
       parameters:
         weight: 1
         direction: 'minimize'
-        scale: 'exponential'
+        scale: 'exp'
 
   reward:
     top_k: -1

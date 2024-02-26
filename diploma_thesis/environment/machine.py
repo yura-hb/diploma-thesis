@@ -262,9 +262,6 @@ class Machine:
     # Timeline
 
     def __produce__(self):
-        if not self.did_dispatch_event.triggered and len(self.state.queue) == 0:
-            yield self.environment.process(self.__starve__())
-
         while True:
             did_breakdown = yield self.environment.process(self.__breakdown_if_needed__())
             did_starve = yield self.environment.process(self.__starve_if_needed__())

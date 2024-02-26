@@ -118,6 +118,9 @@ task:
                   - [
                     'model/model/marl_as.yml'
                   ]
+                  - [
+                    'scheduler/exponential.yml'
+                  ]
 
           tape:
             machine_reward:
@@ -158,6 +161,9 @@ task:
                   # Model
                   - [
                     'model/model/marl_mr.yml'
+                  ]
+                  - [
+                    'scheduler/exponential.yml'
                   ]
 
           tape:

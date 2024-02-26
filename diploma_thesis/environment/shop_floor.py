@@ -116,11 +116,11 @@ class ShopFloor:
         self.history.with_started_at(self.configuration.environment.now)
         self.delegate.did_start_simulation(context=self.__make_context__())
 
-        if self.configuration.problem.pre_assign_initial_jobs:
-            self.__assign_initial_jobs__()
-
         for work_center in self.work_centers:
             work_center.simulate(self.configuration.breakdown)
+
+        if self.configuration.problem.pre_assign_initial_jobs:
+            self.__assign_initial_jobs__()
 
         self.configuration.environment.process(self.__dispatch_jobs__())
 

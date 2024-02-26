@@ -9,12 +9,12 @@ from agents.base.model import NNModel
 class DoubleDeepQTrainer(DeepQTrainer):
 
     def estimate_q(self, model: NNModel, batch: Record | tensordict.TensorDictBase):
-        q_values = model.values(batch.next_state)
+        q_values = model.predict(batch.next_state)
         orig_q = q_values[range(batch.shape[0]), batch.action]
 
         best_actions = q_values.max(dim=-1).indices
 
-        target = self.target_model.values(batch.next_state)[range(batch.shape[0]), best_actions]
+        target = self.target_model.predict(batch.next_state)[range(batch.shape[0]), best_actions]
 
         q = batch.reward + self.configuration.gamma * target * (1 - batch.done)
         q_values[range(batch.shape[0]), batch.action] = q

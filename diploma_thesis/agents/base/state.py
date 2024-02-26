@@ -9,6 +9,13 @@ class TensorState:
 
 
 @tensorclass
+class Graph:
+    node_features: torch.FloatTensor
+    edge_features: torch.FloatTensor
+    edges: torch.LongTensor
+
+
+@tensorclass
 class GraphState:
-    graph: torch.FloatTensor
+    graph: Graph
 

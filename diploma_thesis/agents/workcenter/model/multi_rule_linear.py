@@ -23,12 +23,19 @@ class MultiRuleLinear(NNWorkCenterModel, DeepRule):
         return IdleRoutingRule()
 
     def make_result(
-         self, rule: RoutingRule, parameters: WorkCenterModel.Input, state: State, action: Action
+            self,
+            rule: RoutingRule,
+            parameters: WorkCenterModel.Input,
+            state: State,
+            action: Action,
+            action_values: torch.FloatTensor
     ) -> WorkCenterModel.Record:
         return WorkCenterModel.Record(
             result=rule(job=parameters.job, work_center=parameters.work_center),
             state=state,
-            action=action
+            action=action,
+            action_values=action_values,
+            batch_size=[]
         )
 
     def clone(self):

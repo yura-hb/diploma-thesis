@@ -63,10 +63,10 @@ class Statistics:
                  work_center_history: List['environment.WorkCenterHistory'],
                  machine_history: List['environment.MachineHistory'],
                  production_logs: pd.DataFrame):
-        self.shop_floor_history = deepcopy(shop_floor_history)
+        self.shop_floor_history = shop_floor_history
         self.shop_floor_map = map
-        self.work_center_history = deepcopy(work_center_history)
-        self.machine_history = deepcopy(machine_history)
+        self.work_center_history = work_center_history
+        self.machine_history = machine_history
         self.production_logs = production_logs
 
     def jobs(self, predicate: Predicate = Predicate()) -> List[environment.Job]:
@@ -372,9 +372,9 @@ class Statistics:
         machine_history = [machine.history for machine in shop_floor.machines]
         production_logs = st.ProductionLogFactory().make(shop_floor)
 
-        return Statistics(shop_floor_history=shop_floor_history,
+        return Statistics(shop_floor_history=deepcopy(shop_floor_history),
                           map=map,
-                          work_center_history=work_center_history,
-                          machine_history=machine_history,
+                          work_center_history=deepcopy(work_center_history),
+                          machine_history=deepcopy(machine_history),
                           production_logs=production_logs)
 

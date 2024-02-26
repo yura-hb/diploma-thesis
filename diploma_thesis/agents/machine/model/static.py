@@ -17,7 +17,9 @@ class StaticModel(MachineModel[PlainEncoder.State, None]):
         return MachineModel.Record(
             result=self.rule(parameters.machine, parameters.now),
             state=state,
-            action=None
+            action=None,
+            action_values=None,
+            batch_size=[]
         )
 
     @staticmethod

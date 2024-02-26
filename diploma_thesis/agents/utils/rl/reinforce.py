@@ -1,13 +1,12 @@
-
-import tensordict
-
-from agents.utils.rl.rl import *
+from dataclasses import dataclass
+from typing import List
 
 import torch
 
-from dataclasses import dataclass
-from typing import List
+from typing import Dict
+
 from agents.utils.nn import NNCLI
+from agents.utils.rl.rl import *
 
 
 class Reinforce(RLTrainer):
@@ -21,7 +20,14 @@ class Reinforce(RLTrainer):
                  optimizer: OptimizerCLI,
                  loss: LossCLI,
                  configuration: Configuration):
-        super().__init__(memory, loss, optimizer)
+        actor_loss = LossCLI(LossCLI.Configuration(
+            kind='cross_entropy',
+            parameters=dict()
+        ))
+
+        critics_loss = loss
+
+        super().__init__(memory, actor_loss, optimizer)
 
         self.critics = None
         self.configuration = configuration
@@ -29,11 +35,23 @@ class Reinforce(RLTrainer):
     def configure(self, model: NNModel):
         super().configure(model)
 
-        pass
+        # TODO: - Instantiate critics
 
     def train_step(self, model: NNModel):
-        pass
+        try:
+            batch, info = self.memory.sample(return_info=True)
+            batch: Record | torch.Tensor = torch.squeeze(batch)
+        except NotReadyException:
+            return
 
-    @staticmethod
-    def from_cli(parameters, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):
-        pass
+        # Perform policy step
+
+        # Perform critics step
+
+    @classmethod
+    def from_cli(cls, parameters: Dict, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):
+        critics = parameters.get('critics', {})
+        models = parameters.get('models', {})
+        optimizer = parameters.get('optimizer', {})
+
+        return cls(memory, optimizer, loss, )

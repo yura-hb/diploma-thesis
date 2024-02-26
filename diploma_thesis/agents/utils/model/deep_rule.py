@@ -37,7 +37,12 @@ class DeepRule(Generic[Rule, Input, Record], PhaseUpdatable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def make_result(self, rule: Rule, parameters: Input, state: State, action) -> Record:
+    def make_result(self,
+                    rule: Rule,
+                    parameters: Input,
+                    state: State,
+                    action,
+                    action_values: torch.FloatTensor) -> Record:
         pass
 
     @abstractmethod
@@ -54,14 +59,14 @@ class DeepRule(Generic[Rule, Input, Record], PhaseUpdatable, metaclass=ABCMeta):
                 module.update(phase)
 
     def __call__(self, state: State, parameters: Input) -> Record:
-        values = self.values(state).view(-1)
+        values = self.predict(state).view(-1)
         action, _ = self.action_selector(values)
         action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
         rule = self.rules[action]
 
-        return self.make_result(rule, parameters, state, action)
+        return self.make_result(rule, parameters, state, action, values.detach().clone())
 
-    def values(self, state: State) -> torch.FloatTensor:
+    def predict(self, state: State) -> torch.FloatTensor:
         assert isinstance(state, TensorState), f"State must conform to TensorState"
 
         if not self.model.is_connected:

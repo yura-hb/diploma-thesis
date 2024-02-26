@@ -20,7 +20,9 @@ class StaticModel(WorkCenterModel[PlainEncoder.State, None]):
         return WorkCenterModel.Record(
             result=self.rule(job=parameters.job, work_center=parameters.work_center),
             state=state,
-            action=None
+            action=None,
+            action_values=None,
+            batch_size=[]
         )
 
     def values(self, state: State) -> torch.FloatTensor:

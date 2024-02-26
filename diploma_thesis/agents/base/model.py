@@ -3,6 +3,7 @@ import torch
 
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
+from tensordict.prototype import tensorclass
 from typing import TypeVar, Generic
 from utils import Loggable
 
@@ -14,11 +15,12 @@ Result = TypeVar('Result')
 
 class Model(Loggable, Generic[Input, State, Action, Result], metaclass=ABCMeta):
 
-    @dataclass
+    @tensorclass
     class Record:
         result: Result
         state: State
         action: Action
+        action_values: torch.FloatTensor
 
     @abstractmethod
     def __call__(self, state: State, parameters: Input) -> Record:
@@ -28,7 +30,7 @@ class Model(Loggable, Generic[Input, State, Action, Result], metaclass=ABCMeta):
 class NNModel(Model[Input, State, Action, Result], metaclass=ABCMeta):
 
     @abstractmethod
-    def values(self, state: State) -> torch.FloatTensor:
+    def predict(self, state: State) -> torch.FloatTensor:
         pass
 
     @abstractmethod

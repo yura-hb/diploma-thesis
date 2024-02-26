@@ -77,18 +77,24 @@ class ProductionLogFactory:
 
         if job.current_step_idx >= 0:
             for i in range(job.current_step_idx + 1):
-                if arrived_at := job.history.arrived_at_work_center[i]:
+                arrived_at = job.history.arrived_at_work_center[i]
+
+                if arrived_at >= 0:
                     result += [self.ProductionLog(
                         job.id, i, job.step_idx[i], -1, LogEvent.arrived_at_work_center, arrived_at
                     )]
 
-                if arrived_at := job.history.arrived_at_machine[i]:
+                arrived_at = job.history.arrived_at_machine[i]
+
+                if arrived_at >= job.history.arrived_at_machine[i]:
                     result += [self.ProductionLog(
                         job.id, i, job.step_idx[i], job.history.arrived_machine_idx[i],
                         LogEvent.arrived_at_machine, arrived_at
                     )]
 
-                if started_at := job.history.started_at[i]:
+                started_at = job.history.started_at[i]
+
+                if started_at >= 0:
                     result += [self.ProductionLog(
                         job.id, i, job.step_idx[i], job.history.arrived_machine_idx[i],
                         LogEvent.started_processing, started_at
