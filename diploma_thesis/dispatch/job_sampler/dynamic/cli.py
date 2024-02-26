@@ -4,9 +4,10 @@ from typing import Tuple
 
 import simpy
 
-from environment import JobSampler, Configuration as Problem
-from sampler import (NumericSampler, Permutation, Exponential, Constant,
-                     numeric_sampler_from_cli, permutation_sampler_from_cli)
+from environment import Configuration as Problem
+from dispatch.job_sampler import JobSampler
+from dispatch.sampler import (NumericSampler, Permutation, Exponential, Constant,
+                             numeric_sampler_from_cli, permutation_sampler_from_cli)
 from .builder import Builder
 
 
@@ -41,10 +42,10 @@ class CLI:
         n_jobs: int
 
     @staticmethod
-    def from_cli(parameters: dict, problem: Problem, environment: simpy.Environment) -> JobSampler:
+    def from_cli(parameters: dict, problem: Problem) -> JobSampler:
         configuration = CLI.configuration_from_cli_arguments(problem, parameters)
 
-        builder = Builder(problem, environment)
+        builder = Builder(problem)
 
         builder.with_processing_time_distribution(configuration.processing_times)
         builder.with_step_generation(configuration.permutation)

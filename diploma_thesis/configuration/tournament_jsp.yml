@@ -51,41 +51,49 @@ task:
               work_center_count: 10
               pre_assign_initial_jobs: True
 
-            job_sampler:
-              kind: 'dynamic'
-              parameters:
-                n_jobs: 200
-                processing_times: # Sampler
-                  kind: 'uniform'
-                  parameters:
-                    uniform: [ 1, 50 ]
-                    noise: [ 0, 10 ]
-                permutation:
-                  uneveness: 2
-                due_time: # Sampler
-                  kind: 'uniform'
-                  parameters:
-                    uniform: [ 0, 2 ]
-                job_arrival_time_on_machine:
-                  kind: 'expected_utilization'
-                  parameters:
-                    value: 0.95
+            dispatch:
+              initial_job_assignment:
+                kind: 'n_per_machine'
+                parameters:
+                  n: 5
 
-            breakdown:
-              kind: 'dynamic'
-              parameters:
-                breakdown_arrival:
-                  kind: 'exponential'
-                  parameters:
-                    mean: 1000
-                repair_duration:
-                  kind: 'uniform'
-                  parameters:
-                    uniform: [ 10, 50 ]
+              job_sampler:
+                kind: 'dynamic'
+                parameters:
+                  n_jobs: 200
+                  processing_times: # Sampler
+                    kind: 'uniform'
+                    parameters:
+                      uniform: [ 1, 50 ]
+                      noise: [ 0, 10 ]
+                  permutation:
+                    uneveness: 2
+                  due_time: # Sampler
+                    kind: 'uniform'
+                    parameters:
+                      uniform: [ 0, 2 ]
+                  job_arrival_time_on_machine:
+                    kind: 'expected_utilization'
+                    parameters:
+                      value: 0.95
+
+              breakdown:
+                kind: 'dynamic'
+                parameters:
+                  breakdown_arrival:
+                    kind: 'exponential'
+                    parameters:
+                      mean: 1000
+                  repair_duration:
+                    kind: 'uniform'
+                    parameters:
+                      uniform: [ 10, 50 ]
+
+              seed: 32
 
           values:
 
-            configuration:
+            dispatch:
               seed:
                 - 122341523
                 - 314123123
@@ -93,11 +101,11 @@ task:
                 - 646547353
                 - 745634563
 
-            job_sampler:
-              parameters:
-                job_arrival_time_on_machine:
-                  parameters:
-                    value:
-                      - 0.7
-                      - 0.8
-                      - 0.9
+              job_sampler:
+                parameters:
+                  job_arrival_time_on_machine:
+                    parameters:
+                      value:
+                        - 0.7
+                        - 0.8
+                        - 0.9

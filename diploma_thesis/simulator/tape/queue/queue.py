@@ -1,9 +1,8 @@
 import weakref
-import torch
 from abc import ABCMeta
 
 from environment import Job, ShopFloor, Machine, Context
-from tape.utils.simulator_interface import SimulatorInterface
+from simulator.tape.utils.simulator_interface import SimulatorInterface
 from utils import Loggable
 
 ShopFloorId = int

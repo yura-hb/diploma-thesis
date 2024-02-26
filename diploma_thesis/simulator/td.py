@@ -7,17 +7,13 @@ class TDSimulator(Simulator):
     possible
     """
 
-    def did_prepare_machine_record(
-            self, shop_floor: ShopFloor, machine: Machine, record: Record, decision_moment: float
-    ):
-        super().did_prepare_machine_record(shop_floor, machine, record, decision_moment)
+    def did_prepare_machine_record(self, context: Context, machine: Machine, record: Record):
+        super().did_prepare_machine_record(context, machine, record)
 
         self.machine.store(machine.key, record)
 
-    def did_prepare_work_center_record(
-            self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record, decision_moment: float
-    ):
-        super().did_prepare_work_center_record(shop_floor, work_center, record, decision_moment)
+    def did_prepare_work_center_record(self, context: Context, work_center: WorkCenter, record: Record):
+        super().did_prepare_work_center_record(context, work_center, record)
 
         self.work_center.store(work_center.key, record)
 

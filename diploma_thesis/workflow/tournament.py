@@ -6,14 +6,13 @@ from typing import List
 import numpy as np
 import pandas as pd
 import simpy
-import torch
 import tqdm
 from joblib import Parallel, delayed
 from tabulate import tabulate
 
 from environment import Statistics
 from simulator import EvaluateConfiguration, EpisodicSimulator, Simulation
-from tape import TapeModel, NoMachineReward, NoWorkCenterReward
+from simulator.tape import TapeModel, NoMachineReward, NoWorkCenterReward
 from utils import task
 from workflow.candidates import from_cli as candidates_from_cli, Candidate
 from workflow.criterion import from_cli as criterion_from_cli, Criterion, Direction, Scale

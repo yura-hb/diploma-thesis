@@ -177,7 +177,6 @@ class Machine:
         self.state = State(machine_idx=machine_idx, work_center_idx=work_center_idx, batch_size=[])
         self.history = History(batch_size=[])
         self._shop_floor = None
-        self._breakdown: 'environment.Breakdown' = None
 
         # Events
         self.did_dispatch_event = self.environment.event()
@@ -189,17 +188,21 @@ class Machine:
     def connect(self, shop_floor: 'environment.ShopFloor'):
         self._shop_floor = shop_floor
 
-    def simulate(self, breakdown: 'environment.Breakdown'):
-        self._breakdown = breakdown
-
+    def simulate(self):
         self.environment.process(self.__produce__())
-        self.environment.process(self.__breakdown__())
 
     def receive(self, job: environment.Job):
         job.with_event(self.__new_event__(environment.JobEvent.Kind.arrival_on_machine))
 
         self.state.with_new_job(job, self.environment.now)
         self.__did_receive_job__()
+
+    def receive_breakdown_event(self, repair_duration: float):
+        self.state.with_repair_duration(duration=repair_duration)
+
+        # Get up and break machine, if it is in starvation mode
+        if self.environment.now > self.state.free_at:
+            self.__did_receive_job__()
 
     def reset(self):
         self.state = State(machine_idx=self.state.machine_idx, work_center_idx=self.state.work_center_idx)
@@ -255,7 +258,7 @@ class Machine:
         the previous machine
         """
         return [
-            job for job in self.shop_floor.in_system_jobs
+            job for job in self.shop_floor.in_system_running_jobs
             if job.next_work_center_idx == self.work_center_idx and job.release_moment_on_machine is not None
         ]
 
@@ -295,24 +298,6 @@ class Machine:
             self.shop_floor.did_produce(job, self)
 
             self.__forward__(job)
-
-    def __breakdown__(self):
-        if self._breakdown is None:
-            return
-
-        while True:
-            if self.state.will_breakdown:
-                duration = max(self.state.free_at - self.environment.now, 10)
-                yield self.environment.timeout(duration)
-                continue
-
-            breakdown_arrival = self._breakdown.sample_next_breakdown_time(self)
-
-            yield self.environment.timeout(breakdown_arrival)
-
-            repair_duration = self._breakdown.sample_repair_duration(self)
-
-            self.state.with_repair_duration(repair_duration)
 
     def __starve__(self):
         self.did_dispatch_event = self.environment.event()

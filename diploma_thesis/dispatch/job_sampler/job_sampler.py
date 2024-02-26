@@ -10,9 +10,8 @@ from environment import Configuration
 
 class JobSampler(metaclass=ABCMeta):
 
-    def __init__(self, problem: Configuration, environment: simpy.Environment):
+    def __init__(self, problem: Configuration):
         self.problem = problem
-        self.environment = environment
 
     def connect(self, generator: torch.Generator):
         pass

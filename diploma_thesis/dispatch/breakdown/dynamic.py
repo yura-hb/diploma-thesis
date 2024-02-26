@@ -1,9 +1,11 @@
 import torch
 
-from environment import Breakdown, Machine
+from environment import Machine
 from typing import Dict
-from sampler import NumericSampler, numeric_sampler_from_cli
+from dispatch.sampler import NumericSampler, numeric_sampler_from_cli
 from dataclasses import dataclass
+
+from .breakdown import Breakdown
 
 
 class Dynamic(Breakdown):

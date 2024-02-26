@@ -4,3 +4,6 @@
 [submodule "external/PhD-Thesis-Projects"]
 	path = external/PhD-Thesis-Projects
 	url = https://github.com/RK0731/PhD-Thesis-Projects.git
+[submodule "external/fjsp-drl"]
+	path = external/fjsp-drl
+	url = git@github.com:songwenas12/fjsp-drl.git

@@ -63,9 +63,9 @@ class WorkCenter:
         self._shop_floor = shop_floor
         self._machines = machines
 
-    def simulate(self, break_down: 'environment.Breakdown'):
+    def simulate(self):
         for machine in self.machines:
-            machine.simulate(break_down)
+            machine.simulate()
 
         self.environment.process(self.__dispatch__())
 

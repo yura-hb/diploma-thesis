@@ -1,6 +1,7 @@
 from functools import partial
 
 from utils import from_cli
+from .job_sampler import JobSampler
 from .dynamic import CLI as DynamicJobSamplerFromCLI, Builder as DynamicJobSamplerBuilder, \
     JobSampler as DynamicJobSampler
 from .static import Sampler as StaticJobSampler

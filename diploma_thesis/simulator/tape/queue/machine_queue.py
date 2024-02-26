@@ -1,12 +1,15 @@
 from typing import Dict
 
+import torch
+
 from agents import MachineInput
+from agents.base import Graph
 from agents.machine.model import MachineModel
 from agents.utils.memory import Record
 from environment import MachineKey
-from tape.machine import MachineReward
-from tape.queue.queue import *
-from tape.utils.tape_record import TapeRecord
+from simulator.tape.machine import MachineReward
+from simulator.tape.queue.queue import *
+from simulator.tape.utils.tape_record import TapeRecord
 from utils import filter
 
 
@@ -53,8 +56,7 @@ class MachineQueue(Queue):
 
     @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.key])
     def record_next_state(self, context: Context, machine: Machine, job: Job):
-        parameters = MachineInput(machine, context.moment)
-        state = self.simulator.encode_machine_state(parameters)
+        state = self.simulator.encode_machine_state(context=context, machine=machine)
 
         self.queue[context.shop_floor.id][machine.key][job.id].record.next_state = state
 
@@ -122,10 +124,9 @@ class MachineQueue(Queue):
         result.reward = reward
 
         self.simulator.did_prepare_machine_record(
-            shop_floor=context.shop_floor,
+            context=Context(shop_floor=context.shop_floor, moment=record.moment),
             machine=machine,
             record=result,
-            decision_moment=record.moment
         )
 
         del self.queue[context.shop_floor.id][machine.key][job.id]

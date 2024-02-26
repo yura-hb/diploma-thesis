@@ -11,7 +11,8 @@ from agents import work_center_from_cli, machine_from_cli
 from agents.base.rl_agent import RLAgent
 from simulator import from_cli as simulator_from_cli, Simulator, RewardCache
 from simulator import run_configuration_from_cli, evaluate_configuration_from_cli
-from tape import TapeModel
+from simulator.tape import TapeModel
+from simulator.graph import GraphModel
 from utils import save
 from .workflow import Workflow
 
@@ -114,8 +115,13 @@ class Simulation(Workflow):
         machine = machine_from_cli(parameters=self.parameters['machine_agent'])
         work_center = work_center_from_cli(parameters=self.parameters['work_center_agent'])
         tape = TapeModel.from_cli(parameters=self.parameters['tape'])
+        graph = GraphModel.from_cli(parameters=self.parameters['graph'])
         simulator = simulator_from_cli(
-            machine=machine, work_center=work_center, tape_model=tape, parameters=self.parameters['simulator']
+            machine=machine,
+            work_center=work_center,
+            tape_model=tape,
+            graph_model=graph,
+            parameters=self.parameters['simulator']
         )
 
         return simulator

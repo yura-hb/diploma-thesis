@@ -4,16 +4,15 @@ import simpy
 import torch
 
 from environment import Configuration, Job, JobReductionStrategy
-from sampler import NumericSampler, Permutation
+from dispatch.sampler import NumericSampler, Permutation
 from .job_sampler import JobSampler
 
 
 class Builder:
 
-    def __init__(self, problem: Configuration, environment: simpy.Environment):
+    def __init__(self, problem: Configuration):
         self.problem = problem
-        self.environment = environment
-        self.job_sampler = JobSampler(problem, environment)
+        self.job_sampler = JobSampler(problem)
 
     def with_step_generation(self, sampler: Permutation):
         def sample(initial_work_center_idx: int):

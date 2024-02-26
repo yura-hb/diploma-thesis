@@ -9,18 +9,19 @@ class EpisodicSimulator(Simulator):
     After the run is finished returns are estimated and passed to the agent for training.
     """
 
-    def did_prepare_machine_record(self,
-                                   shop_floor: ShopFloor,
-                                   machine: Machine,
-                                   record: Record,
-                                   decision_moment: float):
-       pass
+    def __init__(self, machine: MachineAgent, work_center: WorkCenterAgent, tape_model: TapeModel):
+        super().__init__(machine, work_center, tape_model)
 
-    def did_prepare_work_center_record(self,
-                                       shop_floor: ShopFloor,
-                                       work_center: WorkCenter,
-                                       record: Record,
-                                       decision_moment: float):
+        self.queue = dict()
+
+    def did_prepare_machine_record(self, context: Context, machine: Machine, record: Record):
+        super().did_prepare_machine_record(context, machine, record)
+
+        pass
+
+    def did_prepare_work_center_record(self, context: Context, work_center: WorkCenter, record: Record):
+        super().did_prepare_work_center_record(context, work_center, record)
+
         pass
 
     @staticmethod

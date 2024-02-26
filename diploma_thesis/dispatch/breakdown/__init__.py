@@ -1,6 +1,7 @@
 from functools import partial
 
 from utils import from_cli
+from .breakdown import Breakdown
 from .dynamic import Dynamic as DynamicBreakdown
 from .no import No as NoBreakdown
 

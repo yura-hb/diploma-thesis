@@ -1,12 +1,14 @@
 from typing import Dict
 
+import torch
+
 from agents import WorkCenterInput
 from agents.utils.memory import Record
 from agents.workcenter.model import WorkCenterModel
 from environment import WorkCenter, WorkCenterKey
-from tape.work_center import WorkCenterReward
-from tape.queue.queue import *
-from tape.utils.tape_record import TapeRecord
+from simulator.tape.queue.queue import *
+from simulator.tape.utils.tape_record import TapeRecord
+from simulator.tape.work_center import WorkCenterReward
 from utils import filter
 
 
@@ -52,8 +54,7 @@ class WorkCenterQueue(Queue):
     @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.work_center.key])
     def record_next_state(self, context: Context, machine: Machine, job: Job):
         work_center = machine.work_center
-        parameters = WorkCenterInput(work_center=work_center, job=job)
-        state = self.simulator.encode_work_center_state(parameters)
+        state = self.simulator.encode_work_center_state(work_center=work_center, job=job, moment=context.moment)
 
         self.queue[context.shop_floor.id][work_center.key][job.id].record.next_state = state
 
@@ -123,10 +124,9 @@ class WorkCenterQueue(Queue):
         result.reward = reward
 
         self.simulator.did_prepare_work_center_record(
-            shop_floor=context.shop_floor,
+            context=Context(shop_floor=context.shop_floor, moment=record.moment),
             work_center=work_center,
-            record=record,
-            decision_moment=record.moment
+            record=record
         )
 
         del self.queue[context.shop_floor.id][work_center.key][job.id]

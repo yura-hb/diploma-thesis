@@ -64,6 +64,8 @@ class DeepRule(Generic[Rule, Input, Record], PhaseUpdatable, metaclass=ABCMeta):
         action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
         rule = self.rules[action]
 
+        # TODO: - Fix, as it should be action probs denoted by action selector !!!
+
         return self.make_result(rule, parameters, state, action, values.detach().clone())
 
     def predict(self, state: State) -> torch.FloatTensor:

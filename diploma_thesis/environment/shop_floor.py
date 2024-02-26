@@ -82,9 +82,7 @@ class Map:
 class ShopFloor:
     @dataclass
     class Configuration:
-        problem: environment.Configuration
-        sampler: 'environment.JobSampler'
-        breakdown: 'environment.Breakdown'
+        configuration: environment.Configuration
         agent: 'environment.Agent'
         delegate: 'environment.Delegate'
         environment: simpy.Environment = field(default_factory=simpy.Environment)
@@ -104,27 +102,34 @@ class ShopFloor:
         self.history = History(batch_size=[])
         self._work_centers, self._machines = ShopFloorFactory(self.configuration, self).make()
 
+        self._did_finish_job_dispatch = False
         self.did_finish_simulation_event = configuration.environment.event()
 
-    def simulate(self):
-        generator = torch.Generator()
-        generator = generator.manual_seed(self.configuration.problem.seed)
-
-        self.configuration.breakdown.connect(generator)
-        self.configuration.sampler.connect(generator)
-
+    def start(self):
         self.history.with_started_at(self.configuration.environment.now)
         self.delegate.did_start_simulation(context=self.__make_context__())
 
         for work_center in self.work_centers:
-            work_center.simulate(self.configuration.breakdown)
-
-        if self.configuration.problem.pre_assign_initial_jobs:
-            self.__assign_initial_jobs__()
-
-        self.configuration.environment.process(self.__dispatch_jobs__())
+            work_center.simulate()
 
         return self.did_finish_simulation_event
+
+    def dispatch(self, job: 'environment.Job'):
+        job = job.with_event(
+            environment.Job.Event(
+                kind=environment.Job.Event.Kind.dispatch,
+                moment=self.configuration.environment.now,
+            )
+        )
+
+        self.history.with_new_job(job)
+
+        work_center = self.work_centers[job.step_idx[0]]
+
+        self.__dispatch__(job, work_center)
+
+    def did_finish_job_dispatch(self):
+        self._did_finish_job_dispatch = True
 
     def reset(self):
         self.state = State(idx=self.state.idx)
@@ -151,6 +156,14 @@ class ShopFloor:
         return self._machines
 
     @property
+    def now(self) -> float:
+        return self.configuration.environment.now
+
+    @property
+    def new_job_id(self) -> float:
+        return self.state.with_new_job_id().job_id
+
+    @property
     def map(self) -> Map:
         return Map(
             work_centers=[
@@ -167,13 +180,23 @@ class ShopFloor:
 
     @property
     def in_system_jobs(self) -> List['environment.Job']:
-        return [self.history.job(job_id) for job_id in self.state.in_system_job_ids]
+        job_ids = self.state.in_system_job_ids
+        job_ids = sorted(job_ids)
+
+        return [self.history.job(job_id) for job_id in job_ids]
+
+    @property
+    def in_system_running_jobs(self) -> List['environment.Job']:
+        return [job for job in self.in_system_jobs if not job.is_completed]
 
     def work_center(self, idx: int) -> 'environment.WorkCenter':
         return self.work_centers[idx]
 
     def machine(self, work_center_idx: int, machine_idx: int) -> 'environment.Machine':
         return self.work_centers[work_center_idx].machines[machine_idx]
+
+    def job(self, job_id) -> 'environment.Job':
+        return self.history.job(job_id)
 
     def work_in_next_queue(self, job: environment.Job) -> torch.FloatTensor:
         work_center_idx = job.next_work_center_idx
@@ -193,7 +216,7 @@ class ShopFloor:
 
     @property
     def completion_rate(self) -> torch.FloatTensor:
-        in_system_jobs = self.in_system_jobs
+        in_system_jobs = self.in_system_running_jobs
 
         completed_operations_count = torch.LongTensor([
             job.processed_operations_count for job in in_system_jobs
@@ -206,7 +229,7 @@ class ShopFloor:
         return completed_operations_count / remaining_operations_count
 
     def tardy_rate(self, now: int) -> torch.FloatTensor:
-        in_system_jobs = self.in_system_jobs
+        in_system_jobs = self.in_system_running_jobs
 
         tardy_jobs = torch.LongTensor([
             job.is_tardy_at(now) for job in in_system_jobs
@@ -214,10 +237,9 @@ class ShopFloor:
 
         return tardy_jobs / len(in_system_jobs)
 
-    def expected_tardy_rate(
-            self, now: float, reduction_strategy: environment.JobReductionStrategy
-    ) -> torch.FloatTensor:
-        in_system_jobs = self.in_system_jobs
+    def expected_tardy_rate(self, now: float,
+                            reduction_strategy: environment.JobReductionStrategy) -> torch.FloatTensor:
+        in_system_jobs = self.in_system_running_jobs
 
         expected_tardy_jobs = torch.LongTensor([
             job.is_expected_to_be_tardy_at(now=now, strategy=reduction_strategy) for job in in_system_jobs
@@ -303,69 +325,6 @@ class ShopFloor:
 
     # Utility methods
 
-    def __assign_initial_jobs__(self):
-        for work_center in self.work_centers:
-            for _ in work_center.machines:
-                job = self.__sample_job__(
-                    initial_work_center_idx=work_center.state.idx,
-                    created_at=self.history.started_at
-                )
-
-                self.history.with_new_job(job)
-
-                self.__dispatch__(job, work_center)
-
-            work_center.__did_receive_job__()
-
-    def __dispatch_jobs__(self):
-        while self.__should_dispatch__():
-            arrival_time = self.configuration.sampler.sample_next_arrival_time()
-
-            yield self.configuration.environment.timeout(arrival_time)
-
-            job = self.__sample_job__(created_at=self.configuration.environment.now)
-
-            self.history.with_new_job(job)
-
-            work_center = self.work_centers[job.step_idx[0]]
-
-            self.__dispatch__(job, work_center)
-
-    def __sample_job__(self, initial_work_center_idx: int = None, created_at: torch.FloatTensor = 0):
-        job = (
-            self.configuration.sampler.sample(
-                job_id=self.state.with_new_job_id().job_id,
-                initial_work_center_idx=initial_work_center_idx,
-                moment=created_at)
-            .with_event(
-                environment.Job.Event(
-                    kind=environment.Job.Event.Kind.dispatch,
-                    moment=created_at,
-                )
-            )
-        )
-
-        return job
-
-    def __test_if_finished__(self):
-        has_dispatched_all_jobs = not self.__should_dispatch__()
-        is_no_jobs_in_system = len(self.state.in_system_job_ids) == 0
-
-        if not self.did_finish_simulation_event.triggered and has_dispatched_all_jobs and is_no_jobs_in_system:
-            self.delegate.did_finish_simulation(context=self.__make_context__())
-
-            self.did_finish_simulation_event.succeed()
-
-    def __should_dispatch__(self):
-        number_of_jobs = self.configuration.sampler.number_of_jobs()
-
-        if number_of_jobs is not None:
-            return self.state.dispatched_job_count < number_of_jobs
-
-        timespan = self.configuration.environment.now - self.history.started_at
-
-        return timespan < self.configuration.problem.timespan
-
     def __dispatch__(self, job: environment.Job, work_center: environment.WorkCenter):
         self.state.with_new_job_in_system(job.id)
 
@@ -376,3 +335,13 @@ class ShopFloor:
             shop_floor=self,
             moment=self.configuration.environment.now
         )
+
+    def __test_if_finished__(self):
+        is_out_of_span = self.configuration.environment.now > self.configuration.configuration.timespan
+
+        if (not self.did_finish_simulation_event.triggered and
+                self._did_finish_job_dispatch and
+                len(self.in_system_running_jobs) == 0):
+            self.delegate.did_finish_simulation(context=self.__make_context__())
+
+            self.did_finish_simulation_event.succeed()

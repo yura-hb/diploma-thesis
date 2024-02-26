@@ -1,13 +1,14 @@
 
 import simpy
 
-from environment import Job, Configuration, JobSampler
+from environment import Job, Configuration
+from dispatch.job_sampler import JobSampler
 
 
 class Sampler(JobSampler):
 
-    def __init__(self, problem: Configuration, environment: simpy.Environment):
-        super().__init__(problem, environment)
+    def __init__(self, problem: Configuration):
+        super().__init__(problem)
 
         self._number_of_jobs = 0
         self._paths = None

@@ -30,12 +30,12 @@ class ShopFloorFactory:
         work_centers = []
         machines = []
 
-        for work_center_idx in range(self.configuration.problem.work_center_count):
+        for work_center_idx in range(self.configuration.configuration.work_center_count):
             work_centers += [environment.WorkCenter(self.configuration.environment, work_center_idx)]
 
             batch = []
 
-            for machine_idx in range(self.configuration.problem.machines_per_work_center):
+            for machine_idx in range(self.configuration.configuration.machines_per_work_center):
                 batch += [environment.Machine(self.configuration.environment, machine_idx, work_center_idx)]
 
             machines += [batch]

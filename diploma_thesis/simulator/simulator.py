@@ -11,11 +11,12 @@ from agents import MachineAgent, WorkCenterAgent
 from agents import MachineInput, WorkCenterInput
 from agents import TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
 from agents.utils.memory import Record
-from environment import Agent, ShopFloor, Job, Machine, WorkCenter, Context
-from tape import TapeModel, SimulatorInterface
+from environment import Agent, ShopFloor, Job, Machine, WorkCenter, Context, Delegate
+from simulator.tape import TapeModel, SimulatorInterface
 from utils import Loggable
 from .configuration import RunConfiguration, EvaluateConfiguration
 from .simulation import Simulation
+from .graph import GraphModel
 
 
 def reset_tape():
@@ -56,7 +57,11 @@ class RewardCache:
 
 class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
-    def __init__(self, machine: MachineAgent, work_center: WorkCenterAgent, tape_model: TapeModel):
+    def __init__(self,
+                 machine: MachineAgent,
+                 work_center: WorkCenterAgent,
+                 tape_model: TapeModel,
+                 graph_model: GraphModel):
         super().__init__()
 
         self.work_center = work_center
@@ -64,6 +69,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         self.tape_model = tape_model
         self.tape_model.connect(self)
 
+        self.graph_model = graph_model
         self.cache = None
 
     def with_logger(self, logger: logging.Logger):
@@ -160,49 +166,54 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
     # Reward
 
-    def encode_machine_state(self, parameters: MachineInput):
+    def encode_machine_state(self, context: Context, machine: Machine):
+        parameters = MachineInput(machine=machine,
+                                  now=context.moment,
+                                  graph=self.graph_model.graph(context=context, key=machine.key))
+
         return self.machine.encode_state(parameters)
 
-    def encode_work_center_state(self, parameters: WorkCenterInput):
+    def encode_work_center_state(self, context: Context, work_center: WorkCenter, job: Job):
+        parameters = WorkCenterInput(work_center=work_center,
+                                     job=job,
+                                     graph=self.graph_model.graph(context=context, key=work_center.key))
+
         return self.work_center.encode_state(parameters)
 
     @abstractmethod
-    def did_prepare_machine_record(
-            self, shop_floor: ShopFloor, machine: Machine, record: Record, decision_moment: float
-    ):
+    def did_prepare_machine_record(self, context: Context, machine: Machine, record: Record):
         if self.cache is None:
             return
 
         self.cache.machines = self.__update_cache__(
             self.cache.machines,
-            RewardCache.MachineRecord,
-            shop_floor,
-            record,
-            decision_moment,
-            machine.work_center_idx,
+            cls=RewardCache.MachineRecord,
+            shop_floor=context.shop_floor,
+            record=record,
+            decision_moment=context.moment,
+            work_center_idx=machine.work_center_idx,
             machine_id=machine.machine_idx
         )
 
     @abstractmethod
-    def did_prepare_work_center_record(
-        self, shop_floor: ShopFloor, work_center: WorkCenter, record: Record, decision_moment: float
-    ):
+    def did_prepare_work_center_record(self, context: Context, work_center: WorkCenter, record: Record):
         if self.cache is None:
             return
 
         self.cache.work_centers = self.__update_cache__(
             self.cache.work_centers,
-            RewardCache.WorkCenterRecord,
-            shop_floor,
-            record,
-            decision_moment,
-            work_center.work_center_idx
+            cls=RewardCache.WorkCenterRecord,
+            shop_floor=context.shop_floor,
+            record=record,
+            decision_moment=context.moment,
+            work_center_idx=work_center.work_center_idx
         )
 
     # Agent
 
     def schedule(self, context: Context, machine: Machine) -> Job | None:
-        parameters = MachineInput(machine=machine, now=context.moment)
+        graph = self.graph_model.graph(context=context, key=machine.key)
+        parameters = MachineInput(machine=machine, now=context.moment, graph=graph)
 
         result = self.machine.schedule(machine.key, parameters)
 
@@ -212,7 +223,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         return result.result
 
     def route(self, context: Context, work_center: WorkCenter, job: Job) -> 'Machine | None':
-        parameters = WorkCenterInput(work_center=work_center, job=job)
+        graph = self.graph_model.graph(context=context, key=work_center.key)
+        parameters = WorkCenterInput(work_center=work_center, job=job, graph=graph)
         result = self.work_center.schedule(work_center.key, parameters)
 
         if self.work_center.is_trainable:
@@ -237,7 +249,9 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
             with resource.request() as req:
                 yield req
 
-                simulation.prepare(self, self.tape_model, environment)
+                delegate = Delegate([self.tape_model, self.graph_model])
+
+                simulation.prepare(self, delegate, environment)
 
                 self.machine.setup(simulation.shop_floor)
                 self.work_center.setup(simulation.shop_floor)
@@ -346,7 +360,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
     def __log__(self, message: str, level: int = logging.INFO):
         self.logger.log(level=level, msg=message)
 
-    def __update_cache__(self, cache, cls, shop_floor, record, decision_moment, work_center_idx, **kwargs):
+    @staticmethod
+    def __update_cache__(cache, cls, shop_floor, record, decision_moment, work_center_idx, **kwargs):
         if torch.is_tensor(decision_moment):
             decision_moment = decision_moment.view([])
         else:

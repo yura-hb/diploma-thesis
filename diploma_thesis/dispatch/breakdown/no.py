@@ -1,7 +1,9 @@
+from typing import Dict
+
 import torch
 
-from environment import Breakdown, Machine
-from typing import Dict
+from environment import Machine
+from .breakdown import Breakdown
 
 
 class No(Breakdown):

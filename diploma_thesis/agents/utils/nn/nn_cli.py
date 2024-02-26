@@ -27,6 +27,13 @@ class NNCLI(nn.Module):
                 return NNCLI.Configuration.InstanceNorm()
 
         @dataclass
+        class Graph:
+
+            @staticmethod
+            def from_cli(parameters: dict):
+                pass
+
+        @dataclass
         class LayerNorm:
 
             @staticmethod
@@ -140,6 +147,8 @@ class NNCLI(nn.Module):
                 return PartialInstanceNorm1d(channels), input_dim
             case NNCLI.Configuration.Linear(output_dim, activation, dropout):
                 return self.__make_linear_layer__(input_dim, output_dim, activation, dropout), output_dim
+            case NNCLI.Configuration.Graph():
+                return ..., ...
             case _:
                 raise ValueError(f"Unknown layer type {layer}")
 

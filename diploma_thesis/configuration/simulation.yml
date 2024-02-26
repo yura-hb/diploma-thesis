@@ -36,6 +36,10 @@ task:
     work_center_reward:
       kind: 'no'
 
+  graph:
+    model:
+      kind: 'no'
+
   simulator:
     kind: 'td'
 
