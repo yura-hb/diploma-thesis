@@ -169,14 +169,14 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
     def encode_machine_state(self, context: Context, machine: Machine):
         parameters = MachineInput(machine=machine,
                                   now=context.moment,
-                                  graph=self.graph_model.graph(context=context, key=machine.key))
+                                  graph=self.graph_model.graph(context=context))
 
         return self.machine.encode_state(parameters)
 
     def encode_work_center_state(self, context: Context, work_center: WorkCenter, job: Job):
         parameters = WorkCenterInput(work_center=work_center,
                                      job=job,
-                                     graph=self.graph_model.graph(context=context, key=work_center.key))
+                                     graph=self.graph_model.graph(context=context))
 
         return self.work_center.encode_state(parameters)
 
@@ -209,10 +209,13 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
             work_center_idx=work_center.work_center_idx
         )
 
+    def did_finish_simulation(self, simulation: Simulation):
+        pass
+
     # Agent
 
     def schedule(self, context: Context, machine: Machine) -> Job | None:
-        graph = self.graph_model.graph(context=context, key=machine.key)
+        graph = self.graph_model.graph(context=context)
         parameters = MachineInput(machine=machine, now=context.moment, graph=graph)
 
         result = self.machine.schedule(machine.key, parameters)
@@ -223,7 +226,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         return result.result
 
     def route(self, context: Context, work_center: WorkCenter, job: Job) -> 'Machine | None':
-        graph = self.graph_model.graph(context=context, key=work_center.key)
+        graph = self.graph_model.graph(context=context)
         parameters = WorkCenterInput(work_center=work_center, job=job, graph=graph)
         result = self.work_center.schedule(work_center.key, parameters)
 
@@ -264,6 +267,9 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                 yield environment.process(simulation.run())
 
                 self.__log__(f'Simulation Finished {simulation.simulation_id}')
+
+                if is_training:
+                    self.did_finish_simulation(simulation)
 
         processes = [environment.process(consume(simulation)) for simulation in simulations]
 

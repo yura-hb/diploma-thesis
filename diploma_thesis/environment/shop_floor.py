@@ -169,7 +169,7 @@ class ShopFloor:
             work_centers=[
                 Map.WorkCenter(
                     idx=work_center.work_center_idx,
-                    machines=torch.cat([machine.state.machine_idx for machine in work_center.machines])
+                    machines=torch.cat([torch.atleast_1d(machine.state.machine_idx) for machine in work_center.machines])
                     if len(work_center.machines) > 1 else torch.atleast_1d(work_center.machines[0].state.machine_idx),
                     batch_size=[]
                 )

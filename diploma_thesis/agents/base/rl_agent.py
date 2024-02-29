@@ -25,6 +25,10 @@ class RLAgent(Generic[Key], Agent[Key]):
     def is_trainable(self):
         return True
 
+    @property
+    def is_distributed(self):
+        return True
+
     @filter(lambda self: self.phase == TrainingPhase())
     def train_step(self):
         self.trainer.train_step(self.model)

@@ -1,8 +1,8 @@
-from dataclasses import dataclass
 from typing import Dict
 
-from .encoder import StateEncoder
 from tensordict.prototype import tensorclass
+
+from .encoder import StateEncoder
 
 
 class PlainEncoder(StateEncoder):

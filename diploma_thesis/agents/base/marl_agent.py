@@ -20,6 +20,10 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
     def is_trainable(self):
         return True
 
+    @property
+    def is_distributed(self):
+        return True
+
     @abstractmethod
     def iterate_keys(self, shop_floor: ShopFloor):
         pass

@@ -37,8 +37,16 @@ task:
       kind: 'no'
 
   graph:
-    model:
-      kind: 'no'
+    transition_model:
+      kind: 'base'
+      parameters:
+        forward:
+          kind: 'complete'
+
+        schedule:
+          kind: 'compressed'
+
+    memory: 1000
 
   simulator:
     kind: 'td'
@@ -47,4 +55,4 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/run/jsp/run.yml'
-      mods: ['test.yml']
+      mods: []

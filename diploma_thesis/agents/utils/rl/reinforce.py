@@ -7,6 +7,7 @@ from typing import Dict
 
 from agents.utils.nn import NNCLI
 from agents.utils.rl.rl import *
+from agents.utils.return_estimator import ReturnEstimator
 
 
 class Reinforce(RLTrainer):
@@ -14,6 +15,7 @@ class Reinforce(RLTrainer):
     @dataclass
     class Configuration:
         critic_networks: List[NNCLI]
+        return_estimator: ReturnEstimator
 
     def __init__(self,
                  memory: Memory,
@@ -47,6 +49,9 @@ class Reinforce(RLTrainer):
         # Perform policy step
 
         # Perform critics step
+
+    def store(self, trajectory: List[Record]):
+        pass
 
     @classmethod
     def from_cli(cls, parameters: Dict, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):

@@ -19,6 +19,9 @@ class StaticWorkCenter(Agent[WorkCenterKey]):
     def train_step(self):
         pass
 
+    def is_distributed(self):
+        return False
+
     def store(self, key: WorkCenterKey, record: Record):
         pass
 

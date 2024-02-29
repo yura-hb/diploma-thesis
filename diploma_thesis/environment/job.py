@@ -117,16 +117,16 @@ class Job:
             return self
 
     # Id of the job
-    id: torch.LongTensor = torch.tensor(-1)
+    id: int = -1
     # The sequence of work-centers ids, which job must visit in order to be complete
     step_idx: torch.LongTensor = field(default_factory=torch.LongTensor)
     # The processing time of the job in work_center & machine,
     # i.e. the tensor of shape (num_work_centers, num_machines_per_work_center)
     processing_times: torch.LongTensor = field(default_factory=torch.LongTensor)
     # The step in job sequence, which is currently being processed
-    current_step_idx: int = torch.tensor(-1)
+    current_step_idx: torch.LongTensor = torch.tensor(-1)
     # The index of the machine in the work-center where the job is being processed
-    current_machine_idx: int = torch.tensor(-1)
+    current_machine_idx: torch.LongTensor = torch.tensor(-1)
     # The priority of the Job
     priority: torch.FloatTensor = torch.tensor([1.0])
     # The due time of the job, i.e. deadline
@@ -400,10 +400,10 @@ class Job:
         # Clone tensors to avoid in-place modification
         match event.kind:
             case JobEvent.Kind.dispatch:
-                self.current_step_idx = torch.tensor(0)
+                self.current_step_idx = torch.tensor(0, dtype=torch.long)
             case JobEvent.Kind.forward:
                 self.current_step_idx = self.current_step_idx.clone() + 1
-                self.current_machine_idx = torch.tensor(-1)
+                self.current_machine_idx = torch.tensor(-1, dtype=torch.long)
             case JobEvent.Kind.arrival_on_machine:
                 self.current_machine_idx = event.machine_idx.clone()
             case _:

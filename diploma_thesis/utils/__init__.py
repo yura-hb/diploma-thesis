@@ -6,3 +6,4 @@ from .modified import modified
 from .from_cli import from_cli
 from .task import task
 from .multi_value_cli import multi_value_cli
+from .ordered_set import OrderedSet

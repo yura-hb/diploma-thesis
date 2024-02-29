@@ -7,7 +7,7 @@ import simpy
 import environment
 
 from environment import Agent, Delegate, ShopFloor
-from dispatch import ShopFloorManager
+from dispatch import Dispatch
 
 from .cli import CLITemplate
 
@@ -24,7 +24,7 @@ class Simulation(CLITemplate):
         self.name = name
         self.logger = logger
         self.shop_floor: ShopFloor = None
-        self.dispatch: ShopFloorManager = None
+        self.dispatch: Dispatch = None
         self.configuration = configuration
 
     @property
@@ -49,7 +49,7 @@ class Simulation(CLITemplate):
         )
 
         self.shop_floor = ShopFloor(self.index, self.simulation_id, configuration, self.logger)
-        self.dispatch = ShopFloorManager.from_cli(
+        self.dispatch = Dispatch.from_cli(
             parameters=self.configuration.dispatch,
             problem=problem,
             environment=env

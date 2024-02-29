@@ -127,13 +127,15 @@ class WorkCenter:
         while True:
             self.history.with_decision_time(self.environment.now)
 
+            non_dispatched_jobs = []
+
             for job in self.state.queue:
                 self.shop_floor.will_dispatch(job, self)
 
                 machine = self.shop_floor.route(work_center=self, job=job)
 
-                # TODO: Implement correct idleness
                 if machine is None:
+                    non_dispatched_jobs += [job]
                     continue
 
                 machine.receive(job)
@@ -141,6 +143,7 @@ class WorkCenter:
                 self.shop_floor.did_dispatch(job, self, machine)
 
             self.state.with_flushed_queue()
+            self.state.queue = non_dispatched_jobs
             self.shop_floor.did_finish_dispatch(self)
 
             yield self.environment.process(self.__starve__())

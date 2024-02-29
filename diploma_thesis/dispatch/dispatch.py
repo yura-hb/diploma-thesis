@@ -11,7 +11,7 @@ from .job_sampler import from_cli as job_sampler_from_cli
 from .initial_job_assignment import from_cli as initial_job_assignment_from_cli
 
 
-class ShopFloorManager:
+class Dispatch:
 
     def __init__(self,
                  environment: simpy.Environment,
@@ -32,6 +32,8 @@ class ShopFloorManager:
         self.breakdown.connect(generator)
         self.job_sampler.connect(generator)
 
+        event = shop_floor.start()
+
         for job in self.initial_job_assignment.make_jobs(shop_floor, self.job_sampler):
             shop_floor.dispatch(job)
 
@@ -40,7 +42,7 @@ class ShopFloorManager:
         for machine in shop_floor.machines:
             self.environment.process(self.__breakdown__(machine))
 
-        return shop_floor.start()
+        return event
 
     def __dispatch__(self, shop_floor: ShopFloor):
         while self.__should_dispatch__(shop_floor):
@@ -51,7 +53,8 @@ class ShopFloorManager:
             job = self.job_sampler.sample(
                 job_id=shop_floor.new_job_id,
                 initial_work_center_idx=None,
-                moment=self.environment.now)
+                moment=self.environment.now
+            )
 
             shop_floor.dispatch(job)
 
@@ -83,7 +86,7 @@ class ShopFloorManager:
 
     @staticmethod
     def from_cli(parameters, problem: Configuration, environment: simpy.Environment):
-        return ShopFloorManager(
+        return Dispatch(
             environment=environment,
             job_sampler=job_sampler_from_cli(parameters['job_sampler'], problem=problem),
             breakdown=breakdown_from_cli(parameters['breakdown']),

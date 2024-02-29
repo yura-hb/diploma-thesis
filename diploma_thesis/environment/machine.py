@@ -42,7 +42,7 @@ class State:
         Adds new job to the queue
 
         Args:
-            job: Job to schedule into queue on the machine
+            job: Job to schedule_graph into queue on the machine
             now: Timestamp when the job has arrived at the machine
         """
         self.queue += [job]
@@ -347,7 +347,7 @@ class Machine:
         Forwards the job to the next machine by sending it to the shop floor
 
         Args:
-            job: Job to forward
+            job: Job to forward_graph
 
         Returns: None
         """

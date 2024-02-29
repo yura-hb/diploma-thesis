@@ -27,7 +27,7 @@ parameters:
         base:
           configuration:
             timespan: 100000
-            machines_per_work_center: 1
+            machines_per_work_center: 3
             work_center_count: 10
 
           dispatch:
@@ -61,7 +61,7 @@ parameters:
                 breakdown_arrival:
                   kind: 'exponential'
                   parameters:
-                    mean: 10000
+                    mean: 1000
                 repair_duration:
                   kind: 'uniform'
                   parameters:

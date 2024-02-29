@@ -51,6 +51,11 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
     def is_trainable(self):
         return self.phase != EvaluationPhase()
 
+    @property
+    @abstractmethod
+    def is_distributed(self):
+        return False
+
     @abstractmethod
     def train_step(self):
         pass

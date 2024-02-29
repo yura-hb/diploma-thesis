@@ -18,7 +18,8 @@ class Return:
     def __init__(self, configuration: Configuration):
         pass
 
-    def estimate_return(self, records: List[Record]):
+    def update_returns(self, records: List[Record]) -> List[Record]:
+
         pass
 
 
