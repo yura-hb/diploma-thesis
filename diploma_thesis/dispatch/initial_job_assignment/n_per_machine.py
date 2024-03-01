@@ -10,13 +10,14 @@ class NPerMachine(InitialJobAssignment):
 
     def make_jobs(self, shop_floor: ShopFloor, sampler: JobSampler):
         for machine in shop_floor.machines:
-            job = sampler.sample(
-                job_id=shop_floor.new_job_id,
-                initial_work_center_idx=machine.key.work_center_id,
-                moment=shop_floor.now
-            )
+            for _ in range(self.n):
+                job = sampler.sample(
+                    job_id=shop_floor.new_job_id,
+                    initial_work_center_idx=machine.key.work_center_id,
+                    moment=shop_floor.now
+                )
 
-            yield job
+                yield job
 
     @staticmethod
     def from_cli(parameters: Dict):

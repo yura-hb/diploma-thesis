@@ -1,2 +1,2 @@
 
-from .encoder import Encoder
+from .encoder import Encoder, Configuration as EncoderConfiguration

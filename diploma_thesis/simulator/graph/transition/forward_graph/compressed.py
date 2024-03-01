@@ -52,9 +52,9 @@ class CompressedTransition(ForwardTransition):
                     *list(product([group_id], list(range(next_step_op_count))))
                 ]
 
-            result = torch.Tensor(list(result)).T
-            result[0, result[:, 0] >= 0] += operations_count
-            result[1, result[:, 1] >= 0] += operations_count + current_step_op_count
+            result = torch.Tensor(list(result)).T.int()
+            result[0, result[0, :] >= 0] += operations_count
+            result[1, result[1, :] >= 0] += operations_count + current_step_op_count
 
             operations_count += current_step_op_count
 

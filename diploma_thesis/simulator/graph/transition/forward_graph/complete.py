@@ -1,3 +1,4 @@
+import torch
 
 from .transition import *
 from typing import Dict
@@ -11,7 +12,7 @@ class CompleteTransition(ForwardTransition):
     """
 
     def construct(self, job: Job) -> torch.Tensor:
-        edge_index = torch.LongTensor([]).view(2, 0)
+        edge_index = torch.IntTensor([]).view(2, 0)
         operations_count = 0
 
         for step_id, work_center_id in enumerate(job.step_idx):
@@ -40,7 +41,7 @@ class CompleteTransition(ForwardTransition):
                 # Any operation can proceed to any operation in next step
                 result = product(list(range(current_step_op_count)), list(range(next_step_op_count)))
 
-            result = torch.Tensor(list(result)).T
+            result = torch.Tensor(list(result)).T.int()
             result[0, :] += operations_count
             result[1, :] += operations_count + current_step_op_count
 

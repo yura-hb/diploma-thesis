@@ -117,7 +117,7 @@ class Job:
             return self
 
     # Id of the job
-    id: int = -1
+    id: torch.LongTensor = -1
     # The sequence of work-centers ids, which job must visit in order to be complete
     step_idx: torch.LongTensor = field(default_factory=torch.LongTensor)
     # The processing time of the job in work_center & machine,

@@ -4,8 +4,6 @@ import torch
 from tensordict.prototype import tensorclass
 from torch_geometric.data import HeteroData
 
-from typing import Dict
-
 
 @dataclass
 class Graph:
@@ -17,6 +15,9 @@ class Graph:
     OPERATION_KEY = "operation"
     SCHEDULED_KEY = "scheduled"
     PROCESSED_KEY = "processed"
+
+    OPERATION_JOB_MAP_KEY = "operation_job_map"
+    JOB_INDEX_KEY = "job_index"
 
     SCHEDULED_GRAPH_KEY = "scheduled_graph"
     PROCESSED_GRAPH_KEY = "processed_graph"
@@ -30,9 +31,9 @@ class Graph:
 
     @dataclass(frozen=True)
     class OperationKey:
-        job_id: torch.Tensor
-        work_center_id: torch.Tensor
-        machine_id: torch.Tensor
+        job_id: int
+        work_center_id: int
+        machine_id: int
 
     data: HeteroData = field(default_factory=HeteroData)
 

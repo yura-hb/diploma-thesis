@@ -61,7 +61,7 @@ class GraphTransition:
 
             graph.data[Graph.MACHINE_KEY][index] = dict()
 
-            t = torch.tensor([], dtype=torch.long)
+            t = torch.tensor([], dtype=torch.int)
 
             graph.data[Graph.MACHINE_KEY][index][Graph.SCHEDULED_KEY] = t.clone().view(2, 0)
             graph.data[Graph.MACHINE_KEY][index][Graph.PROCESSED_KEY] = t.clone().view(2, 0)
@@ -82,7 +82,6 @@ class GraphTransition:
         graph.data[Graph.JOB_KEY][job.id] = dict()
         graph.data[Graph.JOB_KEY][job.id]['job_id'] = job.id
         graph.data[Graph.JOB_KEY][job.id][Graph.FORWARD_GRAPH_KEY] = self.forward_transition.construct(job)
-        graph.data[Graph.JOB_KEY][job.id][Graph.GROUP_KEY] = torch.tensor([], dtype=torch.long).view(2, 0)
 
     # Update
 

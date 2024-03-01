@@ -3,14 +3,26 @@ from typing import Dict
 
 import torch
 
-import time
-
 from agents.base import Graph
-from environment import Job, MachineKey, WorkCenterKey, Delegate, Context, WorkCenter, Machine
+from environment import Job, Delegate, Context, WorkCenter, Machine
 from utils import OrderedSet
 from .transition import GraphTransition, from_cli
+from .util import Encoder, EncoderConfiguration
 
-from .util import Encoder
+
+@dataclass
+class Configuration(EncoderConfiguration):
+    memory: int = 10000
+
+    @staticmethod
+    def from_cli(parameters: Dict) -> 'Configuration':
+        return Configuration(
+            memory=parameters['memory'],
+            is_machine_set_in_work_center_connected=parameters.get('is_machine_set_in_work_center_connected', False),
+            is_work_center_set_in_shop_floor_connected=parameters.get(
+                'is_work_center_set_in_shop_floor_connected', False
+            )
+        )
 
 
 class GraphModel(Delegate):
@@ -18,23 +30,18 @@ class GraphModel(Delegate):
     @dataclass
     class Record:
         graph: Graph
+        previous_encoded_graph: Graph | None
+        did_change_jobs: bool
         job_operation_map: Dict[torch.LongTensor, Dict[Graph.OperationKey, int]]
         completed_job_ids: OrderedSet
         n_ops: int
-
-    @dataclass
-    class Configuration:
-        memory: int = 10000
-
-        @staticmethod
-        def from_cli(parameters: Dict) -> 'GraphModel.Configuration':
-            return GraphModel.Configuration(memory=parameters['memory'])
 
     def __init__(self, transition_model: GraphTransition, configuration: Configuration):
         super().__init__(children=[])
 
         self.configuration = configuration
         self.transition_model = transition_model
+        self.encoder = Encoder(configuration)
         self.cache = {}
         self.job_operation_map: Dict[int, GraphModel.Record] = dict()
 
@@ -44,18 +51,33 @@ class GraphModel(Delegate):
         if record is None:
             return None
 
-        return None
+        did_change_jobs = record.did_change_jobs
+        record.did_change_jobs = False
 
-        # graph = record.graph
-        # job_operation_map = record.job_operation_map
-        #
-        # encoder = Encoder()
-        #
-        # return encoder.encode(graph, context.shop_floor, job_operation_map, self.configuration)
+        graph = record.graph
+        previous_encoded_graph = record.previous_encoded_graph
+        job_operation_map = record.job_operation_map
+
+        new_encoded_graph = self.encoder.encode(
+            previous=previous_encoded_graph,
+            graph=graph,
+            did_change_jobs=did_change_jobs,
+            job_operation_map=job_operation_map,
+            shop_floor=context.shop_floor
+        )
+
+        record.previous_encoded_graph = new_encoded_graph
+
+        return new_encoded_graph
 
     def did_start_simulation(self, context: Context):
         self.cache[context.shop_floor.id] = GraphModel.Record(
-            graph=Graph(), job_operation_map=dict(), completed_job_ids=OrderedSet(), n_ops=0
+            graph=Graph(),
+            previous_encoded_graph=None,
+            did_change_jobs=False,
+            job_operation_map=dict(),
+            completed_job_ids=OrderedSet(),
+            n_ops=0
         )
 
     def will_dispatch(self, context: Context, job: Job, work_center: WorkCenter):
@@ -63,6 +85,7 @@ class GraphModel(Delegate):
 
         if job.current_step_idx == 0 and sid in self.cache:
             self.cache[sid].graph = self.transition_model.append(job, context.shop_floor, self.cache[sid].graph)
+            self.cache[sid].did_change_jobs = True
             self.__append_to_job_operation_map__(context, job)
 
     def did_dispatch(self, context: Context, job: Job, work_center: WorkCenter, machine: Machine):
@@ -91,12 +114,9 @@ class GraphModel(Delegate):
                 job_id = self.cache[sid].completed_job_ids.pop(0)
                 job = context.shop_floor.job(job_id)
 
-                start = time.time()
-
                 self.cache[sid] = self.transition_model.remove(job, context.shop_floor, self.cache[sid])
+                self.cache[sid].did_change_jobs = True
                 self.__remove_job_from_operation_map__(context, job)
-
-                print(f'GraphModel: Remove {time.time() - start}')
 
     def did_finish_simulation(self, context: Context):
         if context.shop_floor.id in self.cache:
@@ -112,9 +132,7 @@ class GraphModel(Delegate):
         for step_id, work_center_id in enumerate(job.step_idx):
             for machine_id in range(len(job.processing_times[step_id])):
                 operation_key = Graph.OperationKey(
-                    job_id=torch.tensor(job.id, dtype=torch.long),
-                    work_center_id=torch.tensor(work_center_id, dtype=torch.long),
-                    machine_id=torch.tensor(machine_id, dtype=torch.long)
+                    job_id=job.id.item(), work_center_id=work_center_id.item(), machine_id=machine_id
                 )
 
                 self.cache[sid].job_operation_map[job.id][operation_key] = self.cache[sid].n_ops
@@ -139,14 +157,7 @@ class GraphModel(Delegate):
                 k: v - n_removed_ops for k, v in self.cache[sid].job_operation_map[key].items()
             }
 
-            values = list(self.cache[sid].job_operation_map[key].values())
-            max_key = max(values)
-            min_key = min(values)
-
-            assert max_key < self.cache[sid].n_ops and min_key >= 0, f'{max_key} {min_key} {self.cache[sid].n_ops}'
-
-
     @staticmethod
     def from_cli(parameters: Dict) -> 'GraphModel':
         return GraphModel(transition_model=from_cli(parameters['transition_model']),
-                          configuration=GraphModel.Configuration.from_cli(parameters))
+                          configuration=Configuration.from_cli(parameters))

@@ -218,6 +218,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         graph = self.graph_model.graph(context=context)
         parameters = MachineInput(machine=machine, now=context.moment, graph=graph)
 
+        print(f'GraphModel.did dispatch: {time.time() - start}')
+
         result = self.machine.schedule(machine.key, parameters)
 
         if self.machine.is_trainable:

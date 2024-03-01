@@ -41,12 +41,15 @@ task:
       kind: 'base'
       parameters:
         forward:
-          kind: 'complete'
+          kind: 'compressed'
 
         schedule:
           kind: 'compressed'
 
-    memory: 1000
+    memory: 10000
+    is_machine_set_in_work_center_connected: True
+    is_work_center_set_in_shop_floor_connected: False
+
 
   simulator:
     kind: 'td'
@@ -55,4 +58,4 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/run/jsp/run.yml'
-      mods: []
+      mods: ['util_99.yml']

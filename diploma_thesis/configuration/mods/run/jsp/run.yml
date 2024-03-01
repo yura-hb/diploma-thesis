@@ -27,14 +27,14 @@ parameters:
         base:
           configuration:
             timespan: 100000
-            machines_per_work_center: 3
+            machines_per_work_center: 10
             work_center_count: 10
 
           dispatch:
             initial_job_assignment:
               kind: 'n_per_machine'
               parameters:
-                n: 5
+                n: 2
 
             job_sampler:
               kind: 'dynamic'
@@ -42,7 +42,7 @@ parameters:
                 processing_times: # Sampler
                   kind: 'uniform'
                   parameters:
-                    uniform: [ 1, 50 ]
+                    uniform: [ 20, 50 ]
                     noise: [ 0, 10 ]
                 permutation:
                   uneveness: 2
