@@ -48,9 +48,6 @@ class Queue(Loggable, metaclass=ABCMeta):
     def did_produce(self, context: Context, machine: Machine, job: Job):
         pass
 
-    # def emit_intermediate_reward(self, context: Context, machine: Machine, job: Job):
-    #     pass
-
     def did_complete(self, context: Context, job: Job):
         pass
 

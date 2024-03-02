@@ -11,12 +11,12 @@ from agents import MachineAgent, WorkCenterAgent
 from agents import MachineInput, WorkCenterInput
 from agents import TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
 from agents.utils.memory import Record
-from environment import Agent, ShopFloor, Job, Machine, WorkCenter, Context, Delegate
+from environment import Agent, Job, Machine, WorkCenter, Context, Delegate
 from simulator.tape import TapeModel, SimulatorInterface
 from utils import Loggable
 from .configuration import RunConfiguration, EvaluateConfiguration
-from .simulation import Simulation
 from .graph import GraphModel
+from .simulation import Simulation
 
 
 def reset_tape():
@@ -218,8 +218,6 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         graph = self.graph_model.graph(context=context)
         parameters = MachineInput(machine=machine, now=context.moment, graph=graph)
 
-        print(f'GraphModel.did dispatch: {time.time() - start}')
-
         result = self.machine.schedule(machine.key, parameters)
 
         if self.machine.is_trainable:
@@ -230,6 +228,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
     def route(self, context: Context, work_center: WorkCenter, job: Job) -> 'Machine | None':
         graph = self.graph_model.graph(context=context)
         parameters = WorkCenterInput(work_center=work_center, job=job, graph=graph)
+
         result = self.work_center.schedule(work_center.key, parameters)
 
         if self.work_center.is_trainable:
@@ -262,7 +261,9 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                 self.work_center.setup(simulation.shop_floor)
 
                 if is_training:
-                    self.tape_model.register(simulation.shop_floor)
+                    self.tape_model.register(simulation.shop_floor,
+                                             self.machine.is_trainable,
+                                             self.work_center.is_trainable)
 
                 self.__log__(f'Simulation Started {simulation.simulation_id}')
 

@@ -16,10 +16,13 @@ class EpisodicSimulator(Simulator):
             self.queue = dict()
 
         def store(self, shop_floor_id, key, moment, record):
+            self.queue[shop_floor_id] = self.queue.get(shop_floor_id, dict())
+
             if self.is_distributed:
-                self.queue[shop_floor_id.id][key][moment] += [record]
+                self.queue[shop_floor_id][key] = self.queue[shop_floor_id].get(key, dict())
+                self.queue[shop_floor_id][key][moment] = self.queue[shop_floor_id][key].get(moment, []) + [record]
             else:
-                self.queue[shop_floor_id][moment] += [record]
+                self.queue[shop_floor_id][moment] = self.queue[shop_floor_id].get(moment, []) + [record]
 
         def pop(self, shop_floor_id):
             if shop_floor_id not in self.queue:

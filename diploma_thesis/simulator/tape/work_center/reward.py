@@ -14,6 +14,7 @@ Context = TypeVar('Context')
 
 @tensorclass
 class RewardList:
+    indices: torch.LongTensor
     work_center_idx: torch.LongTensor
     reward: torch.FloatTensor
 

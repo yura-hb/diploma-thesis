@@ -44,14 +44,18 @@ class TapeModel(Delegate, Loggable, metaclass=ABCMeta):
         _ = {v.connect(simulator) for _, v in self._machine_queue.items()}
         _ = {v.connect(simulator) for _, v in self._work_center_queue.items()}
 
-    def register(self, shop_floor: ShopFloor):
+    def register(self, shop_floor: ShopFloor, is_machine_trainable: bool, is_work_center_trainable: bool):
         self.registered_shop_floor_ids.add(shop_floor.id)
 
         stores = [self._machine_queue, self._work_center_queue]
         rewards = [self.machine_reward, self.work_center_reward]
+        is_trainable = [is_machine_trainable, is_work_center_trainable]
         queues = [MachineQueue, WorkCenterQueue]
 
-        for store, reward, queue in zip(stores, rewards, queues):
+        for store, reward, is_trainable, queue in zip(stores, rewards, is_trainable, queues):
+            if not is_trainable:
+                continue
+
             q = queue(reward)
             q.with_logger(self.logger)
             q.connect(self.simulator)
@@ -67,39 +71,49 @@ class TapeModel(Delegate, Loggable, metaclass=ABCMeta):
 
     @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.registered_shop_floor_ids)
     def register_machine_reward_preparation(self, context: Context, machine: Machine, record: MachineModel.Record):
-        self.machine_queue(context).register(context, machine, record, self.next_state_record_mode)
+        if queue := self.machine_queue(context):
+            queue.register(context, machine, record, self.next_state_record_mode)
 
     @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.registered_shop_floor_ids)
     def register_work_center_reward_preparation(
-            self, context: Context, work_center: WorkCenter, job: Job, record: WorkCenterModel.Record
+         self, context: Context, work_center: WorkCenter, job: Job, record: WorkCenterModel.Record
     ):
-        pass
-        # self.work_center_queue(context).register(context, work_center, job, record, self.next_state_record_mode)
+        if queue := self.work_center_queue(context):
+            queue.register(context, work_center, job, record, self.next_state_record_mode)
 
     @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.registered_shop_floor_ids)
     def did_produce(self, context: Context, job: Job, machine: Machine):
-        self.machine_queue(context).did_produce(context, machine, job)
-        # self.work_center_queue(context).record_next_state_if_needed(context, machine, job)
+        if queue := self.machine_queue(context):
+            queue.did_produce(context, machine, job)
+
+        if queue := self.work_center_queue(context):
+            queue.did_produce(context, machine, job)
 
     @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.registered_shop_floor_ids)
     def did_complete(self, context: Context, job: Job):
-        self.machine_queue(context).did_complete(context, job)
-        # self.work_center_queue(context).emit_reward_after_completion(context, job)
+        if queue := self.machine_queue(context):
+            queue.did_complete(context, job)
+
+        if queue := self.work_center_queue(context):
+            queue.did_complete(context, job)
 
     @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.registered_shop_floor_ids)
     def did_finish_simulation(self, context: Context):
         self.registered_shop_floor_ids.remove(context.shop_floor.id)
 
-        self._machine_queue.pop(context.shop_floor.id)
-        self._work_center_queue.pop(context.shop_floor.id)
+        if context.shop_floor.id in self._machine_queue:
+            self._machine_queue.pop(context.shop_floor.id)
+
+        if context.shop_floor.id in self._work_center_queue:
+            self._work_center_queue.pop(context.shop_floor.id)
 
     # Utils
 
-    def machine_queue(self, context: Context) -> MachineQueue:
-        return self._machine_queue[context.shop_floor.id]
+    def machine_queue(self, context: Context) -> MachineQueue | None:
+        return self._machine_queue.get(context.shop_floor.id)
 
-    def work_center_queue(self, context: Context) -> WorkCenterQueue:
-        return self._work_center_queue[context.shop_floor.id]
+    def work_center_queue(self, context: Context) -> WorkCenterQueue | None:
+        return self._work_center_queue.get(context.shop_floor.id)
 
     @property
     def simulator(self) -> SimulatorInterface:
