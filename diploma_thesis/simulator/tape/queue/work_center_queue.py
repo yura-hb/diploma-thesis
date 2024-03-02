@@ -2,14 +2,11 @@ from typing import Dict
 
 import torch
 
-from agents import WorkCenterInput
-from agents.utils.memory import Record
 from agents.workcenter.model import WorkCenterModel
 from environment import WorkCenter, WorkCenterKey
-from simulator.tape.queue.queue import *
-from simulator.tape.utils.tape_record import TapeRecord
 from simulator.tape.work_center import WorkCenterReward
 from utils import filter
+from .queue import *
 
 
 class WorkCenterQueue(Queue):
@@ -18,18 +15,15 @@ class WorkCenterQueue(Queue):
         super().__init__()
 
         self.reward = reward
-        self.queue: Dict[ShopFloorId, Dict[WorkCenterKey, Dict[ActionId, TapeRecord]]] = dict()
+        self.queue: Dict[WorkCenterKey, Dict[ActionId, TapeRecord]] = dict()
 
     # Preparation
 
     def prepare(self, shop_floor: ShopFloor):
-        self.queue[shop_floor.id] = dict()
+        self.queue = dict()
 
         for work_center in shop_floor.work_centers:
-            self.queue[shop_floor.id][work_center.key] = dict()
-
-    def clear(self, shop_floor: ShopFloor):
-        del self.queue[shop_floor.id]
+            self.queue[work_center.key] = dict()
 
     def clear_all(self):
         self.queue = dict()
@@ -37,8 +31,13 @@ class WorkCenterQueue(Queue):
     # Utility
 
     @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.queue)
-    def register(self, context: Context, work_center: WorkCenter, job: Job,  record: WorkCenterModel.Record):
-        self.queue[context.shop_floor.id][work_center.key][job.id] = TapeRecord(
+    def register(self,
+                 context: Context,
+                 work_center: WorkCenter,
+                 job: Job,
+                 record: WorkCenterModel.Record,
+                 mode: NextStateRecordMode):
+        self.queue[work_center.key][job.id] = TapeRecord(
             record=Record(
                 state=record.state,
                 action=record.action,
@@ -48,20 +47,20 @@ class WorkCenterQueue(Queue):
                 done=False,
             ),
             context=self.reward.record_job_action(record.result, work_center),
-            moment=context.moment
+            moment=context.moment,
+            mode=mode
         )
 
-    @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.work_center.key])
-    def record_next_state(self, context: Context, machine: Machine, job: Job):
+    def record_next_state_if_needed(self, context: Context, machine: Machine, job: Job):
         work_center = machine.work_center
         state = self.simulator.encode_work_center_state(work_center=work_center, job=job, moment=context.moment)
 
-        self.queue[context.shop_floor.id][work_center.key][job.id].record.next_state = state
+        self.queue[work_center.key][job.id].record.next_state = state
 
     @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.work_center.key])
     def emit_intermediate_reward(self, context: Context, machine: Machine, job: Job):
         work_center = machine.work_center
-        record = self.queue[context.shop_floor.id][work_center.key].get(job.id)
+        record = self.queue[work_center.key].get(job.id)
 
         reward = self.reward.reward_after_production(record.context)
 
@@ -115,7 +114,7 @@ class WorkCenterQueue(Queue):
                                        work_center: WorkCenter,
                                        job: Job,
                                        reward: torch.FloatTensor):
-        record = self.queue[context.shop_floor.id][work_center.key].get(job.id)
+        record = self.queue[work_center.key].get(job.id)
 
         if record is None:
             return
@@ -129,7 +128,7 @@ class WorkCenterQueue(Queue):
             record=record
         )
 
-        del self.queue[context.shop_floor.id][work_center.key][job.id]
+        del self.queue[work_center.key][job.id]
 
     @staticmethod
     def __enumerate_job_path__(context: Context, job: Job, fn):

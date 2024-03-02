@@ -5,9 +5,9 @@ from utils import from_cli
 
 from .reward import MachineReward
 from .no import No
-from .global_tardiness_reward import GlobalTardiness
-from .global_decomposed_tardiness_reward import GlobalDecomposedTardiness
-from .surrogate_tardiness_reward import SurrogateTardinessReward
+from .global_tardiness import GlobalTardiness
+from .global_decomposed_tardiness import GlobalDecomposedTardiness
+from .surrogate_tardiness import SurrogateTardinessReward
 
 
 key_to_cls = {

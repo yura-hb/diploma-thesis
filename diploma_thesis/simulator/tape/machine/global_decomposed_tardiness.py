@@ -60,10 +60,10 @@ class GlobalDecomposedTardiness(MachineReward):
 
             reward = - torch.square(restructured_wait / self.configuration.span).clip(0, 1)
 
-        return RewardList(work_center_idx=work_center_idx,
-                          machine_idx=machine_idx,
+        return RewardList(indices=torch.arange(len(contexts)),
+                          units=torch.vstack([work_center_idx, machine_idx]),
                           reward=reward,
-                          batch_size=work_center_idx.shape)
+                          batch_size=[])
 
     @staticmethod
     def from_cli(parameters: Dict) -> MachineReward:

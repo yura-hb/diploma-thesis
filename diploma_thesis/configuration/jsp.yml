@@ -38,7 +38,7 @@ jsp: &jsp
   run:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/run/jsp/run.yml'
+      base_path: 'configuration/mods/run/td_jsp/run.yml'
       mods: [ ]
 
 rl_agents: &rl_agents

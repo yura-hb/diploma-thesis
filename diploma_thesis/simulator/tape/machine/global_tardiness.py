@@ -20,14 +20,11 @@ class GlobalTardiness(MachineReward):
 
     @dataclass
     class Configuration:
-
         span: int = 256
 
         @staticmethod
         def from_cli(parameters: Dict) -> 'GlobalTardiness.Configuration':
-            return GlobalTardiness.Configuration(
-                span=parameters.get('span', 256)
-            )
+            return GlobalTardiness.Configuration(span=parameters.get('span', 256))
 
     def __init__(self, configuration: Configuration):
         self.configuration = configuration
@@ -49,8 +46,8 @@ class GlobalTardiness(MachineReward):
 
             reward += tardy_rate
 
-        return RewardList(work_center_idx=work_center_idx,
-                          machine_idx=machine_idx,
+        return RewardList(indices=torch.arange(len(contexts)),
+                          units=torch.vstack([work_center_idx, machine_idx]),
                           reward=reward,
                           batch_size=work_center_idx.shape)
 

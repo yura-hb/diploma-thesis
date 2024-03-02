@@ -1,137 +1,156 @@
-from typing import Dict
 
-import torch
+import environment
 
-from agents import MachineInput
-from agents.base import Graph
+from typing import Dict, List
+
 from agents.machine.model import MachineModel
-from agents.utils.memory import Record
 from environment import MachineKey
 from simulator.tape.machine import MachineReward
-from simulator.tape.queue.queue import *
-from simulator.tape.utils.tape_record import TapeRecord
 from utils import filter
+from .queue import *
 
 
 class MachineQueue(Queue):
 
     def __init__(self, reward: MachineReward):
         super().__init__()
+
         self.reward = reward
-        self.queue: Dict[ShopFloorId, Dict[MachineKey, Dict[ActionId, TapeRecord]]] = dict()
+        self.queue: Dict[MachineKey, List[TapeRecord]] = dict()
 
     # Preparation
 
     def prepare(self, shop_floor: ShopFloor):
-        self.queue[shop_floor.id] = dict()
-
         for machine in shop_floor.machines:
-            self.queue[shop_floor.id][machine.key] = dict()
-
-    def clear(self, shop_floor: ShopFloor):
-        del self.queue[shop_floor.id]
-
-    def clear_all(self):
-        self.queue = dict()
+            self.queue[machine.key] = []
 
     # Reward Emit
 
-    @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.queue)
-    @filter(lambda self, _, __, record: isinstance(record.result, Job))
-    def register(self, context: Context, machine: Machine, record: MachineModel.Record):
+    @filter(lambda self, _, __, record, ___: isinstance(record.result, Job))
+    def register(self, context: Context, machine: Machine, record: MachineModel.Record, mode: NextStateRecordMode):
         if record.result is None:
-            pass
-        else:
-            self.queue[context.shop_floor.id][machine.key][record.result.id] = TapeRecord(
-                record=Record(
-                    state=record.state,
-                    action=record.action,
-                    action_values=record.action_values,
-                    next_state=None,
-                    reward=None,
-                    done=False,
-                    batch_size=[]
-                ),
-                context=self.reward.record_job_action(record.result, machine, context.moment),
-                moment=context.moment
-            )
+            mode = NextStateRecordMode.on_next_action
 
-    @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.key])
-    def record_next_state(self, context: Context, machine: Machine, job: Job):
+        self.__record_next_state_on_action__(record.state, machine.key)
+        self.__append_to_queue__(context, machine, record, mode)
+
+    def did_produce(self, context: Context, machine: Machine, job: Job):
+        record = self.queue[machine.key][-1]
+        record.record.reward = self.reward.reward_after_production(record.context)
+
+        if record.record.reward is not None:
+            self.__emit_rewards__(context, machine.work_center_idx, machine.machine_idx)
+            return
+
+        if record.mode != NextStateRecordMode.on_produce:
+            return
+
         state = self.simulator.encode_machine_state(context=context, machine=machine)
 
-        self.queue[context.shop_floor.id][machine.key][job.id].record.next_state = state
+        record.record.next_state = state
 
-    @filter(lambda self, context, machine, job: job.id in self.queue[context.shop_floor.id][machine.key])
-    def emit_intermediate_reward(self, context: Context, machine: Machine, job: Job):
-        record = self.queue[context.shop_floor.id][machine.key][job.id]
-        reward = self.reward.reward_after_production(record.context)
+    def did_complete(self, context: Context, job: Job):
+        records = self.__fetch_records_from_job_path__(context, job)
 
-        if reward is None:
+        if len(records) == 0:
             return
 
-        self.__emit_reward_to_machine__(context, machine, job, reward)
-
-    def emit_reward_after_completion(self, context: Context, job: Job):
-        contexts = self.__fetch_contexts_from_job_path__(context, job)
-
-        if len(contexts) == 0:
-            return
-
-        rewards = self.reward.reward_after_completion(contexts)
+        rewards = self.reward.reward_after_completion([record.context for record in records])
 
         if rewards is None:
             return
 
-        for reward in rewards:
-            self.__emit_reward__(context, reward.work_center_idx, reward.machine_idx, job, reward.reward)
+        for index in rewards.indices:
+            records[index].record.reward = rewards.reward[index]
+
+        for unit in range(rewards.units.shape[1]):
+            self.__emit_rewards__(context, rewards.units[0, unit], rewards.units[1, unit])
 
     # Utility
 
-    def __fetch_contexts_from_job_path__(self, context: Context, job: Job):
-        contexts = []
+    def __record_next_state_on_action__(self, state, machine_key):
+        if len(self.queue[machine_key]) == 0:
+            return
+
+        record = self.queue[machine_key][-1]
+
+        if record.mode != NextStateRecordMode.on_next_action:
+            return
+
+        record.record.next_state = state
+
+    def __append_to_queue__(
+        self, context: Context, machine: Machine, record: MachineModel.Record, mode: NextStateRecordMode
+    ):
+        mid = machine.key
+
+        self.queue[mid] += [TapeRecord(
+            job_id=record.result.id if record.result is not None else None,
+            record=Record(
+                state=record.state,
+                action=record.action,
+                action_values=record.action_values,
+                next_state=None,
+                reward=None,
+                done=False,
+                batch_size=[]
+            ),
+            context=self.reward.record_job_action(record.result, machine, context.moment),
+            moment=context.moment,
+            mode=mode
+        )]
+
+    def __fetch_records_from_job_path__(self, context: Context, job: Job):
+        records = []
 
         def fn(index, machine):
-            nonlocal contexts
+            nonlocal records
 
-            record = self.queue[context.shop_floor.id][machine.key].get(job.id)
+            for record in self.queue[machine.key]:
+                is_target_job = record.job_id == job.id
 
-            if record is None or record.context is None:
-                return
+                if is_target_job:
+                    records += [record]
+                    continue
 
-            contexts += [record.context]
+                is_idle_with_job_in_queue = (record.job_id is None and
+                                             job.history.arrived_at_machine[index] <= record.moment <
+                                             job.history.started_at[index])
+
+                if is_idle_with_job_in_queue:
+                    records += [record]
+                    continue
 
         self.__enumerate_job_path__(context, job, fn)
 
-        return contexts
+        return records
 
-    def __emit_reward__(self,
-                        context: Context,
-                        work_center_idx: int,
-                        machine_idx: int,
-                        job: Job,
-                        reward: torch.FloatTensor):
+    def __emit_rewards__(self, context: Context, work_center_idx, machine_idx):
         machine = context.shop_floor.machine(work_center_idx, machine_idx)
 
-        self.__emit_reward_to_machine__(context, machine, job, reward)
+        self.__emit_rewards_to_machine__(context, machine)
 
-    @filter(lambda self, context, machine, job, _: job.id in self.queue[context.shop_floor.id][machine.key])
-    def __emit_reward_to_machine__(self,
-                                   context: Context,
-                                   machine: Machine,
-                                   job: Job,
-                                   reward: torch.FloatTensor):
-        record = self.queue[context.shop_floor.id][machine.key][job.id]
-        result = record.record
-        result.reward = reward
+    def __emit_rewards_to_machine__(self, context: Context, machine: Machine):
+        records = self.queue[machine.key]
 
-        self.simulator.did_prepare_machine_record(
-            context=Context(shop_floor=context.shop_floor, moment=record.moment),
-            machine=machine,
-            record=result,
-        )
+        remove_idx = []
 
-        del self.queue[context.shop_floor.id][machine.key][job.id]
+        for index, record in enumerate(records):
+            result = record.record
+
+            if not result.is_filled:
+                continue
+
+            remove_idx += [index]
+
+            self.simulator.did_prepare_machine_record(
+                context=environment.Context(shop_floor=context.shop_floor, moment=record.moment),
+                machine=machine,
+                record=result
+            )
+
+        for index in reversed(remove_idx):
+            del self.queue[machine.key][index]
 
     @staticmethod
     def __enumerate_job_path__(context: Context, job: Job, fn):

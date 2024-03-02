@@ -3,7 +3,7 @@ task:
 
   name: 'test'
   output_dir: 'tmp'
-  log_stdout: False
+  log_stdout: True
   log_run: True
 
   machine_agent:
@@ -11,6 +11,7 @@ task:
     parameters:
       base_path: 'configuration/mods/machine_agent/model.yml'
       mods: [
+        'rl/agent/single.yml',
         'encoding/indirect.yml',
         'model/model/marl_as.yml',
         'scheduler/exponential.yml'
@@ -36,6 +37,8 @@ task:
     work_center_reward:
       kind: 'no'
 
+    next_state_record_mode: 'on_next_action'
+
   graph:
     transition_model:
       kind: 'base'
@@ -48,14 +51,14 @@ task:
 
     memory: 10000
     is_machine_set_in_work_center_connected: True
-    is_work_center_set_in_shop_floor_connected: False
+    is_work_center_set_in_shop_floor_connected: True
 
 
   simulator:
-    kind: 'td'
+    kind: 'episodic'
 
   run:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/run/jsp/run.yml'
-      mods: ['util_99.yml']
+      base_path: 'configuration/mods/run/episodic_jsp/run.yml'
+      mods: []

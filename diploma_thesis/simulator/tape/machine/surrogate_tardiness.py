@@ -45,7 +45,7 @@ class SurrogateTardinessReward(MachineReward):
         self.strategy = strategy
         self.configuration = configuration
 
-    def record_job_action(self, job: Job, machine: Machine, moment: float) -> Context:
+    def record_job_action(self, job: Job | None, machine: Machine, moment: float) -> Context:
         return self.Context(
             work_center_idx=machine.work_center_idx,
             machine_idx=machine.machine_idx,
@@ -53,7 +53,7 @@ class SurrogateTardinessReward(MachineReward):
                 job.current_operation_processing_time_on_machine for job in machine.queue
             ]),
             slack=torch.FloatTensor([
-                job.slack_upon_moment(0, self.strategy) for job in machine.queue
+                job.slack_upon_moment(moment, self.strategy) for job in machine.queue
             ]),
             winq=torch.FloatTensor([
                 machine.shop_floor.work_in_next_queue(job) for job in machine.queue
@@ -70,8 +70,8 @@ class SurrogateTardinessReward(MachineReward):
             return None
 
         return RewardList(
-            work_center_idx=torch.stack([context.work_center_idx for context in contexts]),
-            machine_idx=torch.stack([context.machine_idx for context in contexts]),
+            indices=torch.arange(len(contexts)),
+            units=torch.vstack([context.work_center_idx for context in contexts]),
             reward=torch.stack([self.__compute_reward__(context) for context in contexts]),
         )
 

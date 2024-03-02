@@ -27,7 +27,7 @@ parameters:
         base:
           configuration:
             timespan: 100000
-            machines_per_work_center: 10
+            machines_per_work_center: 1
             work_center_count: 10
 
           dispatch:
@@ -42,7 +42,7 @@ parameters:
                 processing_times: # Sampler
                   kind: 'uniform'
                   parameters:
-                    uniform: [ 20, 50 ]
+                    uniform: [ 1, 50 ]
                     noise: [ 0, 10 ]
                 permutation:
                   uneveness: 2

@@ -10,9 +10,12 @@ from environment import Job, Machine
 
 @tensorclass
 class RewardList:
-    work_center_idx: torch.LongTensor
-    machine_idx: torch.LongTensor
+    # Indices of contexts provided to reward_after_completion
+    indices: torch.LongTensor
+    # Reward for each context
     reward: torch.FloatTensor
+    # Ids of affected units as tensor (2, n), where first row is work_center_idx and second machine_idx
+    units: torch.LongTensor
 
 
 class MachineReward(metaclass=ABCMeta):
@@ -20,7 +23,7 @@ class MachineReward(metaclass=ABCMeta):
     Context = TypeVar('Context')
 
     @abstractmethod
-    def record_job_action(self, job: Job, machine: Machine, moment: float) -> Context:
+    def record_job_action(self, job: Job | None, machine: Machine, moment: float) -> Context:
         """
         An action to be called when reward model need to capture metrics at the moment of job selection
         """

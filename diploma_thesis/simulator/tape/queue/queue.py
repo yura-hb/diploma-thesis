@@ -1,12 +1,33 @@
 import weakref
 from abc import ABCMeta
+from dataclasses import dataclass
+from enum import StrEnum
+from typing import TypeVar
 
-from environment import Job, ShopFloor, Machine, Context
+from agents.utils.memory import Record
+from environment import Job, ShopFloor, Machine
 from simulator.tape.utils.simulator_interface import SimulatorInterface
 from utils import Loggable
 
 ShopFloorId = int
 ActionId = int
+
+
+class NextStateRecordMode(StrEnum):
+    on_produce = 'on_produce'
+    on_next_action = 'on_next_action'
+
+
+Context = TypeVar('Context')
+
+
+@dataclass
+class TapeRecord:
+    job_id: int | None
+    record: Record
+    context: Context
+    moment: int
+    mode: NextStateRecordMode = NextStateRecordMode.on_produce
 
 
 class Queue(Loggable, metaclass=ABCMeta):
@@ -24,13 +45,13 @@ class Queue(Loggable, metaclass=ABCMeta):
     def clear(self, shop_floor: ShopFloor):
         pass
 
-    def record_next_state(self, context: Context, machine: Machine, job: Job):
+    def did_produce(self, context: Context, machine: Machine, job: Job):
         pass
 
-    def emit_intermediate_reward(self, context: Context, machine: Machine, job: Job):
-        pass
+    # def emit_intermediate_reward(self, context: Context, machine: Machine, job: Job):
+    #     pass
 
-    def emit_reward_after_completion(self, context: Context, job: Job):
+    def did_complete(self, context: Context, job: Job):
         pass
 
     @property
