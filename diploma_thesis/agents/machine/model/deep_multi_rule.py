@@ -33,7 +33,7 @@ class DeepMultiRule(DeepPolicyMachineModel):
             rules = [IdleSchedulingRule()] + rules
 
         policy_parameters = parameters['policy']
-        policy_parameters['parameters']['n_categories'] = len(rules)
+        policy_parameters['parameters']['n_actions'] = len(rules)
 
         policy = policy_from_cli(policy_parameters)
 

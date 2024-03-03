@@ -11,7 +11,7 @@ class ActionSelector(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def __call__(self, distribution: torch.FloatTensor) -> Tuple[int, torch.FloatTensor]:
+    def __call__(self, distribution: torch.Tensor) -> Tuple[int, torch.Tensor]:
         """
         Args:
             distribution: Distribution over possible actions. Either q-values or probabilities.

@@ -188,7 +188,7 @@ class NNCLI(nn.Module):
                 raise ValueError(f"Unknown activation function {activation}")
 
     @staticmethod
-    def from_cli(parameters: dict) -> nn.Module:
+    def from_cli(parameters: dict) -> 'NNCLI':
         configuration = NNCLI.Configuration.from_cli(parameters)
 
         return NNCLI(configuration)

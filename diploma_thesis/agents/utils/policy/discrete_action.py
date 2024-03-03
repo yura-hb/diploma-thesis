@@ -1,6 +1,5 @@
 from typing import Dict
 
-from agents.base.state import TensorState
 from agents.utils import NNCLI, Phase
 from agents.utils.action import ActionSelector, from_cli as action_selector_from_cli
 from .policy import *
@@ -8,14 +7,10 @@ from .policy import *
 
 class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], metaclass=ABCMeta):
 
-    def __init__(self,
-                 n_categories: int,
-                 q_model: NNCLI,
-                 advantage_model: NNCLI | None,
-                 action_selector: ActionSelector):
+    def __init__(self, n_actions: int, q_model: NNCLI, advantage_model: NNCLI | None, action_selector: ActionSelector):
         super().__init__()
 
-        self.n_categories = n_categories
+        self.n_actions = n_actions
         self.q_model = q_model
         self.advantage_model = advantage_model
         self.action_selector = action_selector
@@ -69,15 +64,15 @@ class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], 
 
     def __connect__(self, model: NNCLI, input_shape: torch.Size):
         pass
-        # output_layer = NNCLI.Configuration.Linear(dim=self.n_categories, activation='none', dropout=0)
+        # output_layer = NNCLI.Configuration.Linear(dim=self.n_actions, activation='none', dropout=0)
         #
         # model.connect(input_shape, output_layer)
 
     @staticmethod
     def from_cli(parameters: Dict) -> 'Policy':
-        n_categories = parameters['n_categories']
+        n_actions = parameters['n_actions']
         q_model = NNCLI.from_cli(parameters['q_model'])
         advantage_model = NNCLI.from_cli(parameters['advantage_model']) if parameters.get('advantage_model') else None
         action_selector = action_selector_from_cli(parameters['action_selector'])
 
-        return DiscreteAction(n_categories, q_model, advantage_model, action_selector)
+        return DiscreteAction(n_actions, q_model, advantage_model, action_selector)

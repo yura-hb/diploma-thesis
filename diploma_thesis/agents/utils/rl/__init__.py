@@ -7,6 +7,7 @@ from agents.utils.nn import LossCLI, OptimizerCLI
 from utils import from_cli as _from_cli
 from agents.utils.rl.ddqn import DoubleDeepQTrainer
 from agents.utils.rl.dqn import DeepQTrainer
+from agents.utils.return_estimator import from_cli as return_estimator_from_cli
 from .rl import RLTrainer
 
 key_to_class = {
