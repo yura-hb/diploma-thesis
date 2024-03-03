@@ -10,6 +10,7 @@ class RLAgent(Generic[Key], Agent[Key]):
     def __init__(self, model: DeepPolicyModel, state_encoder: StateEncoder, trainer: RLTrainer):
         super().__init__(model, state_encoder)
 
+        self.model: DeepPolicyModel = model
         self.trainer = trainer
 
     def with_logger(self, logger: logging.Logger):
@@ -31,7 +32,7 @@ class RLAgent(Generic[Key], Agent[Key]):
 
     @filter(lambda self: self.phase == TrainingPhase())
     def train_step(self):
-        self.trainer.train_step(self.model)
+        self.trainer.train_step(self.model.policy)
 
     @filter(lambda self, *args: self.phase == TrainingPhase())
     def store(self, key: Key, record: Record):
@@ -47,6 +48,6 @@ class RLAgent(Generic[Key], Agent[Key]):
         result = super().schedule(key, parameters)
 
         if not self.trainer.is_configured:
-            self.trainer.configure(self.model)
+            self.trainer.configure(self.model.policy)
 
         return result

@@ -1,30 +1,57 @@
-
 parameters:
   model:
-    kind: 'multi_rule_linear'
+    kind: 'deep_multi_rule'
     parameters:
-      model:
-        layers:
-          - kind: 'partial_instance_norm'
-            parameters:
-              channels: 17
-          - kind: 'linear'
-            parameters:
-              dim: 64
-              activation: 'tanh'
-          - kind: 'linear'
-            parameters:
-              dim: 48
-              activation: 'tanh'
-          - kind: 'linear'
-            parameters:
-              dim: 48
-              activation: 'tanh'
-          - kind: 'linear'
-            parameters:
-              dim: 36
-              activation: 'tanh'
-          - kind: 'linear'
-            parameters:
-              dim: 24
-              activation: 'tanh'
+      policy:
+        kind: 'discrete_action'
+        parameters:
+          q_model:
+            state:
+              - kind: 'partial_instance_norm'
+                parameters:
+                  channels: 17
+              - kind: 'linear'
+                parameters:
+                  dim: 64
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 48
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 48
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 36
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 24
+                  activation: 'tanh'
+          advantage_model:
+            state:
+              - kind: 'partial_instance_norm'
+                parameters:
+                  channels: 17
+              - kind: 'linear'
+                parameters:
+                  dim: 64
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 48
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 48
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 36
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 24
+                  activation: 'tanh'

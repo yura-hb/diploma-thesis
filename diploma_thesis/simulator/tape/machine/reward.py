@@ -25,7 +25,7 @@ class MachineReward(metaclass=ABCMeta):
     @abstractmethod
     def record_job_action(self, job: Job | None, machine: Machine, moment: float) -> Context:
         """
-        An action to be called when reward model need to capture metrics at the moment of job selection
+        An action to be called when reward policy need to capture metrics at the moment of job selection
         """
         pass
 

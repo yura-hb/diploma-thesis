@@ -20,7 +20,7 @@ class Record:
     next_state: State
     reward: torch.FloatTensor
     done: torch.BoolTensor
-    info: TensorDict = field(default_factory=lambda: TensorDict(batch_size=[]))
+    info: TensorDict = field(default_factory=lambda: TensorDict({}, batch_size=[]))
 
     @property
     def is_filled(self):

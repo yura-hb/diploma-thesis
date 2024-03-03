@@ -11,6 +11,9 @@ class Activation(Layer):
         self.activation = self.__make_activation__()
 
     def __call__(self, batch: torch.FloatTensor) -> torch.FloatTensor:
+        if self.activation is None:
+            return batch
+
         return self.activation(batch)
 
     def __make_activation__(self):

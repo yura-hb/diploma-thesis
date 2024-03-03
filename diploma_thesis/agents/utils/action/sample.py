@@ -9,7 +9,7 @@ class Sample(ActionSelector):
         super().__init__()
         self.is_distribution = is_distribution
 
-    def __call__(self, distribution: torch.FloatTensor) -> Tuple[int, torch.FloatTensor]:
+    def __call__(self, distribution: torch.Tensor) -> Tuple[int, torch.Tensor]:
         if self.is_distribution:
             distribution = torch.distributions.Categorical(probs=distribution)
         else:

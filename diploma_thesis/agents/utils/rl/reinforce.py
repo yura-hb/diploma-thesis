@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict
 
-from agents.utils.nn import NN
+from agents.utils.nn import NeuralNetwork
 from agents.utils.rl.rl import *
 
 
@@ -9,7 +9,7 @@ class Reinforce(RLTrainer):
 
     @dataclass
     class Configuration:
-        critic_networks: List[NN]
+        critic_networks: List[NeuralNetwork]
 
     def __init__(self,
                  memory: Memory,

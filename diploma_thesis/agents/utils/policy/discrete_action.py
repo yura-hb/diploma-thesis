@@ -1,14 +1,19 @@
+import copy
 from typing import Dict
 
-from agents.utils import NN, Phase
+from agents.utils import NeuralNetwork, Phase
 from agents.utils.nn.layers.linear import Linear
 from agents.utils.action import ActionSelector, from_cli as action_selector_from_cli
 from .policy import *
 
 
-class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], metaclass=ABCMeta):
+class DiscreteAction(Policy[Input]):
 
-    def __init__(self, n_actions: int, q_model: NN, advantage_model: NN | None, action_selector: ActionSelector):
+    def __init__(self,
+                 n_actions: int,
+                 q_model: NeuralNetwork,
+                 advantage_model: NeuralNetwork | None,
+                 action_selector: ActionSelector):
         super().__init__()
 
         self.n_actions = n_actions
@@ -16,7 +21,7 @@ class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], 
         self.advantage_model = advantage_model
         self.action_selector = action_selector
 
-        self.__configure_model_output_layers__()
+        self.__configure__()
 
     def update(self, phase: Phase):
         self.phase = phase
@@ -30,11 +35,9 @@ class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], 
         action, policy = self.action_selector(values)
         action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
 
-        info = TensorDict(batch_size=[])
-        info['policy'] = policy
-        info['values'] = values
+        info = TensorDict({"policy": policy, "values": values.detach().clone()}, batch_size=[])
 
-        return Record(state, action, info)
+        return Record(state, action, info, batch_size=[])
 
     def predict(self, state: State) -> torch.FloatTensor:
         values = self.q_model(state)
@@ -45,25 +48,12 @@ class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], 
 
         return values
 
-    def parameters(self, recurse: bool = True):
-        result = [
-            {'params': self.q_model.parameters(recurse)}
-        ]
-
-        if self.advantage_model:
-            result.append({'params': self.advantage_model.parameters(recurse)})
-
-        return result
-
-    def copy_parameters(self, other: 'DiscreteAction', decay: float = 1.0):
-        self.q_model.copy_parameters(other.q_model, decay)
-
-        if self.advantage_model and other.advantage_model:
-            self.advantage_model.copy_parameters(other.advantage_model, decay)
+    def clone(self):
+        return copy.deepcopy(self)
 
     # Utilities
 
-    def __configure_model_output_layers__(self):
+    def __configure__(self):
         value_output_layer = Linear(dim=1, activation='none', dropout=0)
         action_output_layer = Linear(dim=self.n_actions, activation='none', dropout=0)
 
@@ -76,8 +66,8 @@ class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], 
     @staticmethod
     def from_cli(parameters: Dict) -> 'Policy':
         n_actions = parameters['n_actions']
-        q_model = NN.from_cli(parameters['q_model'])
-        advantage_model = NN.from_cli(parameters['advantage_model']) if parameters.get('advantage_model') else None
+        q_model = NeuralNetwork.from_cli(parameters['q_model'])
+        advantage_model = NeuralNetwork.from_cli(parameters['advantage_model']) if parameters.get('advantage_model') else None
         action_selector = action_selector_from_cli(parameters['action_selector'])
 
         return DiscreteAction(n_actions, q_model, advantage_model, action_selector)

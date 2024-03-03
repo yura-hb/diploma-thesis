@@ -1,3 +1,5 @@
+import torch
+
 from typing import Dict, List
 
 from agents.utils import DiscreteAction
@@ -14,10 +16,12 @@ class DeepMultiRule(DeepPolicyWorkCenterModel, DiscreteAction):
         self.rules = rules
 
     def __call__(self, state: State, parameters: WorkCenterModel.Input) -> WorkCenterModel.Record:
-        record = self.policy(state, parameters)
-        result = self.rules[record.action.item()](parameters.machine, parameters.now)
+        # No gradient descent based on decision on the moment
+        with torch.no_grad():
+            record = self.policy(state, parameters)
+            result = self.rules[record.action.item()](parameters.machine, parameters.now)
 
-        return DeepPolicyWorkCenterModel.Record(result=result, record=record, batch_size=[])
+            return DeepPolicyWorkCenterModel.Record(result=result, record=record, batch_size=[])
 
     @classmethod
     def from_cli(cls, parameters: Dict):

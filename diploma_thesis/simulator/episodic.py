@@ -6,7 +6,7 @@ from typing import Dict
 
 class EpisodicSimulator(Simulator):
     """
-    A simulator, which stores trajectory of agents and emits them for training after it finishes
+    A simulator, which stores trajectory.yml of agents and emits them for training after it finishes
     """
 
     class Queue:

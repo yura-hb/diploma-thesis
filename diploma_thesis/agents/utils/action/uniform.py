@@ -5,7 +5,7 @@ from .action_selector import *
 
 class Uniform(ActionSelector):
 
-    def __call__(self, distribution: torch.FloatTensor) -> Tuple[int, torch.FloatTensor]:
+    def __call__(self, distribution: torch.Tensor) -> Tuple[int, torch.Tensor]:
         action = torch.randint(distribution.size(0), (1,)).item()
         policy = torch.zeros_like(distribution) + 1.0 / distribution.size(0)
 

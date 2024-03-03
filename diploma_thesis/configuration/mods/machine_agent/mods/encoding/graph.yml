@@ -1,4 +1,3 @@
-
 parameters:
   encoder:
     kind: 'graph'

@@ -34,7 +34,7 @@ class WorkCenterQueue(Queue):
         if record.result is None:
             mode = NextStateRecordMode.on_next_action
 
-        self.__record_next_state_on_action__(record.state, work_center.key)
+        self.__record_next_state_on_action__(record.record.state, work_center.key)
         self.__append_to_queue__(context, work_center, job, record, mode)
 
     def did_produce(self, context: Context, machine: Machine, job: Job):
@@ -95,10 +95,10 @@ class WorkCenterQueue(Queue):
         self.queue[wid] += [TapeRecord(
             job_id=job.id,
             record=Record(
-                state=record.state,
-                action=record.action,
-                action_values=record.action_values,
+                state=record.record.state,
+                action=record.record.action,
                 next_state=None,
+                info=record.record.info,
                 reward=None,
                 done=False,
             ),

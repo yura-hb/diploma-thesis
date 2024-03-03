@@ -8,9 +8,14 @@ from .rl_agent import *
 
 class MARLAgent(Generic[Key], RLAgent[Key]):
 
-    def __init__(self, model: DeepPolicyModel, state_encoder: StateEncoder, trainer: RLTrainer, is_model_distributed: bool):
+    def __init__(self,
+                 model: DeepPolicyModel,
+                 state_encoder: StateEncoder,
+                 trainer: RLTrainer,
+                 is_model_distributed: bool):
         super().__init__(model, state_encoder, trainer)
 
+        self.model: DeepPolicyModel | Dict[Key, DeepPolicyModel] = model
         self.trainer: RLTrainer | Dict[Key, RLTrainer] = trainer
         self.is_model_distributed = is_model_distributed
         self.is_configured = False
@@ -57,7 +62,7 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
     @filter(lambda self: self.phase == TrainingPhase())
     def train_step(self):
         for key in self.keys:
-            self.trainer[key].train_step(self.__model_for_key__(key))
+            self.trainer[key].train_step(self.__model_for_key__(key).policy)
 
     @filter(lambda self, *args: self.phase == TrainingPhase())
     def store(self, key: Key, record: Record):
@@ -86,7 +91,7 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         result = model(state, parameters)
 
         if not self.trainer[key].is_configured:
-            self.trainer[key].configure(model)
+            self.trainer[key].configure(model.policy)
 
         return result
 

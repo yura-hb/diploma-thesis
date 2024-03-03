@@ -1,12 +1,12 @@
 jsp: &jsp
-  name: 'model'
+  name: 'policy'
   output_dir: 'tmp/jsp_deep_marl'
   log_stdout: False
 
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/machine_agent/model.yml'
+      base_path: 'configuration/mods/machine_agent/policy.yml'
       mods: [ ]
 
   work_center_agent:
@@ -68,7 +68,7 @@ optimizer: &optimizer
 
 action_set: &action_set
   [
-    'model/rules/marl.yml'
+    'policy/rules/marl.yml'
   ]
 
 reward: &reward
@@ -116,7 +116,7 @@ task:
                   - *action_set
                   # Model
                   - [
-                    'model/model/marl_as.yml'
+                    'policy/policy/marl_as.yml'
                   ]
                   - [
                     'scheduler/exponential.yml'
@@ -160,7 +160,7 @@ task:
                   - *action_set
                   # Model
                   - [
-                    'model/model/marl_mr.yml'
+                    'policy/policy/marl_mr.yml'
                   ]
                   - [
                     'scheduler/exponential.yml'

@@ -6,7 +6,10 @@ from agents.utils import Phase, PhaseUpdatable
 class PhaseSelector(ActionSelector, PhaseUpdatable):
 
     def __init__(self, default: ActionSelector, phase_to_action_selector: Dict[Phase, ActionSelector]):
-        super().__init__()
+        super(ActionSelector).__init__()
+        super(PhaseUpdatable).__init__()
+
+        self.phase = None
         self.default = default
         self.phase_to_action_selector = phase_to_action_selector
 

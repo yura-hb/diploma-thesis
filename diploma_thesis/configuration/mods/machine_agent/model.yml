@@ -1,58 +1,63 @@
 kind: 'rl'
 parameters:
   model:
-    kind: 'multi_rule_linear'
+    kind: 'deep_multi_rule'
     parameters:
       rules: 'all'
-      model:
-        layers:
-          - kind: 'layer_norm'
-          - kind: 'linear'
-            parameters:
-              dim: 64
-              activation: 'tanh'
-          - kind: 'linear'
-            parameters:
-              dim: 48
-              activation: 'tanh'
-          - kind: 'linear'
-            parameters:
-              dim: 48
-              activation: 'tanh'
-          - kind: 'linear'
-            parameters:
-              dim: 36
-              activation: 'tanh'
-          - kind: 'linear'
-            parameters:
-              dim: 24
-              activation: 'tanh'
-      action_selector:
-        kind: 'phase_selector'
+      policy:
+        kind: 'discrete_action'
         parameters:
-          default:
-            kind: 'greedy'
-          phases:
-            - phase:
-                kind: 'training'
-              action_selector:
-                kind: 'epsilon_greedy'
+          q_model:
+            state:
+              - kind: 'partial_instance_norm'
                 parameters:
-                  epsilon: 0.2
-            - phase:
-                kind: 'warm_up'
+                  channels: 17
+              - kind: 'linear'
                 parameters:
-                  step: 0
-              action_selector:
-                kind: 'uniform'
-            - phase:
-                kind: 'warm_up'
+                  dim: 64
+                  activation: 'tanh'
+              - kind: 'linear'
                 parameters:
-                  step: 1
-              action_selector:
-                kind: 'sample'
+                  dim: 48
+                  activation: 'tanh'
+              - kind: 'linear'
                 parameters:
-                  is_distribution: false
+                  dim: 48
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 36
+                  activation: 'tanh'
+              - kind: 'linear'
+                parameters:
+                  dim: 24
+                  activation: 'tanh'
+          action_selector:
+            kind: 'phase_selector'
+            parameters:
+              default:
+                kind: 'greedy'
+              phases:
+                - phase:
+                    kind: 'training'
+                  action_selector:
+                    kind: 'epsilon_greedy'
+                    parameters:
+                      epsilon: 0.2
+                - phase:
+                    kind: 'warm_up'
+                    parameters:
+                      step: 0
+                  action_selector:
+                    kind: 'uniform'
+                - phase:
+                    kind: 'warm_up'
+                    parameters:
+                      step: 1
+                  action_selector:
+                    kind: 'sample'
+                    parameters:
+                      is_distribution: false
 
   encoder:
     kind: 'deep_marl_indirect'
@@ -75,6 +80,9 @@ parameters:
           parameters:
             lr: 0.001
 
-      gamma: 0.95
+      return:
+        kind: 'no'
+        parameters:
+          discount_factor: 0.99
 
 

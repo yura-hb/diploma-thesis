@@ -19,14 +19,9 @@ class StaticModel(WorkCenterModel[PlainEncoder.State, None]):
     def __call__(self, state: State, parameters: WorkCenterModel.Input) -> WorkCenterModel.Record:
         return WorkCenterModel.Record(
             result=self.rule(job=parameters.job, work_center=parameters.work_center),
-            state=state,
-            action=None,
-            action_values=None,
+            record=None,
             batch_size=[]
         )
-
-    def values(self, state: State) -> torch.FloatTensor:
-        return torch.zeros(1, dtype=torch.float32)
 
     @staticmethod
     def from_cli(parameters: Dict):

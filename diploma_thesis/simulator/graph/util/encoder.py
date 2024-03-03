@@ -184,7 +184,7 @@ class Encoder:
                 machine_node_id = self.__get_node_ids__(machine_index, result.data[Graph.MACHINE_INDEX_KEY])
 
                 edges = itertools.combinations(machine_node_id, 2)
-                edges = torch.tensor(list(edges)).T
+                edges = torch.tensor(list(edges)).view(-1, 2).T
 
                 s = result.data[Graph.MACHINE_KEY, Graph.IN_WORK_CENTER_RELATION_KEY, Graph.MACHINE_KEY]
                 s.edge_index = torch.cat([s.edge_index, edges], dim=1)
@@ -256,6 +256,9 @@ class Encoder:
         return torch.vstack([src_nodes, dst_nodes])
 
     def __get_node_ids__(self, values, store):
-        result = torch.abs(store - values.unsqueeze(dim=0).T)
+        if values.numel() == 0:
+            return torch.tensor([], dtype=torch.long).view(1, 0)
+
+        result = torch.abs(store - values.unsqueeze(dim=0))
 
         return (result.sum(axis=-2) == 0).nonzero()[:, 1]

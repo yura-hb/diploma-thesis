@@ -33,6 +33,3 @@ class DeepPolicyModel(Model[Input, State, Action, Result], metaclass=ABCMeta):
 
         self.policy = policy
 
-    def __call__(self, state: State, parameters: Input) -> Model.Record:
-        return self.policy(state, parameters)
-

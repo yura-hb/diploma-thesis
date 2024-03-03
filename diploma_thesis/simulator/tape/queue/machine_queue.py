@@ -31,7 +31,7 @@ class MachineQueue(Queue):
         if record.result is None:
             mode = NextStateRecordMode.on_next_action
 
-        self.__record_next_state_on_action__(record.state, machine.key)
+        self.__record_next_state_on_action__(record.record.state, machine.key)
         self.__append_to_queue__(context, machine, record, mode)
 
     def did_produce(self, context: Context, machine: Machine, job: Job):
@@ -87,12 +87,12 @@ class MachineQueue(Queue):
         self.queue[mid] += [TapeRecord(
             job_id=record.result.id if record.result is not None else None,
             record=Record(
-                state=record.state,
-                action=record.action,
-                action_values=record.action_values,
+                state=record.record.state,
+                action=record.record.action,
                 next_state=None,
                 reward=None,
                 done=False,
+                info=record.record.info,
                 batch_size=[]
             ),
             context=self.reward.record_job_action(record.result, machine, context.moment),

@@ -1,12 +1,11 @@
 jsp: &jsp
-  name: 'model'
-  output_dir: 'tmp/jsp_multi'
+  name: 'policy'
   log_stdout: False
 
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/machine_agent/model.yml'
+      base_path: 'configuration/mods/machine_agent/policy.yml'
       mods: [ ]
 
   work_center_agent:
@@ -81,8 +80,8 @@ scheduler: &scheduler
 
 action_set: &action_set
   [
-    'model/rules/all.yml',
-    'model/rules/marl.yml'
+    'policy/rules/all.yml',
+    'policy/rules/marl.yml'
   ]
 
 reward: &reward
@@ -135,7 +134,7 @@ task:
                   - *action_set
                   # Model
                   - [
-                    'model/model/marl_as.yml'
+                    'policy/policy/marl_as.yml'
                   ]
 
           tape:
@@ -178,7 +177,7 @@ task:
                   - *action_set
                   # Model
                   - [
-                    'model/model/marl_mr.yml'
+                    'policy/policy/marl_mr.yml'
                   ]
 
           tape:

@@ -1,5 +1,4 @@
 
-from .nn import NN
-from .optimizer import Optimizer
 from .loss import Loss
-from agents.utils.nn.layers.graph import GraphCLI
+from .neural_network import NeuralNetwork
+from .optimizer import Optimizer

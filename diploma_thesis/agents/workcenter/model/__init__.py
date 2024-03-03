@@ -2,6 +2,7 @@ from functools import partial
 
 from utils import from_cli
 from .rule import RoutingRule
+from .model import DeepPolicyWorkCenterModel, WorkCenterModel
 from .static import StaticModel as StaticWorkCenterModel
 from .deep_multi_rule import DeepMultiRule
 

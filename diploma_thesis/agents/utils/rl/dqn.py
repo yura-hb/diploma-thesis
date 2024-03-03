@@ -3,6 +3,7 @@ from typing import Dict
 
 import tensordict
 
+from torch.optim.swa_utils import AveragedModel, get_ema_avg_fn
 from agents.utils.memory import NotReadyException
 from agents.utils.rl.rl import *
 
@@ -30,13 +31,13 @@ class DeepQTrainer(RLTrainer):
                  configuration: Configuration):
         super().__init__(memory, loss, optimizer, return_estimator)
 
-        self.target_model = None
+        self._target_model: AveragedModel = None
         self.configuration = configuration
 
     def configure(self, model: Policy):
         super().configure(model)
 
-        self.target_model = model.clone()
+        self._target_model = AveragedModel(model.clone(), avg_fn=get_ema_avg_fn(self.configuration.decay))
 
     def train_step(self, model: Policy):
         try:
@@ -51,6 +52,8 @@ class DeepQTrainer(RLTrainer):
         values = model.predict(batch.state)
         loss = self.loss(values, q_values)
 
+        print(f"Loss: {loss}")
+
         self.optimizer.zero_grad()
 
         loss.backward()
@@ -60,7 +63,7 @@ class DeepQTrainer(RLTrainer):
         self.record_loss(loss)
 
         if self.optimizer.step_count % self.configuration.update_steps == 0:
-            self.target_model.copy_parameters(model, self.configuration.decay)
+            self._target_model.update_parameters(model)
 
         with torch.no_grad():
             td_error += self.configuration.prior_eps
@@ -90,8 +93,13 @@ class DeepQTrainer(RLTrainer):
             return
 
         estimated = self.return_estimator.update_returns(record)
+        estimated = torch.stack(estimated).unsqueeze(dim=-1)
 
         self.memory.store(estimated)
+
+    @property
+    def target_model(self):
+        return self._target_model.module
 
     @classmethod
     def from_cli(cls,

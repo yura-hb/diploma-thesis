@@ -27,7 +27,7 @@ class StaticWorkCenter(Agent[WorkCenterKey]):
 
     @staticmethod
     def from_cli(parameters: Dict):
-        model = model_from_cli(parameters['policy'])
+        model = model_from_cli(parameters['model'])
         encoder = state_encoder_from_cli(parameters['encoder'])
 
         return StaticWorkCenter(model=model, state_encoder=encoder)
