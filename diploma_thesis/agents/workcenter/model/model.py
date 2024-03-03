@@ -1,6 +1,7 @@
-from environment import Job, Machine
+
 from agents.base.model import *
 from agents.workcenter.utils import Input as WorkCenterInput
+from environment import Machine
 
 
 class WorkCenterModel(Model[WorkCenterInput, State, Action, Machine | None], metaclass=ABCMeta):
@@ -8,6 +9,6 @@ class WorkCenterModel(Model[WorkCenterInput, State, Action, Machine | None], met
     Input = WorkCenterInput
 
 
-class NNWorkCenterModel(Model[NNModel, State, Action, Machine | None], metaclass=ABCMeta):
+class DeepPolicyWorkCenterModel(DeepPolicyModel[WorkCenterInput, State, Action, Machine | None], metaclass=ABCMeta):
 
     Input = WorkCenterInput

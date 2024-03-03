@@ -49,7 +49,6 @@ class DEEPMARLIndirectStateEncoder(StateEncoder):
         state = reduce(lambda x, y: x + y, not_normalized_state + normalized, [])
         state = self.__to_list_of_tensors__(state)
         state = torch.hstack(state).reshape(-1)
-
         state = torch.nan_to_num(state, nan=0.0, posinf=1, neginf=-1)
 
         return self.State(state, batch_size=[])

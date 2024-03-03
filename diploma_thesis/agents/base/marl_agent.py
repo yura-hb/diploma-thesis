@@ -8,7 +8,7 @@ from .rl_agent import *
 
 class MARLAgent(Generic[Key], RLAgent[Key]):
 
-    def __init__(self, model: NNModel, state_encoder: StateEncoder, trainer: RLTrainer, is_model_distributed: bool):
+    def __init__(self, model: DeepPolicyModel, state_encoder: StateEncoder, trainer: RLTrainer, is_model_distributed: bool):
         super().__init__(model, state_encoder, trainer)
 
         self.trainer: RLTrainer | Dict[Key, RLTrainer] = trainer
@@ -34,7 +34,7 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
             is_evaluating_with_centralized_model = self.phase == EvaluationPhase() and not self.is_model_distributed
 
             assert is_key_set_equal or is_evaluating_with_centralized_model, \
-                ("Multi-Agent model should be configured for the same shop floor architecture "
+                ("Multi-Agent policy should be configured for the same shop floor architecture "
                  "or have centralized action network")
 
             return

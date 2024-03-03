@@ -24,7 +24,7 @@ class StaticMachine(Agent[MachineKey]):
 
     @staticmethod
     def from_cli(parameters: Dict):
-        model = model_from_cli(parameters['model'])
+        model = model_from_cli(parameters['policy'])
         encoder = state_encoder_from_cli(parameters['encoder'])
 
         return StaticMachine(model=model, state_encoder=encoder)

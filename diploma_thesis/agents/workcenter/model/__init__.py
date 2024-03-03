@@ -1,14 +1,13 @@
 from functools import partial
 
 from utils import from_cli
-from .model import WorkCenterModel, NNWorkCenterModel
 from .rule import RoutingRule
 from .static import StaticModel as StaticWorkCenterModel
-from .multi_rule_linear import MultiRuleLinear
+from .deep_multi_rule import DeepMultiRule
 
 key_to_class = {
     "static": StaticWorkCenterModel,
-    "multi_rule_linear": MultiRuleLinear
+    "deep_multi_rule": DeepMultiRule
 }
 
 

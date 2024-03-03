@@ -16,9 +16,7 @@ class StaticModel(MachineModel[PlainEncoder.State, None]):
     def __call__(self, state: State, parameters: MachineModel.Input) -> MachineModel.Record:
         return MachineModel.Record(
             result=self.rule(parameters.machine, parameters.now),
-            state=state,
-            action=None,
-            action_values=None,
+            record=None,
             batch_size=[]
         )
 

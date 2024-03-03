@@ -9,6 +9,6 @@ class MachineModel(Model[MachineInput, State, Action, Job | None], metaclass=ABC
     Input = MachineInput
 
 
-class NNMachineModel(Model[MachineInput, State, Action, Job | None], metaclass=ABCMeta):
+class DeepPolicyMachineModel(DeepPolicyModel[MachineInput, State, Action, Job | None], metaclass=ABCMeta):
 
     Input = MachineInput

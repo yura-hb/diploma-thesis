@@ -2,12 +2,12 @@ from agents.utils import TrainingPhase
 from agents.utils.rl import RLTrainer
 from utils import filter
 from .agent import *
-from .model import NNModel
+from .model import DeepPolicyModel
 
 
 class RLAgent(Generic[Key], Agent[Key]):
 
-    def __init__(self, model: NNModel, state_encoder: StateEncoder, trainer: RLTrainer):
+    def __init__(self, model: DeepPolicyModel, state_encoder: StateEncoder, trainer: RLTrainer):
         super().__init__(model, state_encoder)
 
         self.trainer = trainer
@@ -27,7 +27,7 @@ class RLAgent(Generic[Key], Agent[Key]):
 
     @property
     def is_distributed(self):
-        return True
+        return False
 
     @filter(lambda self: self.phase == TrainingPhase())
     def train_step(self):

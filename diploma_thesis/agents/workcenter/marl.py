@@ -15,7 +15,7 @@ class MARLWorkCenter(MARLAgent[WorkCenterKey]):
 
     @staticmethod
     def from_cli(parameters: Dict):
-        model = model_from_cli(parameters['model'])
+        model = model_from_cli(parameters['policy'])
         encoder = state_encoder_from_cli(parameters['encoder'])
         trainer = rl_trainer_from_cli(parameters['trainer'])
 
