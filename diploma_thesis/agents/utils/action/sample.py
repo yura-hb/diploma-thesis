@@ -9,15 +9,15 @@ class Sample(ActionSelector):
         super().__init__()
         self.is_distribution = is_distribution
 
-    def __call__(self, distribution: torch.FloatTensor) -> int:
+    def __call__(self, distribution: torch.FloatTensor) -> Tuple[int, torch.FloatTensor]:
         if self.is_distribution:
             distribution = torch.distributions.Categorical(probs=distribution)
         else:
             distribution = torch.distributions.Categorical(logits=distribution)
 
-        action = distribution.sample()
+        action = distribution.sample().item()
 
-        return action, distribution.probs[action]
+        return action, distribution.probs
 
     @staticmethod
     def from_cli(parameters: Dict):

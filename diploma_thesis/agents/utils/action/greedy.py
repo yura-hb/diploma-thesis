@@ -4,7 +4,11 @@ from .action_selector import *
 class Greedy(ActionSelector):
 
     def __call__(self, distribution: torch.FloatTensor) -> Tuple[int, torch.FloatTensor]:
-        return torch.argmax(distribution).item(), torch.tensor(1.0)
+        action = torch.argmax(distribution).item()
+        policy = torch.zeros_like(distribution)
+        policy[action] = 1.0
+
+        return action, policy
 
     @staticmethod
     def from_cli(parameters: Dict):

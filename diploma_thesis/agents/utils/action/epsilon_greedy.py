@@ -1,3 +1,4 @@
+import torch
 
 from .action_selector import *
 
@@ -9,10 +10,14 @@ class EpsilonGreedy(ActionSelector):
         self.epsilon = epsilon
 
     def __call__(self, distribution: torch.FloatTensor) -> Tuple[int, torch.FloatTensor]:
-        if torch.rand(1) < self.epsilon:
-            return torch.randint(0, distribution.size(0), (1,)).item(), self.epsilon / distribution.size(0)
+        action = torch.argmax(distribution).item()
+        policy = torch.zeros_like(distribution) + self.epsilon / distribution.size(0)
+        policy[action] += 1 - self.epsilon
 
-        return torch.argmax(distribution).item(), 1 - self.epsilon
+        if torch.rand(1) < self.epsilon:
+            return torch.randint(0, distribution.size(0), (1,)).item(), policy
+
+        return action, policy
 
     @staticmethod
     def from_cli(parameters: Dict):
