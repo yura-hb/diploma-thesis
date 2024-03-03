@@ -1,13 +1,13 @@
 from typing import Dict
 
-from agents.utils import NNCLI, Phase
+from agents.utils import NN, Phase
 from agents.utils.action import ActionSelector, from_cli as action_selector_from_cli
 from .policy import *
 
 
 class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], metaclass=ABCMeta):
 
-    def __init__(self, n_actions: int, q_model: NNCLI, advantage_model: NNCLI | None, action_selector: ActionSelector):
+    def __init__(self, n_actions: int, q_model: NN, advantage_model: NN | None, action_selector: ActionSelector):
         super().__init__()
 
         self.n_actions = n_actions
@@ -63,8 +63,8 @@ class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], 
     # Utilities
 
     def __configure_model_output_layers__(self):
-        value_output_layer = NNCLI.Linear(dim=1, activation='none', dropout=0)
-        action_output_layer = NNCLI.Linear(dim=self.n_actions, activation='none', dropout=0)
+        value_output_layer = NN.Linear(dim=1, activation='none', dropout=0)
+        action_output_layer = NN.Linear(dim=self.n_actions, activation='none', dropout=0)
 
         if self.advantage_model is not None:
             self.q_model.append(value_output_layer)
@@ -75,8 +75,8 @@ class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], 
     @staticmethod
     def from_cli(parameters: Dict) -> 'Policy':
         n_actions = parameters['n_actions']
-        q_model = NNCLI.from_cli(parameters['q_model'])
-        advantage_model = NNCLI.from_cli(parameters['advantage_model']) if parameters.get('advantage_model') else None
+        q_model = NN.from_cli(parameters['q_model'])
+        advantage_model = NN.from_cli(parameters['advantage_model']) if parameters.get('advantage_model') else None
         action_selector = action_selector_from_cli(parameters['action_selector'])
 
         return DiscreteAction(n_actions, q_model, advantage_model, action_selector)

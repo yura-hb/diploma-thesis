@@ -7,14 +7,14 @@ import torch
 
 from agents.utils.policy import Policy
 from agents.utils.memory import Record, Memory
-from agents.utils.nn import LossCLI, OptimizerCLI
+from agents.utils.nn import Loss, Optimizer
 from agents.utils.return_estimator import ReturnEstimator
 from utils import Loggable
 
 
 class RLTrainer(Loggable):
 
-    def __init__(self, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI, return_estimator: ReturnEstimator):
+    def __init__(self, memory: Memory, loss: Loss, optimizer: Optimizer, return_estimator: ReturnEstimator):
         super().__init__()
 
         self.memory = memory
@@ -50,7 +50,7 @@ class RLTrainer(Loggable):
         self.memory.clear()
 
     @staticmethod
-    def from_cli(parameters, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI, return_estimator: ReturnEstimator):
+    def from_cli(parameters, memory: Memory, loss: Loss, optimizer: Optimizer, return_estimator: ReturnEstimator):
         pass
 
     def record_loss(self, loss: torch.FloatTensor, **kwargs):

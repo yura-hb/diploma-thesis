@@ -2,7 +2,7 @@
 from functools import partial
 
 from agents.utils.memory import from_cli as memory_from_cli
-from agents.utils.nn import LossCLI, OptimizerCLI
+from agents.utils.nn import Loss, Optimizer
 
 from utils import from_cli as _from_cli
 from agents.utils.rl.ddqn import DoubleDeepQTrainer
@@ -20,8 +20,8 @@ def from_cli(parameters):
     _parameters = parameters['parameters']
 
     memory = memory_from_cli(_parameters['memory'])
-    loss = LossCLI.from_cli(_parameters['loss'])
-    optimizer = OptimizerCLI.from_cli(_parameters['optimizer'])
+    loss = Loss.from_cli(_parameters['loss'])
+    optimizer = Optimizer.from_cli(_parameters['optimizer'])
     return_estimator = return_estimator_from_cli(_parameters['return'])
 
     return partial(

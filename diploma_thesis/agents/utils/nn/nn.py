@@ -7,7 +7,7 @@ from copy import deepcopy
 from agents.utils.nn.layers import PartialInstanceNorm1d
 
 
-class NNCLI(nn.Module):
+class NN(nn.Module):
     """
     A simple factory to create NN based on the list of parameters from the CLI
     """
@@ -24,7 +24,7 @@ class NNCLI(nn.Module):
 
             @staticmethod
             def from_cli(parameters: dict):
-                return NNCLI.Configuration.InstanceNorm()
+                return NN.Configuration.InstanceNorm()
 
         @dataclass
         class Graph:
@@ -38,7 +38,7 @@ class NNCLI(nn.Module):
 
             @staticmethod
             def from_cli(parameters: dict):
-                return NNCLI.Configuration.LayerNorm()
+                return NN.Configuration.LayerNorm()
 
         @dataclass
         class PartialInstanceNorm:
@@ -46,7 +46,7 @@ class NNCLI(nn.Module):
 
             @staticmethod
             def from_cli(parameters: dict):
-                return NNCLI.Configuration.PartialInstanceNorm(channels=parameters['channels'])
+                return NN.Configuration.PartialInstanceNorm(channels=parameters['channels'])
 
         @dataclass
         class Linear:
@@ -56,7 +56,7 @@ class NNCLI(nn.Module):
 
             @staticmethod
             def from_cli(parameters: dict):
-                return NNCLI.Configuration.Linear(
+                return NN.Configuration.Linear(
                     dim=parameters['dim'],
                     activation=parameters['activation'],
                     dropout=parameters.get('dropout', 0.0)
@@ -67,7 +67,7 @@ class NNCLI(nn.Module):
 
             @staticmethod
             def from_cli(parameters: dict):
-                return NNCLI.Configuration.Flatten()
+                return NN.Configuration.Flatten()
 
         layers: list[Layer]
 
@@ -76,14 +76,14 @@ class NNCLI(nn.Module):
         @staticmethod
         def from_cli(parameters: dict):
             key_to_cls = {
-                'linear': NNCLI.Configuration.Linear,
-                'instance_norm': NNCLI.Configuration.InstanceNorm,
-                'layer_norm': NNCLI.Configuration.LayerNorm,
-                'partial_instance_norm': NNCLI.Configuration.PartialInstanceNorm,
-                'flatten': NNCLI.Configuration.Flatten
+                'linear': NN.Configuration.Linear,
+                'instance_norm': NN.Configuration.InstanceNorm,
+                'layer_norm': NN.Configuration.LayerNorm,
+                'partial_instance_norm': NN.Configuration.PartialInstanceNorm,
+                'flatten': NN.Configuration.Flatten
             }
 
-            return NNCLI.Configuration(
+            return NN.Configuration(
                 layers=[
                     key_to_cls[layer['kind']].from_cli(layer.get('parameters', dict()))
                     for layer in parameters['layers']
@@ -130,7 +130,7 @@ class NNCLI(nn.Module):
     def parameters(self, recurse: bool = True):
         return [{'params': self.model.parameters(recurse), **self.configuration.optimizer_parameters}]
 
-    def copy_parameters(self, other: 'NNCLI', decay: float = 1.0):
+    def copy_parameters(self, other: 'NN', decay: float = 1.0):
         with torch.no_grad():
             for param, other_param in zip(self.model.parameters(), other.model.parameters()):
                 param.data.copy_(param.data * (1 - decay) + other_param.data * decay)
@@ -142,17 +142,17 @@ class NNCLI(nn.Module):
 
     def __make_layer__(self, input_dim, layer: Configuration.Layer):
         match layer:
-            case NNCLI.Configuration.InstanceNorm():
+            case NN.Configuration.InstanceNorm():
                 return nn.InstanceNorm1d(input_dim), input_dim
-            case NNCLI.Configuration.LayerNorm():
+            case NN.Configuration.LayerNorm():
                 return nn.LayerNorm(input_dim), input_dim
-            case NNCLI.Configuration.Flatten():
+            case NN.Configuration.Flatten():
                 return nn.Flatten(), torch.prod(torch.tensor(input_dim)).item()
-            case NNCLI.Configuration.PartialInstanceNorm(channels):
+            case NN.Configuration.PartialInstanceNorm(channels):
                 return PartialInstanceNorm1d(channels), input_dim
-            case NNCLI.Configuration.Linear(output_dim, activation, dropout):
+            case NN.Configuration.Linear(output_dim, activation, dropout):
                 return self.__make_linear_layer__(input_dim, output_dim, activation, dropout), output_dim
-            case NNCLI.Configuration.Graph():
+            case NN.Configuration.Graph():
                 return ..., ...
             case _:
                 raise ValueError(f"Unknown layer type {layer}")
@@ -193,7 +193,7 @@ class NNCLI(nn.Module):
                 raise ValueError(f"Unknown activation function {activation}")
 
     @staticmethod
-    def from_cli(parameters: dict) -> 'NNCLI':
-        configuration = NNCLI.Configuration.from_cli(parameters)
+    def from_cli(parameters: dict) -> 'NN':
+        configuration = NN.Configuration.from_cli(parameters)
 
-        return NNCLI(configuration)
+        return NN(configuration)

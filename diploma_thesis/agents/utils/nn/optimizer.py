@@ -22,7 +22,7 @@ class Configuration:
     scheduler: Description
 
 
-class OptimizerCLI:
+class Optimizer:
 
     def __init__(self, configuration: Configuration):
         self.configuration = configuration
@@ -111,4 +111,4 @@ class OptimizerCLI:
         if scheduler is not None:
             scheduler = Configuration.Description.from_cli(scheduler)
 
-        return OptimizerCLI(Configuration(optimizer=optimizer, scheduler=scheduler))
+        return Optimizer(Configuration(optimizer=optimizer, scheduler=scheduler))

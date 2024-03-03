@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict
 
-from agents.utils.nn import NNCLI
+from agents.utils.nn import NN
 from agents.utils.rl.rl import *
 
 
@@ -9,15 +9,15 @@ class Reinforce(RLTrainer):
 
     @dataclass
     class Configuration:
-        critic_networks: List[NNCLI]
+        critic_networks: List[NN]
 
     def __init__(self,
                  memory: Memory,
-                 optimizer: OptimizerCLI,
-                 loss: LossCLI,
+                 optimizer: Optimizer,
+                 loss: Loss,
                  return_estimator: ReturnEstimator,
                  configuration: Configuration):
-        actor_loss = LossCLI(LossCLI.Configuration(
+        actor_loss = Loss(Loss.Configuration(
             kind='cross_entropy',
             parameters=dict()
         ))
@@ -55,7 +55,7 @@ class Reinforce(RLTrainer):
         self.memory.store(updated)
 
     @classmethod
-    def from_cli(cls, parameters: Dict, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):
+    def from_cli(cls, parameters: Dict, memory: Memory, loss: Loss, optimizer: Optimizer):
         critics = parameters.get('critics', {})
         models = parameters.get('models', {})
         optimizer = parameters.get('optimizer', {})

@@ -24,8 +24,8 @@ class DeepQTrainer(RLTrainer):
 
     def __init__(self,
                  memory: Memory,
-                 optimizer: OptimizerCLI,
-                 loss: LossCLI,
+                 optimizer: Optimizer,
+                 loss: Loss,
                  return_estimator: ReturnEstimator,
                  configuration: Configuration):
         super().__init__(memory, loss, optimizer, return_estimator)
@@ -97,7 +97,7 @@ class DeepQTrainer(RLTrainer):
     def from_cli(cls,
                  parameters,
                  memory: Memory,
-                 loss: LossCLI,
-                 optimizer: OptimizerCLI,
+                 loss: Loss,
+                 optimizer: Optimizer,
                  return_estimator: ReturnEstimator):
         return cls(memory, optimizer, loss, return_estimator, DeepQTrainer.Configuration.from_cli(parameters))

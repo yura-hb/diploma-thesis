@@ -4,7 +4,7 @@ import torch
 from dataclasses import dataclass
 
 
-class LossCLI:
+class Loss:
 
     @dataclass
     class Configuration:
@@ -37,7 +37,7 @@ class LossCLI:
 
     @staticmethod
     def from_cli(parameters):
-        return LossCLI(LossCLI.Configuration(
+        return Loss(Loss.Configuration(
             kind=parameters['kind'],
             parameters=parameters.get('parameters', dict())
         ))

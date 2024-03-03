@@ -1,5 +1,5 @@
 
-from .nn_cli import NNCLI
-from .optimizer_cli import OptimizerCLI
-from .loss_cli import LossCLI
+from .nn import NN
+from .optimizer import Optimizer
+from .loss import Loss
 from agents.utils.nn.layers.graph import GraphCLI
