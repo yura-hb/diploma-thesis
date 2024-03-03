@@ -1,6 +1,7 @@
 from typing import Dict
 
 from agents.utils import NN, Phase
+from agents.utils.nn.layers.linear import Linear
 from agents.utils.action import ActionSelector, from_cli as action_selector_from_cli
 from .policy import *
 
@@ -63,14 +64,14 @@ class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], 
     # Utilities
 
     def __configure_model_output_layers__(self):
-        value_output_layer = NN.Linear(dim=1, activation='none', dropout=0)
-        action_output_layer = NN.Linear(dim=self.n_actions, activation='none', dropout=0)
+        value_output_layer = Linear(dim=1, activation='none', dropout=0)
+        action_output_layer = Linear(dim=self.n_actions, activation='none', dropout=0)
 
         if self.advantage_model is not None:
-            self.q_model.append(value_output_layer)
-            self.advantage_model.append(action_output_layer)
+            self.q_model.append_output_layer(value_output_layer)
+            self.advantage_model.append_output_layer(action_output_layer)
         else:
-            self.q_model.append(action_output_layer)
+            self.q_model.append_output_layer(action_output_layer)
 
     @staticmethod
     def from_cli(parameters: Dict) -> 'Policy':

@@ -1,10 +1,11 @@
 
 import torch
 
+from .layer import *
 from torch import nn
 
 
-class PartialInstanceNorm1d(nn.Module):
+class PartialInstanceNorm1d(Layer):
 
     def __init__(self, channels: int):
         super().__init__()
@@ -17,3 +18,7 @@ class PartialInstanceNorm1d(nn.Module):
         normalized = self.norm(normalized)
 
         return torch.hstack([normalized, batch[:, self.channels:]])
+
+    @classmethod
+    def from_cli(cls, parameters: dict) -> 'Layer':
+        return PartialInstanceNorm1d(channels=parameters['channels'])
