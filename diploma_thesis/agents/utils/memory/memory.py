@@ -1,9 +1,11 @@
 
 from abc import ABCMeta, abstractmethod
 from typing import TypeVar
+from dataclasses import field
 
 import torch
 from tensordict.prototype import tensorclass
+from tensordict import TensorDict
 from torchrl.data import TensorDictReplayBuffer
 
 State = TypeVar('State')
@@ -15,10 +17,18 @@ Configuration = TypeVar('Configuration')
 class Record:
     state: State
     action: Action
-    action_values: torch.FloatTensor
     next_state: State
     reward: torch.FloatTensor
     done: torch.BoolTensor
+    info: TensorDict = field(default_factory=lambda: TensorDict(batch_size=[]))
+
+    @property
+    def is_filled(self):
+        return (self.state is not None and
+                self.action is not None and
+                self.next_state is not None and
+                self.reward is not None and
+                self.done is not None)
 
 
 class NotReadyException(BaseException):
@@ -43,7 +53,7 @@ class Memory(metaclass=ABCMeta):
     def sample_n(self, batch_size: int) -> Record:
         return self.buffer.sample(batch_size=batch_size)
 
-    def update_priority(self, indices: torch.LongTensor, priorities: torch.FloatTensor):
+    def update_priority(self, indices: torch.LongTensor, priorities: torch.Tensor):
         self.buffer.update_priority(indices, priorities)
 
     @abstractmethod
