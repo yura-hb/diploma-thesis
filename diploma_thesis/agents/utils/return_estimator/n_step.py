@@ -34,12 +34,12 @@ class NStep(Estimator):
     def update_returns(self, records: List[Record]) -> List[Record]:
         pass
 
-# def recursive(trajectory, V, done, args, compute_target_policy):
+# def recursive(trajectory.yml, V, done, args, compute_target_policy):
 #     require_policy = args.off_policy
-#     end = trajectory[-1]
+#     end = trajectory.yml[-1]
 #
 #     for _ in (range(args.n) if done else [0]):
-#         transition = trajectory[0]
+#         transition = trajectory.yml[0]
 #
 #         policy = None
 #
@@ -52,7 +52,7 @@ class NStep(Estimator):
 #             G = V[end.next_state]
 #
 #         for index in reversed(range(args.n)):
-#             tmp = trajectory[index]
+#             tmp = trajectory.yml[index]
 #
 #             if tmp.terminal:
 #                 continue
@@ -73,6 +73,6 @@ class NStep(Estimator):
 #                 G = (1 - args.trace_lambda) * G_1 + args.trace_lambda * G
 #
 #         if done:
-#             trajectory.append(Transition(0.0, 0.0, 0.0, 0.0, 0.0, False, 0.0, True))
+#             trajectory.yml.append(Transition(0.0, 0.0, 0.0, 0.0, 0.0, False, 0.0, True))
 #
 #         V[transition.state] += args.alpha * (G - V[transition.state])

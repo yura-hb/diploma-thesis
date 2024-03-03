@@ -1,13 +1,8 @@
 from dataclasses import dataclass
-from typing import List
-
-import torch
-
 from typing import Dict
 
 from agents.utils.nn import NNCLI
 from agents.utils.rl.rl import *
-from agents.utils.return_estimator import ReturnEstimator
 
 
 class Reinforce(RLTrainer):
@@ -15,12 +10,12 @@ class Reinforce(RLTrainer):
     @dataclass
     class Configuration:
         critic_networks: List[NNCLI]
-        return_estimator: ReturnEstimator
 
     def __init__(self,
                  memory: Memory,
                  optimizer: OptimizerCLI,
                  loss: LossCLI,
+                 return_estimator: ReturnEstimator,
                  configuration: Configuration):
         actor_loss = LossCLI(LossCLI.Configuration(
             kind='cross_entropy',
@@ -29,7 +24,7 @@ class Reinforce(RLTrainer):
 
         critics_loss = loss
 
-        super().__init__(memory, actor_loss, optimizer)
+        super().__init__(memory, actor_loss, optimizer, return_estimator)
 
         self.critics = None
         self.configuration = configuration
@@ -37,6 +32,7 @@ class Reinforce(RLTrainer):
     def configure(self, model: NNModel):
         super().configure(model)
 
+        # configuration.cri
         # TODO: - Instantiate critics
 
     def train_step(self, model: NNModel):
@@ -50,8 +46,13 @@ class Reinforce(RLTrainer):
 
         # Perform critics step
 
-    def store(self, trajectory: List[Record]):
-        pass
+    def store(self, record: Record | List[Record]):
+        if isinstance(record, Record):
+            raise ValueError('Reinforce does not support single records')
+
+        updated = self.return_estimator.update_returns(record)
+
+        self.memory.store(updated)
 
     @classmethod
     def from_cli(cls, parameters: Dict, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):
@@ -59,4 +60,4 @@ class Reinforce(RLTrainer):
         models = parameters.get('models', {})
         optimizer = parameters.get('optimizer', {})
 
-        return cls(memory, optimizer, loss, )
+        return cls(memory, optimizer, loss)

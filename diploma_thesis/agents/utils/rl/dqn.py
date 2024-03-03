@@ -3,13 +3,13 @@ from typing import Dict
 
 import tensordict
 
+from agents.utils.memory import NotReadyException
 from agents.utils.rl.rl import *
 
 
 class DeepQTrainer(RLTrainer):
     @dataclass
     class Configuration:
-        gamma: float
         decay: float = 0.99
         update_steps: int = 10
         prior_eps: float = 1e-6
@@ -17,7 +17,6 @@ class DeepQTrainer(RLTrainer):
         @staticmethod
         def from_cli(parameters: Dict):
             return DeepQTrainer.Configuration(
-                gamma=parameters['gamma'],
                 decay=parameters.get('decay', 0.99),
                 update_steps=parameters.get('update_steps', 10),
                 prior_eps=parameters.get('prior_eps', 1e-6)
@@ -27,18 +26,19 @@ class DeepQTrainer(RLTrainer):
                  memory: Memory,
                  optimizer: OptimizerCLI,
                  loss: LossCLI,
+                 return_estimator: ReturnEstimator,
                  configuration: Configuration):
-        super().__init__(memory, loss, optimizer)
+        super().__init__(memory, loss, optimizer, return_estimator)
 
         self.target_model = None
         self.configuration = configuration
 
-    def configure(self, model: NNModel):
+    def configure(self, model: Policy):
         super().configure(model)
 
         self.target_model = model.clone()
 
-    def train_step(self, model: NNModel):
+    def train_step(self, model: Policy):
         try:
             batch, info = self.memory.sample(return_info=True)
             batch: Record | torch.Tensor = torch.squeeze(batch)
@@ -67,7 +67,7 @@ class DeepQTrainer(RLTrainer):
 
             self.memory.update_priority(info['index'], td_error)
 
-    def estimate_q(self, model: NNModel, batch: Record | tensordict.TensorDictBase):
+    def estimate_q(self, model: Policy, batch: Record | tensordict.TensorDictBase):
         # Note:
         # The idea is that we compute the Q-values only for performed actions. Other actions wouldn't be updated,
         # because there will be zero loss and so zero gradient
@@ -77,13 +77,27 @@ class DeepQTrainer(RLTrainer):
         target = self.target_model.predict(batch.next_state)
         target = target.max(dim=1).values
 
-        q = batch.reward + self.configuration.gamma * target * (1 - batch.done)
+        q = batch.reward + self.return_estimator.discount_factor * target * (1 - batch.done)
         q_values[range(batch.shape[0]), batch.action] = q
 
         td_error = torch.square(orig_q - q)
 
         return q_values, td_error
 
+    def store(self, record: Record | List[Record]):
+        if isinstance(record, Record):
+            self.memory.store(record.view(-1))
+            return
+
+        estimated = self.return_estimator.update_returns(record)
+
+        self.memory.store(estimated)
+
     @classmethod
-    def from_cli(cls, parameters, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):
-        return cls(memory, optimizer, loss, DeepQTrainer.Configuration.from_cli(parameters))
+    def from_cli(cls,
+                 parameters,
+                 memory: Memory,
+                 loss: LossCLI,
+                 optimizer: OptimizerCLI,
+                 return_estimator: ReturnEstimator):
+        return cls(memory, optimizer, loss, return_estimator, DeepQTrainer.Configuration.from_cli(parameters))

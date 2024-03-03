@@ -17,6 +17,3 @@ class PartialInstanceNorm1d(nn.Module):
         normalized = self.norm(normalized)
 
         return torch.hstack([normalized, batch[:, self.channels:]])
-
-
-

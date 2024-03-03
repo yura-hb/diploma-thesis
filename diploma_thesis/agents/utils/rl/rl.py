@@ -1,29 +1,31 @@
 
 from abc import abstractmethod
+from typing import List
 
 import pandas as pd
 import torch
 
-from agents.base.model import NNModel
-from agents.utils.memory import Record, Memory, NotReadyException
+from agents.utils.policy import Policy
+from agents.utils.memory import Record, Memory
 from agents.utils.nn import LossCLI, OptimizerCLI
-
+from agents.utils.return_estimator import ReturnEstimator
 from utils import Loggable
 
 
 class RLTrainer(Loggable):
 
-    def __init__(self, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):
+    def __init__(self, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI, return_estimator: ReturnEstimator):
         super().__init__()
 
         self.memory = memory
         self.loss = loss
         self.optimizer = optimizer
+        self.return_estimator = return_estimator
         self._is_configured = False
         self.loss_cache = []
 
     @abstractmethod
-    def configure(self, model: NNModel):
+    def configure(self, model: Policy):
         self._is_configured = True
 
         if not self.optimizer.is_connected:
@@ -34,13 +36,13 @@ class RLTrainer(Loggable):
         return self._is_configured
 
     @abstractmethod
-    def train_step(self, model: NNModel):
+    def train_step(self, model: Policy):
         pass
 
     def loss_record(self) -> pd.DataFrame:
         return pd.DataFrame(self.loss_cache)
 
-    def store(self, record: Record):
+    def store(self, record: Record | List[Record]):
         self.memory.store(record.view(-1))
 
     def clear(self):
@@ -48,7 +50,7 @@ class RLTrainer(Loggable):
         self.memory.clear()
 
     @staticmethod
-    def from_cli(parameters, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI):
+    def from_cli(parameters, memory: Memory, loss: LossCLI, optimizer: OptimizerCLI, return_estimator: ReturnEstimator):
         pass
 
     def record_loss(self, loss: torch.FloatTensor, **kwargs):

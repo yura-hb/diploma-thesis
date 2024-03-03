@@ -4,7 +4,7 @@ from torch import nn
 from dataclasses import dataclass
 from copy import deepcopy
 
-from agents.utils.layers import PartialInstanceNorm1d
+from agents.utils.nn.layers import PartialInstanceNorm1d
 
 
 class NNCLI(nn.Module):
@@ -99,28 +99,33 @@ class NNCLI(nn.Module):
         self.configuration = configuration
 
     @property
-    def is_connected(self):
+    def is_configured(self):
         return self.model is not None
 
     @property
     def input_dim(self):
         return self.input_dim
 
-    def connect(self, input_dim: torch.Size, output_layer: Configuration.Linear):
-        self.model = nn.Sequential()
-        self._input_dim = input_dim
+    # def connect(self, input_dim: torch.Size, output_layer: Configuration.Linear):
+    #     self.model = nn.Sequential()
+    #     self._input_dim = input_dim
+    #
+    #     previous_dim = input_dim
+    #
+    #     for layer in self.configuration.layers + [output_layer]:
+    #         layer, output_dim = self.__make_layer__(previous_dim, layer)
+    #
+    #         self.model = self.model.append(layer)
+    #
+    #         previous_dim = output_dim
 
-        previous_dim = input_dim
-
-        for layer in self.configuration.layers + [output_layer]:
-            layer, output_dim = self.__make_layer__(previous_dim, layer)
-
-            self.model = self.model.append(layer)
-
-            previous_dim = output_dim
-
-    def forward(self, x):
+    def forward(self, state):
         return self.model(torch.atleast_2d(x))
+
+    def append(self, layer: Configuration.Layer):
+        assert self.model is None, "Layers can be appended only before model initialization"
+
+        self.configuration.layers.append(layer)
 
     def parameters(self, recurse: bool = True):
         return [{'params': self.model.parameters(recurse), **self.configuration.optimizer_parameters}]

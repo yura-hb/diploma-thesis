@@ -22,5 +22,12 @@ def from_cli(parameters):
     memory = memory_from_cli(_parameters['memory'])
     loss = LossCLI.from_cli(_parameters['loss'])
     optimizer = OptimizerCLI.from_cli(_parameters['optimizer'])
+    return_estimator = return_estimator_from_cli(_parameters['return'])
 
-    return partial(_from_cli, key_to_class=key_to_class, memory=memory, loss=loss, optimizer=optimizer)(parameters)
+    return partial(
+        _from_cli,
+        key_to_class=key_to_class,
+        memory=memory, loss=loss,
+        optimizer=optimizer,
+        return_estimator=return_estimator
+    )(parameters)

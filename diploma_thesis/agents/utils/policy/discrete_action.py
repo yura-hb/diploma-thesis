@@ -15,6 +15,8 @@ class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], 
         self.advantage_model = advantage_model
         self.action_selector = action_selector
 
+        self.__configure_model_output_layers__()
+
     def update(self, phase: Phase):
         self.phase = phase
 
@@ -34,15 +36,13 @@ class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], 
         return Record(state, action, info)
 
     def predict(self, state: State) -> torch.FloatTensor:
-        # assert isinstance(state, TensorState), f"State must conform to TensorState"
-        #
-        # if not self.model.is_connected:
-        #     self.__connect__(len(self.rules), self.model, state.state.shape)
-        #
-        # tensor = torch.atleast_2d(state.state)
-        #
-        # return self.model(tensor)
-        pass
+        values = self.q_model(state)
+
+        if self.advantage_model is not None:
+            advantages = self.advantage_model(state)
+            values = values + advantages - advantages.mean(dim=1, keepdim=True)
+
+        return values
 
     def parameters(self, recurse: bool = True):
         result = [
@@ -62,11 +62,15 @@ class DiscreteAction(Generic[Rule, Input, Record], Policy[Rule, Input, Record], 
 
     # Utilities
 
-    def __connect__(self, model: NNCLI, input_shape: torch.Size):
-        pass
-        # output_layer = NNCLI.Configuration.Linear(dim=self.n_actions, activation='none', dropout=0)
-        #
-        # model.connect(input_shape, output_layer)
+    def __configure_model_output_layers__(self):
+        value_output_layer = NNCLI.Linear(dim=1, activation='none', dropout=0)
+        action_output_layer = NNCLI.Linear(dim=self.n_actions, activation='none', dropout=0)
+
+        if self.advantage_model is not None:
+            self.q_model.append(value_output_layer)
+            self.advantage_model.append(action_output_layer)
+        else:
+            self.q_model.append(action_output_layer)
 
     @staticmethod
     def from_cli(parameters: Dict) -> 'Policy':
