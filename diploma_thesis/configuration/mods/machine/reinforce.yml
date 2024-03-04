@@ -4,24 +4,25 @@ parameters:
   model:
     kind: 'deep_multi_rule'
     parameters:
-      rules:
-        ...
+      __rules__: ''
 
       policy:
         kind: 'discrete_action'
         parameters:
           policy_method: 'independent'
 
+          value_model:
+            __model__: ''
+
           action_model:
-            ...
+            __model__: ''
 
           action_selector:
             kind: 'sample'
             parameters:
               is_distribution: False
 
-  encoder:
-    kind: ...
+  __encoder__: ''
 
   trainer:
     kind: 'reinforce'
@@ -30,6 +31,12 @@ parameters:
         kind: 'cross_entropy'
         parameters:
           reduction: 'none'
+
+      optimizer:
+        model:
+          kind: 'adam'
+          parameters:
+            lr: 0.001
 
       memory:
         kind: 'replay'
@@ -53,7 +60,10 @@ parameters:
           loss:
             kind: 'mse'
           neural_network:
-            ...
+            __model__: ''
 
       return:
-        kind: 'no'
+        kind: 'gae'
+        parameters:
+          discount_factor: 0.4
+          lambda: 0.4

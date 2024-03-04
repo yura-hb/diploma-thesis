@@ -1,6 +1,8 @@
 
 state:
   - kind: 'layer_norm'
+    parameters:
+      normalized_shape: [5, 5]
   - kind: 'flatten'
   - kind: 'linear'
     parameters:

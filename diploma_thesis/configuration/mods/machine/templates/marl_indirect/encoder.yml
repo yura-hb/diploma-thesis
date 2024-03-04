@@ -1,2 +1,3 @@
 
-kind: 'deep_marl_indirect'
+encoder:
+  kind: 'deep_marl_indirect'

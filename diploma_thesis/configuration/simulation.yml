@@ -9,9 +9,9 @@ task:
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/machine/reinforce.yml'
+      base_path: 'configuration/mods/machine/ppo.yml'
+      template: 'marl_direct'
       mods: [
-        'architectures/marl_direct/model.yml',
 
       ]
 

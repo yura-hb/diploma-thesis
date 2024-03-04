@@ -4,7 +4,7 @@ parameters:
   model:
     kind: 'deep_multi_rule'
     parameters:
-      rules: ...
+      __rules__: ''
 
       policy:
         kind: 'discrete_action'
@@ -12,10 +12,10 @@ parameters:
           policy_method: 'independent'
 
           value_model:
-            ...
+            __model__: ''
 
           action_model:
-            ...
+            __model__: ''
 
           action_selector:
             kind: 'phase_selector'
@@ -46,8 +46,7 @@ parameters:
                     parameters:
                       epsilon: 0.2
 
-  encoder:
-    kind: ...
+  __encoder__: ''
 
   trainer:
     kind: 'dqn'
