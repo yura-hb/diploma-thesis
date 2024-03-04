@@ -18,6 +18,7 @@ class Record:
     POLICY_KEY = "policy"
     VALUES_KEY = "values"
     REWARD_KEY = "reward"
+    ACTION_KEY = "actions"
     ADVANTAGE_KEY = "advantage"
 
     state: State

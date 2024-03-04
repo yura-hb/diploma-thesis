@@ -49,8 +49,8 @@ class DeepQTrainer(RLTrainer):
         with torch.no_grad():
             q_values, td_error = self.estimate_q(model, batch)
 
-        values = model.predict(batch.state)
-        loss = self.loss(values, q_values)
+        _, actions = model.predict(batch.state)
+        loss = self.loss(actions, q_values)
 
         self.optimizer.zero_grad()
 
@@ -72,18 +72,18 @@ class DeepQTrainer(RLTrainer):
         # Note:
         # The idea is that we compute the Q-values only for performed actions. Other actions wouldn't be updated,
         # because there will be zero loss and so zero gradient
-        q_values = model.predict(batch.next_state)
-        orig_q = q_values.clone()[range(batch.shape[0]), batch.action]
+        _, actions = model.predict(batch.next_state)
+        orig_q = actions.clone()[range(batch.shape[0]), batch.action]
 
         target = self.target_model.predict(batch.next_state)
         target = target.max(dim=1).values
 
         q = batch.reward + self.return_estimator.discount_factor * target * (1 - batch.done)
-        q_values[range(batch.shape[0]), batch.action] = q
+        actions[range(batch.shape[0]), batch.action] = q
 
         td_error = torch.square(orig_q - q)
 
-        return q_values, td_error
+        return actions, td_error
 
     def store(self, record: Record | List[Record]):
         if isinstance(record, Record):

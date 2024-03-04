@@ -53,7 +53,7 @@ class PPO(EpisodicTrainer):
             return
 
         advantages = batch.info[Record.ADVANTAGE_KEY]
-        logits = model.predict(batch.state)
+        value, logits = model.predict(batch.state)
         distribution = torch.distributions.Categorical(logits=logits)
 
         loss = 0

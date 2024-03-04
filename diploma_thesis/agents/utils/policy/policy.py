@@ -1,7 +1,7 @@
 
 from abc import ABCMeta, abstractmethod
 from dataclasses import field
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Tuple
 
 import torch
 from torch import nn
@@ -30,7 +30,7 @@ class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def predict(self, state: State) -> torch.FloatTensor:
+    def predict(self, state: State) -> Tuple[torch.FloatTensor, torch.FloatTensor]:
         pass
 
     @abstractmethod

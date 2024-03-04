@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 # Taken from https://github.com/thomashirtz/noisy-networks/blob/main/noisynetworks.py
 
 

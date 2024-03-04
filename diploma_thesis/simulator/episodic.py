@@ -2,6 +2,7 @@ from .simulator import *
 from agents.base import Agent
 from functools import reduce
 from typing import Dict
+from .utils import Queue
 
 
 class EpisodicSimulator(Simulator):
@@ -9,36 +10,11 @@ class EpisodicSimulator(Simulator):
     A simulator, which stores trajectory.yml of agents and emits them for training after it finishes
     """
 
-    class Queue:
-
-        def __init__(self, is_distributed: bool):
-            self.is_distributed = is_distributed
-            self.queue = dict()
-
-        def store(self, shop_floor_id, key, moment, record):
-            self.queue[shop_floor_id] = self.queue.get(shop_floor_id, dict())
-
-            if self.is_distributed:
-                self.queue[shop_floor_id][key] = self.queue[shop_floor_id].get(key, dict())
-                self.queue[shop_floor_id][key][moment] = self.queue[shop_floor_id][key].get(moment, []) + [record]
-            else:
-                self.queue[shop_floor_id][moment] = self.queue[shop_floor_id].get(moment, []) + [record]
-
-        def pop(self, shop_floor_id):
-            if shop_floor_id not in self.queue:
-                return None
-
-            values = self.queue[shop_floor_id]
-
-            del self.queue[shop_floor_id]
-
-            return values
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.machine_queue = self.Queue(self.machine.is_distributed)
-        self.work_center_queue = self.Queue(self.work_center.is_distributed)
+        self.machine_queue = Queue(self.machine.is_distributed)
+        self.work_center_queue = Queue(self.work_center.is_distributed)
 
     def did_prepare_machine_record(self, context: Context, machine: Machine, record: Record):
         super().did_prepare_machine_record(context, machine, record)

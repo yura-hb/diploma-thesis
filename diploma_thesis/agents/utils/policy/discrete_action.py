@@ -20,14 +20,14 @@ class DiscreteAction(Policy[Input]):
                  value_model: NeuralNetwork,
                  action_model: NeuralNetwork,
                  action_selector: ActionSelector,
-                 value_estimation_method: PolicyEstimationMethod = PolicyEstimationMethod.INDEPENDENT):
+                 policy_method: PolicyEstimationMethod = PolicyEstimationMethod.INDEPENDENT):
         super().__init__()
 
         self.n_actions = n_actions
         self.value_model = value_model
         self.action_model = action_model
         self.action_selector = action_selector
-        self.policy_estimation_method = value_estimation_method
+        self.policy_estimation_method = policy_method
 
         self.__configure__()
 
@@ -87,5 +87,7 @@ class DiscreteAction(Policy[Input]):
         value_model = NeuralNetwork.from_cli(parameters['value_model']) if parameters.get('value_model') else None
         action_model = NeuralNetwork.from_cli(parameters['action_model']) if parameters.get('action_model') else None
         action_selector = action_selector_from_cli(parameters['action_selector'])
+        policy_method = PolicyEstimationMethod(parameters['policy_method']) \
+            if parameters.get('policy_method') else PolicyEstimationMethod.INDEPENDENT
 
-        return DiscreteAction(n_actions, value_model, action_model, action_selector)
+        return DiscreteAction(n_actions, value_model, action_model, action_selector, policy_method)

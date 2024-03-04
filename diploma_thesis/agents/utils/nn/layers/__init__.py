@@ -2,9 +2,10 @@
 from .layer import Layer
 
 from .linear import Linear
-from .common import Flatten, InstanceNorm
+from .common import Flatten, InstanceNorm, LayerNorm
 from .activation import Activation
 from .merge import Merge
+from .noisy_linear import NoisyLinear
 from .graph import GraphLayer
 from .partial_instance_norm_1d import PartialInstanceNorm1d
 
@@ -15,7 +16,7 @@ key_to_class = {
     'linear': Linear,
     'flatten': Flatten,
     'activation': Activation,
-    'layer_norm': ...,
+    'layer_norm': LayerNorm,
     'instance_norm': InstanceNorm,
     'partial_instance_norm': PartialInstanceNorm1d,
     'noisy_linear': ...,
