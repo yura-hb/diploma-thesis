@@ -8,12 +8,14 @@ from utils import from_cli as _from_cli
 from .ddqn import DoubleDeepQTrainer
 from .dqn import DeepQTrainer
 from .reinforce import Reinforce
+from .ppo import PPO
 from .rl import RLTrainer
 
 key_to_class = {
     'dqn': DeepQTrainer,
     'ddqn': DoubleDeepQTrainer,
-    'reinforce': Reinforce
+    'reinforce': Reinforce,
+    'ppo': PPO
 }
 
 

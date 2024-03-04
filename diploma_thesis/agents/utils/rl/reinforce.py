@@ -70,7 +70,7 @@ class Reinforce(EpisodicTrainer):
                 baseline = torch.squeeze(baseline)
 
         # Perform policy step
-        loss = self.loss(model.predict(batch.state), batch.action)
+        loss = self.loss(model.predict(batch.state)[1], batch.action)
 
         if loss.numel() == 1:
             raise ValueError('Loss should not have reduction to single value')
