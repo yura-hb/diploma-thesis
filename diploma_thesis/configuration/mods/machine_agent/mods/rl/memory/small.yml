@@ -1,8 +1,0 @@
-
-parameters:
-  trainer:
-    parameters:
-      memory:
-        parameters:
-          size: 1024
-          batch_size: 64

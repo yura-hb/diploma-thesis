@@ -1,4 +1,0 @@
-parameters:
-  encoder:
-    kind: 'deep_marl_indirect'
-

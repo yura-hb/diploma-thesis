@@ -2,10 +2,10 @@
 #  name: 'policy'
 #  log_stdout: False
 #
-#  machine_agent:
+#  machine:
 #    kind: 'mod'
 #    parameters:
-#      base_path: 'configuration/mods/machine_agent/policy.yml'
+#      base_path: 'configuration/mods/machine/policy.yml'
 #      mods: [ ]
 #
 #  work_center_agent:
@@ -42,7 +42,7 @@
 #
 #rl_agents: &rl_agents
 #  [
-#    'rl/trainer/dqn.yml',
+#    'rl/trainer/dqn.yml.yml',
 #    'rl/trainer/ddqn.yml'
 #  ]
 #
@@ -80,7 +80,7 @@
 #
 #action_set: &action_set
 #  [
-#    'policy/rules/all.yml',
+#    'policy/rules/all_rules.yml',
 #    'policy/rules/marl.yml'
 #  ]
 #

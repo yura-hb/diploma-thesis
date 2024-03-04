@@ -1,0 +1,5 @@
+parameters:
+  trainer:
+    parameters:
+      memory:
+        kind: 'prioritized_replay'

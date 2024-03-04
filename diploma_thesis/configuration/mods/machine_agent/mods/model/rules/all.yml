@@ -1,5 +1,0 @@
-
-parameters:
-  model:
-    parameters:
-      rules: 'all'

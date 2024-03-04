@@ -1,0 +1,73 @@
+
+kind: 'rl'
+parameters:
+  model:
+    kind: 'deep_multi_rule'
+    parameters:
+      rules: ...
+
+      policy:
+        kind: 'discrete_action'
+        parameters:
+          policy_method: 'independent'
+
+          value_model:
+            ...
+
+          action_model:
+            ...
+
+          action_selector:
+            kind: 'phase_selector'
+            parameters:
+              default:
+                kind: 'greedy'
+              phases:
+                - phase:
+                    kind: 'warm_up'
+                    parameters:
+                      step: 0
+                  action_selector:
+                    kind: 'epsilon_greedy'
+                    parameters:
+                      epsilon: 1.0
+                - phase:
+                    kind: 'warm_up'
+                    parameters:
+                      step: 1
+                  action_selector:
+                    kind: 'epsilon_greedy'
+                    parameters:
+                      epsilon: 0.4
+                - phase:
+                    kind: 'training'
+                  action_selector:
+                    kind: 'epsilon_greedy'
+                    parameters:
+                      epsilon: 0.2
+
+  encoder:
+    kind: ...
+
+  trainer:
+    kind: 'dqn'
+    parameters:
+      memory:
+        kind: 'replay'
+        parameters:
+          size: 8192
+          batch_size: 128
+
+      loss:
+        kind: 'mse'
+
+      optimizer:
+        model:
+          kind: 'adam'
+          parameters:
+            lr: 0.001
+
+      return:
+        kind: 'no'
+        parameters:
+          discount_factor: 0.99

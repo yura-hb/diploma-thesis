@@ -1,0 +1,10 @@
+
+rules:
+  - 'spt'
+  - 'lpt'
+  - 'fifo'
+  - 'lifo'
+  - 'swt'
+  - 'lwt'
+  - 'lwkr'
+  - 'mwkr'

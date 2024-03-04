@@ -1,5 +1,0 @@
-parameters:
-  trainer:
-    parameters:
-      loss:
-        kind: 'smooth_l1'

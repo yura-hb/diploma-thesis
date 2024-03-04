@@ -1,7 +1,0 @@
-
-parameters:
-  trainer:
-    kind: 'dqn'
-    parameters:
-      update_steps: 50
-      gamma: 0.95

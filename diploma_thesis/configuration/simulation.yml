@@ -9,18 +9,11 @@ task:
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/machine_agent/model.yml'
+      base_path: 'configuration/mods/machine/reinforce.yml'
       mods: [
-        'rl/agent/single.yml',
-        'rl/trainer/reinforce.yml',
-        'encoding/indirect.yml',
-        'model/model/marl_as.yml',
-        'scheduler/exponential.yml',
-#        'return/n/3_step.yml',
-#        'return/n/off_policy.yml',
-        'return/discount_factor/40.yml'
-      ]
+        'architectures/marl_direct/model.yml',
 
+      ]
 
   work_center_agent:
     kind: 'static'
@@ -56,7 +49,6 @@ task:
     memory: 10000
     is_machine_set_in_work_center_connected: True
     is_work_center_set_in_shop_floor_connected: True
-
 
   simulator:
     kind: 'episodic'

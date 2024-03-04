@@ -1,0 +1,52 @@
+
+kind: 'rl'
+parameters:
+  model:
+    kind: 'deep_multi_rule'
+    parameters:
+      rules:
+        ...
+
+
+      policy:
+        kind: 'discrete_action'
+        parameters:
+          policy_method: 'independent'
+
+          value_model:
+            ...
+
+          action_model:
+            ...
+
+          action_selector:
+            kind: 'sample'
+            parameters:
+              is_distribution: False
+
+  encoder:
+    kind: ...
+
+  trainer:
+    kind: 'reinforce'
+    parameters:
+      loss:
+        kind: 'cross_entropy'
+        parameters:
+          reduction: 'none'
+
+      memory:
+        kind: 'replay'
+        parameters:
+          size: 100000
+          batch_size: 512
+          sampler:
+            kind: 'slice'
+            parameters:
+              slice_len: 256
+              strict_length: False
+              traj_key: [ 'info', 'episode' ]
+              end_key: 'done'
+
+      return:
+        kind: 'gae'
