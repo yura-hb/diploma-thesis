@@ -34,12 +34,13 @@ class DiscreteAction(Policy[Input]):
     def update(self, phase: Phase):
         self.phase = phase
 
-        for module in [self.value_model, self.advantage_model, self.action_selector]:
+        for module in [self.value_model, self.action_model, self.action_selector]:
             if isinstance(module, PhaseUpdatable):
                 module.update(phase)
 
     def __call__(self, state: State, parameters: Input) -> Record:
-        values, actions = self.predict(state).view(-1)
+        values, actions = self.predict(state)
+        values, actions = values.squeeze(), actions.squeeze()
         action, policy = self.action_selector(actions)
         action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
 
@@ -52,13 +53,13 @@ class DiscreteAction(Policy[Input]):
         return Record(state, action, info, batch_size=[])
 
     def predict(self, state: State):
-        values = None
-        actions = None
+        values = torch.tensor(0, dtype=torch.long)
+        actions = torch.tensor(0, dtype=torch.long)
 
         if self.value_model is not None:
             values = self.value_model(state)
 
-        if self.advantage_model is not None:
+        if self.action_model is not None:
             actions = self.action_model(state)
 
         match self.policy_estimation_method:

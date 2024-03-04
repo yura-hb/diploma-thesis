@@ -3,6 +3,7 @@ from .utils import Queue
 
 from agents.base import Agent
 
+
 class TDSimulator(Simulator):
     """
     A simulator, which estimates returns in Temporal Difference manner and send information for training as soon as
