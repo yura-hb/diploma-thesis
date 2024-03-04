@@ -3,12 +3,13 @@
 kind: 'plain'
 parameters:
   timeline:
-    warmup: []
+    warmup:
+      - 1000
     duration: 50000
 
   machine_train_schedule:
     pretrain_steps: 10
-    train_interval: 128
+    train_interval: 5
     max_training_steps: 100000000
 
   work_center_train_schedule:
@@ -23,7 +24,7 @@ parameters:
       parameters:
         base:
           configuration:
-            timespan: 1024
+            timespan: 512
             machines_per_work_center: 1
             work_center_count: 10
 

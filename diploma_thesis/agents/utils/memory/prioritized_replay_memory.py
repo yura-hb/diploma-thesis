@@ -1,8 +1,10 @@
 
-from .memory import *
 from dataclasses import dataclass
 from typing import Dict
+
 from torchrl.data import LazyMemmapStorage, TensorDictPrioritizedReplayBuffer
+
+from .memory import *
 
 
 class PrioritizedReplayMemory(Memory):

@@ -3,16 +3,17 @@ from functools import partial
 
 from agents.utils.memory import from_cli as memory_from_cli
 from agents.utils.nn import Loss, Optimizer
-
-from utils import from_cli as _from_cli
-from agents.utils.rl.ddqn import DoubleDeepQTrainer
-from agents.utils.rl.dqn import DeepQTrainer
 from agents.utils.return_estimator import from_cli as return_estimator_from_cli
+from utils import from_cli as _from_cli
+from .ddqn import DoubleDeepQTrainer
+from .dqn import DeepQTrainer
+from .reinforce import Reinforce
 from .rl import RLTrainer
 
 key_to_class = {
     'dqn': DeepQTrainer,
     'ddqn': DoubleDeepQTrainer,
+    'reinforce': Reinforce
 }
 
 

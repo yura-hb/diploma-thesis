@@ -12,9 +12,13 @@ task:
       base_path: 'configuration/mods/machine_agent/model.yml'
       mods: [
         'rl/agent/single.yml',
+        'rl/trainer/reinforce.yml',
         'encoding/indirect.yml',
         'model/model/marl_as.yml',
-        'scheduler/exponential.yml'
+        'scheduler/exponential.yml',
+#        'return/n/3_step.yml',
+#        'return/n/off_policy.yml',
+        'return/discount_factor/40.yml'
       ]
 
 

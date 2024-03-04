@@ -1,14 +1,14 @@
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, List
 
 from agents.utils import Phase, EvaluationPhase, PhaseUpdatable
-from agents.utils.memory import Memory, Record
+from agents.utils.memory import Record
+from environment import ShopFloor
 from utils import Loggable
 from .encoder import Encoder as StateEncoder, Input, State
 from .model import Model, Action, Result
-from environment import ShopFloor
 
 Key = TypeVar('Key')
 
@@ -61,7 +61,7 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def store(self, key: Key, record: Record):
+    def store(self, key: Key, record: Record | List[Record]):
         pass
 
     def schedule(self, key: Key, parameters: Input) -> Model.Record:

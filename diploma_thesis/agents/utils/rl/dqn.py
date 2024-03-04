@@ -52,8 +52,6 @@ class DeepQTrainer(RLTrainer):
         values = model.predict(batch.state)
         loss = self.loss(values, q_values)
 
-        print(f"Loss: {loss}")
-
         self.optimizer.zero_grad()
 
         loss.backward()

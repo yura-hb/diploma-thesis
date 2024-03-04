@@ -1,0 +1,8 @@
+
+parameters:
+  trainer:
+    parameters:
+      return:
+        kind: 'n_step'
+        parameters:
+          off_policy: true

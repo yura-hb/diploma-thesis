@@ -1,0 +1,31 @@
+
+parameters:
+  trainer:
+    kind: 'reinforce'
+    parameters:
+      loss:
+        kind: 'cross_entropy'
+        parameters:
+          reduction: 'none'
+
+      memory:
+        kind: 'replay'
+        parameters:
+          size: 100000
+          batch_size: 512
+          sampler:
+            kind: 'slice'
+            parameters:
+              slice_len: 256
+              strict_length: False
+              traj_key: ['info', 'episode']
+              end_key: 'done'
+
+      critics:
+        - optimizer:
+            model:
+              kind: 'adam'
+              parameters:
+                lr: 0.001
+          loss:
+            kind: 'mse'

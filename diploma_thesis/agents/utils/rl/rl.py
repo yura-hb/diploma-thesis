@@ -53,7 +53,7 @@ class RLTrainer(Loggable):
     def from_cli(parameters, memory: Memory, loss: Loss, optimizer: Optimizer, return_estimator: ReturnEstimator):
         pass
 
-    def record_loss(self, loss: torch.FloatTensor, **kwargs):
+    def record_loss(self, loss: torch.Tensor, **kwargs):
         self.loss_cache += [dict(
             value=loss.detach().item(),
             optimizer_step=self.optimizer.step_count,

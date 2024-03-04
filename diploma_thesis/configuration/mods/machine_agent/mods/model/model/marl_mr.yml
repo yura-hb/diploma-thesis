@@ -1,3 +1,29 @@
+
+model: &model
+  - kind: 'layer_norm'
+  - kind: 'flatten'
+  - kind: 'linear'
+    parameters:
+      dim: 64
+      activation: 'tanh'
+  - kind: 'linear'
+    parameters:
+      dim: 48
+      activation: 'tanh'
+  - kind: 'linear'
+    parameters:
+      dim: 48
+      activation: 'tanh'
+  - kind: 'linear'
+    parameters:
+      dim: 36
+      activation: 'tanh'
+  - kind: 'linear'
+    parameters:
+      dim: 24
+      activation: 'tanh'
+
+
 parameters:
   model:
     kind: 'deep_multi_rule'
@@ -7,50 +33,15 @@ parameters:
         parameters:
           q_model:
             state:
-              - kind: 'layer_norm'
-              - kind: 'flatten'
-              - kind: 'linear'
-                parameters:
-                  dim: 64
-                  activation: 'tanh'
-              - kind: 'linear'
-                parameters:
-                  dim: 48
-                  activation: 'tanh'
-              - kind: 'linear'
-                parameters:
-                  dim: 48
-                  activation: 'tanh'
-              - kind: 'linear'
-                parameters:
-                  dim: 36
-                  activation: 'tanh'
-              - kind: 'linear'
-                parameters:
-                  dim: 24
-                  activation: 'tanh'
+              *model
           advantage_model:
             state:
-              - kind: 'partial_instance_norm'
-                parameters:
-                  channels: 17
-              - kind: 'linear'
-                parameters:
-                  dim: 64
-                  activation: 'tanh'
-              - kind: 'linear'
-                parameters:
-                  dim: 48
-                  activation: 'tanh'
-              - kind: 'linear'
-                parameters:
-                  dim: 48
-                  activation: 'tanh'
-              - kind: 'linear'
-                parameters:
-                  dim: 36
-                  activation: 'tanh'
-              - kind: 'linear'
-                parameters:
-                  dim: 24
-                  activation: 'tanh'
+              *model
+
+  trainer:
+    parameters:
+      critics:
+        - neural_network:
+            state:
+              *model
+

@@ -156,6 +156,10 @@ class ShopFloor:
         return self._machines
 
     @property
+    def is_job_dispatch_finished(self):
+        return self._did_finish_job_dispatch
+
+    @property
     def now(self) -> float:
         return self.configuration.environment.now
 

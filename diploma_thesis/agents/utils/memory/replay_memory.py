@@ -1,9 +1,10 @@
 
-from .memory import *
-from typing import Dict
+from dataclasses import dataclass
+
 from torchrl.data import LazyMemmapStorage
 
-from dataclasses import dataclass
+from .memory import *
+from .sampler import *
 
 
 class ReplayMemory(Memory):
@@ -12,21 +13,25 @@ class ReplayMemory(Memory):
     class Configuration:
         size: int
         batch_size: int
-        prefetch: int = 1
+        prefetch: int
+        sampler: Sampler
 
         @staticmethod
         def from_cli(parameters: Dict):
             return ReplayMemory.Configuration(
                 size=parameters['size'],
                 batch_size=parameters['batch_size'],
-                prefetch=parameters.get('prefetch', 1)
+                prefetch=parameters.get('prefetch', 0),
+                sampler=Sampler.from_cli(parameters['sampler']) if 'sampler' in parameters else None
             )
 
     def __make_buffer__(self) -> TensorDictReplayBuffer:
         storage = LazyMemmapStorage(max_size=self.configuration.size)
+        sampler = self.configuration.sampler.make() if self.configuration.sampler else RandomSampler()
 
         return TensorDictReplayBuffer(storage=storage,
                                       batch_size=self.configuration.batch_size,
+                                      sampler=sampler,
                                       prefetch=self.configuration.prefetch)
 
     @staticmethod

@@ -1,5 +1,6 @@
 
 import environment
+import torch
 
 from typing import Dict, List
 
@@ -91,7 +92,7 @@ class MachineQueue(Queue):
                 action=record.record.action,
                 next_state=None,
                 reward=None,
-                done=False,
+                done=torch.tensor(False, dtype=torch.bool),
                 info=record.record.info,
                 batch_size=[]
             ),

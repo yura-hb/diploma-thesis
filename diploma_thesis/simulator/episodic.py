@@ -78,4 +78,7 @@ class EpisodicSimulator(Simulator):
         records = sorted(records.items(), key=lambda item: item[0])
         records = reduce(lambda acc, item: acc + item[1], records, [])
 
+        if len(records) > 0:
+            records[-1].done = torch.tensor(True, dtype=torch.bool)
+
         agent.store(key, records)

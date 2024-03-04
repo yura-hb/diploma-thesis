@@ -5,6 +5,7 @@ from typing import TypeVar, Generic
 from tensordict.prototype import tensorclass
 
 from agents.utils.policy import Policy, PolicyRecord
+from agents.utils import Phase, PhaseUpdatable
 from utils import Loggable
 
 State = TypeVar('State')
@@ -26,10 +27,15 @@ class Model(Loggable, Generic[Input, State, Action, Result], metaclass=ABCMeta):
         pass
 
 
-class DeepPolicyModel(Model[Input, State, Action, Result], metaclass=ABCMeta):
+class DeepPolicyModel(Model[Input, State, Action, Result], PhaseUpdatable, metaclass=ABCMeta):
 
     def __init__(self, policy: Policy[Input]):
         super().__init__()
 
         self.policy = policy
+
+    def update(self, phase: Phase):
+        super().update(phase)
+
+        self.policy.update(phase)
 

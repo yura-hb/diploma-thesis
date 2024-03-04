@@ -15,6 +15,11 @@ Configuration = TypeVar('Configuration')
 
 @tensorclass
 class Record:
+    POLICY_KEY = "policy"
+    VALUES_KEY = "values"
+    REWARD_KEY = "reward"
+    ADVANTAGE_KEY = "advantage"
+
     state: State
     action: Action
     next_state: State

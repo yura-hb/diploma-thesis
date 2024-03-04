@@ -1,5 +1,7 @@
 from typing import Dict, List
 
+import torch
+
 import environment
 from agents.workcenter.model import WorkCenterModel
 from environment import WorkCenter, WorkCenterKey
@@ -100,7 +102,7 @@ class WorkCenterQueue(Queue):
                 next_state=None,
                 info=record.record.info,
                 reward=None,
-                done=False,
+                done=torch.tensor(False, dtype=torch.bool),
             ),
             context=self.reward.record_job_action(record.result, work_center),
             moment=context.moment,
