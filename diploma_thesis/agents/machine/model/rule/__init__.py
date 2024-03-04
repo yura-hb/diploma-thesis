@@ -17,11 +17,14 @@ from .lifo import LIFOSchedulingRule
 from .lpt import LPTSchedulingRule
 from .lro import LROSchedulingRule
 from .lwkr import LWRKSchedulingRule
+from .lwt import LWTSchedulingRule
 from .lwkrmod import LWRKMODSchedulingRule
 from .lwkrspt import LWRKSPTSchedulingRule
+from .mwkr import MWRKSchedulingRule
 from .mdd import MDDSchedulingRule
 from .mod import MODSchedulingRule
 from .mon import MONSchedulingRule
+from .mro import MROSchedulingRule
 from .ms import MSSchedulingRule
 from .npt import NPTSchedulingRule
 from .ptwinq import PTWINQSchedulingRule
@@ -31,6 +34,7 @@ from .scheduling_rule import SchedulingRule
 from .spmwk import SPMWKSchedulingRule
 from .spmwkspt import SPMWKSPTSchedulingRule
 from .spt import SPTSchedulingRule
+from .swt import SWTSchedulingRule
 from .winq import WINQSchedulingRule
 
 ALL_SCHEDULING_RULES: Dict[str, SchedulingRule.__class__] = {
@@ -52,9 +56,12 @@ ALL_SCHEDULING_RULES: Dict[str, SchedulingRule.__class__] = {
     'lwkr': LWRKSchedulingRule,
     'lwkrmod': LWRKMODSchedulingRule,
     'lwkrspt': LWRKSPTSchedulingRule,
+    'lwt': LWTSchedulingRule,
+    'mwkr': MWRKSchedulingRule,
     'mdd': MDDSchedulingRule,
     'mod': MODSchedulingRule,
     'mon': MONSchedulingRule,
+    'mro': MROSchedulingRule,
     'ms': MSSchedulingRule,
     'npt': NPTSchedulingRule,
     'ptwinq': PTWINQSchedulingRule,
@@ -63,5 +70,6 @@ ALL_SCHEDULING_RULES: Dict[str, SchedulingRule.__class__] = {
     'spmwk': SPMWKSchedulingRule,
     'spmwkspt': SPMWKSPTSchedulingRule,
     'spt': SPTSchedulingRule,
+    'swt': SWTSchedulingRule,
     'winq': WINQSchedulingRule
 }
