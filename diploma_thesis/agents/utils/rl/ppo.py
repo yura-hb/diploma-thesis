@@ -5,7 +5,7 @@ from typing import Dict
 import torch
 
 from agents.utils.memory import NotReadyException
-from .episodic import *
+from .rl import *
 
 
 @dataclass
@@ -25,7 +25,7 @@ class Configuration:
         )
 
 
-class PPO(EpisodicTrainer):
+class PPO(RLTrainer):
 
     def __init__(self,
                  memory: Memory,
@@ -38,6 +38,9 @@ class PPO(EpisodicTrainer):
         self.is_critics_configured = False
         self.configuration = configuration
         self.episodes = 0
+
+    def configure(self, model: Policy):
+        super().configure(model)
 
     def train_step(self, model: Policy):
         for i in range(self.configuration.epochs):
@@ -88,17 +91,6 @@ class PPO(EpisodicTrainer):
             result.append(updated)
 
         return torch.cat(result, dim=0)
-
-    def store(self, record: Record | List[Record]):
-        if isinstance(record, Record):
-            raise ValueError('Reinforce does not support single records')
-
-        updated = torch.stack(record, dim=0)
-        updated.info['episode'] = torch.full(updated.reward.shape, self.episodes, device=updated.reward.device)
-
-        self.episodes += 1
-
-        self.memory.store(updated)
 
     @classmethod
     def from_cli(cls,

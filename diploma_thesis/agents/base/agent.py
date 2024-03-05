@@ -9,8 +9,24 @@ from environment import ShopFloor
 from utils import Loggable
 from .encoder import Encoder as StateEncoder, Input, State
 from .model import Model, Action, Result
+from dataclasses import dataclass
 
 Key = TypeVar('Key')
+
+
+@dataclass
+class TrainingSample:
+    episode_id: int
+
+
+@dataclass
+class Slice(TrainingSample):
+    records: List[Record]
+
+
+@dataclass
+class Trajectory(TrainingSample):
+    records: List[Record]
 
 
 class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
@@ -61,7 +77,7 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def store(self, key: Key, record: Record | List[Record]):
+    def store(self, key: Key, sample: TrainingSample):
         pass
 
     def schedule(self, key: Key, parameters: Input) -> Model.Record:

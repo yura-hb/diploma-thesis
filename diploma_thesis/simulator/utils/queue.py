@@ -43,6 +43,8 @@ class Queue:
     def store_group(self, shop_floor_id, key, records):
         implicit_moment = -1
 
+        self.queue[shop_floor_id] = self.queue.get(shop_floor_id, dict())
+
         if self.is_distributed:
             self.queue[shop_floor_id][key] = self.queue[shop_floor_id].get(key, dict())
             self.queue[shop_floor_id][key][implicit_moment] = records

@@ -1,0 +1,8 @@
+
+
+parameters:
+  simulations:
+    - values:
+        dispatch:
+          configuration:
+            work_center_count: 10

@@ -1,5 +1,6 @@
 from .simulator import *
 from agents.base import Agent
+from agents.base.agent import Trajectory
 from functools import reduce
 from typing import Dict
 from .utils import Queue
@@ -44,17 +45,17 @@ class EpisodicSimulator(Simulator):
 
         if agent.is_distributed:
             for key, records in records.items():
-                self.__send_trajectory__(key, agent, records)
+                self.__send_trajectory__(simulation.shop_floor.id, key, agent, records)
             return
 
-        self.__send_trajectory__(None, agent, records)
+        self.__send_trajectory__(simulation.shop_floor.id, None, agent, records)
 
     @staticmethod
-    def __send_trajectory__(key, agent: Agent, records: Dict[float, Record]):
+    def __send_trajectory__(episode_id: int, key, agent: Agent, records: Dict[float, Record]):
         records = sorted(records.items(), key=lambda item: item[0])
         records = reduce(lambda acc, item: acc + item[1], records, [])
 
         if len(records) > 0:
             records[-1].done = torch.tensor(True, dtype=torch.bool)
 
-        agent.store(key, records)
+        agent.store(key, Trajectory(episode_id=episode_id, records=records))

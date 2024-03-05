@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import Dict
 
 import tensordict
-
 from torch.optim.swa_utils import AveragedModel, get_ema_avg_fn
+
 from agents.utils.memory import NotReadyException
 from agents.utils.rl.rl import *
 
@@ -84,16 +84,6 @@ class DeepQTrainer(RLTrainer):
         td_error = torch.square(orig_q - q)
 
         return actions, td_error
-
-    def store(self, record: Record | List[Record]):
-        if isinstance(record, Record):
-            self.memory.store(record.view(-1))
-            return
-
-        estimated = self.return_estimator.update_returns(record)
-        estimated = torch.stack(estimated).unsqueeze(dim=-1)
-
-        self.memory.store(estimated)
 
     @property
     def target_model(self):

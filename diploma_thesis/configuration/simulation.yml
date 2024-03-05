@@ -9,7 +9,7 @@ task:
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/machine/ppo.yml'
+      base_path: 'configuration/mods/machine/dqn.yml'
       template: 'marl_direct'
       mods: [
 
@@ -27,7 +27,7 @@ task:
 
   tape:
     machine_reward:
-      kind: 'global_decomposed_tardiness'
+      kind: 'surrogate_tardiness'
       parameters:
         span: 256
 
@@ -51,10 +51,12 @@ task:
     is_work_center_set_in_shop_floor_connected: True
 
   simulator:
-    kind: 'episodic'
+    kind: 'td'
+    parameters:
+      memory: 5
 
   run:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/run/episodic_jsp/run.yml'
+      base_path: 'configuration/mods/run/td_jsp/run.yml'
       mods: []

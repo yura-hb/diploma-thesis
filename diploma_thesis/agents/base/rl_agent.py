@@ -34,9 +34,9 @@ class RLAgent(Generic[Key], Agent[Key]):
     def train_step(self):
         self.trainer.train_step(self.model.policy)
 
-    @filter(lambda self, *args: self.phase == TrainingPhase())
-    def store(self, key: Key, record: Record):
-        self.trainer.store(record)
+    @filter(lambda self, *args: self.phase != EvaluationPhase())
+    def store(self, key: Key, sample: TrainingSample):
+        self.trainer.store(sample)
 
     def loss_record(self):
         return self.trainer.loss_record()

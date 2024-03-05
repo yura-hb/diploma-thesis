@@ -1,5 +1,6 @@
 from .simulator import *
 from .utils import Queue
+from agents.base.agent import Slice
 
 from agents.base import Agent
 
@@ -28,13 +29,14 @@ class TDSimulator(Simulator):
 
         self.__store_or_forward_td__(context, self.work_center_queue, self.work_center, work_center.key, record)
 
-    @staticmethod
-    def from_cli(parameters, *args, **kwargs) -> Simulator:
-        return TDSimulator(parameters.get('memory', 1), *args, **kwargs)
+    def did_finish_simulation(self, simulation: Simulation):
+        pass
 
-    def __store_or_forward_td__(self, context: Context, queue: Queue, agent: Agent, key, record):
+    # TODO: - Implement
+
+    def __store_or_forward_td__(self, context: Context, queue: Queue, agent, key, record):
         if self.memory <= 1:
-            agent.store(key, record)
+            agent.store(key, Slice(episode_id=context.shop_floor.id, records=[record]))
             return
 
         # Implement the idea of n-step memory
@@ -43,8 +45,12 @@ class TDSimulator(Simulator):
         if queue.group_len(context.shop_floor.id, key) > self.memory:
             records = queue.pop_group(context.shop_floor.id, key)
 
-            agent.store(key, records)
+            agent.store(key, Slice(episode_id=context.shop_floor.id, records=records))
 
             queue.store_group(context.shop_floor.id, key, records[1:])
 
         return
+
+    @staticmethod
+    def from_cli(parameters, *args, **kwargs) -> Simulator:
+        return TDSimulator(parameters.get('memory', 1), *args, **kwargs)

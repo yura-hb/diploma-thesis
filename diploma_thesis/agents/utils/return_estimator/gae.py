@@ -17,7 +17,7 @@ class GAE(Estimator):
     def update_returns(self, records: List[Record]) -> List[Record]:
         coef = self._discount_factor * self._lambda
 
-        for i in reversed(range(len(records))):
+        for i in reversed(range(records.batch_size[0])):
             next_value = 0 if i == len(records) - 1 else records[i + 1].info[Record.ADVANTAGE_KEY]
             value = records[i].info[Record.VALUES_KEY]
             advantage = records[i].reward + self._discount_factor * next_value - value

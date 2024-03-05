@@ -1,13 +1,7 @@
 
-state:
-  ...
-
 graph:
-  ...
-
-merge:
-  ...
-
-output:
-  ...
-
+  - kind: 'graph'
+    parameters:
+      kind: 'SageConv'
+      parameters:
+        out_channels: 64

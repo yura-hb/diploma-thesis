@@ -53,7 +53,7 @@ class NStep(Estimator):
 
         lambdas = torch.cumprod(lambdas, dim=0)
 
-        for i in range(len(records)):
+        for i in range(records.batch_size[0]):
             action = records[i].action
 
             next_state_value = records[i + 1].info[Record.VALUES_KEY] if i + 1 < len(records) else 0
@@ -73,7 +73,7 @@ class NStep(Estimator):
             else:
                 off_policy_weights += [1]
 
-        for i in range(len(records)):
+        for i in range(records.batch_size[0]):
             g = records[i].info[Record.VALUES_KEY][records[i].action]
             n = min(self.configuration.n, len(records) - i)
 

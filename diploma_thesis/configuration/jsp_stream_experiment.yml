@@ -1,0 +1,16 @@
+
+# Task to determine the best run configuration + state encoding + reward for the model
+
+# Models:
+# 1. DQN
+# 2. DDQN
+# 3. Dueling DDQN
+# 4.
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 8
+  debug: False
+
+  tasks: []

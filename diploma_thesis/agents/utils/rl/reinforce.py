@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from typing import Dict
 
-from agents.utils.memory import NotReadyException
+from agents.utils.memory import NotReadyException, Record
 from agents.utils.nn import NeuralNetwork
 from agents.utils.nn.layers import Linear
-from .episodic import *
+from .rl import *
 
 
 @dataclass
@@ -33,7 +33,7 @@ class Configuration:
         )
 
 
-class Reinforce(EpisodicTrainer):
+class Reinforce(RLTrainer):
 
     def __init__(self,
                  memory: Memory,

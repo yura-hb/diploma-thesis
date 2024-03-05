@@ -65,8 +65,8 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
             self.trainer[key].train_step(self.__model_for_key__(key).policy)
 
     @filter(lambda self, *args: self.phase == TrainingPhase())
-    def store(self, key: Key, record: Record):
-        self.trainer[key].store(record)
+    def store(self, key: Key, sample: TrainingSample):
+        self.trainer[key].store(sample)
 
     def loss_record(self):
         result = []
