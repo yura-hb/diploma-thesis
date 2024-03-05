@@ -1,3 +1,6 @@
+
+import os
+
 from typing import Dict
 
 from joblib import Parallel, delayed
@@ -25,6 +28,7 @@ class MultiSimulation:
     def run(self):
         parameters = self.__fetch_tasks__()
         parameters = self.__add_debug_info__(parameters)
+        parameters = self.__append_output_dir__(parameters)
         parameters = self.__fix_names__(parameters)
 
         print(f'Running {len(parameters)} simulations')
@@ -55,6 +59,17 @@ class MultiSimulation:
         if self.parameters.get('debug', False):
             for index, _ in enumerate(result):
                 result[index]['debug'] = True
+
+        return result
+
+    def __append_output_dir__(self, simulations: [Dict]):
+        result = simulations
+
+        output_dir = self.parameters.get('output_dir')
+
+        if output_dir:
+            for index, _ in enumerate(result):
+                result[index]['output_dir'] = os.path.join(output_dir, result[index]['output_dir'])
 
         return result
 

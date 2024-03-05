@@ -11,8 +11,8 @@ def multi_value_cli(parameters: dict, build_fn) -> List:
     result = []
 
     for combination in iterate_all_combinations(values):
-        parameters = merge_dicts(base_parameters, combination)
+        tmp = merge_dicts(base_parameters, combination)
 
-        result += [build_fn(parameters)]
+        result += [build_fn(tmp)]
 
     return result

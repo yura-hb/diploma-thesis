@@ -1,0 +1,7 @@
+
+parameters:
+  model:
+    parameters:
+      policy:
+        parameters:
+          policy_method: 'dueling_architecture'

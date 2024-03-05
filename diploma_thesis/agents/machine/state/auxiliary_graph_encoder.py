@@ -1,5 +1,6 @@
+import torch
 
-from agents.base.state import GraphState
+from agents.base.state import GraphState, Graph
 
 from tensordict.prototype import tensorclass
 from .encoder import *
@@ -15,5 +16,23 @@ class AuxiliaryGraphEncoder(StateEncoder):
         if parameters.graph is None:
             raise ValueError("Graph is not provided")
 
-        a = 10
+        graph = parameters.graph
 
+        job_ids = graph.data[Graph.JOB_INDEX_KEY][0, :].unique()
+
+        processing_times = []
+
+        for job_id in job_ids:
+            processing_times += [parameters.machine.shop_floor.job(job_id).processing_times]
+
+        processing_times = torch.cat(processing_times, dim=0)
+        graph.data[Graph.OPERATION_KEY].x = processing_times
+
+        # TODO: - Remove
+        graph.data = graph.data.to_homogeneous()
+
+        return self.State(parameters.graph, batch_size=[])
+
+    @staticmethod
+    def from_cli(parameters: dict):
+        return AuxiliaryGraphEncoder()

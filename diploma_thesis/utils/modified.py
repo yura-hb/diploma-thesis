@@ -27,6 +27,9 @@ def modified(parameters):
 
     base_parameters = __apply_template__(base_parameters, template)
 
+    if 'nested' in parameters:
+        base_parameters = merge_dicts(base_parameters, parameters['nested'])
+
     return base_parameters
 
 

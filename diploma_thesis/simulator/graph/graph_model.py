@@ -17,7 +17,7 @@ class Configuration(EncoderConfiguration):
     @staticmethod
     def from_cli(parameters: Dict) -> 'Configuration':
         return Configuration(
-            memory=parameters['memory'],
+            memory=parameters.get('memory', 0),
             is_machine_set_in_work_center_connected=parameters.get('is_machine_set_in_work_center_connected', False),
             is_work_center_set_in_shop_floor_connected=parameters.get(
                 'is_work_center_set_in_shop_floor_connected', False

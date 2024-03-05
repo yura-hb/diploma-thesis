@@ -69,6 +69,9 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         self.trainer[key].store(sample)
 
     def loss_record(self):
+        if self.keys is None:
+            return pd.DataFrame()
+
         result = []
 
         for key in self.keys:
@@ -82,6 +85,9 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         return pd.concat(result)
 
     def clear_memory(self):
+        if self.keys is None:
+            return
+
         for key in self.keys:
             self.trainer[key].clear()
 

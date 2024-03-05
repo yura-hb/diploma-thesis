@@ -11,7 +11,7 @@ parameters:
 
   machine_train_schedule:
     pretrain_steps: 10
-    train_interval: 5
+    train_interval: 10
     max_training_steps: 100000000
 
   work_center_train_schedule:
@@ -20,59 +20,3 @@ parameters:
     max_training_steps: 0
 
   n_workers: 1
-  simulations:
-    - name: ''
-      kind: 'multi_value'
-      parameters:
-        base:
-          configuration:
-            timespan: 100000
-            machines_per_work_center: 1
-            work_center_count: 10
-
-          dispatch:
-            initial_job_assignment:
-              kind: 'n_per_machine'
-              parameters:
-                n: 2
-
-            job_sampler:
-              kind: 'dynamic'
-              parameters:
-                processing_times: # Sampler
-                  kind: 'uniform'
-                  parameters:
-                    uniform: [ 1, 50 ]
-                    noise: [ 0, 10 ]
-                permutation:
-                  uneveness: 2
-                due_time: # Sampler
-                  kind: 'uniform'
-                  parameters:
-                    uniform: [ 0, 2 ]
-                job_arrival_time_on_machine:
-                  kind: 'expected_utilization'
-                  parameters:
-                    value: 0.95
-
-            breakdown:
-              kind: 'dynamic'
-              parameters:
-                breakdown_arrival:
-                  kind: 'exponential'
-                  parameters:
-                    mean: 1000
-                repair_duration:
-                  kind: 'uniform'
-                  parameters:
-                    uniform: [ 10, 200 ]
-
-            seed: 42
-
-        values:
-          dispatch:
-            job_sampler:
-              parameters:
-                job_arrival_time_on_machine:
-                  parameters:
-                    value: [ 0.7, 0.8, 0.9 ]

@@ -7,6 +7,8 @@ from itertools import product
 
 
 FACTORY_SUFFIX = '__factory__'
+CONCATENATE_SUFFIX = '__concat__'
+INOUT_FACTORY_SUFFIX = '__inout_factory__'
 
 
 def merge_dicts(lhs: Dict, rhs: Dict) -> Dict:
@@ -35,6 +37,17 @@ def merge_dicts(lhs: Dict, rhs: Dict) -> Dict:
                 lhs += rhs[len(lhs):]
 
             result[key] = lhs
+        elif key in result and isinstance(result[key], list) and isinstance(value, dict):
+            for nested in value:
+                tmp = nested.rstrip('_').lstrip('_')
+
+                if not tmp.isdigit():
+                    continue
+
+                tmp = int(tmp)
+
+                if tmp < len(result[key]):
+                    result[key][tmp] = merge_dicts(result[key][tmp], value[nested])
         else:
             result[key] = value
 
@@ -55,6 +68,27 @@ def iterate_all_combinations(value: Dict) -> [Dict]:
 
             continue
 
+        if key.endswith(INOUT_FACTORY_SUFFIX):
+            flatten[key.rstrip(INOUT_FACTORY_SUFFIX) + FACTORY_SUFFIX] = __parse_factory__(value)
+
+            del flatten[key]
+
+            continue
+
+        if key.endswith(CONCATENATE_SUFFIX):
+            assert isinstance(value, list)
+
+            result = []
+
+            for item in value:
+                values = list(iterate_all_combinations(item))
+
+                result += values
+
+            flatten[key.rstrip("." + CONCATENATE_SUFFIX)] = result
+
+            continue
+
         if not isinstance(value, list):
             flatten[key] = [value]
 
@@ -71,14 +105,6 @@ def __parse_factory__(parameters):
     result = []
 
     for combination in product(*parameters):
-        values = []
-
-        for parameter in combination:
-            if isinstance(parameter, list):
-                values.extend(parameter)
-            else:
-                values.append(parameter)
-
-        result.append(values)
+        result.append(list(combination))
 
     return result

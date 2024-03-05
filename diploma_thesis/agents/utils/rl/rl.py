@@ -45,10 +45,6 @@ class RLTrainer(Loggable):
         return pd.DataFrame(self.loss_cache)
 
     def store(self, sample: TrainingSample):
-        records = torch.cat([record.view(-1) for record in sample.records])
-        records = records.clone()
-        sample.records = records
-
         records = self.__prepare__(sample)
         records.info['episode'] = torch.full(records.reward.shape, sample.episode_id, device=records.reward.device)
 

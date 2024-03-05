@@ -1,16 +1,527 @@
-
 # Task to determine the best run configuration + state encoding + reward for the model
 
-# Models:
-# 1. DQN
-# 2. DDQN
-# 3. Dueling DDQN
-# 4.
+template: &template 'marl_indirect'
+
+###############################################################################################
+
+dqn: &dqn
+  base_path: 'configuration/mods/machine/dqn.yml'
+  template: *template
+  mods: [ ]
+
+dueling_ddqn: &dueling_ddqn
+  base_path: 'configuration/mods/machine/dqn.yml'
+  template: *template
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/dueling.yml'
+
+dueling_ddqn_pr: &dueling_ddqn_pr
+  base_path: 'configuration/mods/machine/dqn.yml'
+  template: *template
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/dueling.yml'
+    - 'agent/dqn/prioritized.yml'
+
+dueling_ddqn_pr_n_step: &dueling_ddqn_pr_n_step
+  base_path: 'configuration/mods/machine/dqn.yml'
+  template: *template
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/dueling.yml'
+    - 'agent/dqn/prioritized.yml'
+    - 'agent/dqn/3_step.yml'
+
+marl_ddqn: &marl_ddqn
+  base_path: 'configuration/mods/machine/dqn.yml'
+  template: *template
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'util/agent/multi_agent.yml'
+
+marl_dueling_ddqn: &marl_dueling_ddqn
+  base_path: 'configuration/mods/machine/dqn.yml'
+  template: *template
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/dueling.yml'
+    - 'util/agent/multi_agent.yml'
+
+marl_dueling_ddqn_pr: &marl_dueling_ddqn_pr
+  base_path: 'configuration/mods/machine/dqn.yml'
+  template: *template
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/dueling.yml'
+    - 'agent/dqn/prioritized.yml'
+    - 'util/agent/multi_agent.yml'
+
+marl_dueling_ddqn_n_step: &marl_dueling_ddqn_n_step
+  base_path: 'configuration/mods/machine/dqn.yml'
+  template: *template
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/dueling.yml'
+    - 'util/agent/multi_agent.yml'
+    - 'agent/dqn/3_step.yml'
+
+reinforce: &reinforce
+  base_path: 'configuration/mods/machine/reinforce.yml'
+  template: *template
+  mods: [ ]
+
+ppo: &ppo
+  base_path: 'configuration/mods/machine/ppo.yml'
+  template: *template
+  mods: [ ]
+
+###############################################################################################
+
+reward: &reward
+  - kind: 'global_tardiness'
+    parameters:
+      span: 256
+  - kind: 'global_decomposed_tardiness'
+    parameters:
+      span: 256
+  - kind: 'surrogate_tardiness'
+
+intermediate_reward: &intermediate_reward
+  - kind: 'surrogate_tardiness'
+
+##############################################################################################
+
+# 6 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ [ 'duration/10000.yml' ] ]
+        - [ [ 'size/jsp/5.yml' ], [ 'size/jsp/10.yml' ] ]
+        - [ [ 'utilization/80.yml' ] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0, 21, 42, 63, 84, 105 ] ]
+
+# 6 runs
+
+long_multiple_source_run: &long_multiple_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ [ 'duration/10000.yml' ] ]
+        - [ [ 'size/jsp/5.yml', 'size/jsp/10.yml' ] ]
+        - [ [ 'utilization/80.yml' ] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0, 21, 42 ] ]
+
+# 80 runs
+
+short_single_source_run: &short_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ [ 'duration/256.yml' ] ]
+        - [ [ 'size/jsp/5.yml' ], [ 'size/jsp/10.yml' ] ]
+        - [ [ 'utilization/80.yml' ] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0, 21, 42, 63, 84, 105, 126, 157, 178, 199,
+                    0, 21, 42, 63, 84, 105, 126, 157, 178, 199,
+                    0, 21, 42, 63, 84, 105, 126, 157, 178, 199,
+                    0, 21, 42, 63, 84, 105, 126, 157, 178, 199,
+                    0, 21, 42, 63, 84, 105, 126, 157, 178, 199,
+                    0, 21, 42, 63, 84, 105, 126, 157, 178, 199,
+                    0, 21, 42, 63, 84, 105, 126, 157, 178, 199,
+                    0, 21, 42, 63, 84, 105, 126, 157, 178, 199
+          ] ]
+
+# 80 runs
+
+short_multiple_source_run: &short_multiple_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ [ 'duration/256.yml' ] ]
+        - [ [ 'size/jsp/5.yml', 'size/jsp/10.yml' ] ]
+        - [ [ 'utilization/80.yml' ] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0, 21, 42, 63, 84, 105, 126, 157, 178, 199,
+                    0, 21, 42, 63, 84, 105, 126, 157, 178, 199,
+                    0, 21, 42, 63, 84, 105, 126, 157, 178, 199,
+                    0, 21, 42, 63, 84, 105, 126, 157, 178, 199 ] ]
+
+
+###############################################################################################
 
 
 task:
   kind: 'multi_task'
-  n_workers: 8
-  debug: False
+  n_workers: 4
+  debug: True
+  output_dir: 'results/jsp'
 
-  tasks: []
+  tasks:
+    # TD
+    # We can evaluate all models which doesn't perform any return estimation with any reward function
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: 'td'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'global_tardiness'
+              parameters:
+                span: 256
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+            parameters:
+              memory: 1
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/run/run.yml'
+              mods:
+                - 'n_workers/2.yml'
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/mods/simulation/simulation.yml'
+                            mods: [ ]
+                        values:
+
+
+        values:
+          machine_agent:
+            parameters:
+              - *dqn
+              - *dueling_ddqn
+              - *dueling_ddqn_pr
+              - *marl_ddqn
+              - *marl_dueling_ddqn
+              - *marl_dueling_ddqn_pr
+
+          tape:
+            machine_reward:
+              *reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run
+                            - *long_multiple_source_run
+                            - *short_single_source_run
+                            - *short_multiple_source_run
+
+    # TD - n-step short
+    # We can evaluate all models, which performs n-step return estimation with intermediate rewards
+
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: 'td_n'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'global_tardiness'
+              parameters:
+                span: 256
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+            parameters:
+              memory: 10
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/run/run.yml'
+              mods:
+                - 'n_workers/4.yml'
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/mods/simulation/simulation.yml'
+                            mods: [ ]
+                        values:
+        values:
+          machine_agent:
+            parameters:
+              - *dueling_ddqn_pr_n_step
+              - *marl_dueling_ddqn_n_step
+
+          tape:
+            machine_reward:
+              *intermediate_reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *short_single_source_run
+                            - *short_multiple_source_run
+
+    # TD - n-step long
+    # The memory is pretty large to consider it as episode
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: 'td_long'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'global_tardiness'
+              parameters:
+                span: 256
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+            parameters:
+              memory: 32
+              send_as_trajectory: True
+              next_state_record_mode: 'on_next_action'
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/run/run.yml'
+              mods:
+                - 'n_workers/2.yml'
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/mods/simulation/simulation.yml'
+                            mods: [ ]
+                        values:
+
+        values:
+          machine_agent:
+            parameters:
+              - *dueling_ddqn_pr_n_step
+              - *marl_dueling_ddqn_n_step
+              - *reinforce
+              - *ppo
+
+          tape:
+            machine_reward:
+              *intermediate_reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run
+                            - *long_multiple_source_run
+
+# Episodic
+
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: 'episodic'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            next_state_record_mode: 'on_next_action'
+
+            machine_reward:
+              kind: 'global_tardiness'
+              parameters:
+                span: 256
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'episodic'
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/run/run.yml'
+              mods:
+                - 'n_workers/4.yml'
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/mods/simulation/simulation.yml'
+                            mods: [ ]
+                        values:
+
+        values:
+          machine_agent:
+            parameters:
+              - *dqn
+              - *dueling_ddqn
+              - *dueling_ddqn_pr
+              - *marl_ddqn
+              - *marl_dueling_ddqn
+              - *marl_dueling_ddqn_pr
+              - *reinforce
+              - *ppo
+              - *marl_dueling_ddqn_n_step
+              - *dueling_ddqn_pr_n_step
+
+          tape:
+            machine_reward:
+              *reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *short_single_source_run
+                            - *short_multiple_source_run
+

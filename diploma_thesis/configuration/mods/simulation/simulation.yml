@@ -1,0 +1,46 @@
+
+kind: 'simulation'
+parameters:
+  configuration:
+    timespan: 100000
+    machines_per_work_center: 1
+    work_center_count: 10
+
+  dispatch:
+    initial_job_assignment:
+      kind: 'n_per_machine'
+      parameters:
+        n: 2
+
+    job_sampler:
+      kind: 'dynamic'
+      parameters:
+        processing_times:
+          kind: 'uniform'
+          parameters:
+            uniform: [ 1, 50 ]
+            noise: [ 0, 10 ]
+        permutation:
+          uneveness: 2
+        due_time:
+          kind: 'uniform'
+          parameters:
+            uniform: [ 0, 2 ]
+        job_arrival_time_on_machine:
+          kind: 'expected_utilization'
+          parameters:
+            value: 0.95
+
+    breakdown:
+      kind: 'dynamic'
+      parameters:
+        breakdown_arrival:
+          kind: 'exponential'
+          parameters:
+            mean: 1000
+        repair_duration:
+          kind: 'uniform'
+          parameters:
+            uniform: [ 10, 200 ]
+
+    seed: 42

@@ -47,8 +47,8 @@ parameters:
       memory:
         kind: 'replay'
         parameters:
-          size: 100000
-          batch_size: 512
+          size: 8192
+          batch_size: 128
           prefetch: 8
           sampler:
             kind: 'slice'

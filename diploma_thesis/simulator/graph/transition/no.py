@@ -18,5 +18,6 @@ class No(GraphTransition):
     def flatten(self, graph: Graph):
         return None
 
+    @classmethod
     def from_cli(cls, parameters: Dict):
         return cls(None, None)

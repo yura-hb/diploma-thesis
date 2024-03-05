@@ -1,0 +1,10 @@
+
+parameters:
+  trainer:
+    parameters:
+      return:
+        kind: 'n_step'
+        parameters:
+          discount: 0.9
+          lambda_factor: 0.9
+          n: 3

@@ -5,7 +5,6 @@ from .linear import Linear
 from .common import Flatten, InstanceNorm, LayerNorm
 from .activation import Activation
 from .merge import Merge
-from .noisy_linear import NoisyLinear
 from .graph import GraphLayer
 from .partial_instance_norm_1d import PartialInstanceNorm1d
 

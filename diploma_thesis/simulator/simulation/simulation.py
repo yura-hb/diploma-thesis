@@ -9,10 +9,8 @@ import environment
 from environment import Agent, Delegate, ShopFloor
 from dispatch import Dispatch
 
-from .cli import CLITemplate
 
-
-class Simulation(CLITemplate):
+class Simulation:
 
     @dataclass
     class Configuration:

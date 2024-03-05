@@ -4,6 +4,8 @@ from dataclasses import dataclass
 import torch
 from torch import nn
 
+from torch_geometric.data import HeteroData
+from torch_geometric.nn import to_hetero
 from agents.base.state import TensorState, GraphState
 from .layers import Layer, from_cli as layer_from_cli, Merge
 
@@ -52,8 +54,6 @@ class NeuralNetwork(nn.Module):
         return self.input_dim
 
     def forward(self, state):
-        _is_configured = self.is_configured
-
         encoded_state = None
         encoded_graph = None
 
@@ -61,10 +61,18 @@ class NeuralNetwork(nn.Module):
             encoded_state = self.state_encoder(torch.atleast_2d(state.state))
 
         if isinstance(state, GraphState) and self.graph_encoder is not None:
-            encoded_graph = self.graph_encoder(torch.atleast_2d(state.graph))
+            data = state.graph.data
+
+            if not self.is_configured:
+                if isinstance(data, HeteroData):
+                    self.graph_encoder = to_hetero(self.graph_encoder, data.metadata(), aggr='sum')
+
+            encoded_graph = self.graph_encoder(data.x_dict, data.edge_index_dict)
 
         hidden = self.merge(encoded_state, encoded_graph)
         output = self.output(hidden)
+
+        _is_configured = True
 
         return output
 

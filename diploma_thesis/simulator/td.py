@@ -1,8 +1,6 @@
+from agents.base.agent import Slice, Trajectory
 from .simulator import *
 from .utils import Queue
-from agents.base.agent import Slice
-
-from agents.base import Agent
 
 
 class TDSimulator(Simulator):
@@ -11,10 +9,12 @@ class TDSimulator(Simulator):
     possible
     """
 
-    def __init__(self, memory: int = 100, *args, **kwargs):
+    def __init__(self, memory: int = 100, send_as_trajectory: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.memory = memory
+        self.send_as_trajectory = send_as_trajectory
+        self.episode = 0
 
         self.machine_queue = Queue(self.machine.is_distributed)
         self.work_center_queue = Queue(self.work_center.is_distributed)
@@ -29,23 +29,25 @@ class TDSimulator(Simulator):
 
         self.__store_or_forward_td__(context, self.work_center_queue, self.work_center, work_center.key, record)
 
-    def did_finish_simulation(self, simulation: Simulation):
-        pass
-
-    # TODO: - Implement
-
     def __store_or_forward_td__(self, context: Context, queue: Queue, agent, key, record):
         if self.memory <= 1:
             agent.store(key, Slice(episode_id=context.shop_floor.id, records=[record]))
             return
 
-        # Implement the idea of n-step memory
         queue.store(context.shop_floor.id, key, context.moment, record)
 
         if queue.group_len(context.shop_floor.id, key) > self.memory:
+            # Pass a copy of records to avoid modification of the original
             records = queue.pop_group(context.shop_floor.id, key)
+            records = torch.cat([record.view(-1) for record in records])
+            records: List[Record] = list(records.clone().unbind(dim=0))
 
-            agent.store(key, Slice(episode_id=context.shop_floor.id, records=records))
+            if self.send_as_trajectory:
+                agent.store(key, Trajectory(episode_id=self.episode, records=records))
+
+                self.episode += 1
+            else:
+                agent.store(key, Slice(episode_id=context.shop_floor.id, records=records))
 
             queue.store_group(context.shop_floor.id, key, records[1:])
 
@@ -53,4 +55,6 @@ class TDSimulator(Simulator):
 
     @staticmethod
     def from_cli(parameters, *args, **kwargs) -> Simulator:
-        return TDSimulator(parameters.get('memory', 1), *args, **kwargs)
+        return TDSimulator(parameters.get('memory', 1), 
+                           parameters.get('send_as_trajectory', False),
+                           *args, **kwargs)

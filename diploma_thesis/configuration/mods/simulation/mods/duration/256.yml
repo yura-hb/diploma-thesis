@@ -1,7 +1,4 @@
 
 parameters:
-  simulations:
-    - values:
-        dispatch:
-          configuration:
-            timespan: 256
+  configuration:
+    timespan: 256
