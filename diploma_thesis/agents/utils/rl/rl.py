@@ -12,11 +12,30 @@ from agents.utils.memory import Memory, Record
 from agents.utils.nn import Loss, Optimizer
 from agents.utils.return_estimator import ReturnEstimator
 from utils import Loggable
+from dataclasses import dataclass
+from enum import StrEnum
+
+
+class TrainSchedule(StrEnum):
+    ON_TIMELINE = 'on_timeline'
+    ON_STORE = 'on_store'
+
+    @staticmethod
+    def from_cli(parameters: dict):
+        if 'train_schedule' not in parameters:
+            return TrainSchedule.ON_TIMELINE
+
+        return TrainSchedule(parameters['train_schedule'])
 
 
 class RLTrainer(Loggable):
 
-    def __init__(self, memory: Memory, loss: Loss, optimizer: Optimizer, return_estimator: ReturnEstimator):
+    def __init__(self,
+                 memory: Memory,
+                 loss: Loss,
+                 optimizer: Optimizer,
+                 return_estimator: ReturnEstimator,
+                 train_schedule: TrainSchedule = TrainSchedule.ON_TIMELINE):
         super().__init__()
 
         self.memory = memory
@@ -24,6 +43,7 @@ class RLTrainer(Loggable):
         self.optimizer = optimizer
         self.return_estimator = return_estimator
         self._is_configured = False
+        self.train_schedule = train_schedule
         self.loss_cache = []
 
     @abstractmethod
@@ -33,13 +53,18 @@ class RLTrainer(Loggable):
         if not self.optimizer.is_connected:
             self.optimizer.connect(model.parameters())
 
+    def __train__(self, model: Policy):
+        pass
+
     @property
     def is_configured(self):
         return self._is_configured
 
-    @abstractmethod
     def train_step(self, model: Policy):
-        pass
+        if self.train_schedule != TrainSchedule.ON_TIMELINE:
+            return
+
+        self.__train__(model)
 
     def loss_record(self) -> pd.DataFrame:
         return pd.DataFrame(self.loss_cache)
@@ -49,6 +74,12 @@ class RLTrainer(Loggable):
         records.info['episode'] = torch.full(records.reward.shape, sample.episode_id, device=records.reward.device)
 
         self.memory.store(records.view(-1))
+
+        if self.train_schedule != TrainSchedule.ON_STORE:
+            return
+
+        self.__train__(sample.model)
+
 
     def clear(self):
         self.loss_cache = []

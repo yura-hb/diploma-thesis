@@ -23,13 +23,8 @@ class DeepQTrainer(RLTrainer):
                 prior_eps=parameters.get('prior_eps', 1e-6)
             )
 
-    def __init__(self,
-                 memory: Memory,
-                 optimizer: Optimizer,
-                 loss: Loss,
-                 return_estimator: ReturnEstimator,
-                 configuration: Configuration):
-        super().__init__(memory, loss, optimizer, return_estimator)
+    def __init__(self, configuration: Configuration, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self._target_model: AveragedModel = None
         self.configuration = configuration
@@ -39,7 +34,7 @@ class DeepQTrainer(RLTrainer):
 
         self._target_model = AveragedModel(model.clone(), avg_fn=get_ema_avg_fn(self.configuration.decay))
 
-    def train_step(self, model: Policy):
+    def __train__(self, model: Policy):
         try:
             batch, info = self.memory.sample(return_info=True)
             batch: Record | torch.Tensor = torch.squeeze(batch)
@@ -75,10 +70,10 @@ class DeepQTrainer(RLTrainer):
         _, actions = model.predict(batch.next_state)
         orig_q = actions.clone()[range(batch.shape[0]), batch.action]
 
-        target = self.target_model.predict(batch.next_state)
+        _, target = self.target_model.predict(batch.next_state)
         target = target.max(dim=1).values
 
-        q = batch.reward + self.return_estimator.discount_factor * target * (1 - batch.done)
+        q = batch.reward + self.return_estimator.discount_factor * target * (1 - batch.done.int())
         actions[range(batch.shape[0]), batch.action] = q
 
         td_error = torch.square(orig_q - q)
@@ -96,4 +91,14 @@ class DeepQTrainer(RLTrainer):
                  loss: Loss,
                  optimizer: Optimizer,
                  return_estimator: ReturnEstimator):
-        return cls(memory, optimizer, loss, return_estimator, DeepQTrainer.Configuration.from_cli(parameters))
+        train_schedule = TrainSchedule.from_cli(parameters)
+        configuration = DeepQTrainer.Configuration.from_cli(parameters)
+
+        return cls(
+            configuration=configuration,
+            memory=memory,
+            loss=loss,
+            optimizer=optimizer,
+            return_estimator=return_estimator,
+            train_schedule=train_schedule
+        )

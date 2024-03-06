@@ -2,8 +2,6 @@
 from dataclasses import dataclass
 from typing import Dict
 
-import torch
-
 from agents.utils.memory import NotReadyException
 from .rl import *
 
@@ -13,6 +11,7 @@ class Configuration:
     value_loss: Loss
     policy_step_ratio: float
     entropy_regularization: float
+    update_advantages: bool
     epochs: int
 
     @staticmethod
@@ -21,19 +20,15 @@ class Configuration:
             value_loss=Loss.from_cli(parameters['value_loss']),
             policy_step_ratio=parameters.get('policy_step_ratio', 1.0),
             entropy_regularization=parameters.get('entropy_regularization', 0.0),
+            update_advantages=parameters.get('update_advantages', True),
             epochs=parameters.get('epochs', 1)
         )
 
 
 class PPO(RLTrainer):
 
-    def __init__(self,
-                 memory: Memory,
-                 optimizer: Optimizer,
-                 loss: Loss,
-                 return_estimator: ReturnEstimator,
-                 configuration: Configuration):
-        super().__init__(memory, loss, optimizer, return_estimator)
+    def __init__(self, configuration: Configuration, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.is_critics_configured = False
         self.configuration = configuration
@@ -42,19 +37,20 @@ class PPO(RLTrainer):
     def configure(self, model: Policy):
         super().configure(model)
 
-    def train_step(self, model: Policy):
+    def __train__(self, model: Policy):
         for i in range(self.configuration.epochs):
-            self._train_step(model)
+            self.__step__(model)
 
-    def _train_step(self, model: Policy):
+    def __step__(self, model: Policy):
         try:
             batch = self.memory.sample(return_info=False)
             batch: Record | torch.Tensor = torch.squeeze(batch)
         except NotReadyException:
             return
 
-        with torch.no_grad():
-            batch = self.__estimate_advantage__(batch)
+        if self.configuration.update_advantages:
+            with torch.no_grad():
+                batch = self.__estimate_advantage__(batch)
 
         advantages = batch.info[Record.ADVANTAGE_KEY]
         value, logits = model.predict(batch.state)
@@ -99,4 +95,12 @@ class PPO(RLTrainer):
                  loss: Loss,
                  optimizer: Optimizer,
                  return_estimator: ReturnEstimator):
-        return cls(memory, optimizer, loss, return_estimator, Configuration.from_cli(parameters))
+        schedule = TrainSchedule.from_cli(parameters)
+        configuration = Configuration.from_cli(parameters)
+
+        return cls(configuration=configuration,
+                   memory=memory,
+                   optimizer=optimizer,
+                   loss=loss,
+                   return_estimator=return_estimator,
+                   train_schedule=schedule)

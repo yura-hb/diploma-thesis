@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict
 
-from agents.utils.memory import NotReadyException, Record
+from agents.utils.memory import NotReadyException
 from agents.utils.nn import NeuralNetwork
 from agents.utils.nn.layers import Linear
 from .rl import *
@@ -35,13 +35,8 @@ class Configuration:
 
 class Reinforce(RLTrainer):
 
-    def __init__(self,
-                 memory: Memory,
-                 optimizer: Optimizer,
-                 loss: Loss,
-                 return_estimator: ReturnEstimator,
-                 configuration: Configuration):
-        super().__init__(memory, loss, optimizer, return_estimator)
+    def __init__(self, configuration: Configuration, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.is_critics_configured = False
         self.configuration = configuration
@@ -54,7 +49,7 @@ class Reinforce(RLTrainer):
         for critic in self.configuration.critics:
             critic.neural_network.append_output_layer(layer)
 
-    def train_step(self, model: Policy):
+    def __train__(self, model: Policy):
         try:
             batch = self.memory.sample(return_info=False)
             batch: Record | torch.Tensor = torch.squeeze(batch)
@@ -107,5 +102,12 @@ class Reinforce(RLTrainer):
                  loss: Loss,
                  optimizer: Optimizer,
                  return_estimator: ReturnEstimator):
+        schedule = TrainSchedule.from_cli(parameters)
+        configuration = Configuration.from_cli(parameters)
 
-        return cls(memory, optimizer, loss, return_estimator, Configuration.from_cli(parameters))
+        return cls(configuration=configuration,
+                   memory=memory,
+                   optimizer=optimizer,
+                   loss=loss,
+                   return_estimator=return_estimator,
+                   train_schedule=schedule)

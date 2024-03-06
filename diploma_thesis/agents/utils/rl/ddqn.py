@@ -14,9 +14,9 @@ class DoubleDeepQTrainer(DeepQTrainer):
 
         best_actions = actions.max(dim=-1).indices
 
-        target = self.target_model.predict(batch.next_state)[range(batch.shape[0]), best_actions]
+        target = self.target_model.predict(batch.next_state)[1][range(batch.shape[0]), best_actions]
 
-        q = batch.reward + self.return_estimator.discount_factor * target * (1 - batch.done)
+        q = batch.reward + self.return_estimator.discount_factor * target * (1 - batch.done.int())
         actions[range(batch.shape[0]), batch.action] = q
 
         td_error = torch.square(orig_q - q)
