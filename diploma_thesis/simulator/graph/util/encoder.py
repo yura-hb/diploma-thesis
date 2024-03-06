@@ -262,6 +262,6 @@ class Encoder:
         if values.numel() == 0:
             return torch.tensor([], dtype=torch.long).view(1, 0)
 
-        result = torch.abs(store - values.unsqueeze(dim=0))
+        result = torch.abs(store - values.unsqueeze(dim=0).T)
 
         return (result.sum(axis=-2) == 0).nonzero()[:, 1]

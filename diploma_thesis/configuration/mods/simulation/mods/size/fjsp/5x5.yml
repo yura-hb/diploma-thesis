@@ -1,0 +1,5 @@
+
+parameters:
+  configuration:
+      machines_per_work_center: 5
+      work_center_count: 5

@@ -36,7 +36,9 @@ class CompleteTransition(ForwardTransition):
                 result = product([arrived_machine_idx[step_id]], list(range(next_step_op_count)))
             elif did_arrive_at_machine_and_arrived_on_next:
                 # Operation path is determined
-                result = [arrived_machine_idx[step_id], [arrived_machine_idx[step_id + 1]]]
+                result = [
+                    [arrived_machine_idx[step_id], arrived_machine_idx[step_id + 1]]
+                ]
             else:
                 # Any operation can proceed to any operation in next step
                 result = product(list(range(current_step_op_count)), list(range(next_step_op_count)))

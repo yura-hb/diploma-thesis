@@ -14,7 +14,7 @@ task:
       mods:
         - 'agent/dqn/ddqn.yml'
         - 'agent/dqn/dueling.yml'
-        - 'util/agent/centralized.yml'
+        - 'util/agent/multi_agent.yml'
         - 'util/rules/all_rules.yml'
 
   work_center_agent:
@@ -29,7 +29,7 @@ task:
 
   tape:
     machine_reward:
-      kind: 'global_mdpi'
+      kind: 'surrogate_tardiness'
       parameters:
         span: 256
 
@@ -43,7 +43,7 @@ task:
       kind: 'base'
       parameters:
         forward:
-          kind: 'compressed'
+          kind: 'adding_arc'
 
         schedule:
           kind: 'compressed'
@@ -61,7 +61,8 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/run/run.yml'
-      mods: []
+      mods:
+        - 'timeline/no_warmup.yml'
       nested:
         parameters:
           simulations:
@@ -69,11 +70,11 @@ task:
               parameters:
                 base_path: 'configuration/mods/simulation/simulation.yml'
                 mods:
-                  - 'duration/256.yml'
-                  - 'size/jsp/5.yml'
+                  - 'duration/1024.yml'
+                  - 'size/fjsp/5x5.yml'
             - kind: 'mod'
               parameters:
                 base_path: 'configuration/mods/simulation/simulation.yml'
                 mods:
-                  - 'duration/256.yml'
-                  - 'size/jsp/5.yml'
+                  - 'duration/1024.yml'
+                  - 'size/fjsp/5x5.yml'
