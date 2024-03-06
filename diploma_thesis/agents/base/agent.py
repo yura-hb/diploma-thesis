@@ -17,16 +17,17 @@ Key = TypeVar('Key')
 @dataclass
 class TrainingSample:
     episode_id: int
+    records: List[Record]
 
 
 @dataclass
 class Slice(TrainingSample):
-    records: List[Record]
+    pass
 
 
 @dataclass
 class Trajectory(TrainingSample):
-    records: List[Record]
+    pass
 
 
 class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):

@@ -27,7 +27,10 @@ class Encoder:
                did_change_jobs: bool,
                graph: Graph,
                shop_floor: ShopFloor,
-               job_operation_map: JOB_OPERATION_MAP_TYPE) -> Graph:
+               job_operation_map: JOB_OPERATION_MAP_TYPE) -> Graph | None:
+        if graph is None:
+            return None
+
         result = self.__construct_initial_graph__() if previous is None else previous
 
         if previous is None:

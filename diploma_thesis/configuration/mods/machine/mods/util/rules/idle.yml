@@ -1,2 +1,3 @@
 
-idle: True
+__rules__:
+  idle: True

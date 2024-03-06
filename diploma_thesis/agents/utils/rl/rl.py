@@ -73,13 +73,12 @@ class RLTrainer(Loggable):
         records = self.__prepare__(sample)
         records.info['episode'] = torch.full(records.reward.shape, sample.episode_id, device=records.reward.device)
 
-        self.memory.store(records.view(-1))
+        self.memory.store(records)
 
         if self.train_schedule != TrainSchedule.ON_STORE:
             return
 
         self.__train__(sample.model)
-
 
     def clear(self):
         self.loss_cache = []
@@ -102,6 +101,7 @@ class RLTrainer(Loggable):
         match sample:
             case Trajectory(_, records):
                 updated = self.return_estimator.update_returns(records)
+                updated = [record.view(-1) for record in updated]
                 updated = torch.cat(updated, dim=0)
 
                 return updated
@@ -111,6 +111,6 @@ class RLTrainer(Loggable):
 
                 updated = self.return_estimator.update_returns(records)
 
-                return updated[0]
+                return updated[0].view(-1)
             case _:
                 raise ValueError(f'Unknown sample type: {type(sample)}')

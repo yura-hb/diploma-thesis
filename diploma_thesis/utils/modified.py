@@ -25,6 +25,10 @@ def modified(parameters):
             mod = yaml.safe_load(file)
             base_parameters = merge_dicts(base_parameters, mod)
 
+    for key, value in template.items():
+        if key in base_parameters:
+            template[key] = base_parameters[key]
+
     base_parameters = __apply_template__(base_parameters, template)
 
     if 'nested' in parameters:

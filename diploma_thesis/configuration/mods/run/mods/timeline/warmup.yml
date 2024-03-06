@@ -2,6 +2,6 @@
 parameters:
   timeline:
     warmup:
-      - 5000
-      - 5000
+      - 1000
+      - 1000
 

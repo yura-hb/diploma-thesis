@@ -11,9 +11,11 @@ task:
     parameters:
       base_path: 'configuration/mods/machine/dqn.yml'
       template: 'marl_direct'
-      mods: [
-
-      ]
+      mods:
+        - 'agent/dqn/ddqn.yml'
+        - 'agent/dqn/dueling.yml'
+        - 'util/agent/centralized.yml'
+        - 'util/rules/all_rules.yml'
 
   work_center_agent:
     kind: 'static'
@@ -27,7 +29,7 @@ task:
 
   tape:
     machine_reward:
-      kind: 'surrogate_tardiness'
+      kind: 'global_mdpi'
       parameters:
         span: 256
 
@@ -51,12 +53,27 @@ task:
     is_work_center_set_in_shop_floor_connected: True
 
   simulator:
-    kind: 'td'
+    kind: 'episodic'
     parameters:
       memory: 5
 
   run:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/run/td_jsp/run.yml'
+      base_path: 'configuration/mods/run/run.yml'
       mods: []
+      nested:
+        parameters:
+          simulations:
+            - kind: 'mod'
+              parameters:
+                base_path: 'configuration/mods/simulation/simulation.yml'
+                mods:
+                  - 'duration/256.yml'
+                  - 'size/jsp/5.yml'
+            - kind: 'mod'
+              parameters:
+                base_path: 'configuration/mods/simulation/simulation.yml'
+                mods:
+                  - 'duration/256.yml'
+                  - 'size/jsp/5.yml'

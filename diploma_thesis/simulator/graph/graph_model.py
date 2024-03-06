@@ -114,7 +114,7 @@ class GraphModel(Delegate):
                 job_id = self.cache[sid].completed_job_ids.pop(0)
                 job = context.shop_floor.job(job_id)
 
-                self.cache[sid] = self.transition_model.remove(job, context.shop_floor, self.cache[sid])
+                self.cache[sid].graph = self.transition_model.remove(job, context.shop_floor, self.cache[sid])
                 self.cache[sid].did_change_jobs = True
                 self.__remove_job_from_operation_map__(context, job)
 

@@ -49,7 +49,7 @@ class GlobalTardiness(MachineReward):
         return RewardList(indices=torch.arange(len(contexts)),
                           units=torch.vstack([work_center_idx, machine_idx]),
                           reward=reward,
-                          batch_size=work_center_idx.shape)
+                          batch_size=[])
 
     @staticmethod
     def from_cli(parameters) -> MachineReward:

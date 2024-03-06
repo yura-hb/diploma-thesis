@@ -49,7 +49,7 @@ class TDSimulator(Simulator):
             else:
                 agent.store(key, Slice(episode_id=context.shop_floor.id, records=records))
 
-            queue.store_group(context.shop_floor.id, key, records[1:])
+                queue.store_group(context.shop_floor.id, key, records[1:])
 
         return
 

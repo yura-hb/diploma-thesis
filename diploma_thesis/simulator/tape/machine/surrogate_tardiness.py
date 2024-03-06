@@ -7,7 +7,7 @@ from environment import Job, Machine, JobReductionStrategy
 from .reward import MachineReward, RewardList
 
 
-class SurrogateTardinessReward(MachineReward):
+class SurrogateTardiness(MachineReward):
     """
     Reward from Deep-MARL external/PhD-Thesis-Projects/JSP/machine.py:693
     """
@@ -29,8 +29,8 @@ class SurrogateTardinessReward(MachineReward):
         release_reward_after_completion: bool = False
 
         @staticmethod
-        def from_cli(parameters: dict) -> 'SurrogateTardinessReward.Configuration':
-            return SurrogateTardinessReward.Configuration(
+        def from_cli(parameters: dict) -> 'SurrogateTardiness.Configuration':
+            return SurrogateTardiness.Configuration(
                 critical_level_factor=parameters.get('critical_level_factor', 64),
                 winq_factor=parameters.get('winq_factor', 0.2),
                 span=parameters.get('span', 20),
@@ -69,10 +69,14 @@ class SurrogateTardinessReward(MachineReward):
         if not self.configuration.release_reward_after_completion:
             return None
 
+        work_center_idx = torch.tensor([c.work_center_idx for c in contexts])
+        machine_idx = torch.tensor([c.machine_idx for c in contexts])
+
         return RewardList(
             indices=torch.arange(len(contexts)),
-            units=torch.vstack([context.work_center_idx for context in contexts]),
+            units=torch.vstack([work_center_idx, machine_idx]),
             reward=torch.stack([self.__compute_reward__(context) for context in contexts]),
+            batch_size=[]
         )
 
     def __compute_reward__(self, context: Context):
@@ -104,4 +108,4 @@ class SurrogateTardinessReward(MachineReward):
 
     @staticmethod
     def from_cli(parameters) -> MachineReward:
-        return SurrogateTardinessReward(configuration=SurrogateTardinessReward.Configuration.from_cli(parameters))
+        return SurrogateTardiness(configuration=SurrogateTardiness.Configuration.from_cli(parameters))

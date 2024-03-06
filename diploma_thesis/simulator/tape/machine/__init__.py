@@ -7,14 +7,18 @@ from .reward import MachineReward
 from .no import No
 from .global_tardiness import GlobalTardiness
 from .global_decomposed_tardiness import GlobalDecomposedTardiness
-from .surrogate_tardiness import SurrogateTardinessReward
+from .surrogate_tardiness import SurrogateTardiness
+from .global_MDPI_reward import GlobalMDPI
+from .surrogate_slack import SurrogateSlack
 
 
 key_to_cls = {
     'no': No,
     'global_tardiness': GlobalTardiness,
     'global_decomposed_tardiness': GlobalDecomposedTardiness,
-    'surrogate_tardiness': SurrogateTardinessReward
+    'global_mdpi': GlobalMDPI,
+    'surrogate_tardiness': SurrogateTardiness,
+    'surrogate_slack': SurrogateSlack
 }
 
 

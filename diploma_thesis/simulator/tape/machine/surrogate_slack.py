@@ -11,7 +11,7 @@ from .reward import MachineReward, RewardList
 # Dynamic jobshop scheduling algorithm based on deep q network
 
 
-class SurrogateSlackReward(MachineReward):
+class SurrogateSlack(MachineReward):
 
     @dataclass
     class Context:
@@ -25,8 +25,8 @@ class SurrogateSlackReward(MachineReward):
         release_reward_after_completion: bool = False
 
         @staticmethod
-        def from_cli(parameters: Dict) -> 'SurrogateSlackReward.Configuration':
-            return SurrogateSlackReward.Configuration(
+        def from_cli(parameters: Dict) -> 'SurrogateSlack.Configuration':
+            return SurrogateSlack.Configuration(
                 release_reward_after_completion=parameters.get('release_reward_after_completion', False)
             )
 
@@ -67,8 +67,8 @@ class SurrogateSlackReward(MachineReward):
         )
 
     def __compute_reward__(self, context: Context):
-        return context.slack.mean() / (context.remaining_processing_time.mean() + 0.01)
+        return - context.slack.mean() / (context.remaining_processing_time.mean() + 0.01)
 
     @staticmethod
     def from_cli(parameters: Dict) -> MachineReward:
-        return SurrogateSlackReward(SurrogateSlackReward.Configuration.from_cli(parameters))
+        return SurrogateSlack(SurrogateSlack.Configuration.from_cli(parameters))

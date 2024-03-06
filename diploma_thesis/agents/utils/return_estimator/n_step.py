@@ -53,13 +53,13 @@ class NStep(Estimator):
 
         lambdas = torch.cumprod(lambdas, dim=0)
 
-        for i in range(records.batch_size[0]):
+        for i in range(len(records)):
             action = records[i].action
 
-            next_state_value = records[i + 1].info[Record.VALUES_KEY] if i + 1 < len(records) else 0
+            next_state_value = records[i + 1].info[Record.VALUES_KEY][action] if i + 1 < len(records) else 0
             next_state_value *= self.configuration.discount_factor
 
-            td_errors += [records[i].reward + next_state_value - records[i].info[Record.VALUES_KEY]]
+            td_errors += [records[i].reward + next_state_value - records[i].info[Record.VALUES_KEY][action]]
 
             if self.configuration.off_policy:
                 action_probs = torch.nn.functional.softmax(records[i].info[Record.ACTION_KEY], dim=0)
@@ -73,7 +73,7 @@ class NStep(Estimator):
             else:
                 off_policy_weights += [1]
 
-        for i in range(records.batch_size[0]):
+        for i in range(len(records)):
             g = records[i].info[Record.VALUES_KEY][records[i].action]
             n = min(self.configuration.n, len(records) - i)
 

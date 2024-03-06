@@ -56,11 +56,14 @@ class DiscreteAction(Policy[Input]):
         values = torch.tensor(0, dtype=torch.long)
         actions = torch.tensor(0, dtype=torch.long)
 
-        if self.value_model is not None:
-            values = self.value_model(state)
-
         if self.action_model is not None:
             actions = self.action_model(state)
+
+        if self.value_model is not None:
+            values = self.value_model(state)
+            values = values.expand(-1, self.n_actions)
+        else:
+            values = actions
 
         match self.policy_estimation_method:
             case PolicyEstimationMethod.INDEPENDENT:

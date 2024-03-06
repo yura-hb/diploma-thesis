@@ -21,7 +21,7 @@ parameters:
             uniform: [ 1, 50 ]
             noise: [ 0, 10 ]
         permutation:
-          uneveness: 2
+          uneveness: 0
         due_time:
           kind: 'uniform'
           parameters:
