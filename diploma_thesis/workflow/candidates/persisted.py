@@ -1,4 +1,5 @@
 import os
+import yaml
 from typing import Dict, List
 
 from utils.persistence import load
@@ -26,11 +27,19 @@ class PersistedAgent(Template):
             if not os.path.exists(machine_file) or not os.path.exists(work_center_file):
                 continue
 
+            parameters = os.path.join(target_dir, 'parameters.yml')
+
+            with open(parameters, 'r') as f:
+                parameters = yaml.load(f, Loader=yaml.FullLoader)
+
             try:
                 machine = load(machine_file)
                 work_center = load(work_center_file)
 
-                result += [Candidate(prefix + '_' + file, machine=machine, work_center=work_center)]
+                result += [Candidate(prefix + '_' + file,
+                                     parameters=parameters,
+                                     machine=machine,
+                                     work_center=work_center)]
             except:
                 pass
 

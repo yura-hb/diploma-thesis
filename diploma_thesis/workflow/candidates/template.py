@@ -10,6 +10,7 @@ from agents import MachineAgent, WorkCenterAgent
 @dataclass
 class Candidate:
     name: str
+    parameters: dict
     machine: MachineAgent
     work_center: WorkCenterAgent
 

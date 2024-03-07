@@ -5,10 +5,12 @@ from functools import partial
 
 from .no import No
 from .n_per_machine import NPerMachine
+from .jsp_static import JSPStatic
 
 key_to_class = {
     'no': No,
-    'n_per_machine': NPerMachine
+    'n_per_machine': NPerMachine,
+    'jsp_static': JSPStatic
 }
 
 

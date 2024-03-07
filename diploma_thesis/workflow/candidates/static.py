@@ -28,6 +28,7 @@ class StaticCandidates(Template):
         return [
             Candidate(
                 name=cls.__id__(scheduling_rule, routing_rule),
+                parameters=parameters,
                 machine=StaticMachine(
                     model=StaticMachineModel(scheduling_rule),
                     state_encoder=PlainEncoder()

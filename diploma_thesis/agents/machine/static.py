@@ -1,6 +1,6 @@
 from typing import Dict
 
-from agents.base.agent import Agent
+from agents.base.agent import Agent, Key, TrainingSample
 from agents.utils.memory import Record
 from environment import MachineKey
 from .model import MachineModel, from_cli as model_from_cli
@@ -16,10 +16,14 @@ class StaticMachine(Agent[MachineKey]):
     def is_trainable(self):
         return False
 
+    @property
+    def is_distributed(self):
+        return False
+
     def train_step(self):
         pass
 
-    def store(self, key: MachineKey, record: Record):
+    def store(self, key: Key, sample: TrainingSample):
         pass
 
     @staticmethod

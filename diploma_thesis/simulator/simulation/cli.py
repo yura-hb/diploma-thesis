@@ -3,6 +3,7 @@ from typing import Dict, List, Iterable
 
 from utils import modified
 from .simulation import Simulation
+from .jsp_dataset import JSPDataset
 
 
 def from_cli(prefix: str, parameters: List[Dict], logger: Logger) -> [Simulation]:
@@ -27,6 +28,7 @@ def _from_cli(parameters: Dict, logger: Logger) -> [Simulation]:
 
     key_to_class = {
         'simulation': Simulation,
+        'jsp_dataset': JSPDataset,
         'multi_value': MultiValueCLITemplate,
     }
 

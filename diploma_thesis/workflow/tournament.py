@@ -1,4 +1,5 @@
 import os.path
+import logging
 from functools import reduce
 from typing import Dict
 from typing import List
@@ -13,6 +14,9 @@ from tabulate import tabulate
 from environment import Statistics
 from simulator import EvaluateConfiguration, EpisodicSimulator, Simulation
 from simulator.tape import TapeModel, NoMachineReward, NoWorkCenterReward
+from simulator.graph import GraphModel
+from simulator.graph.graph_model import Configuration as GraphModelConfiguration
+from simulator.graph.transition import No as NoTransitionModel
 from utils import task
 from workflow.candidates import from_cli as candidates_from_cli, Candidate
 from workflow.criterion import from_cli as criterion_from_cli, Criterion, Direction, Scale
@@ -22,14 +26,20 @@ reward_suffix = '_reward'
 
 
 @task(lambda _, candidate, *args: candidate.name)
-def __evaluate__(tournament: 'Tournament', candidate: Candidate, criteria: List[Criterion], output_dir: str):
+def __evaluate__(tournament: 'Tournament',
+                 candidate: Candidate,
+                 criteria: List[Criterion],
+                 configuration: EvaluateConfiguration,
+                 logger: logging.Logger,
+                 output_dir: str):
     environment = simpy.Environment()
     candidate_output_dir = os.path.join(output_dir, 'candidates', candidate.name)
 
-    log_file = tournament.run_log_file(candidate_output_dir)
-    logger = tournament.__make_logger__(name=candidate.name, filename=log_file, log_stdout=False)
+    graph_model = GraphModel(transition_model=NoTransitionModel(forward_transition=None, schedule_transition=None),
+                             configuration=GraphModelConfiguration(memory=1))
 
-    configuration = EvaluateConfiguration.from_cli(parameters=tournament.parameters['simulator'], logger=logger)
+    if 'graph' in candidate.parameters:
+        graph_model = GraphModel.from_cli(candidate.parameters['graph'])
 
     candidate.machine.with_logger(logger)
     candidate.work_center.with_logger(logger)
@@ -38,6 +48,7 @@ def __evaluate__(tournament: 'Tournament', candidate: Candidate, criteria: List[
         machine=candidate.machine,
         work_center=candidate.work_center,
         tape_model=TapeModel(NoMachineReward(), NoWorkCenterReward()),
+        graph_model=graph_model,
     )
 
     simulator.with_logger(logger)
@@ -66,6 +77,10 @@ class Tournament(Workflow):
         return os.path.join(output_dir, 'log.txt')
 
     @property
+    def store_run_statistics(self):
+        return self.parameters.get('store_run_statistics', False)
+
+    @property
     def debug(self) -> bool:
         return self.parameters.get('debug', False)
 
@@ -74,12 +89,19 @@ class Tournament(Workflow):
         criteria = self.__make_criteria__()
         output_dir = self.__make_output_dir__(self.parameters['name'], self.parameters['output_dir'])
 
+        logger = self.__make_logger__(name='Tournament',
+                                      filename=self.run_log_file(output_dir),
+                                      log_stdout=self.parameters.get('log_stdout', False))
+
+        configuration = EvaluateConfiguration.from_cli(parameters=self.parameters['simulator'], logger=logger)
+
         print(f'Evaluating {len(candidates)} candidates')
 
         cpus = self.parameters['n_workers']
 
         iter = Parallel(n_jobs=cpus, return_as='generator')(
-            delayed(__evaluate__)(self, candidate, criteria, output_dir) for candidate in candidates
+            delayed(__evaluate__)(self, candidate, criteria, configuration, logger, output_dir)
+            for candidate in candidates
         )
 
         result = []
@@ -199,8 +221,9 @@ class Tournament(Workflow):
         if not os.path.exists(simulation_output_dir):
             os.makedirs(simulation_output_dir)
 
-        statistics_output_dir = os.path.join(simulation_output_dir, 'statistics')
-        statistics.save(statistics_output_dir)
+        if self.store_run_statistics:
+            statistics_output_dir = os.path.join(simulation_output_dir, 'statistics')
+            statistics.save(statistics_output_dir)
 
         report_output_file = os.path.join(simulation_output_dir, 'report.txt')
         report = statistics.report()

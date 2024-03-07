@@ -4,9 +4,10 @@ from utils import from_cli
 from .job_sampler import JobSampler
 from .dynamic import CLI as DynamicJobSamplerFromCLI, Builder as DynamicJobSamplerBuilder, \
     JobSampler as DynamicJobSampler
-from .static import Sampler as StaticJobSampler
+from .static import No
 
 key_to_class = {
+    'no': No,
     "dynamic": DynamicJobSamplerFromCLI
 }
 

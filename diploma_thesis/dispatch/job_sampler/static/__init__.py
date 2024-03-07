@@ -1,2 +1,2 @@
 
-from .job_sampler import Sampler
+from .no import No
