@@ -36,7 +36,7 @@ class RLAgent(Generic[Key], Agent[Key]):
 
     @filter(lambda self, *args: self.phase != EvaluationPhase())
     def store(self, key: Key, sample: TrainingSample):
-        self.trainer.store(sample)
+        self.trainer.store(sample, self.model.policy)
 
     def loss_record(self):
         return self.trainer.loss_record()
