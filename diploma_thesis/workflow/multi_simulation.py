@@ -27,8 +27,11 @@ class MultiSimulation:
 
     def run(self):
         parameters = self.__fetch_tasks__()
-        parameters = self.__add_debug_info__(parameters)
-        parameters = self.__append_output_dir__(parameters)
+        parameters = self.__passthrough_parameters__(dict(
+            debug=False,
+            output_dir='',
+            store_run_statistics=False
+        ), parameters)
         parameters = self.__fix_names__(parameters)
 
         print(f'Running {len(parameters)} simulations')
@@ -53,23 +56,15 @@ class MultiSimulation:
 
         return result
 
-    def __add_debug_info__(self, simulations: [Dict]):
+    def __passthrough_parameters__(self, values, simulations: [Dict]):
         result = simulations
 
-        if self.parameters.get('debug', False):
-            for index, _ in enumerate(result):
-                result[index]['debug'] = True
+        for key, default in values.items():
+            value = self.parameters.get(key, default)
 
-        return result
-
-    def __append_output_dir__(self, simulations: [Dict]):
-        result = simulations
-
-        output_dir = self.parameters.get('output_dir')
-
-        if output_dir:
-            for index, _ in enumerate(result):
-                result[index]['output_dir'] = os.path.join(output_dir, result[index]['output_dir'])
+            if value is not None:
+                for index, _ in enumerate(result):
+                    result[index][key] = value
 
         return result
 

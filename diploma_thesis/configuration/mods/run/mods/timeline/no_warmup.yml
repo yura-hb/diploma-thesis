@@ -2,4 +2,9 @@
 
 parameters:
   timeline:
-    warmup: []
+    warmup:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0

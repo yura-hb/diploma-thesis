@@ -19,6 +19,7 @@ from enum import StrEnum
 class TrainSchedule(StrEnum):
     ON_TIMELINE = 'on_timeline'
     ON_STORE = 'on_store'
+    ON_STORED_DATA_EXCLUSIVELY = 'on_stored_data_exclusively'
 
     @staticmethod
     def from_cli(parameters: dict):
@@ -69,16 +70,20 @@ class RLTrainer(Loggable):
     def loss_record(self) -> pd.DataFrame:
         return pd.DataFrame(self.loss_cache)
 
-    def store(self, sample: TrainingSample):
+    def store(self, sample: TrainingSample, model: Policy):
         records = self.__prepare__(sample)
         records.info['episode'] = torch.full(records.reward.shape, sample.episode_id, device=records.reward.device)
 
+        if self.train_schedule == TrainSchedule.ON_STORED_DATA_EXCLUSIVELY:
+            self.memory.clear()
+
         self.memory.store(records)
 
-        if self.train_schedule != TrainSchedule.ON_STORE:
+        if (self.train_schedule != TrainSchedule.ON_STORE and
+                self.train_schedule != TrainSchedule.ON_STORED_DATA_EXCLUSIVELY):
             return
 
-        self.__train__(sample.model)
+        self.__train__(model)
 
     def clear(self):
         self.loss_cache = []

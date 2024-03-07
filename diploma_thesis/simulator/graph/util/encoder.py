@@ -51,13 +51,13 @@ class Encoder:
         t = torch.tensor([], dtype=torch.long)
 
         # Nodes
-        result.data[Graph.OPERATION_KEY].x = t.view(1, 0)
-        result.data[Graph.GROUP_KEY].x = t.view(1, 0)
-        result.data[Graph.MACHINE_KEY].x = t.view(1, 0)
-        result.data[Graph.WORK_CENTER_KEY].x = t.view(1, 0)
+        result.data[Graph.OPERATION_KEY].x = t.to(torch.float32).view(0, 1)
+        result.data[Graph.GROUP_KEY].x = t.to(torch.float32).view(0, 1)
+        result.data[Graph.MACHINE_KEY].x = t.to(torch.float32).view(0, 1)
+        result.data[Graph.WORK_CENTER_KEY].x = t.to(torch.float32).view(0, 1)
 
         # Indices
-        result.data[Graph.JOB_INDEX_KEY] = t.view(4, 0)
+        result.data[Graph.JOB_INDEX_KEY] = t.view(0, 4)
 
         def __init_rel__(key):
             result.data[*key].edge_index = t.view(2, 0)
@@ -87,7 +87,7 @@ class Encoder:
 
         n_all_ops = 0
 
-        result.data[Graph.JOB_INDEX_KEY] = torch.tensor([], dtype=torch.long).view(4, 0)
+        result.data[Graph.JOB_INDEX_KEY] = torch.tensor([], dtype=torch.long).view(0, 4)
 
         for job_id in job_ids:
             if job_id not in job_operation_map:
@@ -110,9 +110,9 @@ class Encoder:
                 ]
             )
 
-            result.data[Graph.JOB_INDEX_KEY] = torch.cat([result.data[Graph.JOB_INDEX_KEY], index], dim=1)
+            result.data[Graph.JOB_INDEX_KEY] = torch.cat([result.data[Graph.JOB_INDEX_KEY], index.T], dim=0)
 
-        result.data[Graph.OPERATION_KEY].x = torch.zeros(n_all_ops, dtype=torch.long).view(1, -1)
+        result.data[Graph.OPERATION_KEY].x = torch.zeros(n_all_ops, dtype=torch.float32).view(-1, 1)
 
     def __update_forward_graph__(
          self, result: Graph, source: Graph, shop_floor: ShopFloor, job_operation_map: JOB_OPERATION_MAP_TYPE
@@ -147,7 +147,7 @@ class Encoder:
             n_steps = len(job.step_idx)
 
             forward_graph = source.data[Graph.JOB_KEY][job_id][Graph.FORWARD_GRAPH_KEY]
-            local_operation_to_global_map = torch.arange(min_operation_id, max_operation_id + 1)
+            local_operation_to_global_map = torch.arange(min_operation_id, max_operation_id + 1, dtype=torch.long)
 
             if has_groups:
                 # Group nodes are encoded as -step_id -1, which means that they access items in the end of the list
@@ -170,12 +170,12 @@ class Encoder:
                 s = result.data[Graph.OPERATION_KEY, Graph.FORWARD_RELATION_KEY, Graph.OPERATION_KEY]
                 s.edge_index = torch.cat([s.edge_index, local_operation_to_global_map[forward_graph]], dim=1)
 
-        result.data[Graph.GROUP_KEY].x = torch.zeros(n_groups, dtype=torch.long).view(1, -1)
+        result.data[Graph.GROUP_KEY].x = torch.zeros(n_groups, dtype=torch.float32).view(1, -1)
 
     def __append_machine_nodes__(self, result: Graph, source: Graph, shop_floor: ShopFloor):
-        result.data[Graph.MACHINE_INDEX_KEY] = source.data[Graph.MACHINE_INDEX_KEY]
-        result.data[Graph.MACHINE_KEY].x = torch.zeros(len(shop_floor.machines), dtype=torch.long).view(1, -1)
-        result.data[Graph.WORK_CENTER_KEY].x = torch.zeros(len(shop_floor.work_centers), dtype=torch.long).view(1, -1)
+        result.data[Graph.MACHINE_INDEX_KEY] = source.data[Graph.MACHINE_INDEX_KEY].view(-1, 2)
+        result.data[Graph.MACHINE_KEY].x = torch.zeros(len(shop_floor.machines), dtype=torch.float32).view(-1, 1)
+        result.data[Graph.WORK_CENTER_KEY].x = torch.zeros(len(shop_floor.work_centers), dtype=torch.float32).view(-1, 1)
 
         if self.configuration.is_machine_set_in_work_center_connected:
             for work_center in shop_floor.work_centers:
@@ -184,10 +184,10 @@ class Encoder:
                     torch.arange(len(work_center.machines))
                 ])
 
-                machine_node_id = self.__get_node_ids__(machine_index, result.data[Graph.MACHINE_INDEX_KEY])
+                machine_node_id = self.__get_node_ids__(machine_index, result.data[Graph.MACHINE_INDEX_KEY].T)
 
                 edges = itertools.combinations(machine_node_id, 2)
-                edges = torch.tensor(list(edges)).view(-1, 2).T
+                edges = torch.tensor(list(edges), dtype=torch.long).view(-1, 2).T
 
                 s = result.data[Graph.MACHINE_KEY, Graph.IN_WORK_CENTER_RELATION_KEY, Graph.MACHINE_KEY]
                 s.edge_index = torch.cat([s.edge_index, edges], dim=1)
@@ -200,7 +200,7 @@ class Encoder:
 
         if self.configuration.is_work_center_set_in_shop_floor_connected:
             edges = itertools.combinations(range(len(shop_floor.work_centers)), 2)
-            edges = torch.tensor(list(edges)).T
+            edges = torch.tensor(list(edges), dtype=torch.long).T
 
             s = result.data[Graph.WORK_CENTER_KEY, Graph.IN_SHOP_FLOOR_RELATION_KEY, Graph.WORK_CENTER_KEY]
             s.edge_index = edges
@@ -208,7 +208,7 @@ class Encoder:
     def __update_schedule_graphs__(self, result: Graph, source: Graph):
         self.__reset_schedule_graph__(result)
 
-        index = result.data[Graph.JOB_INDEX_KEY][[0, 1], :]
+        index = result.data[Graph.JOB_INDEX_KEY][:, [0, 1]].view(2, -1)
 
         for machine_id in range(len(result.data[Graph.MACHINE_KEY])):
             has_graph = Graph.SCHEDULED_GRAPH_KEY in source.data[Graph.MACHINE_KEY][machine_id]

@@ -5,16 +5,17 @@ task:
   output_dir: 'tmp'
   log_stdout: True
   log_run: True
+  store_run_statistics: False
 
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/machine/dqn.yml'
+      base_path: 'configuration/mods/machine/ppo.yml'
       template: 'marl_direct'
       mods:
-        - 'agent/dqn/ddqn.yml'
-        - 'agent/dqn/dueling.yml'
-        - 'util/agent/multi_agent.yml'
+#        - 'agent/dqn/ddqn.yml'
+#        - 'agent/dqn/dueling.yml'
+#        - 'util/agent/multi_agent.yml'
         - 'util/rules/all_rules.yml'
 
   work_center_agent:
@@ -30,8 +31,6 @@ task:
   tape:
     machine_reward:
       kind: 'surrogate_tardiness'
-      parameters:
-        span: 256
 
     work_center_reward:
       kind: 'no'
@@ -53,7 +52,7 @@ task:
     is_work_center_set_in_shop_floor_connected: True
 
   simulator:
-    kind: 'episodic'
+    kind: 'td'
     parameters:
       memory: 5
 

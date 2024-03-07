@@ -32,6 +32,10 @@ class Simulation(Workflow):
     def log_stdout(self):
         return self.parameters.get('log_stdout', False)
 
+    @property
+    def store_run_statistics(self):
+        return self.parameters.get('store_run_statistics', False)
+
     def run_log_file(self, output_dir):
         if not self.parameters.get('log_run', False):
             return None
@@ -76,7 +80,10 @@ class Simulation(Workflow):
         if not self.is_debug:
             reward_cache = simulator.train(environment, config)
 
-            self.__store_simulations__(config.simulations, reward_cache, simulation_output_dir)
+            self.__store_simulations__(config.simulations,
+                                       reward_cache,
+                                       self.store_run_statistics,
+                                       simulation_output_dir)
 
         agent_output_dir = os.path.join(output_dir, 'agent')
 
@@ -109,7 +116,10 @@ class Simulation(Workflow):
         if not self.is_debug:
             simulator.evaluate(environment, config)
 
-            self.__store_simulations__(config.simulations, reward_cache=None, output_dir=simulation_output_dir)
+            self.__store_simulations__(config.simulations,
+                                       reward_cache=None,
+                                       store_run_statistics=self.store_run_statistics,
+                                       output_dir=simulation_output_dir)
 
     def __make_simulator__(self):
         machine = machine_from_cli(parameters=self.parameters['machine_agent'])
@@ -127,16 +137,24 @@ class Simulation(Workflow):
         return simulator
 
     @staticmethod
-    def __store_simulations__(simulations: List[simulator.Simulation], reward_cache: RewardCache, output_dir: str):
+    def __store_simulations__(simulations: List[simulator.Simulation],
+                              reward_cache: RewardCache,
+                              store_run_statistics: bool,
+                              output_dir: str):
         reward_cache = RewardCache(batch_size=[]) if reward_cache is None else reward_cache
         machine_reward, work_center_reward = Simulation.__process_reward_cache__(reward_cache)
 
         for simulation in simulations:
             path = os.path.join(output_dir, simulation.simulation_id)
 
+            if not os.path.exists(path):
+                os.makedirs(path)
+
             if shop_floor := simulation.shop_floor:
                 statistics = shop_floor.statistics
-                statistics.save(path)
+
+                if store_run_statistics:
+                    statistics.save(path)
 
                 sh_id = shop_floor.id.item()
 

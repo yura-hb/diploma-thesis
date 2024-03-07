@@ -32,23 +32,19 @@ class MachineQueue(Queue):
         if record.result is None:
             mode = NextStateRecordMode.on_next_action
 
-        self.__record_next_state_on_action__(record.record.state, machine.key)
+        self.__record_next_state_on_action__(context, record.record.state, machine.key)
         self.__append_to_queue__(context, machine, record, mode)
 
     def did_produce(self, context: Context, machine: Machine, job: Job):
         record = self.queue[machine.key][-1]
         record.record.reward = self.reward.reward_after_production(record.context)
 
-        if record.record.reward is not None:
-            self.__emit_rewards__(context, machine.work_center_idx, machine.machine_idx)
-            return
+        if record.mode == NextStateRecordMode.on_produce:
+            state = self.simulator.encode_machine_state(context=context, machine=machine)
 
-        if record.mode != NextStateRecordMode.on_produce:
-            return
+            record.record.next_state = state
 
-        state = self.simulator.encode_machine_state(context=context, machine=machine)
-
-        record.record.next_state = state
+        self.__emit_rewards__(context, machine.work_center_idx, machine.machine_idx)
 
     def did_complete(self, context: Context, job: Job):
         records = self.__fetch_records_from_job_path__(context, job)
@@ -69,7 +65,7 @@ class MachineQueue(Queue):
 
     # Utility
 
-    def __record_next_state_on_action__(self, state, machine_key):
+    def __record_next_state_on_action__(self, context, state, machine_key):
         if len(self.queue[machine_key]) == 0:
             return
 
@@ -79,6 +75,8 @@ class MachineQueue(Queue):
             return
 
         record.record.next_state = state
+
+        self.__emit_rewards__(context, machine_key.work_center_id, machine_key.machine_id)
 
     def __append_to_queue__(
         self, context: Context, machine: Machine, record: MachineModel.Record, mode: NextStateRecordMode

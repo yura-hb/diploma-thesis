@@ -3,11 +3,12 @@ from dataclasses import dataclass
 
 import torch
 from torch import nn
+from torch_geometric import nn as pyg_nn
 
 from torch_geometric.data import HeteroData
 from torch_geometric.nn import to_hetero
 from agents.base.state import TensorState, GraphState
-from .layers import Layer, from_cli as layer_from_cli, Merge
+from .layers import Layer, GraphLayer, from_cli as layer_from_cli, Merge
 
 
 class NeuralNetwork(nn.Module):
@@ -17,7 +18,6 @@ class NeuralNetwork(nn.Module):
 
     @dataclass
     class Configuration:
-
         graph: list[Layer]
         state: list[Layer]
         merge: Layer

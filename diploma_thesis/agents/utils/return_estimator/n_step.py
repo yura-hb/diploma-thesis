@@ -83,7 +83,6 @@ class NStep(Estimator):
             for j in range(n):
                 g += td_errors[i + j] * lambdas[j] * weights[j] * self.configuration.discount_factor ** j
 
-            records[i].info[Record.REWARD_KEY] = records[i].reward
             records[i].reward = g
 
         return records

@@ -18,18 +18,15 @@ class AuxiliaryGraphEncoder(StateEncoder):
 
         graph = parameters.graph
 
-        job_ids = graph.data[Graph.JOB_INDEX_KEY][0, :].unique()
+        job_ids = graph.data[Graph.JOB_INDEX_KEY][:, 0].unique()
 
         processing_times = []
 
         for job_id in job_ids:
-            processing_times += [parameters.machine.shop_floor.job(job_id).processing_times]
+            processing_times += [parameters.machine.shop_floor.job(job_id).processing_times.view(-1)]
 
-        processing_times = torch.cat(processing_times, dim=0)
+        processing_times = torch.cat(processing_times, dim=0).view(-1, 1)
         graph.data[Graph.OPERATION_KEY].x = processing_times
-
-        # TODO: - Remove
-        graph.data = graph.data.to_homogeneous()
 
         return self.State(parameters.graph, batch_size=[])
 

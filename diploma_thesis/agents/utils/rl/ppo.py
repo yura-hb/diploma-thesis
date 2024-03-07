@@ -2,6 +2,8 @@
 from dataclasses import dataclass
 from typing import Dict
 
+import torch
+
 from agents.utils.memory import NotReadyException
 from .rl import *
 
@@ -54,6 +56,7 @@ class PPO(RLTrainer):
 
         advantages = batch.info[Record.ADVANTAGE_KEY]
         value, logits = model.predict(batch.state)
+        value = value[torch.arange(batch.shape[0]), batch.action]
         distribution = torch.distributions.Categorical(logits=logits)
 
         loss = 0

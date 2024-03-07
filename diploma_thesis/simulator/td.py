@@ -38,9 +38,9 @@ class TDSimulator(Simulator):
 
         if queue.group_len(context.shop_floor.id, key) > self.memory:
             # Pass a copy of records to avoid modification of the original
-            records = queue.pop_group(context.shop_floor.id, key)
-            records = torch.cat([record.view(-1) for record in records])
-            records: List[Record] = list(records.clone().unbind(dim=0))
+            original_records = queue.pop_group(context.shop_floor.id, key)
+            records = torch.cat([record.view(-1) for record in original_records]).clone()
+            records: List[Record] = list(records.unbind(dim=0))
 
             if self.send_as_trajectory:
                 agent.store(key, Trajectory(episode_id=self.episode, records=records))
@@ -49,7 +49,7 @@ class TDSimulator(Simulator):
             else:
                 agent.store(key, Slice(episode_id=context.shop_floor.id, records=records))
 
-                queue.store_group(context.shop_floor.id, key, records[1:])
+                queue.store_group(context.shop_floor.id, key, original_records[1:])
 
         return
 

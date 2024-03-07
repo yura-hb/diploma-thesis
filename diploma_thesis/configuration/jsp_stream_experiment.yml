@@ -38,7 +38,6 @@ marl_ddqn: &marl_ddqn
   template: *template
   mods:
     - 'agent/dqn/ddqn.yml'
-    - 'util/agent/centralized.yml'
 
 marl_dueling_ddqn: &marl_dueling_ddqn
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -46,7 +45,6 @@ marl_dueling_ddqn: &marl_dueling_ddqn
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/dueling.yml'
-    - 'util/agent/centralized.yml'
 
 marl_dueling_ddqn_pr: &marl_dueling_ddqn_pr
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -55,7 +53,6 @@ marl_dueling_ddqn_pr: &marl_dueling_ddqn_pr
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/dueling.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'util/agent/centralized.yml'
 
 marl_dueling_ddqn_n_step: &marl_dueling_ddqn_n_step
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -63,7 +60,6 @@ marl_dueling_ddqn_n_step: &marl_dueling_ddqn_n_step
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/dueling.yml'
-    - 'util/agent/centralized.yml'
     - 'agent/dqn/3_step.yml'
 
 reinforce: &reinforce
@@ -172,6 +168,7 @@ task:
   kind: 'multi_task'
   n_workers: 10
   debug: False
+  store_run_statistics: False
   output_dir: 'results/jsp/marl_direct'
 
   tasks:
@@ -586,7 +583,6 @@ task:
           machine_agent:
             parameters:
               - *dueling_ddqn_pr_n_step
-              - *marl_dueling_ddqn_n_step
               - *reinforce
               - *ppo
 
@@ -855,7 +851,6 @@ task:
               - *dueling_ddqn_pr
               - *reinforce
               - *ppo
-              - *marl_dueling_ddqn_n_step
               - *dueling_ddqn_pr_n_step
 
           tape:
