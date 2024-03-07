@@ -63,11 +63,7 @@ class NeuralNetwork(nn.Module):
         if isinstance(state, GraphState) and self.graph_encoder is not None:
             data = state.graph.data
 
-            if not self.is_configured:
-                if isinstance(data, HeteroData):
-                    self.graph_encoder = to_hetero(self.graph_encoder, data.metadata(), aggr='sum')
-
-            encoded_graph = self.graph_encoder(data.x_dict, data.edge_index_dict)
+            encoded_graph = self.graph_encoder(data)
 
         hidden = self.merge(encoded_state, encoded_graph)
         output = self.output(hidden)
