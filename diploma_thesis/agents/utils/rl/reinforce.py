@@ -36,7 +36,7 @@ class Configuration:
 class Reinforce(RLTrainer):
 
     def __init__(self, configuration: Configuration, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, is_episodic=True, **kwargs)
 
         self.is_critics_configured = False
         self.configuration = configuration
@@ -51,7 +51,7 @@ class Reinforce(RLTrainer):
 
     def __train__(self, model: Policy):
         try:
-            batch = self.__sample_batch__(update_returns=False)
+            batch = self.storage.sample(update_returns=False)
         except NotReadyException:
             return
 

@@ -21,7 +21,7 @@ class AuxiliaryGraphEncoder(GraphStateEncoder):
 
         graph = parameters.graph
 
-        job_ids = graph.data[Graph.JOB_INDEX_KEY][:, 0].unique()
+        job_ids = graph.data[Graph.JOB_INDEX_MAP][:, 0].unique()
 
         processing_times = []
 
@@ -33,6 +33,9 @@ class AuxiliaryGraphEncoder(GraphStateEncoder):
 
         if self.is_homogeneous:
             graph.data = graph.data.to_homogeneous(node_attrs=['x'])
+
+        del graph.data[Graph.JOB_INDEX_MAP]
+        del graph.data[Graph.MACHINE_INDEX_KEY]
 
         return self.State(graph, batch_size=[])
 

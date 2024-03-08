@@ -11,6 +11,7 @@ from .rl import *
 @dataclass
 class Configuration:
     value_loss: Loss
+    sample_ratio: float
     policy_step_ratio: float
     entropy_regularization: float
     update_advantages: bool
@@ -20,6 +21,7 @@ class Configuration:
     def from_cli(parameters: Dict):
         return Configuration(
             value_loss=Loss.from_cli(parameters['value_loss']),
+            sample_ratio=parameters.get('sample_ratio', 0.5),
             policy_step_ratio=parameters.get('policy_step_ratio', 1.0),
             entropy_regularization=parameters.get('entropy_regularization', 0.0),
             update_advantages=parameters.get('update_advantages', True),
@@ -30,25 +32,37 @@ class Configuration:
 class PPO(RLTrainer):
 
     def __init__(self, configuration: Configuration, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, is_episodic=True, **kwargs)
 
         self.is_critics_configured = False
         self.configuration = configuration
         self.episodes = 0
 
+    @property
+    def is_episodic(self):
+        return True
+
     def configure(self, model: Policy):
         super().configure(model)
 
     def __train__(self, model: Policy):
-        for i in range(self.configuration.epochs):
-            self.__step__(model)
-
-    def __step__(self, model: Policy):
         try:
-            batch = self.__sample_batch__(update_returns=self.configuration.update_advantages)
+            batch, info = self.storage.sample(update_returns=self.configuration.update_advantages)
         except NotReadyException:
             return
 
+        for i in range(self.configuration.epochs):
+            mask = torch.zeros(batch.batch_size).uniform_() < self.configuration.sample_ratio
+
+            sub_batch = batch[mask]
+
+            if isinstance(batch.state, GraphState):
+                sub_batch.state.graph = Graph(Batch.from_data_list(batch.state.graph.data[mask]))
+                sub_batch.next_state.graph = Graph(Batch.from_data_list(batch.next_state.graph.data[mask]))
+
+            self.__step__(sub_batch, model)
+
+    def __step__(self, batch: Record, model: Policy):
         advantages = batch.info[Record.ADVANTAGE_KEY]
         value, logits = model.predict(batch.state)
         value = value[torch.arange(batch.shape[0]), batch.action]

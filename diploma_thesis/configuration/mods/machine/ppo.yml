@@ -27,7 +27,7 @@ parameters:
     kind: 'ppo'
     parameters:
       policy_step_ratio: 0.2
-      entropy_regularization: 0.01
+      entropy_regularization: 0.1
       epochs: 4
 
       loss:
@@ -47,19 +47,12 @@ parameters:
       memory:
         kind: 'replay'
         parameters:
-          size: 8192
-          batch_size: 128
-          prefetch: 8
-#          sampler:
-#            kind: 'slice'
-#            parameters:
-#              slice_len: 64
-#              strict_length: False
-#              traj_key: [ 'info', 'episode' ]
-#              end_key: 'done'
+          size: 8
+          batch_size: 2
+          prefetch: 2
 
       return:
         kind: 'gae'
         parameters:
-          discount_factor: 0.4
+          discount_factor: 0.6
           lambda: 0.95

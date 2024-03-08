@@ -38,6 +38,7 @@ marl_ddqn: &marl_ddqn
   template: *template
   mods:
     - 'agent/dqn/ddqn.yml'
+    - 'agent/util/agent/multi_agent.yml'
 
 marl_dueling_ddqn: &marl_dueling_ddqn
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -45,6 +46,7 @@ marl_dueling_ddqn: &marl_dueling_ddqn
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/dueling.yml'
+    - 'agent/util/agent/multi_agent.yml'
 
 marl_dueling_ddqn_pr: &marl_dueling_ddqn_pr
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -53,6 +55,7 @@ marl_dueling_ddqn_pr: &marl_dueling_ddqn_pr
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/dueling.yml'
     - 'agent/dqn/prioritized.yml'
+    - 'agent/util/agent/multi_agent.yml'
 
 marl_dueling_ddqn_n_step: &marl_dueling_ddqn_n_step
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -61,6 +64,7 @@ marl_dueling_ddqn_n_step: &marl_dueling_ddqn_n_step
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/dueling.yml'
     - 'agent/dqn/3_step.yml'
+    - 'agent/util/agent/multi_agent.yml'
 
 reinforce: &reinforce
   base_path: 'configuration/mods/machine/reinforce.yml'

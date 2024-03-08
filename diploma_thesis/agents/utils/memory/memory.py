@@ -59,7 +59,7 @@ class Memory(Generic[_Configuration], metaclass=ABCMeta):
         self.configuration = configuration
         self.buffer: ReplayBuffer = self.__make_buffer__()
 
-    def store(self, records: List[Record]):
+    def store(self, records: List[Record] | List[List[Record]]):
         if self.configuration.is_tensordict_storage:
             records = torch.cat(records, dim=0)
 

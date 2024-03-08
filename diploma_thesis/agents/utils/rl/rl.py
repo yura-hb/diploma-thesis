@@ -16,6 +16,8 @@ from utils import Loggable
 
 from torch_geometric.data import Batch
 
+from .storage import *
+
 
 class TrainSchedule(StrEnum):
     ON_TIMELINE = 'on_timeline'
@@ -37,6 +39,7 @@ class TrainSchedule(StrEnum):
 class RLTrainer(Loggable):
 
     def __init__(self,
+                 is_episodic: bool,
                  memory: Memory,
                  loss: Loss,
                  optimizer: Optimizer,
@@ -44,12 +47,12 @@ class RLTrainer(Loggable):
                  train_schedule: TrainSchedule = TrainSchedule.ON_TIMELINE):
         super().__init__()
 
-        self.memory = memory
         self.loss = loss
         self.optimizer = optimizer
-        self.return_estimator = return_estimator
         self._is_configured = False
         self.train_schedule = train_schedule
+
+        self.storage = Storage(is_episodic, memory, return_estimator)
         self.loss_cache = []
 
     @abstractmethod
@@ -76,19 +79,10 @@ class RLTrainer(Loggable):
         return pd.DataFrame(self.loss_cache)
 
     def store(self, sample: TrainingSample, model: Policy):
-        records = self.__prepare__(sample)
-
-        for record in records:
-            record.info['episode'] = sample.episode_id
-
-        # TODO: Store whole trajectory in memory
-
-        records = [record.view(-1) for record in records]
-
         if self.train_schedule == TrainSchedule.ON_STORED_DATA_EXCLUSIVELY:
-            self.memory.clear()
+            self.storage.clear()
 
-        self.memory.store(records)
+        self.storage.store(sample)
 
         if not self.train_schedule.is_on_store:
             return
@@ -97,11 +91,7 @@ class RLTrainer(Loggable):
 
     def clear(self):
         self.loss_cache = []
-        self.memory.clear()
-
-    @staticmethod
-    def from_cli(parameters, memory: Memory, loss: Loss, optimizer: Optimizer, return_estimator: ReturnEstimator):
-        pass
+        self.storage.clear()
 
     def record_loss(self, loss: torch.Tensor, **kwargs):
         self.loss_cache += [dict(
@@ -110,41 +100,3 @@ class RLTrainer(Loggable):
             lr=self.optimizer.learning_rate,
             **kwargs
         )]
-
-    def __prepare__(self, sample: TrainingSample) -> List[Record]:
-        match sample:
-            case Trajectory(_, records):
-                updated = self.return_estimator.update_returns(records)
-                updated = [record for record in updated]
-
-                return updated
-            case Slice(_, records):
-                if len(records) == 1:
-                    return [records[0]]
-
-                updated = self.return_estimator.update_returns(records)
-
-                return [updated[0]]
-            case _:
-                raise ValueError(f'Unknown sample type: {type(sample)}')
-
-    def __sample_batch__(self, update_returns: bool = True):
-        batch, info = self.memory.sample(return_info=True)
-
-        if update_returns:
-            batch = self.return_estimator.update_returns(batch)
-
-        result = torch.cat(batch, dim=0)
-
-        # Batch is the list of records. The main problematic use case is when batch contains records with
-        # graph data, which we must merge into pytorch_geometric Batch object
-
-        if isinstance(batch[0].state, GraphState) and isinstance(batch[0].next_state, GraphState):
-            graphs = [record.state.graph.data for record in batch]
-            next_state_graphs = [record.next_state.graph.data for record in batch]
-
-            result.state.graph.data = Batch.from_data_list(graphs)
-            result.next_state.graph.data = Batch.from_data_list(next_state_graphs)
-
-
-        return batch, info

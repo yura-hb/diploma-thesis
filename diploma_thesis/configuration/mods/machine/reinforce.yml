@@ -41,16 +41,9 @@ parameters:
       memory:
         kind: 'replay'
         parameters:
-          size: 8192
-          batch_size: 128
-          prefetch: 8
-          sampler:
-            kind: 'slice'
-            parameters:
-              slice_len: 64
-              strict_length: False
-              traj_key: [ 'info', 'episode' ]
-              end_key: 'done'
+          size: 4
+          batch_size: 1
+          prefetch: 2
 
       critics:
         - optimizer:

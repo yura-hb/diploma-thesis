@@ -57,7 +57,7 @@ class Encoder:
         result.data[Graph.WORK_CENTER_KEY].x = t.to(torch.float32).view(0, 1)
 
         # Indices
-        result.data[Graph.JOB_INDEX_KEY] = t.view(0, 4)
+        result.data[Graph.JOB_INDEX_MAP] = t.view(0, 4)
 
         def __init_rel__(key):
             result.data[*key].edge_index = t.view(2, 0)
@@ -87,7 +87,7 @@ class Encoder:
 
         n_all_ops = 0
 
-        result.data[Graph.JOB_INDEX_KEY] = torch.tensor([], dtype=torch.long).view(0, 4)
+        result.data[Graph.JOB_INDEX_MAP] = torch.tensor([], dtype=torch.long).view(0, 4)
 
         for job_id in job_ids:
             if job_id not in job_operation_map:
@@ -110,7 +110,7 @@ class Encoder:
                 ]
             )
 
-            result.data[Graph.JOB_INDEX_KEY] = torch.cat([result.data[Graph.JOB_INDEX_KEY], index.T], dim=0)
+            result.data[Graph.JOB_INDEX_MAP] = torch.cat([result.data[Graph.JOB_INDEX_MAP], index.T], dim=0)
 
         result.data[Graph.OPERATION_KEY].x = torch.zeros(n_all_ops, dtype=torch.float32).view(-1, 1)
 
@@ -208,7 +208,7 @@ class Encoder:
     def __update_schedule_graphs__(self, result: Graph, source: Graph):
         self.__reset_schedule_graph__(result)
 
-        index = result.data[Graph.JOB_INDEX_KEY][:, [0, 1]].T
+        index = result.data[Graph.JOB_INDEX_MAP][:, [0, 1]].T
 
         for machine_id in range(len(result.data[Graph.MACHINE_KEY])):
             has_graph = Graph.SCHEDULED_GRAPH_KEY in source.data[Graph.MACHINE_KEY][machine_id]

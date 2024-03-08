@@ -17,7 +17,7 @@ class Graph:
     PROCESSED_KEY = "processed"
 
     OPERATION_JOB_MAP_KEY = "operation_job_map"
-    JOB_INDEX_KEY = "job_index"
+    JOB_INDEX_MAP = "job_index_map"
 
     SCHEDULED_GRAPH_KEY = "scheduled_graph"
     PROCESSED_GRAPH_KEY = "processed_graph"

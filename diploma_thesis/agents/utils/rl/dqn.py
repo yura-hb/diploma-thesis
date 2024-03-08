@@ -24,9 +24,9 @@ class DeepQTrainer(RLTrainer):
             )
 
     def __init__(self, configuration: Configuration, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, is_episodic=False, **kwargs)
 
-        self._target_model: AveragedModel = None
+        self._target_model: AveragedModel | None = None
         self.configuration = configuration
 
     def configure(self, model: Policy):
@@ -36,7 +36,7 @@ class DeepQTrainer(RLTrainer):
 
     def __train__(self, model: Policy):
         try:
-            batch, info = self.__sample_batch__(update_returns=False)
+            batch, info = self.storage.sample(update_returns=False)
         except NotReadyException:
             return
 

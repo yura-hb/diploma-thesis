@@ -78,3 +78,9 @@ task:
                 mods:
                   - 'duration/256.yml'
                   - 'size/fjsp/5x5.yml'
+            - kind: 'mod'
+              parameters:
+                base_path: 'configuration/mods/simulation/simulation.yml'
+                mods:
+                  - 'duration/256.yml'
+                  - 'size/fjsp/5x5.yml'

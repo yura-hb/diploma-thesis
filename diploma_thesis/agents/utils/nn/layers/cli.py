@@ -24,13 +24,15 @@ def from_cli(*args, **kwargs):
         'noisy_linear': ...,
 
         'graph_model': GraphModel,
-        'gin': common_graph_layer(pyg.nn.GINConv),
+        'gin': common_graph_layer(pyg.nn.GIN),
         'sage': common_graph_layer(pyg.nn.SAGEConv),
         'gat': common_graph_layer(pyg.nn.GATConv),
         'gcn': common_graph_layer(pyg.nn.GCNConv),
         'deep_gcn': common_graph_layer(pyg.nn.DeepGCNLayer),
 
         'add_pool': common_operation(pyg.nn.global_add_pool),
+        'max_pool': common_operation(pyg.nn.global_max_pool),
+        'mean_pool': common_operation(pyg.nn.global_mean_pool),
     }
 
     return from_cli_(*args, **kwargs, key_to_class=key_to_class)
