@@ -1,16 +1,27 @@
 
 from abc import ABCMeta, abstractmethod
-from typing import TypeVar
 from dataclasses import field
+from typing import TypeVar, List, Generic, Dict
 
 import torch
-from tensordict.prototype import tensorclass
+
 from tensordict import TensorDict
-from torchrl.data import TensorDictReplayBuffer
+from tensordict.prototype import tensorclass
+from torchrl.data import ReplayBuffer
+from dataclasses import dataclass
+from torchrl.data import LazyMemmapStorage, ListStorage
 
 State = TypeVar('State')
 Action = TypeVar('Action')
-Configuration = TypeVar('Configuration')
+_Configuration = TypeVar('_Configuration')
+
+
+@dataclass
+class Configuration:
+    size: int
+    is_tensordict_storage: bool
+    batch_size: int
+    prefetch: int
 
 
 @tensorclass
@@ -42,20 +53,33 @@ class NotReadyException(BaseException):
     pass
 
 
-class Memory(metaclass=ABCMeta):
+class Memory(Generic[_Configuration], metaclass=ABCMeta):
 
-    def __init__(self, configuration: Configuration):
+    def __init__(self, configuration: _Configuration):
         self.configuration = configuration
-        self.buffer: TensorDictReplayBuffer = self.__make_buffer__()
+        self.buffer: ReplayBuffer = self.__make_buffer__()
 
-    def store(self, record: Record):
-        self.buffer.extend(record)
+    def store(self, records: List[Record]):
+        if self.configuration.is_tensordict_storage:
+            records = torch.cat(records, dim=0)
 
-    def sample(self, return_info: bool = False) -> Record:
-        if len(self.buffer) < self.buffer._batch_size:
+            self.buffer.extend(records)
+        else:
+            self.buffer.extend(records)
+
+    def sample(self, return_info: bool = False) -> List[Record]:
+        if len(self.buffer) < self.configuration.batch_size:
             raise NotReadyException()
 
-        return self.buffer.sample(return_info=return_info)
+        result = self.buffer.sample(return_info=return_info)
+
+        if self.configuration.is_tensordict_storage:
+            if not isinstance(result, list):
+                result = [result]
+
+            return list(record.unbind(dim=0) for record in result)
+
+        return result
 
     def sample_n(self, batch_size: int) -> Record:
         return self.buffer.sample(batch_size=batch_size)
@@ -64,7 +88,7 @@ class Memory(metaclass=ABCMeta):
         self.buffer.update_priority(indices, priorities)
 
     @abstractmethod
-    def __make_buffer__(self) -> TensorDictReplayBuffer:
+    def __make_buffer__(self) -> ReplayBuffer:
         pass
 
     def clear(self):
@@ -72,6 +96,17 @@ class Memory(metaclass=ABCMeta):
 
     def __len__(self) -> int:
         return len(self.buffer)
+
+    def __make_result_buffer__(self, params: Dict, regular_cls, tensordict_cls):
+        if self.configuration.is_tensordict_storage:
+            params['storage'] = LazyMemmapStorage(max_size=self.configuration.size)
+            cls = tensordict_cls
+        else:
+            params['storage'] = ListStorage(max_size=self.configuration.size)
+            params['collate_fn'] = lambda x: x
+            cls = regular_cls
+
+        return cls(**params)
 
     # TorchRL buffer isn't yet pickable. Hence, we recreate it from the configuration
 

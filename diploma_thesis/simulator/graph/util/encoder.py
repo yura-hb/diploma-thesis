@@ -173,7 +173,7 @@ class Encoder:
         result.data[Graph.GROUP_KEY].x = torch.zeros(n_groups, dtype=torch.float32).view(1, -1)
 
     def __append_machine_nodes__(self, result: Graph, source: Graph, shop_floor: ShopFloor):
-        result.data[Graph.MACHINE_INDEX_KEY] = source.data[Graph.MACHINE_INDEX_KEY].view(-1, 2)
+        result.data[Graph.MACHINE_INDEX_KEY] = source.data[Graph.MACHINE_INDEX_KEY].T
         result.data[Graph.MACHINE_KEY].x = torch.zeros(len(shop_floor.machines), dtype=torch.float32).view(-1, 1)
         result.data[Graph.WORK_CENTER_KEY].x = torch.zeros(len(shop_floor.work_centers), dtype=torch.float32).view(-1, 1)
 
@@ -208,7 +208,7 @@ class Encoder:
     def __update_schedule_graphs__(self, result: Graph, source: Graph):
         self.__reset_schedule_graph__(result)
 
-        index = result.data[Graph.JOB_INDEX_KEY][:, [0, 1]].view(2, -1)
+        index = result.data[Graph.JOB_INDEX_KEY][:, [0, 1]].T
 
         for machine_id in range(len(result.data[Graph.MACHINE_KEY])):
             has_graph = Graph.SCHEDULED_GRAPH_KEY in source.data[Graph.MACHINE_KEY][machine_id]

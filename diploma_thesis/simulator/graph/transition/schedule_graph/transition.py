@@ -45,8 +45,14 @@ class ScheduleTransition(metaclass=ABCMeta):
 
     @classmethod
     def __get_machine_index__(
-            cls, graph: Graph, work_center_id: torch.LongTensor, machine_id: torch.LongTensor
+        cls, graph: Graph, work_center_id: torch.LongTensor, machine_id: torch.LongTensor
     ) -> torch.LongTensor | None:
+        if not torch.is_tensor(work_center_id):
+            work_center_id = torch.tensor(work_center_id)
+
+        if not torch.is_tensor(machine_id):
+            machine_id = torch.tensor(machine_id)
+
         index = torch.vstack([work_center_id, machine_id])
         index = (graph.data[Graph.MACHINE_INDEX_KEY] == index).all(dim=0)
 
@@ -68,7 +74,7 @@ class ScheduleTransition(metaclass=ABCMeta):
         if job.id not in graph.data[Graph.JOB_KEY]:
             return None
 
-        prefix_op = 0
+        prefix_op = torch.tensor(0)
 
         for i in range(0, step_id):
             prefix_op += len(job.processing_times[i])

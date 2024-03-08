@@ -1,7 +1,17 @@
 
 graph:
-  - kind: 'graph'
+  - kind: 'graph_model'
     parameters:
-      kind: 'SageConv'
-      parameters:
-        out_channels: 32
+      hetero_aggregation: 'mean'
+
+      layers:
+        - kind: 'sage'
+          parameters:
+            in_channels: -1
+            out_channels: 32
+
+        - kind: 'add_pool'
+
+      output:
+        kind: 'node'
+        node_key: 'operation'

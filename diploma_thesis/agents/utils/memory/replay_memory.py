@@ -1,42 +1,43 @@
-
-from dataclasses import dataclass
-
-from torchrl.data import LazyMemmapStorage
+from torchrl.data import LazyMemmapStorage, TensorDictReplayBuffer, ListStorage
 
 from .memory import *
 from .sampler import *
 
+from .memory import Configuration as MemoryConfiguration
 
-class ReplayMemory(Memory):
 
-    @dataclass
-    class Configuration:
-        size: int
-        batch_size: int
-        prefetch: int
-        sampler: Sampler
+@dataclass
+class Configuration(MemoryConfiguration):
+    sampler: Sampler
 
-        @staticmethod
-        def from_cli(parameters: Dict):
-            return ReplayMemory.Configuration(
-                size=parameters['size'],
-                batch_size=parameters['batch_size'],
-                prefetch=parameters.get('prefetch', 0),
-                sampler=Sampler.from_cli(parameters['sampler']) if 'sampler' in parameters else None
-            )
+    @classmethod
+    def from_cli(cls, parameters: Dict):
+        return cls(
+            size=parameters['size'],
+            batch_size=parameters['batch_size'],
+            prefetch=parameters.get('prefetch', 0),
+            is_tensordict_storage=parameters.get('is_tensordict_storage', False),
+            sampler=Sampler.from_cli(parameters['sampler']) if 'sampler' in parameters else None
+        )
 
-    def __make_buffer__(self) -> TensorDictReplayBuffer:
-        storage = LazyMemmapStorage(max_size=self.configuration.size)
+
+class ReplayMemory(Memory[Configuration]):
+
+    def __make_buffer__(self) -> ReplayBuffer | TensorDictReplayBuffer:
         sampler = self.configuration.sampler.make() if self.configuration.sampler else RandomSampler()
+        cls = None
 
-        return TensorDictReplayBuffer(storage=storage,
-                                      batch_size=self.configuration.batch_size,
-                                      sampler=sampler,
-                                      prefetch=self.configuration.prefetch)
+        params = dict(
+            batch_size=self.configuration.batch_size,
+            prefetch=self.configuration.prefetch,
+            sampler=sampler
+        )
+
+        return self.__make_result_buffer__(params, ReplayBuffer, TensorDictReplayBuffer)
 
     @staticmethod
     def from_cli(parameters: Dict) -> 'ReplayMemory':
-        configuration = ReplayMemory.Configuration.from_cli(parameters)
+        configuration = Configuration.from_cli(parameters)
 
         return ReplayMemory(configuration)
 

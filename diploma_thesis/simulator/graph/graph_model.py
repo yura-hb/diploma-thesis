@@ -68,7 +68,7 @@ class GraphModel(Delegate):
 
         record.previous_encoded_graph = new_encoded_graph
 
-        return new_encoded_graph
+        return Graph(data=new_encoded_graph.data.clone())
 
     def did_start_simulation(self, context: Context):
         self.cache[context.shop_floor.id] = GraphModel.Record(

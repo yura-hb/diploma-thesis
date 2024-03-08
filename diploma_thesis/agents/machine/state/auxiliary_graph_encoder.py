@@ -1,18 +1,21 @@
-import torch
+from tensordict.prototype import tensorclass
 
 from agents.base.state import GraphState, Graph
-
-from tensordict.prototype import tensorclass
 from .encoder import *
 
 
-class AuxiliaryGraphEncoder(StateEncoder):
+class AuxiliaryGraphEncoder(GraphStateEncoder):
+
+    def __init__(self, is_homogeneous: bool):
+        super().__init__()
+
+        self.is_homogeneous = is_homogeneous
 
     @tensorclass
     class State(GraphState):
         pass
 
-    def encode(self, parameters: StateEncoder.Input) -> State:
+    def __encode__(self, parameters: StateEncoder.Input) -> State:
         if parameters.graph is None:
             raise ValueError("Graph is not provided")
 
@@ -28,8 +31,11 @@ class AuxiliaryGraphEncoder(StateEncoder):
         processing_times = torch.cat(processing_times, dim=0).view(-1, 1)
         graph.data[Graph.OPERATION_KEY].x = processing_times
 
-        return self.State(parameters.graph, batch_size=[])
+        if self.is_homogeneous:
+            graph.data = graph.data.to_homogeneous(node_attrs=['x'])
+
+        return self.State(graph, batch_size=[])
 
     @staticmethod
     def from_cli(parameters: dict):
-        return AuxiliaryGraphEncoder()
+        return AuxiliaryGraphEncoder(parameters.get('is_homogeneous', False))

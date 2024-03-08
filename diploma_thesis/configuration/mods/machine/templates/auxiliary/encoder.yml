@@ -1,3 +1,5 @@
 
 encoder:
   kind: 'auxiliary'
+  parameters:
+    is_homogeneous: True

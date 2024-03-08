@@ -45,14 +45,9 @@ class PPO(RLTrainer):
 
     def __step__(self, model: Policy):
         try:
-            batch = self.memory.sample(return_info=False)
-            batch: Record | torch.Tensor = torch.squeeze(batch)
+            batch = self.__sample_batch__(update_returns=self.configuration.update_advantages)
         except NotReadyException:
             return
-
-        if self.configuration.update_advantages:
-            with torch.no_grad():
-                batch = self.__estimate_advantage__(batch)
 
         advantages = batch.info[Record.ADVANTAGE_KEY]
         value, logits = model.predict(batch.state)
@@ -79,17 +74,6 @@ class PPO(RLTrainer):
         loss.backward()
         self.optimizer.step()
         self.record_loss(loss)
-
-    def __estimate_advantage__(self, batch: Record | torch.Tensor) -> torch.Tensor:
-        result = []
-
-        for element in batch.info['episode'].unique():
-            episode = batch[batch.info['episode'] == element].unbind(dim=0)
-            updated = self.return_estimator.update_returns(episode)
-            updated = torch.stack(updated, dim=0)
-            result.append(updated)
-
-        return torch.cat(result, dim=0)
 
     @classmethod
     def from_cli(cls,

@@ -13,7 +13,6 @@ class CompressedTransition(ScheduleTransition):
     """
 
     def schedule_implicit(self, job: Job, graph: Graph) -> Graph:
-
         return graph
 
     def schedule(self, job: Job, graph: Graph) -> Graph:

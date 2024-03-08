@@ -36,8 +36,7 @@ class DeepQTrainer(RLTrainer):
 
     def __train__(self, model: Policy):
         try:
-            batch, info = self.memory.sample(return_info=True)
-            batch: Record | torch.Tensor = torch.squeeze(batch)
+            batch, info = self.__sample_batch__(update_returns=False)
         except NotReadyException:
             return
 

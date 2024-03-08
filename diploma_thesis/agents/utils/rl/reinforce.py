@@ -51,8 +51,7 @@ class Reinforce(RLTrainer):
 
     def __train__(self, model: Policy):
         try:
-            batch = self.memory.sample(return_info=False)
-            batch: Record | torch.Tensor = torch.squeeze(batch)
+            batch = self.__sample_batch__(update_returns=False)
         except NotReadyException:
             return
 

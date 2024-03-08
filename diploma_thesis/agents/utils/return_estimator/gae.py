@@ -1,5 +1,8 @@
 
 from typing import Dict
+
+import torch
+
 from .estimator import *
 
 
@@ -18,10 +21,13 @@ class GAE(Estimator):
         coef = self._discount_factor * self._lambda
 
         for i in reversed(range(len(records))):
-            next_value = 0 if i == len(records) - 1 else records[i + 1].info[Record.ADVANTAGE_KEY]
-            value = records[i].info[Record.VALUES_KEY][records[i].action]
-            advantage = records[i].reward + self._discount_factor * next_value - value
-            next_advantage = 0 if i == len(records) - 1 else records[i + 1].info[Record.ADVANTAGE_KEY]
+            record = records[i]
+            next_record = records[i + 1] if i < len(records) - 1 else None
+
+            next_value = 0 if next_record is None else next_record.info[Record.VALUES_KEY][records[i].action]
+            value = record.info[Record.VALUES_KEY][record.action]
+            advantage = record.reward + self._discount_factor * next_value - value
+            next_advantage = 0 if next_record is None else next_record.info[Record.ADVANTAGE_KEY]
 
             records[i].info[Record.ADVANTAGE_KEY] = coef ** i * advantage + next_advantage
             records[i].info[Record.RETURN_KEY] = records[i].info[Record.ADVANTAGE_KEY] + value
