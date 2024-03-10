@@ -11,7 +11,7 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/machine/dqn.yml'
-      template: 'djsp'
+      template: 'hierarchical'
       mods:
 #        - 'agent/dqn/ddqn.yml'
 #        - 'agent/dqn/dueling.yml'

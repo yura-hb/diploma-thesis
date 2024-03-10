@@ -1,4 +1,3 @@
-import torch
 from tensordict.prototype import tensorclass
 
 from agents.base.state import GraphState

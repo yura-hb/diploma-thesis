@@ -1,1 +1,29 @@
 
+graph:
+  - kind: 'graph_model'
+    parameters:
+      hetero_aggregation: 'mean'
+
+      layers:
+        - kind: 'gin'
+          parameters:
+            in_channels: -1
+            out_channels: 64
+            num_layers: 1
+            hidden_channels: 64
+
+        - kind: 'mean_pool'
+
+output:
+  - kind: 'linear'
+    parameters:
+      dim: 64
+      activation: 'relu'
+  - kind: 'linear'
+    parameters:
+      dim: 64
+      activation: 'relu'
+  - kind: 'linear'
+    parameters:
+      dim: 64
+      activation: 'relu'

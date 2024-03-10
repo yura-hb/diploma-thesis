@@ -46,4 +46,3 @@ class TensorState:
 @tensorclass
 class GraphState:
     graph: Graph
-

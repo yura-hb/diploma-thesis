@@ -1,4 +1,6 @@
 
+import copy
+
 from abc import ABCMeta, abstractmethod
 from dataclasses import field
 from typing import TypeVar, Generic, Tuple
@@ -33,6 +35,5 @@ class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
     def predict(self, state: State) -> Tuple[torch.FloatTensor, torch.FloatTensor]:
         pass
 
-    @abstractmethod
     def clone(self):
-        pass
+        return copy.deepcopy(self)

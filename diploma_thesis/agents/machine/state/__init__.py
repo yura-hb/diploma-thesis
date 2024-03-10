@@ -6,6 +6,7 @@ from .deep_marl_mr import DEEPMARLMinimumRepetitionStateEncoder
 from .djsp_graph_encoder import DJSPGraphEncoder
 from .encoder import StateEncoder
 from .auxiliary_graph_encoder import AuxiliaryGraphEncoder
+from .hierarchical_graph_encoder import HierarchicalGraphEncoder
 from .plain import PlainEncoder
 
 key_to_class = {
@@ -14,7 +15,7 @@ key_to_class = {
     "deep_marl_indirect": DEEPMARLIndirectStateEncoder,
     'auxiliary': AuxiliaryGraphEncoder,
     'djsp': DJSPGraphEncoder,
-    'hierarchical': ...,
+    'hierarchical': HierarchicalGraphEncoder,
     'vp': ...
 }
 
