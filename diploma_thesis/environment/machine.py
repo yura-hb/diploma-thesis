@@ -134,15 +134,21 @@ class State:
 
 @tensorclass
 class History:
+    processed_job_ids: torch.LongTensor = field(default_factory=lambda: torch.LongTensor([]))
     decision_times: torch.FloatTensor = field(default_factory=lambda: torch.FloatTensor([]))
     breakdown_start_at: torch.FloatTensor = field(default_factory=lambda: torch.FloatTensor([]))
     breakdown_end_at: torch.FloatTensor = field(default_factory=lambda: torch.FloatTensor([]))
 
-    def with_decision_time(self, decision_time: float):
+    def with_decision(self, decision_time: float):
         if not isinstance(decision_time, torch.Tensor):
             decision_time = torch.FloatTensor([decision_time])
 
         self.decision_times = torch.cat([self.decision_times, torch.atleast_1d(decision_time)])
+
+        return self
+
+    def with_processed_job_id(self, job_id: torch.Tensor):
+        self.processed_job_ids = torch.cat([self.processed_job_ids, job_id.view(-1)])
 
         return self
 
@@ -274,9 +280,9 @@ class Machine:
 
             moment = self.environment.now
 
-            self.history.with_decision_time(moment)
-
             job = self.__select_job__()
+
+            self.history.with_decision(moment)
 
             if job is None:
                 yield self.environment.process(self.__starve__())
@@ -289,6 +295,8 @@ class Machine:
             processing_time = job.current_operation_processing_time_on_machine.item()
 
             self.state.with_initiated_work(processing_time, moment)
+
+            self.history.with_processed_job_id(job.id)
 
             # Perform the operation of the job
             yield self.environment.timeout(processing_time)

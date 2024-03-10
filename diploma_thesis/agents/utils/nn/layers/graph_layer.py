@@ -64,7 +64,7 @@ def common_operation(fn):
 
         def forward(self, x, batch):
             if isinstance(batch, tuple):
-                return fn(x, batch=batch[0])
+                return fn(x, batch=[element for element in batch if element.shape[0] == x.shape[0]][0])
 
             return fn(x, batch=batch)
 

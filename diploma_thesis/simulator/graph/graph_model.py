@@ -73,7 +73,7 @@ class GraphModel(Delegate):
 
         self.__trim_empty_records__(new_encoded_graph_data)
 
-        return Graph(data=new_encoded_graph_data)
+        return Graph(data=new_encoded_graph_data.clone())
 
     def did_start_simulation(self, context: Context):
         self.cache[context.shop_floor.id] = GraphModel.Record(
@@ -167,9 +167,9 @@ class GraphModel(Delegate):
             if 'x' in store and store['x'].numel() == 0:
                 del data[key]
 
-        for key, store in data.edge_items():
-            if 'edge_index' in store and store['edge_index'].numel() == 0:
-                del data[key]
+                for edge, _ in data.edge_items():
+                    if key in edge:
+                        del data[edge]
 
     @staticmethod
     def from_cli(parameters: Dict) -> 'GraphModel':
