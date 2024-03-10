@@ -21,7 +21,6 @@ def from_cli(*args, **kwargs):
         'layer_norm': LayerNorm,
         'instance_norm': InstanceNorm,
         'partial_instance_norm': PartialInstanceNorm1d,
-        'noisy_linear': ...,
 
         'graph_model': GraphModel,
         'gin': common_graph_layer(pyg.nn.GIN),

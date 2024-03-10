@@ -5,22 +5,33 @@ import torch.nn as nn
 # Taken from https://github.com/thomashirtz/noisy-networks/blob/main/noisynetworks.py
 
 
-class AbstractNoisyLayer(nn.Module):
+class AbstractNoisyLayer(nn.modules.lazy.LazyModuleMixin, nn.Module):
 
-    def __init__(self, input_features: int, output_features: int, sigma: float):
+    def __init__(self, output_features: int, sigma: float):
         super().__init__()
 
         self.sigma = sigma
-        self.input_features = input_features
+        self.input_features = None
         self.output_features = output_features
 
         self.mu_bias = nn.Parameter(torch.FloatTensor(output_features))
         self.sigma_bias = nn.Parameter(torch.FloatTensor(output_features))
-        self.mu_weight = nn.Parameter(torch.FloatTensor(output_features, input_features))
-        self.sigma_weight = nn.Parameter(torch.FloatTensor(output_features, input_features))
+        self.mu_weight = nn.UninitializedParameter()
+        self.sigma_weight = nn.UninitializedParameter()
 
-        self.register_buffer('epsilon_input', torch.FloatTensor(input_features))
-        self.register_buffer('epsilon_output', torch.FloatTensor(output_features))
+    def initialize_parameters(self, input) -> None:
+        if self.has_uninitialized_params():
+            with torch.no_grad():
+                self.input_features = input.shape[-1]
+
+                self.register_buffer('epsilon_input', torch.FloatTensor(self.input_features))
+                self.register_buffer('epsilon_output', torch.FloatTensor(self.output_features))
+
+                self.mu_weight.materialize((self.output_features, self.input_features))
+                self.sigma_weight.materialize((self.output_features, self.input_features))
+
+                self.parameter_initialization()
+                self.sample_noise()
 
     def forward(self, x: torch.Tensor, sample_noise: bool = True) -> torch.Tensor:
         if not self.training:
@@ -46,21 +57,18 @@ class AbstractNoisyLayer(nn.Module):
         raise NotImplementedError
 
     def get_noise_tensor(self, features: int) -> torch.Tensor:
-        noise = torch.FloatTensor(features).uniform_(-self.bound, self.bound).to(self.mu_bias.device)
+        noise = torch.zeros(features).uniform_(-self.bound, self.bound).to(self.mu_bias.device)
 
         return torch.sign(noise) * torch.sqrt(torch.abs(noise))
 
 
 class IndependentNoisyLayer(AbstractNoisyLayer):
-    def __init__(self, input_features: int, output_features: int, sigma: float = 0.017):
-        super().__init__(input_features=input_features, output_features=output_features, sigma=sigma)
+    def __init__(self, output_features: int, sigma: float = 0.017):
+        super().__init__(output_features=output_features, sigma=sigma)
 
-        self.bound = (3 / input_features) ** 0.5
         self.epsilon_bias = None
         self.epsilon_weight = None
-
-        self.parameter_initialization()
-        self.sample_noise()
+        self.bound = None
 
     @property
     def weight(self) -> torch.Tensor:
@@ -75,6 +83,8 @@ class IndependentNoisyLayer(AbstractNoisyLayer):
         self.epsilon_weight = self.get_noise_tensor((self.output_features, self.input_features))
 
     def parameter_initialization(self) -> None:
+        self.bound = (3 / self.input_features) ** 0.5
+
         self.sigma_bias.data.fill_(self.sigma)
         self.sigma_weight.data.fill_(self.sigma)
         self.mu_bias.data.uniform_(-self.bound, self.bound)
@@ -82,15 +92,12 @@ class IndependentNoisyLayer(AbstractNoisyLayer):
 
 
 class FactorisedNoisyLayer(AbstractNoisyLayer):
-    def __init__(self, input_features: int, output_features: int, sigma: float = 0.5):
-        super(AbstractNoisyLayer).__init__(input_features=input_features, output_features=output_features, sigma=sigma)
+    def __init__(self, output_features: int, sigma: float = 0.5):
+        super(AbstractNoisyLayer).__init__(output_features=output_features, sigma=sigma)
 
-        self.bound = input_features**(-0.5)
         self.epsilon_input = None
         self.epsilon_output = None
-
-        self.parameter_initialization()
-        self.sample_noise()
+        self.bound = None
 
     @property
     def weight(self) -> torch.Tensor:
@@ -105,6 +112,8 @@ class FactorisedNoisyLayer(AbstractNoisyLayer):
         self.epsilon_output = self.get_noise_tensor(self.output_features)
 
     def parameter_initialization(self) -> None:
+        self.bound = self.input_features ** (-0.5)
+
         self.mu_bias.data.uniform_(-self.bound, self.bound)
         self.sigma_bias.data.fill_(self.sigma * self.bound)
         self.mu_weight.data.uniform_(-self.bound, self.bound)
