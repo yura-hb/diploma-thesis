@@ -2,4 +2,6 @@
 encoder:
   kind: 'auxiliary'
   parameters:
-    is_homogeneous: True
+    is_homogeneous: False
+    is_undirected: True
+    is_local: True

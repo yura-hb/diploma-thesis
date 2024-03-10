@@ -1,15 +1,13 @@
+
+from typing import Dict
+
 from tensordict.prototype import tensorclass
 
-from agents.base.state import GraphState, Graph
+from agents.base.state import GraphState
 from .encoder import *
 
 
 class AuxiliaryGraphEncoder(GraphStateEncoder):
-
-    def __init__(self, is_homogeneous: bool):
-        super().__init__()
-
-        self.is_homogeneous = is_homogeneous
 
     @tensorclass
     class State(GraphState):
@@ -31,14 +29,8 @@ class AuxiliaryGraphEncoder(GraphStateEncoder):
         processing_times = torch.cat(processing_times, dim=0).view(-1, 1)
         graph.data[Graph.OPERATION_KEY].x = processing_times
 
-        if self.is_homogeneous:
-            graph.data = graph.data.to_homogeneous(node_attrs=['x'])
-
-        del graph.data[Graph.JOB_INDEX_MAP]
-        del graph.data[Graph.MACHINE_INDEX_KEY]
-
         return self.State(graph, batch_size=[])
 
-    @staticmethod
-    def from_cli(parameters: dict):
-        return AuxiliaryGraphEncoder(parameters.get('is_homogeneous', False))
+    @classmethod
+    def from_cli(cls, parameters: dict):
+        return AuxiliaryGraphEncoder(**cls.base_parameters_from_cli(parameters))

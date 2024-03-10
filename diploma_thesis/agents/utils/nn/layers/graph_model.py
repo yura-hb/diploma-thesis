@@ -10,32 +10,14 @@ from enum import StrEnum
 import torch_geometric as pyg
 
 
-class OutputType(StrEnum):
-    NODE = 'node'
-    EDGE = 'edge'
-    GLOBAL = 'global'
-
-
 class GraphModel(Layer):
 
     @dataclass
     class Configuration:
-
-        @dataclass
-        class Output:
-            node_key: str | None
-            kind: OutputType
-
-            @staticmethod
-            def from_cli(parameters: Dict) -> 'GraphModel.Configuration.Output':
-                return GraphModel.Configuration.Output(
-                    node_key=parameters.get('node_key'),
-                    kind=OutputType(parameters['kind'])
-                )
-
         layers: List[Tuple[Layer, str | None]]
+
         hetero_aggregation: str = 'mean'
-        output: Output = None
+        hetero_aggregation_key: str = 'operation'
 
         @staticmethod
         def from_cli(parameters: Dict) -> 'GraphModel.Configuration':
@@ -47,7 +29,7 @@ class GraphModel(Layer):
                     for layer in parameters['layers']
                 ],
                 hetero_aggregation=parameters.get('hetero_aggregation', 'mean'),
-                output=GraphModel.Configuration.Output.from_cli(parameters.get('output', {}))
+                hetero_aggregation_key=parameters.get('hetero_aggregation_key', 'operation')
             )
 
     def __init__(self, configuration: Configuration):
@@ -66,7 +48,7 @@ class GraphModel(Layer):
             # Result is the dict for each edge_type
             hidden = self.model(batch.x_dict, batch.edge_index_dict, batch.batch_dict)
 
-            return hidden
+            return self.__process_heterogeneous_output__(hidden)
 
         hidden = self.model(batch.x, batch.edge_index, batch.batch)
 
@@ -93,15 +75,15 @@ class GraphModel(Layer):
 
             self.is_configured = True
 
-    def __process_heterogeneous_output__(self, graph: pyg.data.Data, output: torch.Tensor):
-        match self.configuration.output.kind:
-            case OutputType.EDGE:
-                return output
-            case OutputType.GLOBAL:
-                pass
-            case OutputType.NODE:
-                pass
+    def __process_heterogeneous_output__(self, output: Dict[Tuple[str, str, str], torch.Tensor]) -> torch.Tensor:
+        result = []
 
+        for key, embeddings in output.items():
+            if key[0] == self.configuration.hetero_aggregation_key:
+                result += [embeddings]
+
+        # TODO: Use aggregation
+        return torch.stack(result).mean(dim=0)
 
     @classmethod
     def from_cli(cls, parameters: dict) -> 'Layer':

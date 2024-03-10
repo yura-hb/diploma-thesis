@@ -1,13 +1,14 @@
 
 import argparse
-import torch
 from typing import Dict
 
+import torch._dynamo
 import yaml
 
 from workflow import Workflow, Simulation, Tournament, MultiSimulation
 
 torch.set_num_threads(1)
+torch._dynamo.config.suppress_errors = True
 
 
 def make_workflow(configuration: Dict) -> Workflow:

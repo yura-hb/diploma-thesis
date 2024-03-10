@@ -10,14 +10,13 @@ task:
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/machine/ppo.yml'
+      base_path: 'configuration/mods/machine/dqn.yml'
       template: 'auxiliary'
       mods:
 #        - 'agent/dqn/ddqn.yml'
 #        - 'agent/dqn/dueling.yml'
 #        - 'util/agent/multi_agent.yml'
         - 'util/rules/all_rules.yml'
-        - 'util/memory/raw.yml'
 
   work_center_agent:
     kind: 'static'
@@ -53,9 +52,10 @@ task:
     is_work_center_set_in_shop_floor_connected: True
 
   simulator:
-    kind: 'episodic'
+    kind: 'td'
     parameters:
-      memory: 5
+      memory: 32
+      emit_trajectory: True
 
   run:
     kind: 'mod'

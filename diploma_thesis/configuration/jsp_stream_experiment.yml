@@ -556,7 +556,7 @@ task:
             kind: 'td'
             parameters:
               memory: 32
-              send_as_trajectory: True
+              emit_trajectory: True
               next_state_record_mode: 'on_next_action'
 
           graph:
@@ -644,7 +644,7 @@ task:
             kind: 'td'
             parameters:
               memory: 32
-              send_as_trajectory: True
+              emit_trajectory: True
               next_state_record_mode: 'on_next_action'
 
           graph:

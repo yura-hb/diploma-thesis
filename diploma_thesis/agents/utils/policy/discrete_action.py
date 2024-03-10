@@ -1,11 +1,11 @@
 import copy
+from enum import StrEnum
 from typing import Dict
 
 from agents.utils import NeuralNetwork, Phase
-from agents.utils.nn.layers.linear import Linear
 from agents.utils.action import ActionSelector, from_cli as action_selector_from_cli
+from agents.utils.nn.layers.linear import Linear
 from .policy import *
-from enum import StrEnum
 
 
 class PolicyEstimationMethod(StrEnum):
@@ -53,7 +53,6 @@ class DiscreteAction(Policy[Input]):
         return Record(state, action, info, batch_size=[])
 
     def predict(self, state: State):
-        values = torch.tensor(0, dtype=torch.long)
         actions = torch.tensor(0, dtype=torch.long)
 
         if self.action_model is not None:

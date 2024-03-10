@@ -7,6 +7,7 @@ from joblib import Parallel, delayed
 
 from utils import multi_value_cli, task
 from .simulation import Simulation
+from .workflow import *
 
 
 @task(lambda s: s['name'])
@@ -16,7 +17,7 @@ def __run__(s: Dict):
     s.run()
 
 
-class MultiSimulation:
+class MultiSimulation(Workflow):
 
     def __init__(self, parameters: Dict):
         self.parameters = parameters

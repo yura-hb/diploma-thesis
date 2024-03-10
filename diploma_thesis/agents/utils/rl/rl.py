@@ -49,9 +49,10 @@ class RLTrainer(Loggable):
 
         self.loss = loss
         self.optimizer = optimizer
-        self._is_configured = False
         self.train_schedule = train_schedule
+        self.return_estimator = return_estimator
 
+        self._is_configured = False
         self.storage = Storage(is_episodic, memory, return_estimator)
         self.loss_cache = []
 

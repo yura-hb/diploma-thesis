@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Dict
 
 import torch
+import torch_geometric as pyg
 
 from agents.base import Graph
 from environment import Job, Delegate, Context, WorkCenter, Machine
@@ -68,7 +69,11 @@ class GraphModel(Delegate):
 
         record.previous_encoded_graph = new_encoded_graph
 
-        return Graph(data=new_encoded_graph.data.clone())
+        new_encoded_graph_data = new_encoded_graph.data
+
+        self.__trim_empty_records__(new_encoded_graph_data)
+
+        return Graph(data=new_encoded_graph_data)
 
     def did_start_simulation(self, context: Context):
         self.cache[context.shop_floor.id] = GraphModel.Record(
@@ -156,6 +161,15 @@ class GraphModel(Delegate):
             self.cache[sid].job_operation_map[key] = {
                 k: v - n_removed_ops for k, v in self.cache[sid].job_operation_map[key].items()
             }
+
+    def __trim_empty_records__(self, data: pyg.data.HeteroData):
+        for key, store in data.node_items():
+            if 'x' in store and store['x'].numel() == 0:
+                del data[key]
+
+        for key, store in data.edge_items():
+            if 'edge_index' in store and store['edge_index'].numel() == 0:
+                del data[key]
 
     @staticmethod
     def from_cli(parameters: Dict) -> 'GraphModel':

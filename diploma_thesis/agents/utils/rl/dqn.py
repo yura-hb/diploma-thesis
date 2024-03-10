@@ -26,7 +26,7 @@ class DeepQTrainer(RLTrainer):
     def __init__(self, configuration: Configuration, *args, **kwargs):
         super().__init__(*args, is_episodic=False, **kwargs)
 
-        self._target_model: AveragedModel | None = None
+        self._target_models: AveragedModel | None = None
         self.configuration = configuration
 
     def configure(self, model: Policy):
@@ -60,7 +60,7 @@ class DeepQTrainer(RLTrainer):
         with torch.no_grad():
             td_error += self.configuration.prior_eps
 
-            self.memory.update_priority(info['index'], td_error)
+            self.storage.update_priority(info['index'], td_error)
 
     def estimate_q(self, model: Policy, batch: Record | tensordict.TensorDictBase):
         # Note:

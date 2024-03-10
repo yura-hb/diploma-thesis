@@ -41,6 +41,9 @@ class Storage:
 
         return self.__process_batched_data__(batch, update_returns), info
 
+    def update_priority(self, indices: torch.LongTensor, priorities: torch.FloatTensor):
+        self.memory.update_priority(indices, priorities)
+
     def clear(self):
         self.memory.clear()
 
@@ -75,8 +78,8 @@ class Storage:
         if isinstance(batch[0][0].state, GraphState) and isinstance(batch[0][0].next_state, GraphState):
             records = reduce(lambda x, y: x + y, batch)
 
-            result.state.graph = Graph(self.__collate_graphs__([record.state.graph for record in records]))
-            result.next_state.graph = Graph(self.__collate_graphs__([record.next_state.graph for record in records]))
+            result.state.graph = self.__collate_graphs__([record.state.graph for record in records])
+            result.next_state.graph = self.__collate_graphs__([record.next_state.graph for record in records])
 
         return result
 
@@ -87,12 +90,12 @@ class Storage:
         result = torch.cat([element.view(-1) for element in batch], dim=0)
 
         if isinstance(batch[0].state, GraphState) and isinstance(batch[0].next_state, GraphState):
-            result.state.graph.data = self.__collate_graphs__([record.state.graph for record in batch])
-            result.next_state.graph.data = self.__collate_graphs__([record.next_state.graph for record in batch])
+            result.state.graph = self.__collate_graphs__([record.state.graph for record in batch])
+            result.next_state.graph = self.__collate_graphs__([record.next_state.graph for record in batch])
 
         return result
 
     def __collate_graphs__(self, records: List[Graph]):
         data = reduce(lambda x, y: x + y, (record.data.to_data_list() for record in records))
 
-        return Batch.from_data_list(data)
+        return Graph(Batch.from_data_list(data))

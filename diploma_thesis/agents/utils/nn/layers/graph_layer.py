@@ -49,8 +49,8 @@ def common_graph_layer(layer):
         def signature(self):
             return self._signature or 'x, edge_index -> x'
 
-        def forward(self, *args, **kwargs):
-            return self.model(*args, **kwargs)
+        def forward(self, x, edge_index):
+            return self.model(x, edge_index)
 
     return Wrapper
 
@@ -62,7 +62,10 @@ def common_operation(fn):
         def signature(self):
             return self._signature or 'x, batch -> x'
 
-        def forward(self, *args, **kwargs):
-            return fn(*args, **kwargs)
+        def forward(self, x, batch):
+            if isinstance(batch, tuple):
+                return fn(x, batch=batch[0])
+
+            return fn(x, batch=batch)
 
     return Wrapper

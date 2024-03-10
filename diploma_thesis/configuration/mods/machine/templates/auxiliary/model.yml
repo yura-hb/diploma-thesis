@@ -14,10 +14,6 @@ graph:
 
         - kind: 'mean_pool'
 
-      output:
-        kind: 'node'
-        node_key: 'operation'
-
 output:
   - kind: 'linear'
     parameters:

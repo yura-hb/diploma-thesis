@@ -9,11 +9,11 @@ class TDSimulator(Simulator):
     possible
     """
 
-    def __init__(self, memory: int = 100, send_as_trajectory: bool = False, *args, **kwargs):
+    def __init__(self, memory: int = 100, emit_trajectory: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.memory = memory
-        self.send_as_trajectory = send_as_trajectory
+        self.emit_trajectory = emit_trajectory
         self.episode = 0
 
         self.machine_queue = Queue(self.machine.is_distributed)
@@ -42,7 +42,7 @@ class TDSimulator(Simulator):
             records = torch.cat([record.view(-1) for record in original_records]).clone()
             records: List[Record] = list(records.unbind(dim=0))
 
-            if self.send_as_trajectory:
+            if self.emit_trajectory:
                 agent.store(key, Trajectory(episode_id=self.episode, records=records))
 
                 self.episode += 1
@@ -56,5 +56,5 @@ class TDSimulator(Simulator):
     @staticmethod
     def from_cli(parameters, *args, **kwargs) -> Simulator:
         return TDSimulator(parameters.get('memory', 1), 
-                           parameters.get('send_as_trajectory', False),
+                           parameters.get('emit_trajectory', False),
                            *args, **kwargs)
