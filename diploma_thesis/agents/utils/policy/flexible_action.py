@@ -17,13 +17,17 @@ class FlexibleAction(Policy[Input]):
                  value_model: NeuralNetwork,
                  action_model: NeuralNetwork,
                  action_selector: ActionSelector,
-                 policy_method: PolicyEstimationMethod = PolicyEstimationMethod.INDEPENDENT):
+                 policy_method: PolicyEstimationMethod = PolicyEstimationMethod.INDEPENDENT,
+                 noise_parameters: Dict = None):
         super().__init__()
 
         self.value_model = value_model
         self.action_model = action_model
         self.action_selector = action_selector
         self.policy_estimation_method = policy_method
+        self.noise_parameters = noise_parameters
+
+        self.__configure__()
 
     def update(self, phase: Phase):
         self.phase = phase
@@ -71,6 +75,10 @@ class FlexibleAction(Policy[Input]):
             case _:
                 raise ValueError(f"Policy estimation method {self.policy_estimation_method} is not supported")
 
+    def __configure__(self):
+        if self.noise_parameters is not None:
+            self.action_model.to_noisy(self.noise_parameters)
+
     @classmethod
     def from_cli(cls, parameters: Dict) -> 'Policy':
         return FlexibleAction(**cls.base_parameters_from_cli(parameters))
@@ -82,5 +90,6 @@ class FlexibleAction(Policy[Input]):
             action_model=NeuralNetwork.from_cli(parameters['action_model']) if parameters.get('action_model') else None,
             action_selector=action_selector_from_cli(parameters['action_selector']),
             policy_method=PolicyEstimationMethod(parameters['policy_method']) if parameters.get('policy_method')
-            else PolicyEstimationMethod.INDEPENDENT
+            else PolicyEstimationMethod.INDEPENDENT,
+            noise_parameters=parameters.get('noise')
         )

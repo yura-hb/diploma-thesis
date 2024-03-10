@@ -24,9 +24,6 @@ class AbstractNoisyLayer(nn.modules.lazy.LazyModuleMixin, nn.Module):
             with torch.no_grad():
                 self.input_features = input.shape[-1]
 
-                self.register_buffer('epsilon_input', torch.FloatTensor(self.input_features))
-                self.register_buffer('epsilon_output', torch.FloatTensor(self.output_features))
-
                 self.mu_weight.materialize((self.output_features, self.input_features))
                 self.sigma_weight.materialize((self.output_features, self.input_features))
 
@@ -93,10 +90,11 @@ class IndependentNoisyLayer(AbstractNoisyLayer):
 
 class FactorisedNoisyLayer(AbstractNoisyLayer):
     def __init__(self, output_features: int, sigma: float = 0.5):
-        super(AbstractNoisyLayer).__init__(output_features=output_features, sigma=sigma)
+        super().__init__(output_features=output_features, sigma=sigma)
 
         self.epsilon_input = None
         self.epsilon_output = None
+
         self.bound = None
 
     @property

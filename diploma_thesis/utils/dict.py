@@ -85,6 +85,8 @@ def iterate_all_combinations(value: Dict) -> [Dict]:
 
                 result += values
 
+            del flatten[key]
+
             flatten[key.rstrip("." + CONCATENATE_SUFFIX)] = result
 
             continue
@@ -97,8 +99,14 @@ def iterate_all_combinations(value: Dict) -> [Dict]:
 
     for combination in product(*values):
         result = FlatDict(zip(keys, combination), delimiter=delimiter)
+        result = result.as_dict()
 
-        yield result.as_dict()
+        if '' in result:
+            result.update(result[''])
+
+            del result['']
+
+        yield result
 
 
 def __parse_factory__(parameters):

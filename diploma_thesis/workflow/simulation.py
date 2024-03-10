@@ -77,7 +77,13 @@ class Simulation(Workflow):
 
         config = run_configuration_from_cli(config, logger=logger)
 
-        if not self.is_debug:
+        if self.is_debug:
+            config.timeline.duration = 4096
+            config.n_workers = 1
+            config.timeline.warm_up_phases = [0]
+
+            simulator.train(environment, config)
+        else:
             reward_cache = simulator.train(environment, config)
 
             self.__store_simulations__(config.simulations,

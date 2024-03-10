@@ -19,24 +19,15 @@ class Linear(Layer):
                  dim: int,
                  activation: str,
                  dropout: float,
-                 noise: NoiseType = NoiseType.none,
                  noise_parameters: Dict = None):
         super().__init__()
 
         self.dim = dim
         self.activation = Activation(kind=activation)
         self.dropout = nn.Dropout(p=dropout) if dropout is not None else None
+        self.noise_parameters = noise_parameters or dict()
 
-        if noise_parameters is None:
-            noise_parameters = dict()
-
-        match noise:
-            case NoiseType.none:
-                self.linear = nn.LazyLinear(out_features=dim)
-            case NoiseType.independent:
-                self.linear = IndependentNoisyLayer(output_features=dim, **noise_parameters)
-            case NoiseType.factorized:
-                self.linear = FactorisedNoisyLayer(output_features=dim, **noise_parameters)
+        self.__build__()
 
     def __call__(self, batch: torch.FloatTensor) -> torch.FloatTensor:
         batch = self.linear(batch)
@@ -47,12 +38,32 @@ class Linear(Layer):
 
         return batch
 
+    def to_noisy(self, noise_parameters):
+        self.noise_parameters = noise_parameters
+
+        self.__build__()
+
+    def __build__(self):
+        kind = self.noise_parameters.get('kind', NoiseType.none)
+
+        if kind != NoiseType.none:
+            kind = NoiseType(kind)
+
+        parameters = self.noise_parameters.get('parameters', dict())
+
+        match kind:
+            case NoiseType.none:
+                self.linear = nn.LazyLinear(out_features=self.dim)
+            case NoiseType.independent:
+                self.linear = IndependentNoisyLayer(output_features=self.dim, **parameters)
+            case NoiseType.factorized:
+                self.linear = FactorisedNoisyLayer(output_features=self.dim, **parameters)
+
     @classmethod
     def from_cli(cls, parameters: dict) -> 'Layer':
         return Linear(
             dim=parameters['dim'],
             activation=parameters['activation'],
             dropout=parameters.get('dropout'),
-            noise=parameters.get('noise', dict()).get('kind', NoiseType.none),
             noise_parameters=parameters.get('noise', dict()).get('parameters', dict())
         )

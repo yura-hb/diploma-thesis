@@ -6,6 +6,7 @@ from torch import nn
 
 from agents.base.state import TensorState, GraphState
 from .layers import Layer, from_cli as layer_from_cli, Merge
+from .layers.linear import Linear
 
 
 class NeuralNetwork(nn.Module):
@@ -72,7 +73,17 @@ class NeuralNetwork(nn.Module):
     def append_output_layer(self, layer: Layer):
         assert not self.is_configured, "The model is already configured"
 
+        self.configuration.output.append(layer)
         self.output.append(layer)
+
+    def to_noisy(self, noise_parameters):
+        assert not self.is_configured, "The model is already configured"
+
+        for layer in self.configuration.graph + self.configuration.state + self.configuration.output:
+            if isinstance(layer, Linear):
+                layer.to_noisy(noise_parameters)
+
+        self.__build__()
 
     def copy_parameters(self, other: 'NeuralNetwork', decay: float = 1.0):
         with torch.no_grad():

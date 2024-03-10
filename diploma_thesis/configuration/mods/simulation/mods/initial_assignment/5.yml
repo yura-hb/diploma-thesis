@@ -1,0 +1,8 @@
+
+
+parameters:
+  dispatch:
+    initial_job_assignment:
+      kind: 'n_per_machine'
+      parameters:
+        n: 5

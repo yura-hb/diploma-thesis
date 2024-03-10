@@ -67,6 +67,9 @@ class GraphModel(Delegate):
             shop_floor=context.shop_floor
         )
 
+        if new_encoded_graph is None:
+            return None
+
         record.previous_encoded_graph = new_encoded_graph
 
         new_encoded_graph_data = new_encoded_graph.data

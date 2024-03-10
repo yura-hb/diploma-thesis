@@ -27,21 +27,25 @@ class MultiSimulation(Workflow):
         return ''
 
     def run(self):
+        def __merge__(key, lhs, rhs):
+            if key == 'output_dir':
+                return os.path.join(rhs, lhs)
+
+            return rhs
+
         parameters = self.__fetch_tasks__()
         parameters = self.__passthrough_parameters__(dict(
             debug=False,
             output_dir='',
             store_run_statistics=False
-        ), parameters)
+        ), parameters, merge=__merge__)
         parameters = self.__fix_names__(parameters)
 
         print(f'Running {len(parameters)} simulations')
 
         n_workers = self.parameters.get('n_workers', -1)
 
-        Parallel(
-            n_jobs=n_workers,
-        )(delayed(__run__)(s) for s in parameters)
+        Parallel(n_jobs=n_workers)(delayed(__run__)(s) for s in parameters)
 
     def __fetch_tasks__(self):
         result: [Dict] = []
@@ -57,7 +61,7 @@ class MultiSimulation(Workflow):
 
         return result
 
-    def __passthrough_parameters__(self, values, simulations: [Dict]):
+    def __passthrough_parameters__(self, values, simulations: [Dict], merge=lambda key, lhs, rhs: rhs):
         result = simulations
 
         for key, default in values.items():
@@ -65,7 +69,7 @@ class MultiSimulation(Workflow):
 
             if value is not None:
                 for index, _ in enumerate(result):
-                    result[index][key] = value
+                    result[index][key] = merge(key, result[index].get(key, default), value)
 
         return result
 

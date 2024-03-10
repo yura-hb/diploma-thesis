@@ -1,0 +1,18 @@
+
+state:
+  - kind: 'layer_norm'
+    parameters:
+      normalized_shape: [5, 5]
+  - kind: 'flatten'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'

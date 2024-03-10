@@ -6,11 +6,9 @@ from agents.utils.nn.layers import Linear
 class DiscreteAction(FlexibleAction):
 
     def __init__(self, n_actions: int, base_parameters):
-        super().__init__(**base_parameters)
-
         self.n_actions = n_actions
 
-        self.__configure__()
+        super().__init__(**base_parameters)
 
     def __get_values__(self, state):
         values = self.value_model(state)
@@ -25,6 +23,8 @@ class DiscreteAction(FlexibleAction):
 
         if self.value_model is not None:
             self.value_model.append_output_layer(Linear(dim=1, activation='none', dropout=0))
+
+        super().__configure__()
 
     @classmethod
     def from_cli(cls, parameters: Dict) -> 'Policy':
