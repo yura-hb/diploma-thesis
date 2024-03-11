@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from .legend import add_legend
 
 def plot_performance_across_runs(data, info):
     metric = info['metric']
@@ -55,10 +56,7 @@ def plot_performance_across_runs(data, info):
     ax.set_yticks(np.arange(len(runs)), runs)
 
     if len(candidates) > 1:
-        ax.legend(ncols=info.get('ncols', 2),
-                  bbox_to_anchor=info.get('bbox_to_anchor', (-0.08, 1)),
-                  loc='best',
-                  fancybox=True)
+        add_legend(ax, info)
 
     plt.tight_layout()
 

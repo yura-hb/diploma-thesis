@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from .legend import add_legend
 
 def plot_reward_per_run(data, info, format_group):
     metric = info['metric']
@@ -16,10 +17,8 @@ def plot_reward_per_run(data, info, format_group):
         ax.plot(filtered[metric], filtered[reward], marker=info['marker'], ls='', label=format_group(run))
 
     ax.grid(True)
-    ax.legend(ncols=info.get('ncols', 2),
-              bbox_to_anchor=info.get('bbox_to_anchor', (-0.08, 1)),
-              loc='best',
-              fancybox=True,)
+
+    add_legend(ax, info)
 
     ax.set_xlabel(info['xlabel'])
     ax.set_ylabel(info['ylabel'])

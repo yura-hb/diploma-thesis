@@ -6,3 +6,4 @@ from .plot_reward_distribution_per_action import plot_reward_distribution_per_ac
 from .plot_reward_model_across_runs import plot_reward_per_model_across_runs
 from .plot_gantt import plot_gantt
 from .plot_performance_accross_runs import plot_performance_across_runs
+from .plot_decisions_per_action import plot_decisions_per_action
