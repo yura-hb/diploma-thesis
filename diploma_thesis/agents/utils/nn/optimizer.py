@@ -20,6 +20,7 @@ class Configuration:
 
     optimizer: Description
     scheduler: Description
+    grad_norm: Description
 
 
 class Optimizer:
@@ -31,8 +32,12 @@ class Optimizer:
         self._scheduler: torch.optim.lr_scheduler.LRScheduler = None
 
     def connect(self, parameters):
+        parameters = list(parameters)
+
         self._optimizer = self.__make_optimizer__(parameters)
         self._scheduler = self.__make_scheduler__()
+
+        self.__register_grad_norm_hooks__(parameters)
 
     def zero_grad(self):
         self._optimizer.zero_grad()
@@ -101,6 +106,24 @@ class Optimizer:
 
         return cls(self._optimizer, **self.configuration.scheduler.parameters)
 
+    def __register_grad_norm_hooks__(self, parameters):
+        if self.configuration.grad_norm is None:
+            return
+
+        match self.configuration.grad_norm.kind:
+            case 'norm':
+                value = self.configuration.grad_norm.parameters['value']
+
+                for p in parameters:
+                    p.register_hook(lambda grad: torch.nn.functional.normalize(grad, dim=-1) * value)
+            case 'clip':
+                value = self.configuration.grad_norm.parameters['value']
+
+                for p in parameters:
+                    p.register_hook(lambda grad: torch.clamp(grad, -value, value))
+            case _:
+                raise ValueError('Unsupported value for grad norm')
+
     @staticmethod
     def from_cli(parameters):
         optimizer = parameters['model']
@@ -111,4 +134,9 @@ class Optimizer:
         if scheduler is not None:
             scheduler = Configuration.Description.from_cli(scheduler)
 
-        return Optimizer(Configuration(optimizer=optimizer, scheduler=scheduler))
+        grad_norm = parameters.get('grad_norm')
+
+        if grad_norm is not None:
+            grad_norm = Configuration.Description.from_cli(grad_norm)
+
+        return Optimizer(Configuration(optimizer=optimizer, scheduler=scheduler, grad_norm=grad_norm))

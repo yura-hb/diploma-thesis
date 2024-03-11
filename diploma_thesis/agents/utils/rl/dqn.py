@@ -47,17 +47,15 @@ class DeepQTrainer(RLTrainer):
         loss = self.loss(actions, q_values)
 
         self.optimizer.zero_grad()
-
         loss.backward()
-
         self.optimizer.step()
 
         self.record_loss(loss)
 
-        if self.optimizer.step_count % self.configuration.update_steps == 0:
-            self._target_model.update_parameters(model)
-
         with torch.no_grad():
+            if self.optimizer.step_count % self.configuration.update_steps == 0:
+                self._target_model.update_parameters(model)
+
             td_error += self.configuration.prior_eps
 
             self.storage.update_priority(info['index'], td_error)
