@@ -7,7 +7,7 @@ import yaml
 
 from workflow import Workflow, Simulation, Tournament, MultiSimulation
 
-torch.set_num_threads(1)
+# torch.set_num_threads(1)
 
 
 def make_workflow(configuration: Dict) -> Workflow:

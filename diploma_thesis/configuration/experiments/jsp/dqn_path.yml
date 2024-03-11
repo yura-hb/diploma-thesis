@@ -87,7 +87,7 @@ marl_dqn_centralized_4: &centralized_dqn_4
     - 'agent/dqn/steps/3.yml'
     - 'util/agent/centralized.yml'
 
-      ###############################################################################################
+###############################################################################################
 
 dqn_5: &dqn_5
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -182,9 +182,9 @@ long_single_source_run: &long_single_source_run
     mods:
       __inout_factory__:
         - [ [ 'duration/50000.yml' ] ]
-        - [ [ 'size/jsp/10.yml' ], [ 'size/jsp/20.yml' ] ]
+        - [ [ 'size/jsp/10.yml' ], [ 'size/jsp/15.yml' ] ]
         - [ [ 'utilization/90.yml' ] ]
-        - [ [ 'initial_assignment/5.yml' ] ]
+        - [ [ 'initial_assignment/2.yml' ] ]
     nested:
       parameters:
         dispatch:
@@ -197,9 +197,9 @@ short_single_source_run: &short_single_source_run
     mods:
       __inout_factory__:
         - [ [ 'duration/1024.yml' ] ]
-        - [ [ 'size/jsp/10.yml' ], [ 'size/jsp/20.yml' ] ]
+        - [ [ 'size/jsp/10.yml' ], [ 'size/jsp/15.yml' ] ]
         - [ [ 'utilization/90.yml' ] ]
-        - [ [ 'initial_assignment/5.yml' ] ]
+        - [ [ 'initial_assignment/2.yml' ] ]
     nested:
       parameters:
         dispatch:

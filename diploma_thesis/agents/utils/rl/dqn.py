@@ -19,7 +19,7 @@ class DeepQTrainer(RLTrainer):
         def from_cli(parameters: Dict):
             return DeepQTrainer.Configuration(
                 decay=parameters.get('decay', 0.99),
-                update_steps=parameters.get('update_steps', 10),
+                update_steps=parameters.get('update_steps', 100),
                 prior_eps=parameters.get('prior_eps', 1e-6)
             )
 

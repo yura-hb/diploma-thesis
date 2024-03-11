@@ -71,7 +71,7 @@ task:
                     processing_times: # Sampler
                       kind: 'uniform'
                       parameters:
-                        uniform: [ 1, 50 ]
+                        uniform: [ 10, 50 ]
                         noise: [ 0, 10 ]
                     permutation:
                       uneveness: 0

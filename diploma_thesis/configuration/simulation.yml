@@ -11,12 +11,13 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/machine/dqn.yml'
-      template: 'auxiliary'
+      template: 'experimental/dqn_path'
       mods:
 #        - 'agent/dqn/ddqn.yml'
 #        - 'agent/dqn/dueling.yml'
 #        - 'util/agent/multi_agent.yml'
         - 'util/rules/all_rules.yml'
+#        - 'util/agent/multi_agent.yml'
 
   work_center_agent:
     kind: 'static'
@@ -70,17 +71,19 @@ task:
               parameters:
                 base_path: 'configuration/mods/simulation/simulation.yml'
                 mods:
-                  - 'duration/256.yml'
-                  - 'size/jsp/10.yml'
-            - kind: 'mod'
-              parameters:
-                base_path: 'configuration/mods/simulation/simulation.yml'
-                mods:
-                  - 'duration/256.yml'
-                  - 'size/fjsp/5x5.yml'
-            - kind: 'mod'
-              parameters:
-                base_path: 'configuration/mods/simulation/simulation.yml'
-                mods:
-                  - 'duration/256.yml'
-                  - 'size/fjsp/5x5.yml'
+                  - 'duration/50000.yml'
+                  - 'size/jsp/15.yml'
+                  - 'utilization/90.yml'
+                  - 'initial_assignment/5.yml'
+#            - kind: 'mod'
+#              parameters:
+#                base_path: 'configuration/mods/simulation/simulation.yml'
+#                mods:
+#                  - 'duration/256.yml'
+#                  - 'size/fjsp/5x5.yml'
+#            - kind: 'mod'
+#              parameters:
+#                base_path: 'configuration/mods/simulation/simulation.yml'
+#                mods:
+#                  - 'duration/256.yml'
+#                  - 'size/fjsp/5x5.yml'

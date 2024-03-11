@@ -54,9 +54,17 @@ def __evaluate__(tournament: 'Tournament',
     simulator.with_logger(logger)
 
     if not tournament.debug:
-        simulator.evaluate(environment=environment, config=configuration)
+        simulations = configuration.simulations
 
-        return tournament.__evaluate_criteria__(candidate, configuration.simulations, criteria, candidate_output_dir)
+        for simulation in simulations:
+            try:
+                configuration.simulations = [simulation]
+
+                simulator.evaluate(environment=environment, config=configuration)
+            except:
+                print(f'Simulation {simulation.name} failed')
+
+        return tournament.__evaluate_criteria__(candidate, simulations, criteria, candidate_output_dir)
 
     return {}
 

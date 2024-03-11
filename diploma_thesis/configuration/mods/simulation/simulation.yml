@@ -18,14 +18,14 @@ parameters:
         processing_times:
           kind: 'uniform'
           parameters:
-            uniform: [ 1, 50 ]
+            uniform: [ 10, 50 ]
             noise: [ 0, 10 ]
         permutation:
           uneveness: 0
         due_time:
           kind: 'uniform'
           parameters:
-            uniform: [ 0, 2 ]
+            uniform: [ 0.4, 2 ]
         job_arrival_time_on_machine:
           kind: 'expected_utilization'
           parameters:
@@ -41,6 +41,6 @@ parameters:
         repair_duration:
           kind: 'uniform'
           parameters:
-            uniform: [ 10, 200 ]
+            uniform: [ 100, 300 ]
 
     seed: 42

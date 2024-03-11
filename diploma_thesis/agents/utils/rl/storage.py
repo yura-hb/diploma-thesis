@@ -89,7 +89,7 @@ class Storage:
         if update_returns:
             batch = self.return_estimator.update_returns(batch)
 
-        result = torch.cat([element[0].view(-1) for element in batch], dim=0)
+        result = torch.cat([element.view(-1) for element in batch], dim=0)
 
         if isinstance(batch[0].state, GraphState) and isinstance(batch[0].next_state, GraphState):
             result.state.graph = self.__collate_graphs__([record.state.graph for record in batch])
