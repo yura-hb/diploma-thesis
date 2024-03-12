@@ -7,7 +7,7 @@ parameters:
       - 500
       - 500
 
-    duration: 100000
+    duration: 10000000
 
   machine_train_schedule:
     pretrain_steps: 10

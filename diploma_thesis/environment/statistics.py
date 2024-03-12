@@ -1,5 +1,3 @@
-
-import os
 from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
@@ -7,10 +5,10 @@ from typing import List, Callable, Tuple, Iterable
 
 import pandas as pd
 import torch
-from tensordict import TensorDict
 
 import environment
 import environment.utils as st
+from utils.persistence import save, load
 
 INFO_KEY = 'info'
 PRODUCTION_LOG_KEY = 'production_logs.feather'
@@ -321,48 +319,11 @@ class Statistics:
     # I/O
 
     def save(self, path: str):
-        info = TensorDict({
-            'shop_floor_history': self.shop_floor_history,
-            'shop_floor_map': self.shop_floor_map,
-            'work_center_history': self.__encode_list__(self.work_center_history),
-            'machine_history': self.__encode_list__(self.machine_history)
-        }, batch_size=[])
-
-        info_path = os.path.join(path, INFO_KEY)
-        info.memmap(prefix=info_path)
-
-        production_log_path = os.path.join(path, PRODUCTION_LOG_KEY)
-        self.production_logs.to_feather(production_log_path)
+        save(path, self)
 
     @staticmethod
     def load(path: str):
-        info_path = os.path.join(path, INFO_KEY)
-        info = TensorDict.load_memmap(prefix=info_path)
-
-        production_log_path = os.path.join(path, PRODUCTION_LOG_KEY)
-        production_logs = pd.read_feather(production_log_path)
-
-        work_center_history = Statistics.__decode_list__(info['work_center_history'])
-        machine_history = Statistics.__decode_list__(info['machine_history'])
-
-        return Statistics(
-            shop_floor_history=info['shop_floor_history'],
-            map=info['shop_floor_map'],
-            work_center_history=work_center_history,
-            machine_history=machine_history,
-            production_logs=production_logs
-        )
-
-    @staticmethod
-    def __encode_list__(l: List):
-        return TensorDict({str(i): x for i, x in enumerate(l)}, batch_size=[])
-
-    @staticmethod
-    def __decode_list__(l: TensorDict):
-        result = [(int(index), value) for index, value in l.items()]
-        result = sorted(result, key=lambda x: int(x[0]))
-
-        return [value for _, value in result]
+        return load(path)
 
     @staticmethod
     def from_shop_floor(shop_floor: 'environment.shop_floor.ShopFloor'):

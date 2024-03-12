@@ -1,1 +1,306 @@
 
+template: &template 'reference/marl_indirect'
+
+default_params: &params
+  - 'util/optimizer/grad_norm.yml'
+  - 'util/rules/all_rules.yml'
+
+##############################################################################################
+
+reinforce: &reinforce
+  base_path: 'configuration/mods/machine/reinforce.yml'
+  template: *template
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+      - [ 'util/rules/all_rules.yml' ]
+      - [
+          '__none__',
+          'agent/reinforce/2.yml',
+          'agent/reinforce/3.yml',
+          'agent/reinforce/3_different_optim.yml'
+        ]
+      - [
+        '__none__',
+        'util/agent/multi_agent.yml',
+        'util/agent/centralized.yml',
+      ]
+      - [
+        '__none__',
+        'util/train_schedule/on_store.yml',
+        'util/train_schedule/on_stored_data_exclusively.yml',
+      ]
+
+ppo: &ppo
+  base_path: 'configuration/mods/machine/ppo.yml'
+  template: *template
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+      - [ 'util/rules/all_rules.yml' ]
+      - [
+          '__none__',
+          'agent/ppo/epochs/4.yml',
+          'agent/ppo/epochs/10.yml'
+        ]
+      - [
+         '__none__',
+         'util/agent/multi_agent.yml',
+         'util/agent/centralized.yml',
+      ]
+      - [
+        '__none__',
+        'util/train_schedule/on_store.yml',
+        'util/train_schedule/on_stored_data_exclusively.yml',
+      ]
+
+###############################################################################################
+
+reward: &reward
+  - kind: 'global_decomposed_tardiness'
+    parameters:
+      span: 256
+  - kind: 'surrogate_tardiness'
+
+intermediate_reward: &intermediate_reward
+  - kind: 'surrogate_tardiness'
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ [ 'duration/10000.yml' ] ]
+        - [ [ 'size/jsp/10.yml' ]]
+        - [ [ 'utilization/80.yml' ] ]
+        - [ [ 'initial_assignment/2.yml' ] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0, 1, 2, 3, 4, 5, 6, 7 ] ]
+
+# 200 runs
+
+short_single_source_run: &short_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ [ 'duration/128.yml' ] ]
+        - [ [ 'size/jsp/10.yml' ] ]
+        - [ [ 'utilization/80.yml' ] ]
+        - [ [ 'initial_assignment/2.yml' ] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+            11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+            21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+            31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+            41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+            51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+            61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
+            71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+            81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+            91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
+            101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+            111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
+            121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
+            131, 132, 133, 134, 135, 136, 137, 138, 139, 140,
+            141, 142, 143, 144, 145, 146, 148, 148, 149, 150,
+            151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
+            161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
+            171, 172, 173, 174, 175, 176, 177, 178, 179, 180,
+            181, 182, 183, 184, 185, 186, 187, 188, 189, 190,
+            191, 192, 193, 194, 195, 196, 197, 198, 199
+          ] ]
+
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 1
+  debug: True
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/ppo_reinforce_path/marl_indirect'
+
+  tasks:
+    # TD - n-step short single source
+    # We can evaluate all models, which performs n-step return estimation with intermediate rewards
+
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'global_tardiness'
+              parameters:
+                span: 256
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+            parameters:
+              memory: 32
+              emit_trajectory: True
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/run/run.yml'
+              mods:
+                - 'n_workers/1.yml'
+                - 'timeline/warmup.yml'
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/mods/simulation/simulation.yml'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+            - output_dir: 'reinforce'
+              machine_agent:
+                parameters:
+                  *reinforce
+            - output_dir: 'ppo'
+              machine_agent:
+                parameters:
+                  *ppo
+
+          tape:
+            machine_reward:
+              *reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *short_single_source_run
+                            - *long_single_source_run
+
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '2'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'global_tardiness'
+              parameters:
+                span: 256
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'episodic'
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/run/run.yml'
+              mods:
+                - 'n_workers/1.yml'
+                - 'timeline/warmup.yml'
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/mods/simulation/simulation.yml'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+            - output_dir: 'reinforce'
+              machine_agent:
+                parameters:
+                  - *reinforce
+            - output_dir: 'ppo'
+              machine_agent:
+                parameters:
+                  - *ppo
+
+          tape:
+            machine_reward:
+              *intermediate_reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *short_single_source_run

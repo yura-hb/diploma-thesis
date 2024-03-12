@@ -11,9 +11,9 @@ import environment
 from .utils import ShopFloorFactory
 
 
-@tensorclass
+@dataclass
 class State:
-    idx: str = 0
+    idx: int = 0
 
     job_id: int = 0
 
@@ -42,7 +42,7 @@ class State:
         return self
 
 
-@tensorclass
+@dataclass
 class History:
     # A list of jobs, where each job is represented by the id of machine
     jobs: Dict[int, environment.Job] = field(default_factory=dict)
@@ -98,8 +98,8 @@ class ShopFloor:
         self._work_centers: List[environment.WorkCenter] = []
         self._machines: List[environment.Machine] = []
 
-        self.state = State(idx=id, batch_size=[])
-        self.history = History(batch_size=[])
+        self.state = State(idx=id)
+        self.history = History()
         self._work_centers, self._machines = ShopFloorFactory(self.configuration, self).make()
 
         self._did_finish_job_dispatch = False

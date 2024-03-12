@@ -52,19 +52,7 @@ class NeuralNetwork(nn.Module):
         return self.input_dim
 
     def forward(self, state):
-        encoded_state = None
-        encoded_graph = None
-
-        if isinstance(state, TensorState) and self.state_encoder is not None:
-            encoded_state = self.state_encoder(torch.atleast_2d(state.state))
-
-        if isinstance(state, GraphState) and self.graph_encoder is not None:
-            data = state.graph.data
-
-            encoded_graph = self.graph_encoder(data)
-
-        hidden = self.merge(encoded_state, encoded_graph)
-        output = self.output(hidden)
+        output = self.__forward__(state)
 
         _is_configured = True
 
@@ -99,6 +87,23 @@ class NeuralNetwork(nn.Module):
         self.graph_encoder = nn.Sequential(*self.configuration.graph)
         self.merge = self.configuration.merge
         self.output = nn.Sequential(*self.configuration.output)
+
+    def __forward__(self, state):
+        encoded_state = None
+        encoded_graph = None
+
+        if isinstance(state, TensorState) and self.state_encoder is not None:
+            encoded_state = self.state_encoder(torch.atleast_2d(state.state))
+
+        if isinstance(state, GraphState) and self.graph_encoder is not None:
+            data = state.graph.data
+
+            encoded_graph = self.graph_encoder(data)
+
+        hidden = self.merge(encoded_state, encoded_graph)
+        output = self.output(hidden)
+
+        return output
 
     @staticmethod
     def from_cli(parameters: dict) -> 'NeuralNetwork':

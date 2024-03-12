@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import field
 from typing import Callable, List
 
+import gc
 import simpy
 import torch
 from tensordict.prototype import tensorclass

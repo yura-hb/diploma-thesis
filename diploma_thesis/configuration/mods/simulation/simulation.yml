@@ -25,7 +25,7 @@ parameters:
         due_time:
           kind: 'uniform'
           parameters:
-            uniform: [ 0.5, 2 ]
+            uniform: [ 0.0, 2 ]
         job_arrival_time_on_machine:
           kind: 'expected_utilization'
           parameters:
@@ -37,10 +37,10 @@ parameters:
         breakdown_arrival:
           kind: 'exponential'
           parameters:
-            mean: 1000
+            mean: 5000
         repair_duration:
           kind: 'uniform'
           parameters:
-            uniform: [ 100, 300 ]
+            uniform: [ 10, 200 ]
 
     seed: 42

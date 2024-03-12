@@ -10,8 +10,10 @@ from .rule import SchedulingRule, ALL_SCHEDULING_RULES, IdleSchedulingRule
 
 class DeepMultiRule(DeepPolicyMachineModel):
 
-    def __init__(self, rules: List[SchedulingRule], policy: Policy[MachineInput]):
-        super().__init__(policy)
+    def __init__(self, rules: List[SchedulingRule],
+                 policy: Policy[MachineInput],
+                 configuration: DeepPolicyModel.Configuration):
+        super().__init__(policy, configuration)
 
         self.rules = rules
 
@@ -42,4 +44,6 @@ class DeepMultiRule(DeepPolicyMachineModel):
 
         policy = policy_from_cli(policy_parameters)
 
-        return cls(rules, policy)
+        configuration = DeepPolicyModel.Configuration.from_cli(parameters)
+
+        return cls(rules, policy, configuration)

@@ -1,3 +1,5 @@
+import torch
+
 from agents.utils import TrainingPhase
 from agents.utils.rl import RLTrainer
 from utils import filter

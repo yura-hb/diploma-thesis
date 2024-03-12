@@ -1,9 +1,8 @@
 
-import torch
-
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from tensordict.prototype import tensorclass
+
+import torch
 
 
 class ReductionStrategy(Enum):
@@ -52,12 +51,12 @@ class JobEvent:
     work_center_idx: int = None
 
 
-@tensorclass
+@dataclass
 class Job:
 
     Event = JobEvent
 
-    @tensorclass
+    @dataclass
     class History:
         # The creation time of the job
         created_at: torch.FloatTensor = torch.FloatTensor([0.0])
@@ -139,9 +138,9 @@ class Job:
             self.id = torch.tensor(self.id)
 
         if self.history is None:
-            self.history = Job.History(batch_size=[])
+            self.history = Job.History()
             self.history.configure(self.step_idx)
-            self.history = self.history.reshape(self.batch_size)
+            self.history = self.history
 
         assert 0.0 <= self.priority <= 1.0, "Priority must be in range [0, 1]"
 

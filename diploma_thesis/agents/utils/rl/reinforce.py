@@ -44,14 +44,14 @@ class Reinforce(RLTrainer):
     def configure(self, model: Policy):
         super().configure(model)
 
-        layer = Linear(1, 'none')
+        layer = Linear(1, 'none', dropout=None)
 
         for critic in self.configuration.critics:
             critic.neural_network.append_output_layer(layer)
 
     def __train__(self, model: Policy):
         try:
-            batch = self.storage.sample(update_returns=False)
+            batch, index = self.storage.sample(update_returns=False)
         except NotReadyException:
             return
 

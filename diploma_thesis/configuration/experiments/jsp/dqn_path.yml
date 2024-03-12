@@ -1,6 +1,6 @@
 # Evaluate the effectivenes of basic DQNs on the JSP environment
 
-template: &template 'reference/marl_indirect'
+template: &template 'reference/marl_direct'
 
 ###############################################################################################
 
@@ -9,6 +9,7 @@ dqn_1: &dqn_1
   template: *template
   mods:
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 marl_dqn_1: &marl_dqn_1
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -16,6 +17,7 @@ marl_dqn_1: &marl_dqn_1
   mods:
     - 'util/agent/multi_agent.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 marl_dqn_centralized_1: &centralized_dqn_1
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -24,6 +26,7 @@ marl_dqn_centralized_1: &centralized_dqn_1
     - 'util/agent/centralized.yml'
     - 'util/optimizer/lr_0001.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 ###############################################################################################
 
@@ -33,6 +36,7 @@ dqn_2: &dqn_2
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 marl_dqn_2: &marl_dqn_2
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -41,6 +45,7 @@ marl_dqn_2: &marl_dqn_2
     - 'agent/dqn/ddqn.yml'
     - 'util/agent/multi_agent.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 marl_dqn_centralized_2: &centralized_dqn_2
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -50,6 +55,7 @@ marl_dqn_centralized_2: &centralized_dqn_2
     - 'util/agent/centralized.yml'
     - 'util/optimizer/lr_0001.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
   ###############################################################################################
 
@@ -59,6 +65,7 @@ dqn_3: &dqn_3
   mods:
     - 'agent/dqn/dueling.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 marl_dqn_3: &marl_dqn_3
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -67,6 +74,7 @@ marl_dqn_3: &marl_dqn_3
     - 'agent/dqn/dueling.yml'
     - 'util/agent/multi_agent.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 marl_dqn_centralized_3: &centralized_dqn_3
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -76,6 +84,7 @@ marl_dqn_centralized_3: &centralized_dqn_3
     - 'util/agent/centralized.yml'
     - 'util/optimizer/lr_0001.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 ###############################################################################################
 
@@ -85,6 +94,7 @@ dqn_4: &dqn_4
   mods:
     - 'agent/dqn/steps/3.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 marl_dqn_4: &marl_dqn_4
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -93,6 +103,7 @@ marl_dqn_4: &marl_dqn_4
     - 'agent/dqn/steps/3.yml'
     - 'util/agent/multi_agent.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 marl_dqn_centralized_4: &centralized_dqn_4
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -102,6 +113,7 @@ marl_dqn_centralized_4: &centralized_dqn_4
     - 'util/agent/centralized.yml'
     - 'util/optimizer/lr_0001.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 ###############################################################################################
 
@@ -111,6 +123,7 @@ dqn_5: &dqn_5
   mods:
     - 'agent/dqn/prioritized.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 marl_dqn_5: &marl_dqn_5
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -119,6 +132,7 @@ marl_dqn_5: &marl_dqn_5
     - 'agent/dqn/prioritized.yml'
     - 'util/agent/multi_agent.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 marl_dqn_centralized_5: &centralized_dqn_5
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -128,6 +142,7 @@ marl_dqn_centralized_5: &centralized_dqn_5
     - 'util/agent/centralized.yml'
     - 'util/optimizer/lr_0001.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
 
 ###############################################################################################
 
@@ -137,6 +152,8 @@ dqn_6: &dqn_6
   mods:
     - 'agent/dqn/noisy.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
+    - 'util/action_selector/sample.yml'
 
 marl_dqn_6: &marl_dqn_6
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -145,6 +162,8 @@ marl_dqn_6: &marl_dqn_6
     - 'agent/dqn/noisy.yml'
     - 'util/agent/multi_agent.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
+    - 'util/action_selector/sample.yml'
 
 marl_dqn_centralized_6: &centralized_dqn_6
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -154,6 +173,8 @@ marl_dqn_centralized_6: &centralized_dqn_6
     - 'util/agent/centralized.yml'
     - 'util/optimizer/lr_0001.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
+    - 'util/action_selector/sample.yml'
 
 ###############################################################################################
 
@@ -167,6 +188,8 @@ dqn_7: &dqn_7
     - 'agent/dqn/dueling.yml'
     - 'agent/dqn/noisy.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
+    - 'util/action_selector/sample.yml'
 
 marl_dqn_7: &marl_dqn_7
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -179,6 +202,8 @@ marl_dqn_7: &marl_dqn_7
     - 'agent/dqn/noisy.yml'
     - 'util/agent/multi_agent.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
+    - 'util/action_selector/sample.yml'
 
 marl_dqn_centralized_7: &centralized_dqn_7
   base_path: 'configuration/mods/machine/dqn.yml'
@@ -192,6 +217,8 @@ marl_dqn_centralized_7: &centralized_dqn_7
     - 'util/agent/centralized.yml'
     - 'util/optimizer/lr_0001.yml'
     - 'util/optimizer/grad_norm.yml'
+    - 'util/rules/all_rules.yml'
+    - 'util/action_selector/sample.yml'
 
 ###############################################################################################
 
@@ -203,20 +230,20 @@ reward: &reward
 
 ##############################################################################################
 
-# 6 runs
+# 8 runs
 
 long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ [ 'duration/25000.yml' ] ]
-        - [ [ 'size/jsp/10.yml' ], [ 'size/jsp/15.yml' ] ]
-        - [ [ 'utilization/90.yml' ] ]
+        - [ [ 'duration/10000.yml' ] ]
+        - [ [ 'size/jsp/10.yml' ] ]
+        - [ [ 'utilization/80.yml' ] ]
         - [ [ 'initial_assignment/2.yml' ] ]
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0, 1, 2, 3 ] ]
+          seed: [ [ 0, 1, 2, 3, 4, 5, 6, 7 ] ]
 
 # 100 runs
 
@@ -224,9 +251,9 @@ short_single_source_run: &short_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ [ 'duration/256.yml' ] ]
-        - [ [ 'size/jsp/10.yml' ], [ 'size/jsp/15.yml' ] ]
-        - [ [ 'utilization/90.yml' ] ]
+        - [ [ 'duration/128.yml' ] ]
+        - [ [ 'size/jsp/10.yml' ] ]
+        - [ [ 'utilization/80.yml' ] ]
         - [ [ 'initial_assignment/2.yml' ] ]
     nested:
       parameters:
@@ -241,7 +268,17 @@ short_single_source_run: &short_single_source_run
             61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
             71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
             81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
-            91, 92, 93, 94, 95, 96, 97, 98, 99
+            91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
+            101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+            111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
+            121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
+            131, 132, 133, 134, 135, 136, 137, 138, 139, 140,
+            141, 142, 143, 144, 145, 146, 148, 148, 149, 150,
+            151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
+            161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
+            171, 172, 173, 174, 175, 176, 177, 178, 179, 180,
+            181, 182, 183, 184, 185, 186, 187, 188, 189, 190,
+            191, 192, 193, 194, 195, 196, 197, 198, 199
           ] ]
 
 
@@ -250,10 +287,10 @@ short_single_source_run: &short_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 8
+  n_workers: 4
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/dqn_path/marl_indirect'
+  output_dir: 'results/jsp/experiments/dqn_path/marl_direct'
 
   tasks:
     # TD - n-step short single source
@@ -294,7 +331,7 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 10
+              memory: 3
 
           graph:
             transition_model:
@@ -305,7 +342,7 @@ task:
             parameters:
               base_path: 'configuration/mods/run/run.yml'
               mods:
-                - 'n_workers/2.yml'
+                - 'n_workers/1.yml'
                 - 'timeline/warmup.yml'
               nested:
                 parameters:

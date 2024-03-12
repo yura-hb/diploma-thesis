@@ -5,6 +5,7 @@ parameters:
     kind: 'deep_multi_rule'
     parameters:
       __rules__: ''
+      compile: False
 
       policy:
         kind: 'discrete_action'
@@ -28,9 +29,7 @@ parameters:
                     parameters:
                       step: 0
                   action_selector:
-                    kind: 'epsilon_greedy'
-                    parameters:
-                      epsilon: 1.0
+                    kind: 'uniform'
                 - phase:
                     kind: 'warm_up'
                     parameters:
@@ -44,7 +43,7 @@ parameters:
                   action_selector:
                     kind: 'epsilon_greedy'
                     parameters:
-                      epsilon: 0.2
+                      epsilon: 0.1
 
   __encoder__: ''
 
@@ -55,7 +54,7 @@ parameters:
         kind: 'replay'
         parameters:
           size: 8192
-          batch_size: 128
+          batch_size: 256
           prefetch: 8
 
       loss:

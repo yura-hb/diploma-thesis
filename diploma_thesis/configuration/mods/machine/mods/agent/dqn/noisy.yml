@@ -6,8 +6,3 @@ parameters:
         parameters:
           noise:
             kind: 'factorized'
-
-          action_selector:
-            kind: 'sample'
-            parameters:
-              is_distribution: False

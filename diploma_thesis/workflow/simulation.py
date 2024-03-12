@@ -17,6 +17,10 @@ from utils import save
 from .workflow import Workflow
 
 
+torch.set_num_threads(1)
+torch._dynamo.config.suppress_errors = True
+
+
 class Simulation(Workflow):
 
     def __init__(self, parameters: Dict):
@@ -60,6 +64,7 @@ class Simulation(Workflow):
             yaml.dump(self.parameters, file)
 
         self.__run__(simulator, output_dir)
+
         self.__evaluate__(simulator, output_dir)
 
     def __run__(self, simulator: Simulator, output_dir: str):

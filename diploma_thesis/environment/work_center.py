@@ -1,7 +1,6 @@
 
 from dataclasses import dataclass, field
 from typing import List
-from tensordict.prototype import tensorclass
 
 import simpy
 import torch
@@ -9,7 +8,7 @@ import torch
 import environment
 
 
-@tensorclass
+@dataclass
 class State:
     idx: torch.LongTensor = torch.LongTensor([0])
 
@@ -29,7 +28,7 @@ class State:
         return self
 
 
-@tensorclass
+@dataclass
 class History:
     decision_times: torch.FloatTensor = field(default_factory=lambda: torch.FloatTensor([]))
 
@@ -52,8 +51,8 @@ class WorkCenter:
     def __init__(self, environment: simpy.Environment, work_center_idx: int):
         self.environment = environment
 
-        self.state = State(idx=work_center_idx, batch_size=[])
-        self.history = History(batch_size=[])
+        self.state = State(idx=work_center_idx)
+        self.history = History()
         self._machines = []
         self._shop_floor = None
 

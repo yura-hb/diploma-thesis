@@ -23,4 +23,6 @@ class DeepRule(DeepPolicyMachineModel):
         policy_parameters = parameters['policy']
         policy = policy_from_cli(policy_parameters)
 
-        return cls(policy)
+        configuration = DeepPolicyModel.Configuration.from_cli(parameters)
+
+        return cls(policy, configuration)

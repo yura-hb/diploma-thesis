@@ -1,0 +1,32 @@
+
+parameters:
+  trainer:
+    parameters:
+      critics:
+        - optimizer:
+            model:
+              kind: 'adam'
+              parameters:
+                lr: 0.001
+            grad_norm:
+              kind: 'norm'
+              parameters:
+                value: 1
+          loss:
+            kind: 'mse'
+          neural_network:
+            __model__: ''
+
+        - optimizer:
+            model:
+              kind: 'adam'
+              parameters:
+                lr: 0.001
+            grad_norm:
+              kind: 'norm'
+              parameters:
+                value: 1
+          loss:
+            kind: 'smooth_l1'
+          neural_network:
+            __model__: ''

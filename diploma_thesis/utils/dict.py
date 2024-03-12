@@ -4,11 +4,13 @@ import copy
 from typing import Dict
 from flatdict import FlatDict
 from itertools import product
+from functools import reduce
 
 
 FACTORY_SUFFIX = '__factory__'
 CONCATENATE_SUFFIX = '__concat__'
 INOUT_FACTORY_SUFFIX = '__inout_factory__'
+NONE_TAG = '__none__'
 
 
 def merge_dicts(lhs: Dict, rhs: Dict) -> Dict:
@@ -113,6 +115,8 @@ def __parse_factory__(parameters):
     result = []
 
     for combination in product(*parameters):
-        result.append(list(combination))
+        combination = reduce(lambda x, y: x + [y] if y != NONE_TAG else x, combination, [])
+
+        result.append(combination)
 
     return result

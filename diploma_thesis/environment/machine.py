@@ -1,15 +1,15 @@
 from dataclasses import dataclass, field
 from functools import reduce
 from typing import List
-from tensordict.prototype import tensorclass
 
 import simpy
 import torch
+from tensordict.prototype import tensorclass
 
 import environment
 
 
-@tensorclass
+@dataclass
 class State:
     """
     Support class representing the state of the machine
@@ -21,7 +21,7 @@ class State:
     # The list of jobs, which are queued on the machine
     queue: List[environment.Job] = field(default_factory=list)
     # Total processing time for each job in the queue
-    total_processing_time: torch.LongTensor = torch.LongTensor([0])
+    total_processing_time: torch.FloatTensor = torch.LongTensor([0])
     # Expected moment of machine availability, i.e. without breakdowns and maintenances
     available_at: torch.FloatTensor = torch.FloatTensor([0])
     # Moment, when the machine will be free working or breakdown
@@ -132,7 +132,7 @@ class State:
         return self.with_updated_information(now)
 
 
-@tensorclass
+@dataclass
 class History:
     processed_job_ids: torch.LongTensor = field(default_factory=lambda: torch.LongTensor([]))
     decision_times: torch.FloatTensor = field(default_factory=lambda: torch.FloatTensor([]))
@@ -180,8 +180,8 @@ class Machine:
     def __init__(self, environment: simpy.Environment, machine_idx: int, work_center_idx: int):
         self.environment = environment
 
-        self.state = State(machine_idx=machine_idx, work_center_idx=work_center_idx, batch_size=[])
-        self.history = History(batch_size=[])
+        self.state = State(machine_idx=machine_idx, work_center_idx=work_center_idx)
+        self.history = History()
         self._shop_floor = None
 
         # Events

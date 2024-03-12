@@ -5,6 +5,7 @@ parameters:
     kind: 'deep_multi_rule'
     parameters:
       __rules__: ''
+      compile: False
 
       policy:
         kind: 'discrete_action'
@@ -18,9 +19,33 @@ parameters:
             __model__: ''
 
           action_selector:
-            kind: 'sample'
+            kind: 'phase_selector'
             parameters:
-              is_distribution: False
+              default:
+                kind: 'greedy'
+              phases:
+                - phase:
+                    kind: 'warm_up'
+                    parameters:
+                      step: 0
+                  action_selector:
+                    kind: 'sample'
+                    parameters:
+                      is_distribution: False
+                - phase:
+                    kind: 'warm_up'
+                    parameters:
+                      step: 1
+                  action_selector:
+                    kind: 'sample'
+                    parameters:
+                      is_distribution: False
+                - phase:
+                    kind: 'training'
+                  action_selector:
+                    kind: 'sample'
+                    parameters:
+                      is_distribution: False
 
   __encoder__: ''
 
@@ -51,6 +76,10 @@ parameters:
               kind: 'adam'
               parameters:
                 lr: 0.001
+            grad_norm:
+              kind: 'norm'
+              parameters:
+                value: 1
           loss:
             kind: 'mse'
           neural_network:
