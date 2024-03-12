@@ -18,7 +18,7 @@ task:
 #        - 'util/agent/multi_agent.yml'
         - 'util/rules/all_rules.yml'
         - 'util/optimizer/grad_norm.yml'
-#        - 'util/agent/multi_agent.yml'
+        - 'util/agent/multi_agent.yml'
         - 'util/infrastructure/compile.yml'
 
   work_center_agent:

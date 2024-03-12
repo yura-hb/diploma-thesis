@@ -1,5 +1,3 @@
 
 parameters:
-  model:
-    parameters:
-      compile: True
+  compile: True

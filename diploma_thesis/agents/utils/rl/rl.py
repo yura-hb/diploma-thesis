@@ -90,6 +90,9 @@ class RLTrainer(Loggable):
 
         self.__train__(model)
 
+    def compile(self):
+        pass
+
     def clear(self):
         self.loss_cache = []
         self.storage.clear()

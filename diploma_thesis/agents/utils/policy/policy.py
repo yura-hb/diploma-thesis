@@ -28,7 +28,7 @@ class Record:
 class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
 
     @abstractmethod
-    def predict(self, state: State) -> Tuple[torch.FloatTensor, torch.FloatTensor]:
+    def select(self, state, parameters):
         pass
 
     def clone(self):

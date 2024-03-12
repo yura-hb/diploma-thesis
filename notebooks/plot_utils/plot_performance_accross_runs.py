@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from .legend import add_legend
 
+
 def plot_performance_across_runs(data, info):
     metric = info['metric']
     group = info['group']

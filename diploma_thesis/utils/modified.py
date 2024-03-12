@@ -16,6 +16,7 @@ def modified(parameters):
         template = __load_template__(parameters, base_path)
 
     mods = parameters['mods']
+    mods = reduce(lambda x, y: x + y if isinstance(y, list) else x + [y], mods, [])
 
     mods_dir = os.path.dirname(base_path)
     mods_dir = os.path.join(mods_dir, 'mods')

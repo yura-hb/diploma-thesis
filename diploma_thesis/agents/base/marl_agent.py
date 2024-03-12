@@ -8,17 +8,14 @@ from .rl_agent import *
 
 class MARLAgent(Generic[Key], RLAgent[Key]):
 
-    def __init__(self,
-                 model: DeepPolicyModel,
-                 state_encoder: StateEncoder,
-                 trainer: RLTrainer,
-                 is_model_distributed: bool):
-        super().__init__(model, state_encoder, trainer)
-
-        self.model: DeepPolicyModel | Dict[Key, DeepPolicyModel] = model
-        self.trainer: RLTrainer | Dict[Key, RLTrainer] = trainer
-        self.is_model_distributed = is_model_distributed
+    def __init__(self, is_model_distributed: bool, *args, **kwargs):
         self.is_configured = False
+
+        super().__init__(*args, **kwargs)
+
+        self.model: DeepPolicyModel | Dict[Key, DeepPolicyModel] = self.model
+        self.trainer: RLTrainer | Dict[Key, RLTrainer] = self.trainer
+        self.is_model_distributed = is_model_distributed
         self.keys = None
 
     @property
@@ -99,6 +96,9 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         if not self.trainer[key].is_configured:
             self.trainer[key].configure(model.policy)
 
+        if not self.is_compiled:
+            self.compile()
+
         return result
 
     def __model_for_key__(self, key: Key):
@@ -106,3 +106,22 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
             return self.model[key]
 
         return self.model
+
+    def compile(self):
+        if not self.is_configured or self.is_compiled:
+            return
+
+        if not self.configuration.compile:
+            self.is_compiled = True
+            return
+
+        for _, value in self.trainer.items():
+            value.compile()
+
+        if self.is_model_distributed:
+            for _, value in self.model.items():
+                value.compile()
+        else:
+            self.model.compile()
+
+        self.is_compiled = True

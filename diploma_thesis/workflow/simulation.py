@@ -11,14 +11,10 @@ from agents import work_center_from_cli, machine_from_cli
 from agents.base.rl_agent import RLAgent
 from simulator import from_cli as simulator_from_cli, Simulator, RewardCache
 from simulator import run_configuration_from_cli, evaluate_configuration_from_cli
-from simulator.tape import TapeModel
 from simulator.graph import GraphModel
+from simulator.tape import TapeModel
 from utils import save
 from .workflow import Workflow
-
-
-torch.set_num_threads(1)
-torch._dynamo.config.suppress_errors = True
 
 
 class Simulation(Workflow):

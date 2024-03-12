@@ -64,7 +64,7 @@ class Reinforce(RLTrainer):
                 baseline = torch.squeeze(baseline)
 
         # Perform policy step
-        loss = self.loss(model.predict(batch.state)[1], batch.action)
+        loss = self.loss(model(batch.state)[1], batch.action)
 
         if loss.numel() == 1:
             raise ValueError('Loss should not have reduction to single value')
@@ -89,6 +89,13 @@ class Reinforce(RLTrainer):
             critic_loss.backward()
             critic.optimizer.step()
             self.record_loss(critic_loss, key=f'critic_{index}')
+
+    def compile(self):
+        if not self.is_configured:
+            return
+
+        for critic in self.critics:
+            critic.neural_network.compile()
 
     @property
     def critics(self):

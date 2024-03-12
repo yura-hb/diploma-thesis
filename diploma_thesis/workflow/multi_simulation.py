@@ -45,7 +45,10 @@ class MultiSimulation(Workflow):
 
         n_workers = self.parameters.get('n_workers', -1)
 
-        Parallel(n_jobs=n_workers)(delayed(__run__)(s) for s in parameters)
+        torch.set_num_threads(n_workers)
+        torch.set_num_interop_threads(n_workers)
+
+        Parallel(n_jobs=n_workers, backend='loky')(delayed(__run__)(s) for s in parameters)
 
     def __fetch_tasks__(self):
         result: [Dict] = []

@@ -9,12 +9,12 @@ from agents.utils.policy import Policy
 class DoubleDeepQTrainer(DeepQTrainer):
 
     def estimate_q(self, model: Policy, batch: Record | tensordict.TensorDictBase):
-        _, actions = model.predict(batch.next_state)
+        _, actions = model(batch.next_state)
         orig_q = actions[range(batch.shape[0]), batch.action]
 
         best_actions = actions.max(dim=-1).indices
 
-        target = self.target_model.predict(batch.next_state)[1][range(batch.shape[0]), best_actions]
+        target = self.target_model(batch.next_state)[1][range(batch.shape[0]), best_actions]
 
         q = batch.reward + self.return_estimator.discount_factor * target * (1 - batch.done.int())
         actions[range(batch.shape[0]), batch.action] = q

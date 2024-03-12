@@ -64,7 +64,7 @@ class PPO(RLTrainer):
 
     def __step__(self, batch: Record, model: Policy):
         advantages = batch.info[Record.ADVANTAGE_KEY]
-        value, logits = model.predict(batch.state)
+        value, logits = model(batch.state)
         value = value[torch.arange(batch.shape[0]), batch.action]
         distribution = torch.distributions.Categorical(logits=logits)
 

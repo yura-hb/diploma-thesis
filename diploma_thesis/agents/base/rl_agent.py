@@ -6,12 +6,32 @@ from utils import filter
 from .agent import *
 from .model import DeepPolicyModel
 
+from dataclasses import dataclass
+
+
+@dataclass
+class Configuration:
+    compile: bool = False
+
+    @staticmethod
+    def from_cli(parameters):
+        return Configuration(
+            compile=parameters.get('compile', False)
+        )
+
 
 class RLAgent(Generic[Key], Agent[Key]):
 
-    def __init__(self, model: DeepPolicyModel, state_encoder: StateEncoder, trainer: RLTrainer):
+    def __init__(self,
+                 model: DeepPolicyModel,
+                 state_encoder: StateEncoder,
+                 trainer: RLTrainer,
+                 configuration: Configuration):
         super().__init__(model, state_encoder)
 
+        self.is_compiled = False
+
+        self.configuration = configuration
         self.model: DeepPolicyModel = model
         self.trainer = trainer
 
@@ -52,4 +72,25 @@ class RLAgent(Generic[Key], Agent[Key]):
         if not self.trainer.is_configured:
             self.trainer.configure(self.model.policy)
 
+        if not self.is_compiled:
+            self.compile()
+
         return result
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+
+        self.compile()
+
+    def compile(self):
+        if not self.configuration.compile:
+            self.is_compiled = True
+            return
+
+        if self.is_compiled:
+            return
+
+        self.trainer.compile()
+        self.model.compile()
+
+        self.is_compiled = True

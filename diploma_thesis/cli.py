@@ -2,7 +2,6 @@
 import argparse
 from typing import Dict
 
-import torch._dynamo
 import yaml
 
 from workflow import Workflow, Simulation, Tournament, MultiSimulation

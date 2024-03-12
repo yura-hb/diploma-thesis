@@ -26,6 +26,9 @@ class Model(Loggable, Generic[Input, State, Action, Result], metaclass=ABCMeta):
     def __call__(self, state: State, parameters: Input) -> Record:
         pass
 
+    def compile(self):
+        pass
+
 
 class DeepPolicyModel(Model[Input, State, Action, Result], PhaseUpdatable, metaclass=ABCMeta):
 
@@ -39,3 +42,5 @@ class DeepPolicyModel(Model[Input, State, Action, Result], PhaseUpdatable, metac
 
         self.policy.update(phase)
 
+    def compile(self):
+        self.policy.compile()

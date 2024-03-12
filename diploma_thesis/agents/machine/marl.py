@@ -1,6 +1,6 @@
 from typing import Dict
 
-from agents.base.marl_agent import MARLAgent
+from agents.base.marl_agent import MARLAgent, Configuration
 from agents.utils.rl import from_cli as rl_trainer_from_cli
 from environment import MachineKey, ShopFloor
 from .model import DeepPolicyMachineModel, from_cli as model_from_cli
@@ -19,9 +19,14 @@ class MARLMachine(MARLAgent[MachineKey]):
         model = model_from_cli(parameters['model'])
         encoder = state_encoder_from_cli(parameters['encoder'])
         trainer = rl_trainer_from_cli(parameters['trainer'])
+        configuration = Configuration.from_cli(parameters)
 
         is_model_distributed = parameters.get('is_model_distributed', True)
 
         assert isinstance(model, DeepPolicyMachineModel), f"Model must conform to NNModel"
 
-        return MARLMachine(model, encoder, trainer, is_model_distributed)
+        return MARLMachine(is_model_distributed=is_model_distributed,
+                           model=model,
+                           state_encoder=encoder,
+                           trainer=trainer,
+                           configuration=configuration)

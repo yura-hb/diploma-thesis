@@ -11,7 +11,7 @@ class PartialInstanceNorm1d(Layer):
         super().__init__()
 
         self.channels = channels
-        self.norm = nn.InstanceNorm1d(num_features=channels)
+        self.norm = nn.InstanceNorm1d(num_features=1)
 
     def forward(self, batch):
         normalized = batch[:, :self.channels]

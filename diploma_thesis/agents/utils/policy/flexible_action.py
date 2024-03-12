@@ -44,21 +44,7 @@ class FlexibleAction(Policy[Input]):
     def __get_actions__(self, state):
         return self.action_model(state)
 
-    def forward(self, state: State, parameters: Input) -> Record:
-        values, actions = self.predict(state)
-        values, actions = values.squeeze(), actions.squeeze()
-        action, policy = self.action_selector(actions)
-        action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
-
-        info = TensorDict({
-            "policy": policy,
-            "values": values.detach().clone(),
-            "actions": actions.detach().clone()
-        }, batch_size=[])
-
-        return Record(state, action, info, batch_size=[])
-
-    def predict(self, state: State):
+    def forward(self, state: State):
         actions = torch.tensor(0, dtype=torch.long)
 
         if self.action_model is not None:
@@ -76,6 +62,20 @@ class FlexibleAction(Policy[Input]):
                 return values, values + (actions - actions.mean(dim=1, keepdim=True))
             case _:
                 raise ValueError(f"Policy estimation method {self.policy_estimation_method} is not supported")
+
+    def select(self, state: State, parameters: Input) -> Record:
+        values, actions = self.__call__(state)
+        values, actions = values.squeeze(), actions.squeeze()
+        action, policy = self.action_selector(actions)
+        action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
+
+        info = TensorDict({
+            "policy": policy,
+            "values": values.detach().clone(),
+            "actions": actions.detach().clone()
+        }, batch_size=[])
+
+        return Record(state, action, info, batch_size=[])
 
     def __configure__(self):
         if self.noise_parameters is not None:

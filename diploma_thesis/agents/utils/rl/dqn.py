@@ -19,7 +19,7 @@ class DeepQTrainer(RLTrainer):
         def from_cli(parameters: Dict):
             return DeepQTrainer.Configuration(
                 decay=parameters.get('decay', 0.99),
-                update_steps=parameters.get('update_steps', 100),
+                update_steps=parameters.get('update_steps', 20),
                 prior_eps=parameters.get('prior_eps', 1e-6)
             )
 
@@ -43,7 +43,7 @@ class DeepQTrainer(RLTrainer):
         with torch.no_grad():
             q_values, td_error = self.estimate_q(model, batch)
 
-        _, actions = model.predict(batch.state)
+        _, actions = model(batch.state)
         loss = self.loss(actions, q_values)
 
         self.optimizer.zero_grad()
@@ -64,10 +64,10 @@ class DeepQTrainer(RLTrainer):
         # Note:
         # The idea is that we compute the Q-values only for performed actions. Other actions wouldn't be updated,
         # because there will be zero loss and so zero gradient
-        _, actions = model.predict(batch.next_state)
+        _, actions = model(batch.next_state)
         orig_q = actions.clone()[range(batch.shape[0]), batch.action]
 
-        _, target = self.target_model.predict(batch.next_state)
+        _, target = self.target_model(batch.next_state)
         target = target.max(dim=1).values
 
         q = batch.reward + self.return_estimator.discount_factor * target * (1 - batch.done.int())
@@ -80,6 +80,12 @@ class DeepQTrainer(RLTrainer):
     @property
     def target_model(self):
         return self._target_model.module
+
+    def compile(self):
+        if not self.is_configured:
+            return
+
+        self.target_model.compile()
 
     @classmethod
     def from_cli(cls,
