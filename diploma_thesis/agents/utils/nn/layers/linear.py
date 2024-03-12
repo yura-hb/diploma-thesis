@@ -29,7 +29,7 @@ class Linear(Layer):
 
         self.__build__()
 
-    def __call__(self, batch: torch.FloatTensor) -> torch.FloatTensor:
+    def forward(self, batch: torch.FloatTensor) -> torch.FloatTensor:
         batch = self.linear(batch)
         batch = self.activation(batch)
 

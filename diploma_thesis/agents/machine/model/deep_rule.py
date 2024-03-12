@@ -1,11 +1,9 @@
+from typing import Dict
 
 import torch
 
-from typing import Dict, List
-
 from agents.utils.policy import from_cli as policy_from_cli
 from .model import *
-from .rule import SchedulingRule, ALL_SCHEDULING_RULES, IdleSchedulingRule
 
 
 class DeepRule(DeepPolicyMachineModel):
@@ -23,6 +21,4 @@ class DeepRule(DeepPolicyMachineModel):
         policy_parameters = parameters['policy']
         policy = policy_from_cli(policy_parameters)
 
-        configuration = DeepPolicyModel.Configuration.from_cli(parameters)
-
-        return cls(policy, configuration)
+        return cls(policy)

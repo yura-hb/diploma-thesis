@@ -11,7 +11,7 @@ class Flatten(Layer):
 
         self.layer = nn.Flatten()
 
-    def __call__(self, batch: torch.FloatTensor) -> torch.FloatTensor:
+    def forward(self, batch: torch.FloatTensor) -> torch.FloatTensor:
         return self.layer(batch)
 
     @classmethod
@@ -26,7 +26,7 @@ class LayerNorm(Layer):
 
         self.layer = nn.LayerNorm(normalized_shape=normalized_shape)
 
-    def __call__(self, batch: torch.FloatTensor) -> torch.FloatTensor:
+    def forward(self, batch: torch.FloatTensor) -> torch.FloatTensor:
         return self.layer(batch)
 
     @classmethod
@@ -41,7 +41,7 @@ class InstanceNorm(Layer):
 
         self.layer = nn.LazyInstanceNorm1d()
 
-    def __call__(self, batch: torch.FloatTensor) -> torch.FloatTensor:
+    def forward(self, batch: torch.FloatTensor) -> torch.FloatTensor:
         return self.layer(batch)
 
     @classmethod

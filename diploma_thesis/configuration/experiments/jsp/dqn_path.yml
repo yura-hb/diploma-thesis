@@ -1,6 +1,6 @@
 # Evaluate the effectivenes of basic DQNs on the JSP environment
 
-template: &template 'reference/marl_direct'
+template: &template 'reference/marl_indirect'
 
 ###############################################################################################
 
@@ -236,7 +236,7 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ [ 'duration/10000.yml' ] ]
+        - [ [ 'duration/25000.yml' ] ]
         - [ [ 'size/jsp/10.yml' ] ]
         - [ [ 'utilization/80.yml' ] ]
         - [ [ 'initial_assignment/2.yml' ] ]
@@ -290,7 +290,7 @@ task:
   n_workers: 4
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/dqn_path/marl_direct'
+  output_dir: 'results/jsp/experiments/dqn_path/marl_indirect'
 
   tasks:
     # TD - n-step short single source
@@ -342,7 +342,7 @@ task:
             parameters:
               base_path: 'configuration/mods/run/run.yml'
               mods:
-                - 'n_workers/1.yml'
+                - 'n_workers/2.yml'
                 - 'timeline/warmup.yml'
               nested:
                 parameters:

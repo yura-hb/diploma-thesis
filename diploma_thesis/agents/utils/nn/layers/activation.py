@@ -10,7 +10,7 @@ class Activation(Layer):
         self.kind = kind
         self.activation = self.__make_activation__()
 
-    def __call__(self, batch: torch.FloatTensor) -> torch.FloatTensor:
+    def forward(self, batch: torch.FloatTensor) -> torch.FloatTensor:
         if self.activation is None:
             return batch
 

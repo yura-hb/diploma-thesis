@@ -13,7 +13,7 @@ class PartialInstanceNorm1d(Layer):
         self.channels = channels
         self.norm = nn.InstanceNorm1d(num_features=channels)
 
-    def __call__(self, batch):
+    def forward(self, batch):
         normalized = batch[:, :self.channels]
         normalized = self.norm(normalized)
 

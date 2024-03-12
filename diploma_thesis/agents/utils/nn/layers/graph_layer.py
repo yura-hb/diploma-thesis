@@ -1,4 +1,3 @@
-
 from .layer import *
 
 from typing import Dict
@@ -15,29 +14,28 @@ class GraphLayer(Layer):
 
 class BaseWrapper(GraphLayer):
 
-        def __init__(self, configuration):
-            super().__init__()
+    def __init__(self, configuration):
+        super().__init__()
 
-            self.configuration = configuration
+        self.configuration = configuration
 
-            if 'signature' in configuration:
-                self._signature = configuration['signature']
+        if 'signature' in configuration:
+            self._signature = configuration['signature']
 
-                del configuration['signature']
-            else:
-                self._signature = None
+            del configuration['signature']
+        else:
+            self._signature = None
 
-        @property
-        def signature(self):
-            return self._signature or 'x -> x'
+    @property
+    def signature(self):
+        return self._signature or 'x -> x'
 
-        @classmethod
-        def from_cli(cls, parameters: Dict):
-            return cls(parameters)
+    @classmethod
+    def from_cli(cls, parameters: Dict):
+        return cls(parameters)
 
 
 def common_graph_layer(layer):
-
     class Wrapper(BaseWrapper):
 
         def __init__(self, configuration):

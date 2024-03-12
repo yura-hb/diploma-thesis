@@ -44,7 +44,7 @@ class FlexibleAction(Policy[Input]):
     def __get_actions__(self, state):
         return self.action_model(state)
 
-    def __call__(self, state: State, parameters: Input) -> Record:
+    def forward(self, state: State, parameters: Input) -> Record:
         values, actions = self.predict(state)
         values, actions = values.squeeze(), actions.squeeze()
         action, policy = self.action_selector(actions)

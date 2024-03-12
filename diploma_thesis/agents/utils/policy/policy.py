@@ -28,10 +28,6 @@ class Record:
 class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
 
     @abstractmethod
-    def __call__(self, state: State, parameters: Input) -> Record:
-        pass
-
-    @abstractmethod
     def predict(self, state: State) -> Tuple[torch.FloatTensor, torch.FloatTensor]:
         pass
 
