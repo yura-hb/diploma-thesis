@@ -4,5 +4,5 @@ encoder:
   kind: 'hierarchical'
   parameters:
     is_homogeneous: True
-    is_undirected: False
-    is_local: True
+    is_undirected: True
+    is_local: False

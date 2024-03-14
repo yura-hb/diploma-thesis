@@ -140,7 +140,7 @@ class History:
     breakdown_end_at: torch.FloatTensor = field(default_factory=lambda: torch.FloatTensor([]))
 
     def with_decision(self, decision_time: float):
-        if not isinstance(decision_time, torch.Tensor):
+        if not torch.is_tensor(decision_time):
             decision_time = torch.FloatTensor([decision_time])
 
         self.decision_times = torch.cat([self.decision_times, torch.atleast_1d(decision_time)])
@@ -153,7 +153,7 @@ class History:
         return self
 
     def with_breakdown_start(self, start_at: torch.FloatTensor):
-        if not isinstance(start_at, torch.Tensor):
+        if not torch.is_tensor(start_at):
             start_at = torch.FloatTensor([start_at])
 
         self.breakdown_start_at = torch.cat([self.breakdown_start_at, torch.atleast_1d(start_at)])

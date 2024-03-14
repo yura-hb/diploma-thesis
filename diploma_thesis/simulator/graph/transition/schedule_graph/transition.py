@@ -28,9 +28,9 @@ class ScheduleTransition(metaclass=ABCMeta):
 
     # Utils
 
-    def __append_operations_to_scheduled_graph__(self, operations: torch.LongTensor, machine_index: int, graph: Graph):
-        graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_KEY] = torch.cat([
-            graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_KEY],
+    def __append_operations_to_scheduled_graph__(self, operations: torch.LongTensor, machine_index: str, graph: Graph):
+        graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY] = torch.cat([
+            graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY],
             operations
         ], dim=1)
 

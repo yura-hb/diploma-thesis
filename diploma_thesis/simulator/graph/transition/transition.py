@@ -63,15 +63,15 @@ class GraphTransition:
 
             index = key(index)
 
-            graph.data[Graph.MACHINE_KEY][index] = TensorDict({}, batch_size=[])
+            graph.data[Graph.MACHINE_KEY, index] = TensorDict({}, batch_size=[])
 
             t = torch.tensor([], dtype=torch.int)
 
-            graph.data[Graph.MACHINE_KEY][index][Graph.SCHEDULED_KEY] = t.clone().view(2, 0)
-            graph.data[Graph.MACHINE_KEY][index][Graph.PROCESSED_KEY] = t.clone().view(2, 0)
+            graph.data[Graph.MACHINE_KEY, index, Graph.SCHEDULED_KEY] = t.clone().view(2, 0)
+            graph.data[Graph.MACHINE_KEY, index, Graph.PROCESSED_KEY] = t.clone().view(2, 0)
 
-            graph.data[Graph.MACHINE_KEY][index][Graph.SCHEDULED_GRAPH_KEY] = t.clone().view(4, 0)
-            graph.data[Graph.MACHINE_KEY][index][Graph.PROCESSED_GRAPH_KEY] = t.clone().view(4, 0)
+            graph.data[Graph.MACHINE_KEY, index, Graph.SCHEDULED_GRAPH_KEY] = t.clone().view(4, 0)
+            graph.data[Graph.MACHINE_KEY, index, Graph.PROCESSED_GRAPH_KEY] = t.clone().view(4, 0)
 
         graph.data[Graph.MACHINE_INDEX_KEY] = machine_index
 

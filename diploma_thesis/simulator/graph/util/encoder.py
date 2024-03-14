@@ -124,8 +124,8 @@ class Encoder:
 
     def __append_machine_nodes__(self, result: Graph, source: Graph, shop_floor: ShopFloor):
         result.data[Graph.MACHINE_INDEX_KEY] = source.data[Graph.MACHINE_INDEX_KEY].T
-        result.data[Graph.MACHINE_KEY][Graph.X] = torch.zeros(len(shop_floor.machines), dtype=torch.float32).view(-1, 1)
-        result.data[Graph.WORK_CENTER_KEY][Graph.X] = torch.zeros(len(shop_floor.work_centers), dtype=torch.float32).view(-1, 1)
+        result.data[Graph.MACHINE_KEY, Graph.X] = torch.zeros(len(shop_floor.machines), dtype=torch.float32).view(-1, 1)
+        result.data[Graph.WORK_CENTER_KEY, Graph.X] = torch.zeros(len(shop_floor.work_centers), dtype=torch.float32).view(-1, 1)
 
         if self.configuration.is_machine_set_in_work_center_connected:
             for work_center in shop_floor.work_centers:
@@ -219,15 +219,17 @@ class Encoder:
 
         index = result.data[Graph.JOB_INDEX_MAP][:, [0, 1]].T
 
-        for machine_id in range(len(result.data[Graph.MACHINE_KEY])):
-            has_graph = Graph.SCHEDULED_GRAPH_KEY in source.data[Graph.MACHINE_KEY][machine_id]
+        for machine_id in range(result.data[Graph.MACHINE_KEY, Graph.X].shape[0]):
+            machine_id = key(machine_id)
+
+            has_graph = Graph.SCHEDULED_GRAPH_KEY in source.data[Graph.MACHINE_KEY, machine_id].keys()
 
             if has_graph:
                 graph_key = [Graph.SCHEDULED_GRAPH_KEY, Graph.PROCESSED_GRAPH_KEY]
                 relation_key = [Graph.SCHEDULED_RELATION_KEY, Graph.PROCESSED_RELATION_KEY]
 
                 for graph, relation in zip(graph_key, relation_key):
-                    graph = source.data[Graph.MACHINE_KEY][machine_id][graph]
+                    graph = source.data[Graph.MACHINE_KEY, machine_id, graph]
                     s = result.data[edge(Graph.OPERATION_KEY, relation, Graph.OPERATION_KEY)]
                     s[Graph.EDGE_INDEX] = torch.cat([s[Graph.EDGE_INDEX], self.__encode_graph__(graph, index)], dim=1)
             else:
@@ -237,7 +239,7 @@ class Encoder:
                 for op, relation in zip(op_key, relation_key):
                     s = result.data[(Graph.MACHINE_KEY, relation, Graph.OPERATION_KEY)]
 
-                    scheduled_operations = source.data[Graph.MACHINE_KEY][machine_id][op]
+                    scheduled_operations = source.data[Graph.MACHINE_KEY, machine_id, op]
                     scheduled_operations = self.__get_node_ids__(scheduled_operations, index)
 
                     s[Graph.EDGE_INDEX] = torch.cat([s[Graph.EDGE_INDEX], torch.vstack([

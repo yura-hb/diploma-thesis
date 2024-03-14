@@ -37,7 +37,8 @@ class MultiSimulation(Workflow):
         parameters = self.__passthrough_parameters__(dict(
             debug=False,
             output_dir='',
-            store_run_statistics=False
+            store_run_statistics=False,
+            log_run=False
         ), parameters, merge=__merge__)
         parameters = self.__fix_names__(parameters)
 
@@ -45,10 +46,7 @@ class MultiSimulation(Workflow):
 
         n_workers = self.parameters.get('n_workers', -1)
 
-        torch.set_num_threads(n_workers)
-        torch.set_num_interop_threads(n_workers)
-
-        Parallel(n_jobs=n_workers, backend='loky')(delayed(__run__)(s) for s in parameters)
+        Parallel(n_jobs=n_workers, backend='threading')(delayed(__run__)(s) for s in parameters)
 
     def __fetch_tasks__(self):
         result: [Dict] = []

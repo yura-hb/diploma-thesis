@@ -26,7 +26,7 @@ class HierarchicalGraphEncoder(GraphStateEncoder):
 
             for j in range(job.current_step_idx, len(job.step_idx)):
                 if j == 0:
-                    moment = 0
+                    moment = parameters.machine.shop_floor.now
                 else:
                     moment = completions_times[j-1].max()
 
@@ -35,10 +35,7 @@ class HierarchicalGraphEncoder(GraphStateEncoder):
             status = torch.ones_like(job.step_idx)
             status = self.__fill_job_matrix__(job, status)
 
-            states += [torch.vstack([
-                completions_times.view(-1),
-                status.view(-1)
-            ])]
+            states += [torch.vstack([completions_times.view(-1), status.view(-1)])]
 
         states = torch.cat(states, dim=1).T if len(states) > 0 else torch.tensor([]).view(0, 2)
         graph[Graph.OPERATION_KEY].x = states

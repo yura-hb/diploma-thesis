@@ -53,8 +53,8 @@ class CompressedTransition(ScheduleTransition):
         if operation_id is None or machine_index is None:
             return
 
-        graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_KEY] = torch.cat([
-            graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_KEY],
+        graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY] = torch.cat([
+            graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY],
             operation_id
         ], dim=1)
 
@@ -65,28 +65,28 @@ class CompressedTransition(ScheduleTransition):
         if operation_id is None or machine_index is None:
             return
 
-        graph.data[Graph.MACHINE_KEY][machine_index][Graph.PROCESSED_KEY] = torch.cat([
-            graph.data[Graph.MACHINE_KEY][machine_index][Graph.PROCESSED_KEY],
+        graph.data[Graph.MACHINE_KEY, machine_index, Graph.PROCESSED_KEY] = torch.cat([
+            graph.data[Graph.MACHINE_KEY, machine_index, Graph.PROCESSED_KEY],
             operation_id
         ], dim=1)
 
-        graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_KEY] = self.__delete_by_first_row__(
+        graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY] = self.__delete_by_first_row__(
             value=job.id,
-            tensor=graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_KEY]
+            tensor=graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY]
         )
 
     def __remove__(self, job: Job, graph: Graph):
-        for index, _ in enumerate(graph.data[Graph.MACHINE_INDEX_KEY]):
+        for index in range(graph.data[Graph.MACHINE_INDEX_KEY].shape[1]):
             index = key(index)
 
-            graph.data[Graph.MACHINE_KEY][index][Graph.SCHEDULED_KEY] = self.__delete_by_first_row__(
+            graph.data[Graph.MACHINE_KEY, index, Graph.SCHEDULED_KEY] = self.__delete_by_first_row__(
                 value=job.id,
-                tensor=graph.data[Graph.MACHINE_KEY][index][Graph.SCHEDULED_KEY]
+                tensor=graph.data[Graph.MACHINE_KEY, index, Graph.SCHEDULED_KEY]
             )
 
-            graph.data[Graph.MACHINE_KEY][index][Graph.PROCESSED_KEY] = self.__delete_by_first_row__(
+            graph.data[Graph.MACHINE_KEY, index, Graph.PROCESSED_KEY] = self.__delete_by_first_row__(
                 value=job.id,
-                tensor=graph.data[Graph.MACHINE_KEY][index][Graph.PROCESSED_KEY]
+                tensor=graph.data[Graph.MACHINE_KEY, index, Graph.PROCESSED_KEY]
             )
 
     @staticmethod

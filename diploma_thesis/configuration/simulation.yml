@@ -10,7 +10,7 @@ task:
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/machine/reinforce.yml'
+      base_path: 'configuration/mods/machine/ppo.yml'
       template: 'reference/hierarchical'
       mods:
 #        - 'agent/dqn/ddqn.yml'
@@ -18,10 +18,12 @@ task:
 #        - 'agent/dqn/prioritized.yml'
 #        - 'agent/dqn/steps/5.yml'
 #        - 'agent/dqn/noisy.yml'
-#        - 'agent/ppo/epochs/4.yml'
+        - 'agent/ppo/epochs/4.yml'
         - 'util/rules/simple_rules.yml'
 #        - 'util/optimizer/grad_norm.yml'
         - 'util/device/mps.yml'
+        - 'util/train_schedule/on_store.yml'
+#        - 'util/infrastructure/compile.yml'
 #        - 'util/train_schedule/on_stored_data_exclusively.yml'
 #        - 'util/agent/multi_agent.yml'
 #        - 'util/infrastructure/compile.yml'
@@ -50,12 +52,12 @@ task:
       kind: 'base'
       parameters:
         forward:
-          kind: 'complete'
+          kind: 'adding_arc'
 
         schedule:
-          kind: 'compressed'
+          kind: 'complete'
 
-    memory: 100
+    memory: 0
     is_machine_set_in_work_center_connected: True
     is_work_center_set_in_shop_floor_connected: True
 

@@ -1,6 +1,21 @@
 
 template: &template 'experimental/hierarchical'
 
+graph: &graph
+    transition_model:
+      kind: 'base'
+      parameters:
+        forward:
+          kind: 'adding_arc'
+
+        schedule:
+          kind: 'complete'
+
+    memory: 0
+    is_machine_set_in_work_center_connected: True
+    is_work_center_set_in_shop_floor_connected: True
+
+
 ##############################################################################################
 
 reinforce: &reinforce
@@ -35,8 +50,8 @@ ppo: &ppo
       - [ 'util/device/mps.yml' ]
       - [ 'util/rules/simple_rules.yml' ]
       - [
-          '__none__',
           'agent/ppo/epochs/4.yml',
+          'agent/ppo/epochs/10.yml',
         ]
 #      - [
 #         '__none__',
@@ -44,7 +59,7 @@ ppo: &ppo
 #         ['util/agent/centralized.yml', 'util/optimizer/lr_0001.yml'],
 #      ]
       - [
-        '__none__',
+#        '__none__',
         'util/train_schedule/on_store.yml',
         'util/train_schedule/on_stored_data_exclusively.yml',
       ]
@@ -109,8 +124,9 @@ short_single_source_run: &short_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 2
+  n_workers: 1
   debug: False
+  log_run: True
   store_run_statistics: False
   output_dir: 'results/jsp/experiments/ppo_reinforce_path/runs/hierarchical'
 
@@ -144,8 +160,6 @@ task:
           tape:
             machine_reward:
               kind: 'global_tardiness'
-              parameters:
-                span: 256
 
             work_center_reward:
               kind: 'no'
@@ -157,18 +171,7 @@ task:
               emit_trajectory: True
 
           graph:
-            transition_model:
-              kind: 'base'
-              parameters:
-                forward:
-                  kind: 'complete'
-
-                schedule:
-                  kind: 'compressed'
-
-            memory: 100
-            is_machine_set_in_work_center_connected: True
-            is_work_center_set_in_shop_floor_connected: True
+            *graph
 
           run:
             kind: 'mod'
@@ -241,8 +244,6 @@ task:
           tape:
             machine_reward:
               kind: 'global_tardiness'
-              parameters:
-                span: 256
 
             work_center_reward:
               kind: 'no'
@@ -251,8 +252,7 @@ task:
             kind: 'episodic'
 
           graph:
-            transition_model:
-              kind: 'no'
+            *graph
 
           run:
             kind: 'mod'

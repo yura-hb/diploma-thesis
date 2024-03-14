@@ -74,13 +74,13 @@ class CompleteTransition(ScheduleTransition):
             return
 
         # Remove operation from disjunctive graph
-        disjunctive_operations = graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_KEY]
+        disjunctive_operations = graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY]
         mask = (disjunctive_operations == operation_id).all(dim=0)
-        graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_KEY] = disjunctive_operations[:, ~mask]
+        graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY] = disjunctive_operations[:, ~mask]
 
         # Append operation to history
-        graph.data[Graph.MACHINE_KEY][machine_index][Graph.PROCESSED_KEY] = torch.cat([
-            graph.data[Graph.MACHINE_KEY][machine_index][Graph.PROCESSED_KEY],
+        graph.data[Graph.MACHINE_KEY, machine_index, Graph.PROCESSED_KEY] = torch.cat([
+            graph.data[Graph.MACHINE_KEY, machine_index, Graph.PROCESSED_KEY],
             operation_id
         ], dim=1)
 
@@ -89,10 +89,10 @@ class CompleteTransition(ScheduleTransition):
         self.__update_processed_graph__(machine_index, graph)
 
     def __update_scheduled_graph__(self, machine_index, graph: Graph):
-        dj = graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_KEY]
+        dj = graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY]
 
         # Construct new disjunctive edges, i.e complete graph
-        history = graph.data[Graph.MACHINE_KEY][machine_index][Graph.PROCESSED_KEY]
+        history = graph.data[Graph.MACHINE_KEY, machine_index, Graph.PROCESSED_KEY]
 
         if history.numel() == 0 and dj.shape[1] > 1:
             # If no operation was processed on machine, then it can start with any of them in the queue. Hence, we
@@ -111,30 +111,30 @@ class CompleteTransition(ScheduleTransition):
             edges = torch.vstack([edges, dj])
 
         # Replace disjunctive edges
-        graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_GRAPH_KEY] = edges
+        graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_GRAPH_KEY] = edges
 
     def __update_processed_graph__(self, machine_index, graph: Graph):
-        history = graph.data[Graph.MACHINE_KEY][machine_index][Graph.PROCESSED_KEY]
+        history = graph.data[Graph.MACHINE_KEY, machine_index, Graph.PROCESSED_KEY]
 
         if history.shape[1] <= 1:
             new_edges = torch.tensor([], dtype=torch.long).view(2, 0)
         else:
             new_edges = torch.vstack([history[:, :-1], history[:, 1:]])
 
-        graph.data[Graph.MACHINE_KEY][machine_index][Graph.PROCESSED_GRAPH_KEY] = new_edges
+        graph.data[Graph.MACHINE_KEY, machine_index, Graph.PROCESSED_GRAPH_KEY] = new_edges
 
     # Remove
 
     def __remove_operation_record__(self, job: Job, graph: Graph):
-        for machine_index, _ in enumerate(graph.data[Graph.MACHINE_INDEX_KEY]):
+        for machine_index in range(graph.data[Graph.MACHINE_INDEX_KEY].shape[1]):
             machine_index = key(machine_index)
 
-            graph.data[Graph.MACHINE_KEY][machine_index][Graph.PROCESSED_KEY] = self.__delete_by_first_row__(
-                job.id, graph.data[Graph.MACHINE_KEY][machine_index][Graph.PROCESSED_KEY]
+            graph.data[Graph.MACHINE_KEY, machine_index, Graph.PROCESSED_KEY] = self.__delete_by_first_row__(
+                job.id, graph.data[Graph.MACHINE_KEY, machine_index, Graph.PROCESSED_KEY]
             )
 
-            graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_KEY] = self.__delete_by_first_row__(
-                job.id, graph.data[Graph.MACHINE_KEY][machine_index][Graph.SCHEDULED_KEY]
+            graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY] = self.__delete_by_first_row__(
+                job.id, graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY]
             )
 
             self.__update_scheduled_graph__(machine_index, graph)

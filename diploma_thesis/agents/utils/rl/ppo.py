@@ -44,21 +44,13 @@ class PPO(RLTrainer):
 
     def __train__(self, model: Policy):
         try:
-            batch, info = self.storage.sample(update_returns=self.configuration.update_advantages,
-                                              device=self.run_configuration.device)
+            for slice in self.storage.sample_minibatches(update_returns=self.configuration.update_advantages,
+                                                         device=self.run_configuration.device,
+                                                         n=self.configuration.epochs,
+                                                         sample_ratio=self.configuration.sample_ratio):
+                self.__step__(slice, model)
         except NotReadyException:
             return
-
-        for i in range(self.configuration.epochs):
-            mask = torch.zeros(batch.batch_size).uniform_() < self.configuration.sample_ratio
-
-            sub_batch = batch[mask]
-
-            if isinstance(batch.state, GraphState):
-                sub_batch.state.graph = Batch.from_data_list(batch.state.graph[mask]).to(self.run_configuration.device)
-                sub_batch.next_state.graph = Batch.from_data_list(batch.next_state.graph[mask]).to(self.run_configuration.device)
-
-            self.__step__(sub_batch, model)
 
     def __step__(self, batch: Record, model: Policy):
         range = torch.arange(batch.shape[0], device=self.run_configuration.device)

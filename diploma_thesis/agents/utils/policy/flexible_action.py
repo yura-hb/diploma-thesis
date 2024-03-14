@@ -3,6 +3,7 @@ from typing import Dict
 
 import torch
 
+from agents.base.state import GraphState
 from agents.utils import NeuralNetwork, Phase
 from agents.utils.action import ActionSelector, from_cli as action_selector_from_cli
 from .policy import *
@@ -83,17 +84,17 @@ class FlexibleAction(Policy[Input]):
 
     def select(self, state: State, parameters: Input) -> Record:
         values, actions = self.__call__(state)
-        values, actions = values.squeeze().cpu(), actions.squeeze().cpu()
+        values, actions = values.squeeze(), actions.squeeze()
         action, policy = self.action_selector(actions)
         action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
 
         info = TensorDict({
             "policy": policy,
-            "values": values.detach().clone(),
-            "actions": actions.detach().clone()
+            "values": values,
+            "actions": actions
         }, batch_size=[])
 
-        return Record(state, action, info, batch_size=[])
+        return Record(state, action, info, batch_size=[]).detach().clone().cpu()
 
     def __configure__(self):
         if self.noise_parameters is not None:

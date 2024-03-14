@@ -38,7 +38,7 @@ class Workflow(metaclass=ABCMeta):
             def format(self, record):
                 time = environment.now
 
-                if isinstance(time, torch.Tensor):
+                if torch.is_tensor(time):
                     time = int(time.item())
 
                 record.time = str(time)
