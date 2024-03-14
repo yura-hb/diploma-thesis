@@ -31,9 +31,9 @@ class SurrogateTardiness(MachineReward):
         @staticmethod
         def from_cli(parameters: dict) -> 'SurrogateTardiness.Configuration':
             return SurrogateTardiness.Configuration(
-                critical_level_factor=parameters.get('critical_level_factor', 64),
+                critical_level_factor=parameters.get('critical_level_factor', 20),
                 winq_factor=parameters.get('winq_factor', 0.2),
-                span=parameters.get('span', 20),
+                span=parameters.get('span', 64),
                 release_reward_after_completion=parameters.get('release_reward_after_completion', False)
             )
 

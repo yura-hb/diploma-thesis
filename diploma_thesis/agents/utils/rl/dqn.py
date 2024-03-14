@@ -13,14 +13,12 @@ class DeepQTrainer(RLTrainer):
     class Configuration:
         decay: float = 0.99
         update_steps: int = 10
-        prior_eps: float = 1e-6
 
         @staticmethod
         def from_cli(parameters: Dict):
             return DeepQTrainer.Configuration(
                 decay=parameters.get('decay', 0.99),
-                update_steps=parameters.get('update_steps', 20),
-                prior_eps=parameters.get('prior_eps', 1e-6)
+                update_steps=parameters.get('update_steps', 20)
             )
 
     def __init__(self, configuration: Configuration, *args, **kwargs):
@@ -29,14 +27,16 @@ class DeepQTrainer(RLTrainer):
         self._target_models: AveragedModel | None = None
         self.configuration = configuration
 
-    def configure(self, model: Policy):
-        super().configure(model)
+    def configure(self, model: Policy, configuration: RunConfiguration):
+        super().configure(model, configuration)
 
-        self._target_model = AveragedModel(model.clone(), avg_fn=get_ema_avg_fn(self.configuration.decay))
+        avg_fn = get_ema_avg_fn(self.configuration.decay)
+
+        self._target_model = AveragedModel(model.clone(), avg_fn=avg_fn).to(configuration.device)
 
     def __train__(self, model: Policy):
         try:
-            batch, info = self.storage.sample(update_returns=False)
+            batch, info = self.storage.sample(update_returns=False, device=self.run_configuration.device)
         except NotReadyException:
             return
 
@@ -55,8 +55,6 @@ class DeepQTrainer(RLTrainer):
         with torch.no_grad():
             if self.optimizer.step_count % self.configuration.update_steps == 0:
                 self._target_model.update_parameters(model)
-
-            td_error += self.configuration.prior_eps
 
             self.storage.update_priority(info['index'], td_error)
 

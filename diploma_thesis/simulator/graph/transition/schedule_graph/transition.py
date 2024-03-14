@@ -4,6 +4,7 @@ from abc import ABCMeta, abstractmethod
 import torch
 
 from agents.base import Graph
+from simulator.graph.transition.utils import key
 from environment import Job
 
 
@@ -46,7 +47,7 @@ class ScheduleTransition(metaclass=ABCMeta):
     @classmethod
     def __get_machine_index__(
         cls, graph: Graph, work_center_id: torch.LongTensor, machine_id: torch.LongTensor
-    ) -> torch.LongTensor | None:
+    ) -> str:
         if not torch.is_tensor(work_center_id):
             work_center_id = torch.tensor(work_center_id)
 
@@ -56,7 +57,7 @@ class ScheduleTransition(metaclass=ABCMeta):
         index = torch.vstack([work_center_id, machine_id])
         index = (graph.data[Graph.MACHINE_INDEX_KEY] == index).all(dim=0)
 
-        return torch.where(index)[0].item()
+        return key(torch.where(index)[0])
 
     def __current_operation_id__(cls, graph: Graph, job: Job) -> torch.Tensor | None:
         return cls.__operation_id__(graph, job, job.current_step_idx, job.current_machine_idx)
@@ -71,7 +72,7 @@ class ScheduleTransition(metaclass=ABCMeta):
     def __operation_id__(
             graph: Graph, job: Job, step_id: torch.LongTensor | int, machine_id: torch.LongTensor | int
     ) -> torch.LongTensor | None:
-        if job.id not in graph.data[Graph.JOB_KEY]:
+        if key(job.id) not in graph.data[Graph.JOB_KEY].keys():
             return None
 
         prefix_op = torch.tensor(0)

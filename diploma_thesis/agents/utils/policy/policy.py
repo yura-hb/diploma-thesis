@@ -1,16 +1,15 @@
 
 import copy
-
 from abc import ABCMeta, abstractmethod
 from dataclasses import field
-from typing import TypeVar, Generic, Tuple
+from typing import TypeVar, Generic
 
-import torch
-from torch import nn
 from tensordict import TensorDict
 from tensordict.prototype import tensorclass
+from torch import nn
 
 from agents.utils import PhaseUpdatable
+from agents.utils.run_configuration import RunConfiguration
 
 State = TypeVar('State')
 Action = TypeVar('Action')
@@ -29,6 +28,9 @@ class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
 
     @abstractmethod
     def select(self, state, parameters):
+        pass
+
+    def configure(self, configuration: RunConfiguration):
         pass
 
     def clone(self):

@@ -1,8 +1,8 @@
 import os.path
 import logging
 from functools import reduce
-from typing import Dict
-from typing import List
+from typing import Dict, List
+import traceback
 
 import numpy as np
 import pandas as pd
@@ -15,7 +15,7 @@ from environment import Statistics
 from simulator import EvaluateConfiguration, EpisodicSimulator, Simulation
 from simulator.tape import TapeModel, NoMachineReward, NoWorkCenterReward
 from simulator.graph import GraphModel
-from simulator.graph.graph_model import Configuration as GraphModelConfiguration
+from simulator.graph.graph_model import Configuration as GraphRunConfiguration
 from simulator.graph.transition import No as NoTransitionModel
 from utils import task
 from workflow.candidates import from_cli as candidates_from_cli, Candidate
@@ -36,7 +36,7 @@ def __evaluate__(tournament: 'Tournament',
     candidate_output_dir = os.path.join(output_dir, 'candidates', candidate.name)
 
     graph_model = GraphModel(transition_model=NoTransitionModel(forward_transition=None, schedule_transition=None),
-                             configuration=GraphModelConfiguration(memory=1))
+                             configuration=GraphRunConfiguration(memory=1))
 
     if 'graph' in candidate.parameters:
         graph_model = GraphModel.from_cli(candidate.parameters['graph'])
@@ -55,16 +55,19 @@ def __evaluate__(tournament: 'Tournament',
 
     if not tournament.debug:
         simulations = configuration.simulations
+        result = []
 
         for simulation in simulations:
             try:
                 configuration.simulations = [simulation]
 
                 simulator.evaluate(environment=environment, config=configuration)
-            except:
-                print(f'Simulation {simulation.name} failed')
 
-        return tournament.__evaluate_criteria__(candidate, simulations, criteria, candidate_output_dir)
+                result += [simulation]
+            except:
+                print(f'Error in simulation {traceback.format_exc()}')
+
+        return tournament.__evaluate_criteria__(candidate, result, criteria, candidate_output_dir)
 
     return {}
 

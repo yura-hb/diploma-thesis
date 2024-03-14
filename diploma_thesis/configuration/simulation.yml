@@ -10,16 +10,21 @@ task:
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/machine/dqn.yml'
-      template: 'experimental/dqn_path'
+      base_path: 'configuration/mods/machine/reinforce.yml'
+      template: 'reference/hierarchical'
       mods:
 #        - 'agent/dqn/ddqn.yml'
 #        - 'agent/dqn/dueling.yml'
+#        - 'agent/dqn/prioritized.yml'
+#        - 'agent/dqn/steps/5.yml'
+#        - 'agent/dqn/noisy.yml'
+#        - 'agent/ppo/epochs/4.yml'
+        - 'util/rules/simple_rules.yml'
+#        - 'util/optimizer/grad_norm.yml'
+        - 'util/device/mps.yml'
+#        - 'util/train_schedule/on_stored_data_exclusively.yml'
 #        - 'util/agent/multi_agent.yml'
-        - 'util/rules/all_rules.yml'
-        - 'util/optimizer/grad_norm.yml'
-        - 'util/agent/multi_agent.yml'
-        - 'util/infrastructure/compile.yml'
+#        - 'util/infrastructure/compile.yml'
 
   work_center_agent:
     kind: 'static'
@@ -48,25 +53,25 @@ task:
           kind: 'complete'
 
         schedule:
-          kind: 'complete'
+          kind: 'compressed'
 
-    memory: 10000
+    memory: 100
     is_machine_set_in_work_center_connected: True
     is_work_center_set_in_shop_floor_connected: True
 
   simulator:
     kind: 'td'
     parameters:
-      memory: 3
-#      emit_trajectory: True
+      memory: 128
+      emit_trajectory: True
 
   run:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/run/run.yml'
       mods:
-        - 'n_workers/4.yml'
-        - 'timeline/no_warmup.yml'
+        - 'n_workers/1.yml'
+        - 'timeline/warmup.yml'
       nested:
         parameters:
           simulations:
@@ -82,19 +87,19 @@ task:
                   parameters:
                     mods:
                       __factory__:
-                        - [ 'duration/128.yml' ]
+                        - [ 'duration/10000.yml' ]
                         - [ 'size/jsp/10.yml' ]
-                        - [ 'utilization/80.yml' ]
+                        - [ 'utilization/80.yml', 'utilization/90.yml']
                         - [ 'initial_assignment/2.yml' ]
                     nested:
                       parameters:
                         dispatch:
                           seed: [
-                            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                            11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                            21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-                            31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-                            41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+                            0, 1, 2, 3
+#                            11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+#                            21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+#                            31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+#                            41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
 #                            51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
 #                            61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
 #                            71, 72, 73, 74, 75, 76, 77, 78, 79, 80,

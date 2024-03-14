@@ -33,13 +33,13 @@ class Storage:
 
             self.memory.store(records)
 
-    def sample(self, update_returns: bool = True):
+    def sample(self, update_returns: bool, device: torch.device):
         batch, info = self.memory.sample(return_info=True)
 
         if self.is_episodic:
-            return self.__process_episodic_batched_data__(batch, update_returns), info
+            return self.__process_episodic_batched_data__(batch, update_returns, device), info
 
-        return self.__process_batched_data__(batch, update_returns), info
+        return self.__process_batched_data__(batch, update_returns, device), info
 
     def update_priority(self, indices: torch.LongTensor, priorities: torch.FloatTensor):
         self.memory.update_priority(indices, priorities)
@@ -64,40 +64,48 @@ class Storage:
             case _:
                 raise ValueError(f'Unknown sample type: {type(sample)}')
 
-    def __process_episodic_batched_data__(self, batch, update_returns: bool):
-        if update_returns:
-            batch = [
-                [self.return_estimator.update_returns(trajectory) for trajectory in element] for element in batch
-            ]
-
+    def __process_episodic_batched_data__(self, batch, update_returns: bool, device: torch.device):
         batch = [element[0] for element in batch]
 
-        result = [torch.cat([step.view(-1) for step in trajectory], dim=0) for trajectory in batch]
-        result = torch.cat(result, dim=0)
+        if update_returns:
+            batch = [self.return_estimator.update_returns(trajectory) for trajectory in batch]
 
-        if isinstance(batch[0][0].state, GraphState) and isinstance(batch[0][0].next_state, GraphState):
-            records = reduce(lambda x, y: x + y, batch)
+        result = reduce(lambda x, y: x + y, batch, [])
 
-            result.state.graph = self.__collate_graphs__([record.state.graph for record in records])
-            result.next_state.graph = self.__collate_graphs__([record.next_state.graph for record in records])
+        return self.__merge_batched_data__(result, device)
 
-        return result
-
-    def __process_batched_data__(self, batch, update_returns: bool):
+    def __process_batched_data__(self, batch, update_returns: bool, device: torch.device):
         batch = [element[0] for element in batch]
 
         if update_returns:
             batch = self.return_estimator.update_returns(batch)
 
-        result = torch.cat([element.view(-1) for element in batch], dim=0)
+        return self.__merge_batched_data__(batch, device)
+
+
+    def __merge_batched_data__(self, batch, device):
+        batch = [element.view(-1).clone() for element in batch]
 
         if isinstance(batch[0].state, GraphState) and isinstance(batch[0].next_state, GraphState):
-            result.state.graph = self.__collate_graphs__([record.state.graph for record in batch])
-            result.next_state.graph = self.__collate_graphs__([record.next_state.graph for record in batch])
+            state_graph = []
+            next_state_graph = []
 
-        return result
+            for element in batch:
+                state_graph += [element.state.graph]
+                next_state_graph += [element.next_state.graph]
 
-    def __collate_graphs__(self, records: List[Graph]):
-        data = reduce(lambda x, y: x + y, (record.data.to_data_list() for record in records))
+                element.state.graph, element.next_state.graph = None, None
 
-        return Graph(Batch.from_data_list(data))
+            result = torch.cat(batch, dim=0)
+
+            result.state.graph = self.__collate_graphs__(state_graph, device)
+            result.next_state.graph = self.__collate_graphs__(next_state_graph, device)
+        else:
+            result = torch.cat(batch, dim=0)
+
+        return result.to(device)
+
+    def __collate_graphs__(self, records: List[Graph], device: torch.device):
+        batch = Batch.from_data_list([record[0].to_pyg_graph() for record in records]).to(device)
+
+        return batch

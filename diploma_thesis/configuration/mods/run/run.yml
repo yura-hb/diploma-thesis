@@ -4,8 +4,8 @@ kind: 'plain'
 parameters:
   timeline:
     warmup:
-      - 500
-      - 500
+      - 2000
+      - 2000
 
     duration: 10000000
 

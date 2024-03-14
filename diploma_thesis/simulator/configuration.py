@@ -17,7 +17,7 @@ class BaseConfiguration:
     def parse_base_parameters(parameters, logger):
         return dict(
             n_workers=parameters['n_workers'],
-            log_tick=parameters.get('log_tick', 10000),
+            log_tick=parameters.get('log_tick', 1000),
             simulations=simulation_from_cli(prefix=parameters.get('prefix', ''),
                                             parameters=parameters['simulations'],
                                             logger=logger)

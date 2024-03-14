@@ -1,5 +1,8 @@
 
 from typing import Dict
+
+import torch
+
 from .transition import *
 
 
@@ -74,6 +77,8 @@ class CompressedTransition(ScheduleTransition):
 
     def __remove__(self, job: Job, graph: Graph):
         for index, _ in enumerate(graph.data[Graph.MACHINE_INDEX_KEY]):
+            index = key(index)
+
             graph.data[Graph.MACHINE_KEY][index][Graph.SCHEDULED_KEY] = self.__delete_by_first_row__(
                 value=job.id,
                 tensor=graph.data[Graph.MACHINE_KEY][index][Graph.SCHEDULED_KEY]

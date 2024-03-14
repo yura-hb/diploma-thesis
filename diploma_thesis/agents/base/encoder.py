@@ -29,21 +29,23 @@ class GraphEncoder(Encoder, Generic[Input, State]):
         self.to_undirected = ToUndirected()
 
     def encode(self, parameters: Input) -> State:
+        parameters.graph = parameters.graph.to_pyg_graph()
+
         if self.is_local:
             parameters.graph = self.__localize__(parameters, parameters.graph)
 
         result = self.__encode__(parameters)
 
         if self.is_homogeneous:
-            result.graph.data = result.graph.data.to_homogeneous(node_attrs=['x'])
+            result.graph = result.graph.to_homogeneous(node_attrs=['x'])
 
-        del result.graph.data[Graph.JOB_INDEX_MAP]
-        del result.graph.data[Graph.MACHINE_INDEX_KEY]
+        del result.graph[Graph.JOB_INDEX_MAP]
+        del result.graph[Graph.MACHINE_INDEX_KEY]
 
         if self.is_undirected:
-            result.graph.data = self.to_undirected(result.graph.data)
+            result.graph = self.to_undirected(result.graph)
 
-        result.graph.data = Batch.from_data_list([result.graph.data])
+        result.graph = Graph.from_pyg_graph(result.graph)
 
         return result
 

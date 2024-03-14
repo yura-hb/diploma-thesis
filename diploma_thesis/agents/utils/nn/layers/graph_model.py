@@ -1,13 +1,12 @@
-import torch
-
-from .layer import *
-from typing import Dict, List, Tuple
 from dataclasses import dataclass
-from .graph_layer import GraphLayer
+from typing import Dict, List, Tuple
 
-from enum import StrEnum
-
+import torch
 import torch_geometric as pyg
+
+from agents.base import Graph
+from .graph_layer import GraphLayer
+from .layer import *
 
 
 class GraphModel(Layer):
@@ -41,7 +40,14 @@ class GraphModel(Layer):
 
         self.__build__()
 
-    def forward(self, batch: pyg.data.Batch) -> torch.Tensor:
+    def forward(self, graph: Graph | pyg.data.Batch) -> torch.Tensor:
+        batch: pyg.data.Batch = None
+
+        if isinstance(graph, Graph):
+            batch = graph.to_pyg_batch()
+        else:
+            batch = graph
+
         self.__configure_if_needed__(batch)
 
         if isinstance(batch, pyg.data.HeteroData):

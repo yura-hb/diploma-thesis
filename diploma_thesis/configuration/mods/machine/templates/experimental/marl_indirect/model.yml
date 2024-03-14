@@ -1,13 +1,8 @@
 
 state:
-  - kind: 'layer_norm'
+  - kind: 'partial_instance_norm'
     parameters:
-      normalized_shape: [5, 5]
-  - kind: 'flatten'
-  - kind: 'linear'
-    parameters:
-      dim: 128
-      activation: 'relu'
+      channels: 17
   - kind: 'linear'
     parameters:
       dim: 128

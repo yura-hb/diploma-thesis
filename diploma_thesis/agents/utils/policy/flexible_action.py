@@ -28,6 +28,7 @@ class FlexibleAction(Policy[Input]):
         self.action_selector = action_selector
         self.policy_estimation_method = policy_method
         self.noise_parameters = noise_parameters
+        self.run_configuration = None
 
         self.__configure__()
 
@@ -38,6 +39,20 @@ class FlexibleAction(Policy[Input]):
             if isinstance(module, PhaseUpdatable):
                 module.update(phase)
 
+    def configure(self, configuration: RunConfiguration):
+        self.run_configuration = configuration
+
+        if configuration.compile:
+            for model in [self.action_model, self.value_model]:
+                if model is not None:
+                    model.compile()
+
+        if self.action_model is not None:
+            self.action_model = self.action_model.to(configuration.device)
+
+        if self.value_model is not None:
+            self.value_model = self.value_model.to(configuration.device)
+
     def __get_values__(self, state):
         return self.value_model(state)
 
@@ -45,6 +60,9 @@ class FlexibleAction(Policy[Input]):
         return self.action_model(state)
 
     def forward(self, state: State):
+        if state.device != self.run_configuration.device:
+            state = state.to(self.run_configuration.device)
+
         actions = torch.tensor(0, dtype=torch.long)
 
         if self.action_model is not None:
@@ -59,13 +77,13 @@ class FlexibleAction(Policy[Input]):
             case PolicyEstimationMethod.INDEPENDENT:
                 return values, actions
             case PolicyEstimationMethod.DUELING_ARCHITECTURE:
-                return values, values + (actions - actions.mean(dim=1, keepdim=True))
+                return values, values + (actions - actions.mean(dim=-1, keepdim=True))
             case _:
                 raise ValueError(f"Policy estimation method {self.policy_estimation_method} is not supported")
 
     def select(self, state: State, parameters: Input) -> Record:
         values, actions = self.__call__(state)
-        values, actions = values.squeeze(), actions.squeeze()
+        values, actions = values.squeeze().cpu(), actions.squeeze().cpu()
         action, policy = self.action_selector(actions)
         action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
 

@@ -15,8 +15,8 @@ class Configuration(Configuration):
     @staticmethod
     def from_cli(parameters: Dict):
         return Configuration(
-            alpha=parameters.get('alpha', 0.6),
-            beta=parameters.get('beta', 0.4),
+            alpha=parameters.get('alpha', 0.7),
+            beta=parameters.get('beta', 0.5),
             size=parameters['size'],
             is_tensordict_storage=parameters.get('is_tensordict_storage', False),
             batch_size=parameters['batch_size'],

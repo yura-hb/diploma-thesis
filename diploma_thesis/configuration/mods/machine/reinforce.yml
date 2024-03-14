@@ -12,9 +12,6 @@ parameters:
         parameters:
           policy_method: 'independent'
 
-          value_model:
-            __model__: ''
-
           action_model:
             __model__: ''
 
@@ -29,17 +26,13 @@ parameters:
                     parameters:
                       step: 0
                   action_selector:
-                    kind: 'sample'
-                    parameters:
-                      is_distribution: False
+                    kind: 'uniform'
                 - phase:
                     kind: 'warm_up'
                     parameters:
                       step: 1
                   action_selector:
-                    kind: 'sample'
-                    parameters:
-                      is_distribution: False
+                    kind: 'uniform'
                 - phase:
                     kind: 'training'
                   action_selector:
@@ -66,7 +59,7 @@ parameters:
       memory:
         kind: 'replay'
         parameters:
-          size: 4
+          size: 8
           batch_size: 1
           prefetch: 2
 
@@ -88,5 +81,5 @@ parameters:
       return:
         kind: 'gae'
         parameters:
-          discount_factor: 0.4
-          lambda: 0.4
+          discount_factor: 0.99
+          lambda: 1.0

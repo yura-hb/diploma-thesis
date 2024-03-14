@@ -331,7 +331,10 @@ class Statistics:
         map = shop_floor.map
         work_center_history = [work_center.history for work_center in shop_floor.work_centers]
         machine_history = [machine.history for machine in shop_floor.machines]
-        production_logs = st.ProductionLogFactory().make(shop_floor)
+        try:
+            production_logs = st.ProductionLogFactory().make(shop_floor)
+        except:
+            a = 10
 
         return Statistics(shop_floor_history=deepcopy(shop_floor_history),
                           map=map,

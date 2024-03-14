@@ -16,7 +16,7 @@ class DJSPGraphEncoder(GraphStateEncoder):
 
         graph = parameters.graph
 
-        job_ids = graph.data[Graph.JOB_INDEX_MAP][:, 0].unique()
+        job_ids = graph[Graph.JOB_INDEX_MAP][:, 0].unique()
         prev_ops = 0
 
         states = []
@@ -47,8 +47,8 @@ class DJSPGraphEncoder(GraphStateEncoder):
 
             prev_ops += n_ops
 
-        states = torch.cat(states, dim=1).T
-        graph.data[Graph.OPERATION_KEY].x = states
+        states = torch.cat(states, dim=1).T  if len(states) > 0 else torch.tensor([]).view(0, 8)
+        graph[Graph.OPERATION_KEY].x = states
 
         return self.State(graph, batch_size=[])
 

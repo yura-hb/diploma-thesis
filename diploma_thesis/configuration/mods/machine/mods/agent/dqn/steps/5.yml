@@ -6,7 +6,6 @@ parameters:
       return:
         kind: 'n_step'
         parameters:
-          discount: 0.9
-          lambda_factor: 0.9
-          n: 3
-          off_policy: true
+          discount: 1.0
+          lambda_factor: 0.99
+          n: 5

@@ -49,7 +49,7 @@ class CLI:
 
         builder.with_processing_time_distribution(configuration.processing_times)
         builder.with_step_generation(configuration.permutation)
-        builder.with_uniform_due_time(configuration.due_time)
+        builder.with_due_time(configuration.due_time)
         builder.with_job_arrival_time(configuration.job_arrival_time_on_machine, configuration.n_jobs)
 
         return builder.sampler

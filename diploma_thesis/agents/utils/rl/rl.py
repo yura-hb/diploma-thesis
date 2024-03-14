@@ -1,21 +1,13 @@
 
 from abc import abstractmethod
 from enum import StrEnum
-from typing import List
 
 import pandas as pd
-import torch
 
-from agents.base.agent import TrainingSample, Trajectory, Slice
-from agents.base.state import GraphState
-from agents.utils.memory import Memory, Record
+from agents.utils.run_configuration import RunConfiguration
 from agents.utils.nn import Loss, Optimizer
 from agents.utils.policy import Policy
-from agents.utils.return_estimator import ReturnEstimator
 from utils import Loggable
-
-from torch_geometric.data import Batch
-
 from .storage import *
 
 
@@ -51,30 +43,35 @@ class RLTrainer(Loggable):
         self.optimizer = optimizer
         self.train_schedule = train_schedule
         self.return_estimator = return_estimator
+        self.run_configuration: RunConfiguration = None
 
         self._is_configured = False
         self.storage = Storage(is_episodic, memory, return_estimator)
         self.loss_cache = []
 
-    @abstractmethod
-    def configure(self, model: Policy):
+    def configure(self, model: Policy, configuration: RunConfiguration):
         self._is_configured = True
+
+        self.run_configuration = configuration
 
         if not self.optimizer.is_connected:
             self.optimizer.connect(model.parameters())
-
-    def __train__(self, model: Policy):
-        pass
 
     @property
     def is_configured(self):
         return self._is_configured
 
     def train_step(self, model: Policy):
+        if not self.is_configured:
+            return
+
         if self.train_schedule != TrainSchedule.ON_TIMELINE:
             return
 
         self.__train__(model)
+
+    def __train__(self, model: Policy):
+        pass
 
     def loss_record(self) -> pd.DataFrame:
         return pd.DataFrame(self.loss_cache)
@@ -90,16 +87,13 @@ class RLTrainer(Loggable):
 
         self.__train__(model)
 
-    def compile(self):
-        pass
-
     def clear(self):
         self.loss_cache = []
         self.storage.clear()
 
     def record_loss(self, loss: torch.Tensor, **kwargs):
         self.loss_cache += [dict(
-            value=loss.detach().item(),
+            value=loss.detach().cpu().item(),
             optimizer_step=self.optimizer.step_count,
             lr=self.optimizer.learning_rate,
             **kwargs

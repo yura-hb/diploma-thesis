@@ -19,6 +19,7 @@ class TrainingSample:
     episode_id: int
     records: List[Record]
 
+
 @dataclass
 class Slice(TrainingSample):
     pass

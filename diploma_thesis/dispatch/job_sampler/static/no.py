@@ -23,7 +23,7 @@ class No(JobSampler):
         step_idx[initial_work_center_idx] = 0
         step_idx[0] = initial_work_center_idx
 
-        job = Job(id=job_id, step_idx=step_idx, processing_times=processing_times, batch_size=[])
+        job = Job(id=job_id, step_idx=step_idx, processing_times=processing_times)
 
         event = Job.Event(kind=Job.Event.Kind.creation, moment=moment)
         job = job.with_event(event)

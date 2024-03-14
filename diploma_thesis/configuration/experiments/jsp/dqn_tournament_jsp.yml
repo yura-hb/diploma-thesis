@@ -1,16 +1,41 @@
 task:
   kind: 'tournament'
 
-  n_workers: 8
+  n_workers: 6
   name: 'static_rules'
-  output_dir: 'results/tournaments'
+  output_dir: 'results/jsp/experiments/dqn_path/tournaments/marl_indirect_test'
   store_run_statistics: False
   debug: False
 
   candidates:
     - kind: 'persisted_agents'
       parameters:
-        path: 'results/jsp/marl_direct'
+        prefix: 'dqn'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/1'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: 'ddqn'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/2'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: 'dueling'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/3'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: '3-step'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/4'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: 'prioritized'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/5'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: 'noisy'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/6'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: 'all'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/7'
     - kind: 'static'
       parameters:
         scheduling: 'all'
@@ -56,7 +81,6 @@ task:
                 timespan: 3000
                 machines_per_work_center: 1
                 work_center_count: 10
-                pre_assign_initial_jobs: True
 
               dispatch:
                 initial_job_assignment:
@@ -71,14 +95,14 @@ task:
                     processing_times: # Sampler
                       kind: 'uniform'
                       parameters:
-                        uniform: [ 10, 50 ]
+                        uniform: [ 1, 50 ]
                         noise: [ 0, 10 ]
                     permutation:
                       uneveness: 0
                     due_time: # Sampler
                       kind: 'uniform'
                       parameters:
-                        uniform: [ 0, 2 ]
+                        uniform: [ 0.5, 2 ]
                     job_arrival_time_on_machine:
                       kind: 'expected_utilization'
                       parameters:
@@ -90,11 +114,11 @@ task:
                     breakdown_arrival:
                       kind: 'exponential'
                       parameters:
-                        mean: 1000
+                        mean: 5000
                     repair_duration:
                       kind: 'uniform'
                       parameters:
-                        uniform: [ 10, 50 ]
+                        uniform: [ 10, 200 ]
 
                 seed: 32
 

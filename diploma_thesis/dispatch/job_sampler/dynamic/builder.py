@@ -37,11 +37,11 @@ class Builder:
 
         return self
 
-    def with_uniform_due_time(self, sampler: NumericSampler):
+    def with_due_time(self, sampler: NumericSampler):
         def sample(job: Job, moment: torch.FloatTensor) -> torch.FloatTensor:
             # Take mean over all processing times of the job
             weight = job.step_idx.shape[0]
-            weight *= job.processing_time_moments(reduction_strategy=JobReductionStrategy.none)[0]
+            weight *= job.processing_time_moments(reduction_strategy=JobReductionStrategy.mean)[0]
 
             tightness = 1. + sampler.sample((1,))
 

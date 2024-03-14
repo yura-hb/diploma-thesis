@@ -4,6 +4,7 @@ from typing import TypeVar, Generic
 
 from tensordict.prototype import tensorclass
 
+from agents.utils.run_configuration import RunConfiguration
 from agents.utils import Phase, PhaseUpdatable
 from agents.utils.policy import Policy, PolicyRecord
 from utils import Loggable
@@ -42,5 +43,5 @@ class DeepPolicyModel(Model[Input, State, Action, Result], PhaseUpdatable, metac
 
         self.policy.update(phase)
 
-    def compile(self):
-        self.policy.compile()
+    def configure(self, configuration: RunConfiguration):
+        self.policy.configure(configuration)

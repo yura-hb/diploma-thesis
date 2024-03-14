@@ -15,9 +15,6 @@ class No(GraphTransition):
     def remove(self, job: Job, shop_floor: ShopFloor, graph: Graph):
         pass
 
-    def flatten(self, graph: Graph):
-        return None
-
     @classmethod
     def from_cli(cls, parameters: Dict):
         return cls(None, None)

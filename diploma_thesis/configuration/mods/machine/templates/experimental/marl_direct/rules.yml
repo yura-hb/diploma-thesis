@@ -1,0 +1,10 @@
+
+rules:
+  - 'spt'
+  - 'lpt'
+  - 'lwkr'
+  - 'ms'
+  - 'mon'
+  - 'fifo'
+  - 'lifo'
+  - 'random'

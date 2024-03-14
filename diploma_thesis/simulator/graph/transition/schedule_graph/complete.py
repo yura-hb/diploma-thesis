@@ -127,6 +127,8 @@ class CompleteTransition(ScheduleTransition):
 
     def __remove_operation_record__(self, job: Job, graph: Graph):
         for machine_index, _ in enumerate(graph.data[Graph.MACHINE_INDEX_KEY]):
+            machine_index = key(machine_index)
+
             graph.data[Graph.MACHINE_KEY][machine_index][Graph.PROCESSED_KEY] = self.__delete_by_first_row__(
                 job.id, graph.data[Graph.MACHINE_KEY][machine_index][Graph.PROCESSED_KEY]
             )

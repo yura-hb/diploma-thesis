@@ -53,8 +53,12 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         for key in self.keys:
             if self.is_model_distributed:
                 self.model[key] = copy.deepcopy(base_model)
+                self.model.configure(self.configuration)
 
             self.trainer[key] = copy.deepcopy(base_trainer)
+
+        if not self.is_model_distributed:
+            self.model.configure(self.configuration)
 
     @filter(lambda self: self.phase == TrainingPhase())
     def train_step(self):
@@ -94,10 +98,7 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         result = model(state, parameters)
 
         if not self.trainer[key].is_configured:
-            self.trainer[key].configure(model.policy)
-
-        if not self.is_compiled:
-            self.compile()
+            self.trainer[key].configure(model.policy, configuration=self.configuration)
 
         return result
 
@@ -106,22 +107,3 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
             return self.model[key]
 
         return self.model
-
-    def compile(self):
-        if not self.is_configured or self.is_compiled:
-            return
-
-        if not self.configuration.compile:
-            self.is_compiled = True
-            return
-
-        for _, value in self.trainer.items():
-            value.compile()
-
-        if self.is_model_distributed:
-            for _, value in self.model.items():
-                value.compile()
-        else:
-            self.model.compile()
-
-        self.is_compiled = True

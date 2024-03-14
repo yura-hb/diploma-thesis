@@ -1,9 +1,5 @@
 
-template: &template 'reference/marl_indirect'
-
-default_params: &params
-  - 'util/optimizer/grad_norm.yml'
-  - 'util/rules/all_rules.yml'
+template: &template 'experimental/hierarchical'
 
 ##############################################################################################
 
@@ -13,18 +9,17 @@ reinforce: &reinforce
   mods:
     __factory__:
       - [ 'util/optimizer/grad_norm.yml' ]
-      - [ 'util/rules/all_rules.yml' ]
+      - [ 'util/device/mps.yml' ]
+      - [ 'util/rules/simple_rules.yml' ]
       - [
           '__none__',
-          'agent/reinforce/2.yml',
-          'agent/reinforce/3.yml',
-          'agent/reinforce/3_different_optim.yml'
+          'agent/reinforce/critics/2.yml',
         ]
-      - [
-        '__none__',
-        'util/agent/multi_agent.yml',
-        'util/agent/centralized.yml',
-      ]
+#      - [
+#        '__none__',
+#        'util/agent/multi_agent.yml',
+#        ['util/agent/centralized.yml','util/optimizer/lr_0001.yml' ],
+#      ]
       - [
         '__none__',
         'util/train_schedule/on_store.yml',
@@ -37,17 +32,17 @@ ppo: &ppo
   mods:
     __factory__:
       - [ 'util/optimizer/grad_norm.yml' ]
-      - [ 'util/rules/all_rules.yml' ]
+      - [ 'util/device/mps.yml' ]
+      - [ 'util/rules/simple_rules.yml' ]
       - [
           '__none__',
           'agent/ppo/epochs/4.yml',
-          'agent/ppo/epochs/10.yml'
         ]
-      - [
-         '__none__',
-         'util/agent/multi_agent.yml',
-         'util/agent/centralized.yml',
-      ]
+#      - [
+#         '__none__',
+#         'util/agent/multi_agent.yml',
+#         ['util/agent/centralized.yml', 'util/optimizer/lr_0001.yml'],
+#      ]
       - [
         '__none__',
         'util/train_schedule/on_store.yml',
@@ -88,7 +83,7 @@ short_single_source_run: &short_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ [ 'duration/128.yml' ] ]
+        - [ [ 'duration/256.yml' ] ]
         - [ [ 'size/jsp/10.yml' ] ]
         - [ [ 'utilization/80.yml' ] ]
         - [ [ 'initial_assignment/2.yml' ] ]
@@ -105,17 +100,7 @@ short_single_source_run: &short_single_source_run
             61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
             71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
             81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
-            91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
-            101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
-            111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
-            121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
-            131, 132, 133, 134, 135, 136, 137, 138, 139, 140,
-            141, 142, 143, 144, 145, 146, 148, 148, 149, 150,
-            151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
-            161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
-            171, 172, 173, 174, 175, 176, 177, 178, 179, 180,
-            181, 182, 183, 184, 185, 186, 187, 188, 189, 190,
-            191, 192, 193, 194, 195, 196, 197, 198, 199
+            91, 92, 93, 94, 95, 96, 97, 98, 99, 100
           ] ]
 
 
@@ -124,10 +109,10 @@ short_single_source_run: &short_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 1
-  debug: True
+  n_workers: 2
+  debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/ppo_reinforce_path/marl_indirect'
+  output_dir: 'results/jsp/experiments/ppo_reinforce_path/runs/hierarchical'
 
   tasks:
     # TD - n-step short single source
@@ -168,20 +153,29 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 32
+              memory: 96
               emit_trajectory: True
 
           graph:
             transition_model:
-              kind: 'no'
+              kind: 'base'
+              parameters:
+                forward:
+                  kind: 'complete'
+
+                schedule:
+                  kind: 'compressed'
+
+            memory: 100
+            is_machine_set_in_work_center_connected: True
+            is_work_center_set_in_shop_floor_connected: True
 
           run:
             kind: 'mod'
             parameters:
               base_path: 'configuration/mods/run/run.yml'
               mods:
-                - 'n_workers/1.yml'
-                - 'timeline/warmup.yml'
+                - 'n_workers/2.yml'
               nested:
                 parameters:
                   simulations:
@@ -196,18 +190,18 @@ task:
                         values:
         values:
           __concat__:
-            - output_dir: 'reinforce'
-              machine_agent:
-                parameters:
-                  *reinforce
-            - output_dir: 'ppo'
+#            - output_dir: '1'
+#              machine_agent:
+#                parameters:
+#                  *reinforce
+            - output_dir: '2'
               machine_agent:
                 parameters:
                   *ppo
 
           tape:
             machine_reward:
-              *reward
+              *intermediate_reward
 
           run:
             parameters:
@@ -218,7 +212,7 @@ task:
                       parameters:
                         values:
                           __concat__:
-                            - *short_single_source_run
+#                            - *short_single_source_run
                             - *long_single_source_run
 
     - kind: 'multi_value'
@@ -265,7 +259,7 @@ task:
             parameters:
               base_path: 'configuration/mods/run/run.yml'
               mods:
-                - 'n_workers/1.yml'
+                - 'n_workers/2.yml'
                 - 'timeline/warmup.yml'
               nested:
                 parameters:
@@ -281,18 +275,18 @@ task:
                         values:
         values:
           __concat__:
-            - output_dir: 'reinforce'
-              machine_agent:
-                parameters:
-                  - *reinforce
-            - output_dir: 'ppo'
+#            - output_dir: '1'
+#              machine_agent:
+#                parameters:
+#                  - *reinforce
+            - output_dir: '2'
               machine_agent:
                 parameters:
                   - *ppo
 
           tape:
             machine_reward:
-              *intermediate_reward
+              *reward
 
           run:
             parameters:

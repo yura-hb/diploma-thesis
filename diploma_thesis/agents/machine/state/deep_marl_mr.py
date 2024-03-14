@@ -116,7 +116,7 @@ class DEEPMARLMinimumRepetitionStateEncoder(StateEncoder):
             job.next_remaining_processing_time(self.reduction_strategy),
             job.slack_upon_moment(now, self.reduction_strategy),
             machine.shop_floor.average_waiting_in_next_queue(job),
-            machine.work_center_idx
+            job.current_operation_waiting_time_on_machine(now)
         ]
 
         state = self.__to_list_of_tensors__(state)

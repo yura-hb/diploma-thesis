@@ -9,11 +9,12 @@ class TDSimulator(Simulator):
     possible
     """
 
-    def __init__(self, memory: int = 100, emit_trajectory: bool = False, *args, **kwargs):
+    def __init__(self, memory: int = 100, emit_trajectory: bool = False, reset_trajectory: bool = True, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.memory = memory
         self.emit_trajectory = emit_trajectory
+        self.reset_trajectory = reset_trajectory
         self.episode = 0
 
         self.machine_queue = Queue(self.machine.is_distributed)
@@ -39,8 +40,7 @@ class TDSimulator(Simulator):
         if queue.group_len(context.shop_floor.id, key) > self.memory:
             # Pass a copy of records to avoid modification of the original
             original_records = queue.pop_group(context.shop_floor.id, key)
-            records = torch.cat([record.view(-1) for record in original_records]).clone()
-            records: List[Record] = list(records.unbind(dim=0))
+            records = [record.clone() for record in original_records]
 
             if self.emit_trajectory:
                 agent.store(key, Trajectory(episode_id=self.episode, records=records))
@@ -49,6 +49,7 @@ class TDSimulator(Simulator):
             else:
                 agent.store(key, Slice(episode_id=context.shop_floor.id, records=records))
 
+            if not self.emit_trajectory or not self.reset_trajectory:
                 queue.store_group(context.shop_floor.id, key, original_records[1:])
 
         return
@@ -57,4 +58,5 @@ class TDSimulator(Simulator):
     def from_cli(parameters, *args, **kwargs) -> Simulator:
         return TDSimulator(parameters.get('memory', 1), 
                            parameters.get('emit_trajectory', False),
+                           parameters.get('reset_trajectory', True),
                            *args, **kwargs)

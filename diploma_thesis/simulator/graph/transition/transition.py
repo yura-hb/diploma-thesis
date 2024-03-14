@@ -3,10 +3,12 @@ from typing import Dict
 
 import torch
 
+from tensordict import TensorDict
 from agents.base import Graph
 from environment import Job, ShopFloor
 from .forward_graph import ForwardTransition
 from .schedule_graph import ScheduleTransition
+from .utils import key
 
 
 class GraphTransition:
@@ -16,7 +18,7 @@ class GraphTransition:
         self.schedule_transition = schedule_transition
 
     def append(self, job: Job, shop_floor: ShopFloor, graph: Graph):
-        if Graph.JOB_KEY not in graph.data:
+        if Graph.JOB_KEY not in graph.data.keys():
             self.__build_initial_graph__(graph, shop_floor)
 
         self.__append_job__(job, graph)
@@ -59,7 +61,9 @@ class GraphTransition:
                 torch.vstack([machine.work_center_idx, machine.machine_idx])
             ], dim=1)
 
-            graph.data[Graph.MACHINE_KEY][index] = dict()
+            index = key(index)
+
+            graph.data[Graph.MACHINE_KEY][index] = TensorDict({}, batch_size=[])
 
             t = torch.tensor([], dtype=torch.int)
 
@@ -79,24 +83,30 @@ class GraphTransition:
         for step_id, work_center_id in enumerate(job.step_idx):
             operations_count += len(job.processing_times[step_id])
 
-        graph.data[Graph.JOB_KEY][job.id] = dict()
-        graph.data[Graph.JOB_KEY][job.id]['job_id'] = job.id
-        graph.data[Graph.JOB_KEY][job.id][Graph.FORWARD_GRAPH_KEY] = self.forward_transition.construct(job)
+        job_id = key(job.id)
+
+        graph.data[Graph.JOB_KEY][job_id] = dict()
+        graph.data[Graph.JOB_KEY][job_id]['job_id'] = job.id
+        graph.data[Graph.JOB_KEY][job_id][Graph.FORWARD_GRAPH_KEY] = self.forward_transition.construct(job)
 
     # Update
 
     def __update_next_operation_edges_on_dispatch__(self, job: Job, graph: Graph):
-        if job.id not in graph.data[Graph.JOB_KEY]:
+        job_id = key(job.id)
+
+        if job_id not in graph.data[Graph.JOB_KEY].keys():
             return
 
-        graph.data[Graph.JOB_KEY][job.id][Graph.FORWARD_GRAPH_KEY] = self.forward_transition.construct(job)
+        graph.data[Graph.JOB_KEY][job_id][Graph.FORWARD_GRAPH_KEY] = self.forward_transition.construct(job)
 
     # Remove
 
     @classmethod
     def __remove_job__(cls, job: Job, graph: Graph):
-        if job.id in graph.data[Graph.JOB_KEY]:
-            graph.data[Graph.JOB_KEY].pop(job.id)
+        job_id = key(job.id)
+
+        if job_id in graph.data[Graph.JOB_KEY].keys():
+            graph.data[Graph.JOB_KEY].pop(job_id)
             return
         
         raise ValueError(f'Job with id {job.id} not found in graph')

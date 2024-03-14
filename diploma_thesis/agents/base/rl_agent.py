@@ -1,39 +1,23 @@
-import torch
-
 from agents.utils import TrainingPhase
+from agents.utils.run_configuration import RunConfiguration
 from agents.utils.rl import RLTrainer
 from utils import filter
 from .agent import *
 from .model import DeepPolicyModel
 
-from dataclasses import dataclass
-
-
-@dataclass
-class Configuration:
-    compile: bool = False
-
-    @staticmethod
-    def from_cli(parameters):
-        return Configuration(
-            compile=parameters.get('compile', False)
-        )
-
 
 class RLAgent(Generic[Key], Agent[Key]):
 
-    def __init__(self,
-                 model: DeepPolicyModel,
-                 state_encoder: StateEncoder,
-                 trainer: RLTrainer,
-                 configuration: Configuration):
-        super().__init__(model, state_encoder)
-
-        self.is_compiled = False
+    def __init__(
+            self, model: DeepPolicyModel, encoder: StateEncoder, trainer: RLTrainer, configuration: RunConfiguration
+    ):
+        super().__init__(model, encoder)
 
         self.configuration = configuration
         self.model: DeepPolicyModel = model
         self.trainer = trainer
+
+        self.model.configure(configuration)
 
     def with_logger(self, logger: logging.Logger):
         super().with_logger(logger)
@@ -70,27 +54,6 @@ class RLAgent(Generic[Key], Agent[Key]):
         result = super().schedule(key, parameters)
 
         if not self.trainer.is_configured:
-            self.trainer.configure(self.model.policy)
-
-        if not self.is_compiled:
-            self.compile()
+            self.trainer.configure(self.model.policy, configuration=self.configuration)
 
         return result
-
-    def __setstate__(self, state):
-        self.__dict__ = state
-
-        self.compile()
-
-    def compile(self):
-        if not self.configuration.compile:
-            self.is_compiled = True
-            return
-
-        if self.is_compiled:
-            return
-
-        self.trainer.compile()
-        self.model.compile()
-
-        self.is_compiled = True

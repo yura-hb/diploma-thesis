@@ -55,7 +55,7 @@ parameters:
         parameters:
           size: 8192
           batch_size: 128
-          prefetch: 8
+          prefetch: 2
 
       loss:
         kind: 'mse'

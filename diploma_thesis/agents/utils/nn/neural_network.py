@@ -96,9 +96,7 @@ class NeuralNetwork(nn.Module):
             encoded_state = self.state_encoder(torch.atleast_2d(state.state))
 
         if isinstance(state, GraphState) and self.graph_encoder is not None:
-            data = state.graph.data
-
-            encoded_graph = self.graph_encoder(data)
+            encoded_graph = self.graph_encoder(state.graph)
 
         hidden = self.merge(encoded_state, encoded_graph)
         output = self.output(hidden)

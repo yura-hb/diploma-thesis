@@ -42,12 +42,10 @@ class PPO(RLTrainer):
     def is_episodic(self):
         return True
 
-    def configure(self, model: Policy):
-        super().configure(model)
-
     def __train__(self, model: Policy):
         try:
-            batch, info = self.storage.sample(update_returns=self.configuration.update_advantages)
+            batch, info = self.storage.sample(update_returns=self.configuration.update_advantages,
+                                              device=self.run_configuration.device)
         except NotReadyException:
             return
 
@@ -57,20 +55,21 @@ class PPO(RLTrainer):
             sub_batch = batch[mask]
 
             if isinstance(batch.state, GraphState):
-                sub_batch.state.graph = Graph(Batch.from_data_list(batch.state.graph.data[mask]))
-                sub_batch.next_state.graph = Graph(Batch.from_data_list(batch.next_state.graph.data[mask]))
+                sub_batch.state.graph = Batch.from_data_list(batch.state.graph[mask]).to(self.run_configuration.device)
+                sub_batch.next_state.graph = Batch.from_data_list(batch.next_state.graph[mask]).to(self.run_configuration.device)
 
             self.__step__(sub_batch, model)
 
     def __step__(self, batch: Record, model: Policy):
+        range = torch.arange(batch.shape[0], device=self.run_configuration.device)
         advantages = batch.info[Record.ADVANTAGE_KEY]
         value, logits = model(batch.state)
-        value = value[torch.arange(batch.shape[0]), batch.action]
+        value = value[range, batch.action]
         distribution = torch.distributions.Categorical(logits=logits)
 
         loss = 0
 
-        action_probs = batch.info[Record.POLICY_KEY][torch.arange(batch.shape[0]), batch.action.view(-1)]
+        action_probs = batch.info[Record.POLICY_KEY][range, batch.action.view(-1)]
 
         weights = distribution.log_prob(batch.action).view(-1) - torch.log(action_probs)
         weights = torch.exp(weights)

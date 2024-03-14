@@ -6,8 +6,9 @@ import torch
 
 class JSPStatic(InitialJobAssignment):
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, due_ratio: float = 4):
         self.path = path
+        self.due_ratio = due_ratio
 
     def make_jobs(self, shop_floor: ShopFloor, sampler: JobSampler):
         with open(self.path, 'r') as f:
@@ -32,11 +33,11 @@ class JSPStatic(InitialJobAssignment):
             job.processing_times = torch.tensor(processing_times, dtype=torch.float32)
             job.processing_times = torch.atleast_2d(job.processing_times).T
 
-            job.with_due_at(job.processing_times.sum() * 1.5)
+            job.with_due_at(job.processing_times.sum() * self.due_ratio)
 
             yield job
 
     @staticmethod
     def from_cli(parameters: Dict):
-        return JSPStatic(path=parameters['path'])
+        return JSPStatic(path=parameters['path'], due_ratio=parameters.get('due_ratio', 4))
 

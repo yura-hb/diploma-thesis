@@ -1,14 +1,16 @@
 from dataclasses import dataclass
 from typing import Dict
 
-import torch
-import torch_geometric as pyg
+from tensordict import TensorDict
 
 from agents.base import Graph
 from environment import Job, Delegate, Context, WorkCenter, Machine
 from utils import OrderedSet
 from .transition import GraphTransition, from_cli
+from .transition.utils import key, unkey
 from .util import Encoder, EncoderConfiguration
+
+
 
 
 @dataclass
@@ -27,13 +29,12 @@ class Configuration(EncoderConfiguration):
 
 
 class GraphModel(Delegate):
-
     @dataclass
     class Record:
         graph: Graph
         previous_encoded_graph: Graph | None
         did_change_jobs: bool
-        job_operation_map: Dict[torch.LongTensor, Dict[Graph.OperationKey, int]]
+        job_operation_map: Dict[str, Dict[Graph.OperationKey, int]]
         completed_job_ids: OrderedSet
         n_ops: int
 
@@ -44,7 +45,7 @@ class GraphModel(Delegate):
         self.transition_model = transition_model
         self.encoder = Encoder(configuration)
         self.cache = {}
-        self.job_operation_map: Dict[int, GraphModel.Record] = dict()
+        self.job_operation_map: Dict[str, GraphModel.Record] = dict()
 
     def graph(self, context: Context) -> Graph | None:
         record = self.cache.get(context.shop_floor.id)
@@ -73,14 +74,13 @@ class GraphModel(Delegate):
         record.previous_encoded_graph = new_encoded_graph
 
         new_encoded_graph_data = new_encoded_graph.data
+        new_encoded_graph_data = self.__trim_empty_records__(new_encoded_graph_data)
 
-        self.__trim_empty_records__(new_encoded_graph_data)
-
-        return Graph(data=new_encoded_graph_data.clone())
+        return Graph(data=new_encoded_graph_data, batch_size=[])
 
     def did_start_simulation(self, context: Context):
         self.cache[context.shop_floor.id] = GraphModel.Record(
-            graph=Graph(),
+            graph=Graph(batch_size=[]),
             previous_encoded_graph=None,
             did_change_jobs=False,
             job_operation_map=dict(),
@@ -116,13 +116,15 @@ class GraphModel(Delegate):
         sid = context.shop_floor.id
 
         if sid in self.cache:
-            self.cache[sid].completed_job_ids.add(job.id)
+            job_id = key(job.id)
+            self.cache[sid].completed_job_ids.add(job_id)
 
             if len(self.cache[sid].completed_job_ids) > self.configuration.memory:
                 job_id = self.cache[sid].completed_job_ids.pop(0)
+                job_id = unkey(job_id, is_tensor=True)
                 job = context.shop_floor.job(job_id)
 
-                self.cache[sid].graph = self.transition_model.remove(job, context.shop_floor, self.cache[sid])
+                self.cache[sid].graph = self.transition_model.remove(job, context.shop_floor, self.cache[sid].graph)
                 self.cache[sid].did_change_jobs = True
                 self.__remove_job_from_operation_map__(context, job)
 
@@ -134,45 +136,55 @@ class GraphModel(Delegate):
 
     def __append_to_job_operation_map__(self, context: Context, job: Job):
         sid = context.shop_floor.id
+        job_id = key(job.id)
 
-        self.cache[sid].job_operation_map[job.id] = dict()
+        self.cache[sid].job_operation_map[job_id] = dict()
 
         for step_id, work_center_id in enumerate(job.step_idx):
             for machine_id in range(len(job.processing_times[step_id])):
                 operation_key = Graph.OperationKey(
-                    job_id=job.id.item(), work_center_id=work_center_id.item(), machine_id=machine_id
+                    job_id=job_id, work_center_id=work_center_id.item(), machine_id=machine_id
                 )
 
-                self.cache[sid].job_operation_map[job.id][operation_key] = self.cache[sid].n_ops
+                self.cache[sid].job_operation_map[job_id][operation_key] = self.cache[sid].n_ops
                 self.cache[sid].n_ops += 1
 
     def __remove_job_from_operation_map__(self, context: Context, job: Job):
         sid = context.shop_floor.id
+        job_id = key(job.id)
 
-        n_removed_ops = len(self.cache[sid].job_operation_map.pop(job.id))
+        n_removed_ops = len(self.cache[sid].job_operation_map.pop(job_id))
         self.cache[sid].n_ops -= n_removed_ops
-        self.cache[sid].completed_job_ids.discard(job.id)
+        self.cache[sid].completed_job_ids.discard(job_id)
 
         keys = list(self.cache[sid].job_operation_map)
         keys = sorted(keys)
 
-        for key in keys:
+        for key_ in keys:
             # All jobs arrive at shop floor in ordered manner
-            if key < job.id:
+            if unkey(key_) < job.id:
                 continue
 
-            self.cache[sid].job_operation_map[key] = {
-                k: v - n_removed_ops for k, v in self.cache[sid].job_operation_map[key].items()
+            self.cache[sid].job_operation_map[key_] = {
+                k: v - n_removed_ops for k, v in self.cache[sid].job_operation_map[key_].items()
             }
 
-    def __trim_empty_records__(self, data: pyg.data.HeteroData):
-        for key, store in data.node_items():
-            if 'x' in store and store['x'].numel() == 0:
-                del data[key]
+    @staticmethod
+    def __trim_empty_records__(data: TensorDict):
+        result = data.clone()
 
-                for edge, _ in data.edge_items():
-                    if key in edge:
-                        del data[edge]
+        for key, store in data.items():
+            if (isinstance(store, TensorDict) and
+                    key in result.keys() and
+                    Graph.X in store.keys() and
+                    store[Graph.X].numel() == 0):
+                del result[key]
+
+                for key_ in data.keys(include_nested=True):
+                    if key in key_ and key_ in result.keys(include_nested=True):
+                        del result[key_]
+
+        return result
 
     @staticmethod
     def from_cli(parameters: Dict) -> 'GraphModel':

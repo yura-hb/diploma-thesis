@@ -15,9 +15,8 @@ class HierarchicalGraphEncoder(GraphStateEncoder):
             raise ValueError("Graph is not provided")
 
         graph = parameters.graph
-        machines_per_work_center = parameters.machine.shop_floor.configuration.configuration.machines_per_work_center
 
-        job_ids = graph.data[Graph.JOB_INDEX_MAP][:, 0].unique()
+        job_ids = graph[Graph.JOB_INDEX_MAP][:, 0].unique()
 
         states = []
 
@@ -27,7 +26,7 @@ class HierarchicalGraphEncoder(GraphStateEncoder):
 
             for j in range(job.current_step_idx, len(job.step_idx)):
                 if j == 0:
-                    moment = parameters.machine.shop_floor.now
+                    moment = 0
                 else:
                     moment = completions_times[j-1].max()
 
@@ -41,8 +40,8 @@ class HierarchicalGraphEncoder(GraphStateEncoder):
                 status.view(-1)
             ])]
 
-        states = torch.cat(states, dim=1).T
-        graph.data[Graph.OPERATION_KEY].x = states
+        states = torch.cat(states, dim=1).T if len(states) > 0 else torch.tensor([]).view(0, 2)
+        graph[Graph.OPERATION_KEY].x = states
 
         return self.State(graph, batch_size=[])
 

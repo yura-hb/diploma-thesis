@@ -1,6 +1,7 @@
 from typing import Dict
 
-from agents.base.marl_agent import MARLAgent, Configuration
+from agents.base.marl_agent import MARLAgent
+from agents.utils.run_configuration import RunConfiguration
 from agents.utils.rl import from_cli as rl_trainer_from_cli
 from environment import MachineKey, ShopFloor
 from .model import DeepPolicyMachineModel, from_cli as model_from_cli
@@ -19,7 +20,7 @@ class MARLMachine(MARLAgent[MachineKey]):
         model = model_from_cli(parameters['model'])
         encoder = state_encoder_from_cli(parameters['encoder'])
         trainer = rl_trainer_from_cli(parameters['trainer'])
-        configuration = Configuration.from_cli(parameters)
+        configuration = RunConfiguration.from_cli(parameters)
 
         is_model_distributed = parameters.get('is_model_distributed', True)
 

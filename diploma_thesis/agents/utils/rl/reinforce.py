@@ -41,17 +41,18 @@ class Reinforce(RLTrainer):
         self.is_critics_configured = False
         self.configuration = configuration
 
-    def configure(self, model: Policy):
-        super().configure(model)
+    def configure(self, model: Policy, configuration: RunConfiguration):
+        super().configure(model, configuration)
 
         layer = Linear(1, 'none', dropout=None)
 
         for critic in self.configuration.critics:
             critic.neural_network.append_output_layer(layer)
+            critic.neural_network = critic.neural_network.to(configuration.device)
 
     def __train__(self, model: Policy):
         try:
-            batch, index = self.storage.sample(update_returns=False)
+            batch, index = self.storage.sample(update_returns=False, device=self.run_configuration.device)
         except NotReadyException:
             return
 
@@ -89,13 +90,6 @@ class Reinforce(RLTrainer):
             critic_loss.backward()
             critic.optimizer.step()
             self.record_loss(critic_loss, key=f'critic_{index}')
-
-    def compile(self):
-        if not self.is_configured:
-            return
-
-        for critic in self.critics:
-            critic.neural_network.compile()
 
     @property
     def critics(self):
