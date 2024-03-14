@@ -37,11 +37,7 @@ class GraphTransition:
         return graph
 
     def remove(self, job: Job, shop_floor: ShopFloor, graph: Graph):
-        try:
-            self.__remove_job__(job, graph)
-        except:
-            return graph
-
+        self.__remove_job__(job, graph)
         self.schedule_transition.remove(job, graph)
 
         return graph

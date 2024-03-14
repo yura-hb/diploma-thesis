@@ -24,7 +24,7 @@ class DeepQTrainer(RLTrainer):
     def __init__(self, configuration: Configuration, *args, **kwargs):
         super().__init__(*args, is_episodic=False, **kwargs)
 
-        self._target_models: AveragedModel | None = None
+        self._target_model: AveragedModel | None = None
         self.configuration = configuration
 
     def configure(self, model: Policy, configuration: RunConfiguration):
@@ -79,11 +79,17 @@ class DeepQTrainer(RLTrainer):
     def target_model(self):
         return self._target_model.module
 
-    def compile(self):
-        if not self.is_configured:
-            return
+    def state_dict(self):
+        state_dict = super().state_dict()
 
-        self.target_model.compile()
+        state_dict.update(dict(target_model=self.target_model.state_dict()))
+
+        return state_dict
+
+    def load_state_dict(self, state_dict: dict):
+        super().load_state_dict(state_dict)
+
+        self.target_model.load_state_dict(state_dict['target_model'])
 
     @classmethod
     def from_cli(cls,

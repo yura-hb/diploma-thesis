@@ -156,7 +156,7 @@ class Encoder:
             s[Graph.EDGE_INDEX] = edges
 
     def __update_forward_graph__(
-            self, result: Graph, source: Graph, shop_floor: ShopFloor, job_operation_map: JOB_OPERATION_MAP_TYPE
+        self, result: Graph, source: Graph, shop_floor: ShopFloor, job_operation_map: JOB_OPERATION_MAP_TYPE
     ):
         self.__reset_forward_graph__(result)
 
@@ -169,7 +169,7 @@ class Encoder:
         n_groups = 0
 
         for job_id in job_ids:
-            if job_id not in job_operation_map:
+            if job_id not in job_operation_map.keys():
                 continue
 
             job = shop_floor.job(unkey(job_id, is_tensor=True))
@@ -281,6 +281,6 @@ class Encoder:
 
     def __get_job_ids__(self, graph) -> [torch.Tensor]:
         job_ids = graph.data[Graph.JOB_KEY].keys()
-        job_ids = sorted(job_ids)
+        job_ids = sorted(job_ids, key=lambda x: unkey(x))
 
         return job_ids

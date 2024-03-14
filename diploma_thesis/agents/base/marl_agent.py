@@ -18,18 +18,6 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         self.is_model_distributed = is_model_distributed
         self.keys = None
 
-    @property
-    def is_trainable(self):
-        return True
-
-    @property
-    def is_distributed(self):
-        return True
-
-    @abstractmethod
-    def iterate_keys(self, shop_floor: ShopFloor):
-        pass
-
     def setup(self, shop_floor: ShopFloor):
         if self.is_configured:
             is_key_set_equal = self.keys == list(self.iterate_keys(shop_floor))
@@ -59,6 +47,28 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
 
         if not self.is_model_distributed:
             self.model.configure(self.configuration)
+
+    def schedule(self, key: Key, parameters):
+        state = self.encode_state(parameters)
+        model = self.__model_for_key__(key)
+        result = model(state, parameters)
+
+        if not self.trainer[key].is_configured:
+            self.trainer[key].configure(model.policy, configuration=self.configuration)
+
+        return result
+
+    @property
+    def is_trainable(self):
+        return True
+
+    @property
+    def is_distributed(self):
+        return True
+
+    @abstractmethod
+    def iterate_keys(self, shop_floor: ShopFloor):
+        pass
 
     @filter(lambda self: self.phase == TrainingPhase())
     def train_step(self):
@@ -92,18 +102,48 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         for key in self.keys:
             self.trainer[key].clear()
 
-    def schedule(self, key: Key, parameters):
-        state = self.encode_state(parameters)
-        model = self.__model_for_key__(key)
-        result = model(state, parameters)
-
-        if not self.trainer[key].is_configured:
-            self.trainer[key].configure(model.policy, configuration=self.configuration)
-
-        return result
-
     def __model_for_key__(self, key: Key):
         if self.is_model_distributed:
             return self.model[key]
 
         return self.model
+
+    def state_dict(self):
+        state_dict = dict(is_configured=self.is_configured, keys=self.keys)
+
+        if self.is_configured:
+            model = {key: model.state_dict() for key, model in self.model.item()} \
+                     if self.is_model_distributed else self.model.state_dict()
+
+            state_dict.update(dict(
+                model=model,
+                trainer={key: trainer.state_dict() for key, trainer in self.trainer.items()}
+            ))
+
+            return state_dict
+
+        state_dict.update(
+            model=self.model.state_dict(),
+            trainer=self.trainer.state_dict()
+        )
+
+        return state_dict
+
+    def load_state_dict(self, state_dict: dict):
+        self.is_configured = state_dict['is_configured']
+        self.keys=self.keys
+
+        if self.is_configured:
+            for key in self.keys:
+                if self.is_model_distributed:
+                    self.model[key].load_state_dict(state_dict['model'][key])
+
+                self.trainer[key].load_state_dict(state_dict['trainer'][key])
+
+            if not self.is_model_distributed:
+                self.model.load_state_dict(state_dict['model'])
+
+            return
+
+        self.model.load_state_dict(state_dict['model'])
+        self.trainer.load_state_dict(state_dict['trainer'])

@@ -98,3 +98,9 @@ class RLTrainer(Loggable):
             lr=self.optimizer.learning_rate,
             **kwargs
         )]
+
+    def state_dict(self):
+        return dict(optimizer=self.optimizer.state_dict())
+
+    def load_state_dict(self, state_dict: dict):
+        self.optimizer.load_state_dict(state_dict['optimizer'])

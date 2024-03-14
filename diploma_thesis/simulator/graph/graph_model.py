@@ -153,16 +153,21 @@ class GraphModel(Delegate):
         sid = context.shop_floor.id
         job_id = key(job.id)
 
-        n_removed_ops = len(self.cache[sid].job_operation_map.pop(job_id))
-        self.cache[sid].n_ops -= n_removed_ops
+        removed_record = self.cache[sid].job_operation_map[job_id]
+        min_operation_key = min(removed_record.values())
+        n_removed_ops = len(removed_record)
+
+        del self.cache[sid].job_operation_map[job_id]
+        self.cache[sid].n_ops -= len(removed_record)
         self.cache[sid].completed_job_ids.discard(job_id)
 
         keys = list(self.cache[sid].job_operation_map)
         keys = sorted(keys)
 
         for key_ in keys:
-            # All jobs arrive at shop floor in ordered manner
-            if unkey(key_) < job.id:
+            current_min_operation_key = min(self.cache[sid].job_operation_map[key_].values())
+
+            if current_min_operation_key < min_operation_key:
                 continue
 
             self.cache[sid].job_operation_map[key_] = {

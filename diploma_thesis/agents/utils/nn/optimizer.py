@@ -30,6 +30,7 @@ class Optimizer:
         self.step_idx = 0
         self._optimizer: torch.optim.Optimizer = None
         self._scheduler: torch.optim.lr_scheduler.LRScheduler = None
+        self.state_dict_ = None
 
     def connect(self, parameters):
         parameters = list(parameters)
@@ -38,6 +39,11 @@ class Optimizer:
         self._scheduler = self.__make_scheduler__()
 
         self.__register_grad_norm_hooks__(parameters)
+
+        if self.state_dict_ is not None:
+            self.load_state_dict(self.state_dict_)
+
+            del self.state_dict_
 
     def zero_grad(self):
         self._optimizer.zero_grad()
@@ -123,6 +129,25 @@ class Optimizer:
                     p.register_hook(lambda grad: torch.clamp(grad, -value, value))
             case _:
                 raise ValueError('Unsupported value for grad norm')
+
+    def state_dict(self):
+        return dict(
+            optimizer=self._optimizer.state_dict(),
+            scheduler=self._scheduler.state_dict() if self._scheduler is not None else None,
+            step_idx=self.step_idx
+        )
+
+    def load_state_dict(self, state_dict: dict):
+        if self._optimizer is None:
+            self.state_dict_ = state_dict
+            return
+
+        self._optimizer.load_state_dict(state_dict['optimizer'])
+
+        if scheduler_state := state_dict['scheduler']:
+            self._scheduler.load_state_dict(scheduler_state)
+
+        self.step_idx = state_dict['step_idx']
 
     @staticmethod
     def from_cli(parameters):

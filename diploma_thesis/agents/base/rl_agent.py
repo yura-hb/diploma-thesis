@@ -19,6 +19,14 @@ class RLAgent(Generic[Key], Agent[Key]):
 
         self.model.configure(configuration)
 
+    def schedule(self, key, parameters):
+        result = super().schedule(key, parameters)
+
+        if not self.trainer.is_configured:
+            self.trainer.configure(self.model.policy, configuration=self.configuration)
+
+        return result
+
     def with_logger(self, logger: logging.Logger):
         super().with_logger(logger)
 
@@ -50,10 +58,12 @@ class RLAgent(Generic[Key], Agent[Key]):
     def clear_memory(self):
         self.trainer.clear()
 
-    def schedule(self, key, parameters):
-        result = super().schedule(key, parameters)
+    def state_dict(self):
+        return dict(
+            model=self.model.state_dict(),
+            trainer=self.trainer.state_dict()
+        )
 
-        if not self.trainer.is_configured:
-            self.trainer.configure(self.model.policy, configuration=self.configuration)
-
-        return result
+    def load_state_dict(self, state_dict: dict):
+        self.model.load_state_dict(state_dict['model'])
+        self.trainer.load_state_dict(state_dict['trainer'])

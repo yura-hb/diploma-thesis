@@ -2,9 +2,10 @@ task:
   kind: 'task'
 
   name: 'test'
-  output_dir: 'tmp'
+  output_dir: 'results/jsp/experiments/ppo_reinforce_path/test'
   log_stdout: True
   log_run: True
+  debug: True
   store_run_statistics: False
 
   machine_agent:

@@ -2,6 +2,7 @@ import os
 import yaml
 from typing import Dict, List
 
+import agents
 from utils.persistence import load
 from .template import Template, Candidate
 
@@ -33,8 +34,11 @@ class PersistedAgent(Template):
                 parameters = yaml.load(f, Loader=yaml.FullLoader)
 
             try:
-                machine = load(machine_file)
-                work_center = load(work_center_file)
+                machine = agents.machine_from_cli(parameters['machine_agent'])
+                work_center = agents.work_center_from_cli(parameters['work_center_agent'])
+
+                machine.load_state_dict(load(machine_file))
+                work_center.load_state_dict(load(work_center_file))
 
                 result += [Candidate(prefix + '_' + file,
                                      parameters=parameters,

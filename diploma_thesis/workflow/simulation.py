@@ -79,7 +79,7 @@ class Simulation(Workflow):
         config = run_configuration_from_cli(config, logger=logger)
 
         if self.is_debug:
-            config.timeline.duration = 4096
+            config.timeline.duration = 2048
             config.n_workers = 1
             config.timeline.warm_up_phases = [0]
 
@@ -196,10 +196,10 @@ class Simulation(Workflow):
     @staticmethod
     def __store_agents__(simulator: Simulator, output_dir: str):
         machine_path = os.path.join(output_dir, 'machine.pt')
-        save(obj=simulator.machine, path=machine_path)
+        save(obj=simulator.machine.state_dict(), path=machine_path)
 
         work_center_path = os.path.join(output_dir, 'work_center.pt')
-        save(obj=simulator.work_center, path=work_center_path)
+        save(obj=simulator.work_center.state_dict(), path=work_center_path)
 
     @staticmethod
     def __process_rl_agents__(simulator: Simulator, output_dir: str):

@@ -30,6 +30,12 @@ class Model(Loggable, Generic[Input, State, Action, Result], metaclass=ABCMeta):
     def compile(self):
         pass
 
+    def state_dict(self):
+        return dict()
+
+    def load_state_dict(self, state_dict: dict):
+        pass
+
 
 class DeepPolicyModel(Model[Input, State, Action, Result], PhaseUpdatable, metaclass=ABCMeta):
 
@@ -45,3 +51,9 @@ class DeepPolicyModel(Model[Input, State, Action, Result], PhaseUpdatable, metac
 
     def configure(self, configuration: RunConfiguration):
         self.policy.configure(configuration)
+
+    def state_dict(self):
+        return self.policy.state_dict()
+
+    def load_state_dict(self, state_dict: dict):
+        self.policy.load_state_dict(state_dict)

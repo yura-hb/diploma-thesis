@@ -81,6 +81,12 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
     def store(self, key: Key, sample: TrainingSample):
         pass
 
+    def state_dict(self):
+        pass
+
+    def load_state_dict(self, state_dict: dict):
+        pass
+
     def schedule(self, key: Key, parameters: Input) -> Model.Record:
         state = self.encode_state(parameters)
 

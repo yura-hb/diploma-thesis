@@ -95,6 +95,27 @@ class Reinforce(RLTrainer):
     def critics(self):
         return self.configuration.critics
 
+    def state_dict(self):
+        state_dict = super().state_dict()
+
+        state_dict.update(
+            dict(
+                critics=[dict(
+                    neural_network=critic.neural_network.state_dict(),
+                    optimizer=critic.optimizer.state_dict()
+                ) for critic in self.configuration.critics]
+            )
+        )
+
+        return state_dict
+
+    def load_state_dict(self, state_dict: dict):
+        super().load_state_dict(state_dict)
+
+        for critic, parameters in zip(self.configuration.critics, state_dict['critics']):
+            critic.neural_network.load_state_dict(parameters['neural_network'])
+            critic.optimizer.load_state_dict(parameters['optimizer'])
+
     @classmethod
     def from_cli(cls,
                  parameters: Dict,
