@@ -5,4 +5,4 @@ encoder:
   parameters:
     is_homogeneous: True
     is_undirected: True
-    is_local: False
+    is_local: True

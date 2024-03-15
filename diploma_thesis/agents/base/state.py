@@ -7,7 +7,6 @@ from tensordict import TensorDictBase, TensorDict
 from tensordict.prototype import tensorclass
 
 
-
 @tensorclass
 class Graph:
     MACHINE_KEY = "machine"

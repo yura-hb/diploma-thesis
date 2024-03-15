@@ -15,6 +15,7 @@ class Configuration:
     policy_step_ratio: float
     entropy_regularization: float
     update_advantages: bool
+    rollback_ratio: float
     epochs: int
 
     @staticmethod
@@ -25,6 +26,7 @@ class Configuration:
             policy_step_ratio=parameters.get('policy_step_ratio', 1.0),
             entropy_regularization=parameters.get('entropy_regularization', 0.0),
             update_advantages=parameters.get('update_advantages', True),
+            rollback_ratio=parameters.get('rollback_ratio', 0.1),
             epochs=parameters.get('epochs', 1)
         )
 
@@ -66,8 +68,13 @@ class PPO(RLTrainer):
         weights = distribution.log_prob(batch.action).view(-1) - torch.log(action_probs)
         weights = torch.exp(weights)
 
-        ratio = self.configuration.policy_step_ratio
-        clipped_weights = torch.clamp(weights, 1 - ratio, 1 + ratio)
+        step = self.configuration.policy_step_ratio
+        phi = self.configuration.rollback_ratio
+        rollback_value = - self.configuration.rollback_ratio * weights
+
+        clipped_weights = torch.clamp(weights,
+                                      rollback_value + (1 + phi) * (1 - step),
+                                      rollback_value + (1 + phi) * (1 + step))
 
         advantages = torch.min(weights * advantages, clipped_weights * advantages)
 
@@ -96,3 +103,4 @@ class PPO(RLTrainer):
                    loss=loss,
                    return_estimator=return_estimator,
                    train_schedule=schedule)
+

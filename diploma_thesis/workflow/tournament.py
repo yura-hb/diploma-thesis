@@ -11,6 +11,7 @@ import tqdm
 from joblib import Parallel, delayed
 from tabulate import tabulate
 
+from tqdm import tqdm
 from environment import Statistics
 from simulator import EvaluateConfiguration, EpisodicSimulator, Simulation
 from simulator.tape import TapeModel, NoMachineReward, NoWorkCenterReward
@@ -18,6 +19,7 @@ from simulator.graph import GraphModel
 from simulator.graph.graph_model import Configuration as GraphRunConfiguration
 from simulator.graph.transition import No as NoTransitionModel
 from utils import task
+from utils import chunked
 from workflow.candidates import from_cli as candidates_from_cli, Candidate
 from workflow.criterion import from_cli as criterion_from_cli, Criterion, Direction, Scale
 from .workflow import Workflow
@@ -55,17 +57,18 @@ def __evaluate__(tournament: 'Tournament',
 
     if not tournament.debug:
         simulations = configuration.simulations
+        simulations = chunked(simulations, configuration.n_workers)
         result = []
 
-        for simulation in simulations:
+        for batch in tqdm(simulations, desc=f'Candidate: {candidate.name}'):
             try:
-                configuration.simulations = [simulation]
+                configuration.simulations = batch
 
                 simulator.evaluate(environment=environment, config=configuration)
 
-                result += [simulation]
+                result += batch
             except:
-                print(f'Error in simulation {traceback.format_exc()}')
+                print(f'Error {traceback.format_exc()}')
 
         return tournament.__evaluate_criteria__(candidate, result, criteria, candidate_output_dir)
 
@@ -117,7 +120,7 @@ class Tournament(Workflow):
 
         result = []
 
-        for metrics in tqdm.tqdm(iter, total=len(candidates)):
+        for metrics in tqdm(iter, total=len(candidates)):
             result += metrics
 
         result = pd.DataFrame(result)

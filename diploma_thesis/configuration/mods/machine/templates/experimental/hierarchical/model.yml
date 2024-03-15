@@ -2,24 +2,22 @@
 graph:
   - kind: 'graph_model'
     parameters:
-      hetero_aggregation: 'mean'
-
       layers:
-        - kind: 'gin'
+        - kind: 'sage_conv'
           parameters:
             in_channels: -1
-            out_channels: 128
+            out_channels: 64
             num_layers: 1
-            hidden_channels: 128
+            hidden_channels: 64
 
         - kind: 'mean_pool'
 
 output:
   - kind: 'linear'
     parameters:
-      dim: 128
+      dim: 64
       activation: 'tanh'
   - kind: 'linear'
     parameters:
-      dim: 128
+      dim: 64
       activation: 'tanh'

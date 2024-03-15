@@ -61,9 +61,6 @@ class FlexibleAction(Policy[Input]):
         return self.action_model(state)
 
     def forward(self, state: State):
-        if state.device != self.run_configuration.device:
-            state = state.to(self.run_configuration.device)
-
         actions = torch.tensor(0, dtype=torch.long)
 
         if self.action_model is not None:
@@ -83,6 +80,9 @@ class FlexibleAction(Policy[Input]):
                 raise ValueError(f"Policy estimation method {self.policy_estimation_method} is not supported")
 
     def select(self, state: State, parameters: Input) -> Record:
+        if state.device != self.run_configuration.device:
+            state = state.to(self.run_configuration.device)
+
         values, actions = self.__call__(state)
         values, actions = values.squeeze(), actions.squeeze()
         action, policy = self.action_selector(actions)
@@ -94,7 +94,7 @@ class FlexibleAction(Policy[Input]):
             "actions": actions
         }, batch_size=[])
 
-        return Record(state, action, info, batch_size=[]).detach().clone().cpu()
+        return Record(state, action, info, batch_size=[]).detach().cpu()
 
     def __configure__(self):
         if self.noise_parameters is not None:

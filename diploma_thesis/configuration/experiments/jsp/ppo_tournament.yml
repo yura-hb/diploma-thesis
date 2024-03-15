@@ -39,7 +39,7 @@ task:
     points: 1
 
   simulator:
-    n_workers: 1
+    n_workers: 10
     simulations:
       - name: 'tailard'
         kind: 'jsp_dataset'

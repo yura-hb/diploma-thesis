@@ -87,6 +87,9 @@ class RLTrainer(Loggable):
 
         self.__train__(model)
 
+        if self.train_schedule == TrainSchedule.ON_STORED_DATA_EXCLUSIVELY:
+            self.storage.clear()
+
     def clear(self):
         self.loss_cache = []
         self.storage.clear()
