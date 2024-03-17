@@ -30,6 +30,10 @@ class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
     def select(self, state, parameters):
         pass
 
+    @property
+    def is_recurrent(self):
+        return False
+
     def configure(self, configuration: RunConfiguration):
         pass
 

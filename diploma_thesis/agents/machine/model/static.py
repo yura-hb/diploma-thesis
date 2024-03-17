@@ -5,7 +5,7 @@ from .model import MachineModel
 from .rule import SchedulingRule, ALL_SCHEDULING_RULES
 
 
-class StaticModel(MachineModel[State, None]):
+class StaticModel(MachineModel[None]):
 
     def __init__(self, rule: SchedulingRule):
         super().__init__()

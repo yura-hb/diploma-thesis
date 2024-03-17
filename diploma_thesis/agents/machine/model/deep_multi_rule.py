@@ -18,7 +18,7 @@ class DeepMultiRule(DeepPolicyMachineModel):
     def __call__(self, state: State, parameters: Input) -> DeepPolicyMachineModel.Record:
         # No gradient descent based on decision on the moment
         with torch.no_grad():
-            record = self.policy.select(state, parameters)
+            record = super().__call__(state, parameters)
             result = self.rules[record.action.item()](parameters.machine, parameters.now)
 
             return DeepPolicyMachineModel.Record(result=result, record=record, batch_size=[])

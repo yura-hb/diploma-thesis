@@ -28,7 +28,7 @@ class DiscreteAction(FlexibleAction):
             self.action_model.append_output_layer(Linear(dim=self.n_actions, activation='none', dropout=0))
 
         if self.value_model is not None:
-            self.value_layer.append_output_layer(Linear(dim=1, activation='none', dropout=0))
+            self.value_model.append_output_layer(Linear(dim=1, activation='none', dropout=0))
 
         super().__configure__()
 

@@ -11,7 +11,8 @@ class DeepRule(DeepPolicyMachineModel):
     def __call__(self, state: State, parameters: Input) -> DeepPolicyMachineModel.Record:
         # No gradient descent based on decision on the moment
         with torch.no_grad():
-            record = self.policy.select(state, parameters)
+            # TODO: Verify. Output should be job id and not idx!!!
+            record = super().__call__(state, parameters)
             result = parameters.machine.queue[record.action.item()]
 
             return DeepPolicyMachineModel.Record(result=result, record=record, batch_size=[])

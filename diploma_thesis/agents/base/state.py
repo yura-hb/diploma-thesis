@@ -31,6 +31,8 @@ class Graph:
     IN_WORK_CENTER_RELATION_KEY = "in_work_center"
     IN_SHOP_FLOOR_RELATION_KEY = "in_shop_floor"
 
+    TARGET_KEY = 'target'
+
     X = 'x'
     NODE_TYPE = 'node_type'
     EDGE_TYPE = 'edge_type'
