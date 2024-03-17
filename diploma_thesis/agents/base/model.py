@@ -4,19 +4,19 @@ from typing import TypeVar, Generic
 
 from tensordict.prototype import tensorclass
 
-from agents.utils.run_configuration import RunConfiguration
 from agents.utils import Phase, PhaseUpdatable
 from agents.utils.policy import Policy, PolicyRecord
+from agents.utils.run_configuration import RunConfiguration
 from utils import Loggable
+from .state import State
 
-State = TypeVar('State')
+
 Input = TypeVar('Input')
-Rule = TypeVar('Rule')
 Action = TypeVar('Action')
 Result = TypeVar('Result')
 
 
-class Model(Loggable, Generic[Input, State, Action, Result], metaclass=ABCMeta):
+class Model(Loggable, Generic[Input, Action, Result], metaclass=ABCMeta):
 
     @tensorclass
     class Record:

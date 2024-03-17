@@ -1,7 +1,7 @@
 
-import torch
-
 from typing import Dict, List
+
+import torch
 
 from agents.utils.policy import from_cli as policy_from_cli
 from .model import *

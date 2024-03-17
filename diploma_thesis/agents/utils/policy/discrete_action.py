@@ -10,16 +10,13 @@ class DiscreteAction(FlexibleAction):
 
         super().__init__(**base_parameters)
 
-        self.action_layer = None
-        self.value_layer = None
-
-    def __get_values__(self, state):
+    def __get_values__(self, state: State):
         hidden = self.value_model(state)
         values = self.value_layer(hidden)
 
         return values.expand(-1, self.n_actions)
 
-    def __get_actions__(self, state):
+    def __get_actions__(self, state: State):
         hidden = self.action_model(state)
 
         return hidden

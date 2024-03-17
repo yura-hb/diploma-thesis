@@ -1,3 +1,5 @@
+import torch
+
 from abc import abstractmethod
 from typing import TypeVar, Generic
 
@@ -5,6 +7,8 @@ from torch_geometric.transforms import ToUndirected
 
 from utils import Loggable
 from .state import State, Graph
+
+from environment import Job
 
 Input = TypeVar('Input')
 
@@ -55,9 +59,31 @@ class GraphEncoder(Encoder, Generic[Input]):
     def __post_encode__(self, graph: Graph, parameters: Input) -> Graph:
         return graph
 
-    @abstractmethod
-    def __localize__(self, parameters: Input, graph: Graph):
-        pass
+    @staticmethod
+    def __fill_job_matrix__(job: Job, tensor):
+        result = torch.zeros_like(job.processing_times)
+
+        idx = job.current_step_idx + (1 if job.is_completed else 0)
+
+        result[
+            torch.arange(idx, dtype=torch.long), job.history.arrived_machine_idx[:idx].int()
+        ] = tensor[:idx].float()
+
+        return result
+
+    @staticmethod
+    def __localize_with_job_ids__(graph: Graph, job_ids: torch.Tensor):
+        job_ids_ = graph[Graph.JOB_INDEX_MAP][:, 0]
+        mask = torch.isin(job_ids_, job_ids, assume_unique=True)
+        idx = torch.nonzero(mask).view(-1)
+
+        if idx.numel() == 0:
+            return graph
+
+        graph = graph.subgraph({Graph.OPERATION_KEY: idx})
+        graph[Graph.JOB_INDEX_MAP] = graph[Graph.JOB_INDEX_MAP][mask]
+
+        return graph
 
     @classmethod
     def base_parameters_from_cli(cls, parameters):

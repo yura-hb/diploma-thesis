@@ -1,6 +1,7 @@
 
 import logging
 from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass
 from typing import TypeVar, Generic, List
 
 from agents.utils import Phase, EvaluationPhase, PhaseUpdatable
@@ -9,7 +10,6 @@ from environment import ShopFloor
 from utils import Loggable
 from .encoder import Encoder as StateEncoder, Input, State
 from .model import Model, Action, Result
-from dataclasses import dataclass
 
 Key = TypeVar('Key')
 
@@ -32,17 +32,12 @@ class Trajectory(TrainingSample):
 
 class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
 
-    def __init__(self,
-                 model: Model[Input, State, Action, Result],
-                 state_encoder: StateEncoder[Input, State]):
+    def __init__(self, model: Model[Input, Action, Result], state_encoder: StateEncoder[Input]):
         self.state_encoder = state_encoder
         self.model = model
         self.phase = EvaluationPhase()
-        super().__init__()
-        self.__post_init__()
 
-    def __post_init__(self):
-        pass
+        super().__init__()
 
     def with_logger(self, logger: logging.Logger):
         super().with_logger(logger)

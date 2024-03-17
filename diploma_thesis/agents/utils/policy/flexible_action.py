@@ -3,7 +3,6 @@ from typing import Dict
 
 import torch
 
-from agents.base.state import GraphState
 from agents.utils import NeuralNetwork, Phase
 from agents.utils.action import ActionSelector, from_cli as action_selector_from_cli
 from .policy import *
