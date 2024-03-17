@@ -1,24 +1,22 @@
 from abc import abstractmethod
 from typing import TypeVar, Generic
 
-from torch_geometric.data import Batch
 from torch_geometric.transforms import ToUndirected
 
 from utils import Loggable
-from .state import GraphState, Graph
+from .state import State, Graph
 
 Input = TypeVar('Input')
-State = TypeVar('State')
 
 
-class Encoder(Loggable, Generic[Input, State]):
+class Encoder(Loggable, Generic[Input]):
 
     @abstractmethod
     def encode(self, parameters: Input) -> State:
         pass
 
 
-class GraphEncoder(Encoder, Generic[Input, State]):
+class GraphEncoder(Encoder, Generic[Input]):
 
     def __init__(self, is_homogeneous: False, is_undirected: False, is_local: False):
         super().__init__()
@@ -35,6 +33,7 @@ class GraphEncoder(Encoder, Generic[Input, State]):
             parameters.graph = self.__localize__(parameters, parameters.graph)
 
         result = self.__encode__(parameters)
+        result.graph = self.__post_encode__(result.graph, parameters)
 
         if self.is_homogeneous:
             result.graph = result.graph.to_homogeneous(node_attrs=['x'])
@@ -50,8 +49,11 @@ class GraphEncoder(Encoder, Generic[Input, State]):
         return result
 
     @abstractmethod
-    def __encode__(self, parameters: Input) -> State | GraphState:
+    def __encode__(self, parameters: Input) -> State:
         pass
+
+    def __post_encode__(self, graph: Graph, parameters: Input) -> Graph:
+        return graph
 
     @abstractmethod
     def __localize__(self, parameters: Input, graph: Graph):

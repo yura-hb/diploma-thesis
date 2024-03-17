@@ -1,9 +1,9 @@
 from typing import Dict
 
 import torch
-from tensordict.prototype import tensorclass
+from tensordict import TensorDict
 
-from agents.base.state import TensorState
+from agents.base.state import State
 from environment import JobReductionStrategy, Job, Machine
 from .encoder import StateEncoder
 
@@ -24,10 +24,6 @@ class DEEPMARLMinimumRepetitionStateEncoder(StateEncoder):
     2. Arriving job info represents information of the job that is about to arrive at the machine
     """
 
-    @tensorclass
-    class State(TensorState):
-        job_idx: torch.LongTensor
-
     def __init__(self, strategy: JobReductionStrategy = JobReductionStrategy.mean):
         super().__init__()
 
@@ -40,7 +36,7 @@ class DEEPMARLMinimumRepetitionStateEncoder(StateEncoder):
         state = torch.vstack([state, arriving_job_state])
         state = state.unsqueeze(0)
 
-        return self.State(state, job_idx, batch_size=[])
+        return State(state, info=TensorDict({ 'job_idx': job_idx }, batch_size=[]), batch_size=[])
 
     def __make_initial_state(self, parameters: StateEncoder.Input) -> torch.FloatTensor:
         machine = parameters.machine

@@ -3,6 +3,7 @@ from typing import List, TypeVar
 
 import torch
 
+from agents.base.encoder import Input
 from environment import Job
 
 from agents.base import Encoder, GraphEncoder, Graph
@@ -48,3 +49,12 @@ class GraphStateEncoder(GraphEncoder, metaclass=ABCMeta):
         graph[Graph.JOB_INDEX_MAP] = graph[Graph.JOB_INDEX_MAP][mask]
 
         return graph
+
+    # TODO: - Implement
+    def __post_encode__(self, graph: Graph, parameters: StateEncoder.Input) -> Graph:
+        index = torch.tensor(parameters.machine.work_center_idx, parameters.machine.machine_idx)
+        is_target = graph[Graph.JOB_INDEX_MAP][[2, 3], :] == index
+
+
+        return graph
+

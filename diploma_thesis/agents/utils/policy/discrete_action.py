@@ -10,10 +10,19 @@ class DiscreteAction(FlexibleAction):
 
         super().__init__(**base_parameters)
 
+        self.action_layer = None
+        self.value_layer = None
+
     def __get_values__(self, state):
-        values = self.value_model(state)
+        hidden = self.value_model(state)
+        values = self.value_layer(hidden)
 
         return values.expand(-1, self.n_actions)
+
+    def __get_actions__(self, state):
+        hidden = self.action_model(state)
+
+        return hidden
 
     # Utilities
 
@@ -22,7 +31,7 @@ class DiscreteAction(FlexibleAction):
             self.action_model.append_output_layer(Linear(dim=self.n_actions, activation='none', dropout=0))
 
         if self.value_model is not None:
-            self.value_model.append_output_layer(Linear(dim=1, activation='none', dropout=0))
+            self.value_layer.append_output_layer(Linear(dim=1, activation='none', dropout=0))
 
         super().__configure__()
 

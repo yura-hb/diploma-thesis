@@ -1,13 +1,11 @@
 from typing import Dict
 
-from agents.machine.state import PlainEncoder
+from agents.base.state import State
 from .model import MachineModel
 from .rule import SchedulingRule, ALL_SCHEDULING_RULES
 
 
-class StaticModel(MachineModel[PlainEncoder.State, None]):
-
-    State = PlainEncoder.State
+class StaticModel(MachineModel[State, None]):
 
     def __init__(self, rule: SchedulingRule):
         super().__init__()

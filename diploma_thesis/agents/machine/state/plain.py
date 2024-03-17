@@ -1,18 +1,12 @@
 from typing import Dict
 
-from tensordict.prototype import tensorclass
-
-from .encoder import StateEncoder
+from .encoder import *
 
 
 class PlainEncoder(StateEncoder):
 
-    @tensorclass
-    class State:
-        pass
-
     def encode(self, parameters: StateEncoder.Input) -> State:
-        return self.State()
+        return State(batch_size=[])
 
     @staticmethod
     def from_cli(parameters: Dict):

@@ -1,14 +1,7 @@
-from tensordict.prototype import tensorclass
-
-from agents.base.state import GraphState
 from .encoder import *
 
 
 class DJSPGraphEncoder(GraphStateEncoder):
-
-    @tensorclass
-    class State(GraphState):
-        pass
 
     def __encode__(self, parameters: StateEncoder.Input) -> State:
         if parameters.graph is None:
@@ -50,7 +43,7 @@ class DJSPGraphEncoder(GraphStateEncoder):
         states = torch.cat(states, dim=1).T  if len(states) > 0 else torch.tensor([]).view(0, 8)
         graph[Graph.OPERATION_KEY].x = states
 
-        return self.State(graph, batch_size=[])
+        return State(graph=graph, batch_size=[])
 
     @classmethod
     def from_cli(cls, parameters: dict):

@@ -15,6 +15,8 @@ class Sample(ActionSelector):
         else:
             distribution = torch.distributions.Categorical(logits=distribution)
 
+        print(distribution.probs.max(), distribution.probs)
+
         action = distribution.sample().item()
 
         return action, distribution.probs

@@ -4,7 +4,6 @@ from dataclasses import dataclass
 import torch
 from torch import nn
 
-from agents.base.state import TensorState, GraphState
 from .layers import Layer, from_cli as layer_from_cli, Merge
 from .layers.linear import Linear
 
@@ -92,10 +91,10 @@ class NeuralNetwork(nn.Module):
         encoded_state = None
         encoded_graph = None
 
-        if isinstance(state, TensorState) and self.state_encoder is not None:
+        if state.state is not None and self.state_encoder is not None:
             encoded_state = self.state_encoder(torch.atleast_2d(state.state))
 
-        if isinstance(state, GraphState) and self.graph_encoder is not None:
+        if state.graph is not None and self.graph_encoder is not None:
             encoded_graph = self.graph_encoder(state.graph)
 
         hidden = self.merge(encoded_state, encoded_graph)

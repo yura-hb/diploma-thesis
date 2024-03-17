@@ -103,10 +103,8 @@ class Graph:
 
 
 @tensorclass
-class TensorState:
+class State:
     state: torch.FloatTensor
-
-
-@tensorclass
-class GraphState:
-    graph: Graph
+    graph: Graph = None
+    memory: torch.FloatTensor = None
+    info: TensorDictBase

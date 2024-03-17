@@ -1,14 +1,8 @@
-from tensordict.prototype import tensorclass
-
-from agents.base.state import GraphState
+from agents.base.state import State
 from .encoder import *
 
 
 class AuxiliaryGraphEncoder(GraphStateEncoder):
-
-    @tensorclass
-    class State(GraphState):
-        pass
 
     def __encode__(self, parameters: StateEncoder.Input) -> State:
         if parameters.graph is None:
@@ -27,7 +21,7 @@ class AuxiliaryGraphEncoder(GraphStateEncoder):
             else torch.tensor([]).view(0, 1)
         graph[Graph.OPERATION_KEY].x = processing_times
 
-        return self.State(graph, batch_size=[])
+        return State(graph=graph, batch_size=[])
 
     @classmethod
     def from_cli(cls, parameters: dict):

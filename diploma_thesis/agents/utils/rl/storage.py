@@ -1,9 +1,9 @@
 
 import torch
 
-from typing import List
+from typing import List, Tuple, Generator
 
-from agents.base.state import GraphState, Graph
+from agents.base.state import Graph
 from agents.utils.memory import Memory, Record
 from agents.base.agent import TrainingSample, Trajectory, Slice
 from agents.utils.return_estimator import ReturnEstimator
@@ -41,27 +41,30 @@ class Storage:
 
         return self.__process_batched_data__(batch, update_returns, batch_graphs, device), info
 
-    def sample_minibatches(self, update_returns, device, n, sample_ratio):
+    def sample_minibatches(self, update_returns, device, n, sample_ratio) -> Tuple[Record, Generator]:
         batch, info = self.sample(update_returns, device, batch_graphs=False)
 
-        mask = torch.zeros(batch.batch_size, device=device)
+        def generator(batch):
+            mask = torch.zeros(batch.batch_size, device=device)
 
-        for i in range(n):
-            mask_ = mask.uniform_() < sample_ratio
-            idx = mask_.nonzero()
+            for i in range(n):
+                mask_ = mask.uniform_() < sample_ratio
+                idx = mask_.nonzero()
 
-            sub_batch = batch[mask_]
+                sub_batch = batch[mask_]
 
-            if isinstance(batch.state, GraphState):
-                sub_batch.state.graph = Batch.from_data_list(
-                    [batch.state.graph[index] for index in idx]
-                ).to(device)
+                if batch[0].state.graph is not None:
+                    sub_batch.state.graph = Batch.from_data_list(
+                        [batch.state.graph[index] for index in idx]
+                    ).to(device)
 
-                sub_batch.next_state.graph = Batch.from_data_list(
-                    [batch.next_state.graph[index] for index in idx]
-                ).to(device)
+                    sub_batch.next_state.graph = Batch.from_data_list(
+                        [batch.next_state.graph[index] for index in idx]
+                    ).to(device)
 
-            yield sub_batch
+                yield sub_batch
+
+        return batch, generator(batch)
 
     def update_priority(self, indices: torch.LongTensor, priorities: torch.FloatTensor):
         self.memory.update_priority(indices, priorities)
@@ -107,7 +110,7 @@ class Storage:
     def __merge_batched_data__(self, batch, batch_graphs, device):
         batch = [element.view(-1) for element in batch]
 
-        if isinstance(batch[0].state, GraphState) and isinstance(batch[0].next_state, GraphState):
+        if batch[0].state.graph is not None:
             state_graph = []
             next_state_graph = []
 

@@ -2,18 +2,13 @@ from functools import reduce
 from typing import Dict
 
 import torch
-from tensordict.prototype import tensorclass
 
-from agents.base.state import TensorState
+from agents.base.state import State
 from environment import JobReductionStrategy
 from .encoder import StateEncoder
 
 
 class DEEPMARLIndirectStateEncoder(StateEncoder):
-
-    @tensorclass
-    class State(TensorState):
-        pass
 
     def __init__(self, strategy: JobReductionStrategy = JobReductionStrategy.mean):
         super().__init__()
@@ -51,7 +46,7 @@ class DEEPMARLIndirectStateEncoder(StateEncoder):
         state = torch.hstack(state).reshape(-1)
         state = torch.nan_to_num(state, nan=0.0, posinf=1, neginf=-1)
 
-        return self.State(state, batch_size=[])
+        return State(state=state, batch_size=[])
 
     def __make_job_number_state__(self, parameters: StateEncoder.Input):
         state = [

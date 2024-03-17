@@ -1,3 +1,4 @@
+import gc
 import logging
 from abc import ABCMeta, abstractmethod
 from dataclasses import field
@@ -351,6 +352,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
             self.__log__(f'Timeline {environment.now}')
 
             yield environment.timeout(log_tick)
+
+            gc.collect()
 
     def __terminate_if_needed__(self, environment: simpy.Environment, run_event: simpy.Event, delay: float):
         yield environment.timeout(delay)

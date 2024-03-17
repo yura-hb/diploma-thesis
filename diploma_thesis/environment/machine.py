@@ -307,11 +307,6 @@ class Machine:
 
             self.__forward__(job)
 
-    def __starve__(self):
-        self.did_dispatch_event = self.environment.event()
-
-        yield self.did_dispatch_event
-
     def __select_job__(self):
         if self.state.is_empty:
             return None
@@ -349,6 +344,11 @@ class Machine:
             return True
 
         return False
+
+    def __starve__(self):
+        self.did_dispatch_event = self.environment.event()
+
+        yield self.did_dispatch_event
 
     def __forward__(self, job: environment.Job):
         """

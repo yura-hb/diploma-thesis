@@ -1,16 +1,11 @@
-
-import torch
-
 from typing import Dict
 
-from agents.machine.state import PlainEncoder
+from agents.base.state import State
 from .model import WorkCenterModel
 from .rule import RoutingRule, ALL_ROUTING_RULES
 
 
-class StaticModel(WorkCenterModel[PlainEncoder.State, None]):
-
-    State = PlainEncoder.State
+class StaticModel(WorkCenterModel[None]):
 
     def __init__(self, rule: RoutingRule):
         self.rule = rule
