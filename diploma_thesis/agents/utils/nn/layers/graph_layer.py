@@ -60,7 +60,7 @@ class GIN(GraphModuleWrapper):
 class SAGEConv(GraphModuleWrapper):
 
     def __init__(self, configuration):
-        super().__init__(pyg.nn.SAGEConv, configuration)
+        super().__init__(pyg.nn.GraphSAGE, configuration)
 
 
 class GATConv(GraphModuleWrapper):

@@ -8,9 +8,7 @@ class HierarchicalGraphEncoder(GraphStateEncoder):
             raise ValueError("Graph is not provided")
 
         graph = parameters.graph
-
         job_ids = graph[Graph.JOB_INDEX_MAP][:, 0].unique()
-
         states = []
 
         for job_id in job_ids:

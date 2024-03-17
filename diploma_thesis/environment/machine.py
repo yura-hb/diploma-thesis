@@ -311,6 +311,9 @@ class Machine:
         if self.state.is_empty:
             return None
 
+        if self.shop_floor.configuration.configuration.deduce_naive_actions and len(self.queue) == 1:
+            return self.queue[0]
+
         job = self.shop_floor.schedule(self)
 
         return job

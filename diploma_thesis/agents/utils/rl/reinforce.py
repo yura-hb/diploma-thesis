@@ -72,9 +72,7 @@ class Reinforce(RLTrainer):
 
         loss = (batch.reward - baseline) * loss
         loss = loss.mean()
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
+        self.step(loss, self.optimizer)
         self.record_loss(loss, key='policy')
 
         # Perform critics step
@@ -86,9 +84,7 @@ class Reinforce(RLTrainer):
 
         for index, critic in enumerate(self.critics):
             critic_loss = critic.loss(torch.squeeze(critic.neural_network(batch.state)), batch.reward)
-            critic.optimizer.zero_grad()
-            critic_loss.backward()
-            critic.optimizer.step()
+            self.step(critic_loss, critic.optimizer)
             self.record_loss(critic_loss, key=f'critic_{index}')
 
     @property

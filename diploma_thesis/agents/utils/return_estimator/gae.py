@@ -24,8 +24,8 @@ class GAE(Estimator):
             record = records[i]
             next_record = records[i + 1] if i < len(records) - 1 else None
 
-            next_value = 0 if next_record is None else next_record.info[Record.VALUES_KEY][records[i].action]
-            value = record.info[Record.VALUES_KEY][record.action]
+            next_value = 0 if next_record is None else self.get_value(next_record)
+            value = self.get_value(record)
             advantage = record.reward + self._discount_factor * next_value - value
             next_advantage = 0 if next_record is None else next_record.info[Record.ADVANTAGE_KEY]
 

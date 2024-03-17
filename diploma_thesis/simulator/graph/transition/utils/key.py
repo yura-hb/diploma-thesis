@@ -10,6 +10,7 @@ def key(value: torch.Tensor | int):
 
     return str(value)
 
+
 def unkey(value, is_tensor: bool = False):
     value = int(value)
 

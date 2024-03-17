@@ -32,10 +32,7 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
         super().__init__(*args, is_episodic=True, **kwargs)
 
     def __step__(self, batch: Record, model: Policy, configuration: PPOConfiguration):
-        range = torch.arange(batch.shape[0], device=self.run_configuration.device)
-
         value, logits = model(batch.state)
-        value = value[range, batch.action]
 
         loss = self.actor_loss(batch, logits, configuration, self.run_configuration.device)
         # Maximization of negative value is equivalent to minimization
@@ -44,9 +41,7 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
         # Want to maximize
         loss = -loss
 
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
+        self.step(loss, self.optimizer)
         self.record_loss(loss)
 
     @staticmethod
@@ -59,7 +54,6 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
 
         range = torch.arange(batch.shape[0], device=device)
         advantages = batch.info[Record.ADVANTAGE_KEY]
-
         action_probs = batch.info[Record.POLICY_KEY][range, batch.action.view(-1)]
 
         weights = distribution.log_prob(batch.action).view(-1) - torch.log(action_probs)

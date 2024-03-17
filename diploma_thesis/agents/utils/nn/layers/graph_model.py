@@ -51,14 +51,25 @@ class GraphModel(Layer):
         self.__configure_if_needed__(batch)
 
         if isinstance(batch, pyg.data.HeteroData):
-            # Result is the dict for each edge_type
-            hidden = self.model(batch.x_dict, batch.edge_index_dict, batch.batch_dict)
+            return self.forward_heterogeneous(graph, batch)
 
-            return self.__process_heterogeneous_output__(hidden)
+        return self.forward_homogeneous(graph, batch)
 
+    def forward_homogeneous(self, graph, batch):
         hidden = self.model(batch.x, batch.edge_index, batch.batch)
 
-        return hidden
+        if hidden.shape[0] == batch.num_graphs:
+            return hidden
+        else:
+            return hidden[batch.target]
+
+    def forward_heterogeneous(self, graph, batch):
+        assert False, "Heterogeneous input is not yet supported"
+
+        # Result is the dict for each edge_type
+        hidden = self.model(batch.x_dict, batch.edge_index_dict, batch.batch_dict)
+
+        return self.__process_heterogeneous_output__(hidden)
 
     def __build__(self):
         def encode_layer(layer, signature):
@@ -76,20 +87,20 @@ class GraphModel(Layer):
 
     def __configure_if_needed__(self, graph: pyg.data.Data | pyg.data.HeteroData):
         if not self.is_configured:
-            if isinstance(graph, pyg.data.HeteroData):
-                self.model = pyg.nn.to_hetero(self.model, graph.metadata(), aggr=self.configuration.hetero_aggregation)
+            # if isinstance(graph, pyg.data.HeteroData):
+            #     self.model = pyg.nn.to_hetero(self.model, graph.metadata(), aggr=self.configuration.hetero_aggregation)
 
             self.is_configured = True
 
-    def __process_heterogeneous_output__(self, output: Dict[Tuple[str, str, str], torch.Tensor]) -> torch.Tensor:
-        result = []
-
-        for key, embeddings in output.items():
-            if key[0] == self.configuration.hetero_aggregation_key:
-                result += [embeddings]
-
-        # TODO: Use aggregation
-        return torch.stack(result).mean(dim=0)
+    # def __process_heterogeneous_output__(self, output: Dict[Tuple[str, str, str], torch.Tensor]) -> torch.Tensor:
+    #     result = []
+    #
+    #     for key, embeddings in output.items():
+    #         if key[0] == self.configuration.hetero_aggregation_key:
+    #             result += [embeddings]
+    #
+    #     # TODO: Use aggregation
+    #     return torch.stack(result).mean(dim=0)
 
     @classmethod
     def from_cli(cls, parameters: dict) -> 'Layer':

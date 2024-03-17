@@ -1,5 +1,5 @@
 
-from .estimator import Estimator as ReturnEstimator
+from .estimator import Estimator as ReturnEstimator, ValueFetchMethod
 
 from .no import No
 from .gae import GAE

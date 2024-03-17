@@ -1,3 +1,4 @@
+
 from agents.utils.memory import NotReadyException
 from .utils.ppo_mixin import *
 
@@ -9,8 +10,8 @@ class Configuration(PPOConfiguration):
     @staticmethod
     def from_cli(parameters: Dict):
         return Configuration(
+            trpo_penalty=parameters.get('trpo_penalty', 0.1),
             **PPOConfiguration.base_parameters_from_cli(parameters),
-            trpo_penalty=parameters.get('trpo_penalty', 0.1)
         )
 
 
@@ -20,9 +21,13 @@ class P3OR(PPOMixin):
         super().__init__(*args, **kwargs)
 
         self.configuration = configuration
+        self.trpo_loss = Loss(configuration=Loss.Configuration(kind='cross_entropy', parameters=dict()))
+        self.auxiliary_head = None
 
     def __configure__(self, model: Policy, configuration: RunConfiguration):
-        pass
+        super(RLTrainer).__configure__(model, configuration)
+
+        self.auxiliary_head = model.make_linear_layer(1).to(configuration.device)
 
     def __train__(self, model: Policy):
         try:
@@ -35,12 +40,21 @@ class P3OR(PPOMixin):
                 self.__step__(minibatch, model, self.configuration)
 
             # Auxiliary step
-            self.__auxiliary_step__(batch)
+            self.__auxiliary_step__(model, batch)
         except NotReadyException:
             return
 
-    def __auxiliary_step__(self, batch: Batch):
-        pass
+    def __auxiliary_step__(self, model: Policy, batch: Batch):
+        actions = model.encode(batch.state, return_values=False)
+        actions = model.post_encode(values=None, actions=actions)
+
+        values = self.auxiliary_head(actions)
+
+        loss = self.configuration.value_loss(values.view(-1), batch.info[Record.RETURN_KEY])
+        loss += self.configuration.trpo_penalty * self.trpo_loss(actions, batch.info[Record.POLICY_KEY])
+
+        # TODO: Shouldn't it be a separate optimizer ????
+        self.step(loss, self.optimizer)
 
     @classmethod
     def from_cli(cls,

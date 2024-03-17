@@ -1,6 +1,5 @@
-
-from .action_selector import *
 from agents.utils import Phase, PhaseUpdatable
+from .action_selector import *
 
 
 class PhaseSelector(ActionSelector, PhaseUpdatable):
@@ -13,7 +12,7 @@ class PhaseSelector(ActionSelector, PhaseUpdatable):
         self.default = default
         self.phase_to_action_selector = phase_to_action_selector
 
-    def __call__(self, distribution: torch.FloatTensor) -> Tuple[int, torch.FloatTensor]:
+    def __call__(self, distribution: torch.Tensor) -> Tuple[int, torch.Tensor]:
         if self.phase in self.phase_to_action_selector:
             return self.phase_to_action_selector[self.phase](distribution)
 

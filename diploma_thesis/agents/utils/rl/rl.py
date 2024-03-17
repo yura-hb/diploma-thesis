@@ -113,3 +113,9 @@ class RLTrainer(Loggable):
 
     def load_state_dict(self, state_dict: dict):
         self.optimizer.load_state_dict(state_dict['optimizer'])
+
+    @staticmethod
+    def step(loss, optimizer):
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()

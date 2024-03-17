@@ -10,11 +10,16 @@ class Configuration:
     machines_per_work_center: int = 1
     # The number of work centers
     work_center_count: int = 1
+    # Whether machine should automatically perform naive action
+    deduce_naive_actions: int = False
 
     @staticmethod
     def from_cli_arguments(configuration: Dict) -> 'Configuration':
+        print(configuration.get('deduce_naive_actions'))
+
         return Configuration(
             timespan=configuration['timespan'],
             machines_per_work_center=configuration['machines_per_work_center'],
-            work_center_count=configuration['work_center_count']
+            work_center_count=configuration['work_center_count'],
+            deduce_naive_actions=configuration.get('deduce_naive_actions', False)
         )

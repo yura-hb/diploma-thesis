@@ -52,13 +52,13 @@ class DeepPolicyModel(Model[Input, Action, Result], PhaseUpdatable, metaclass=AB
             assert key is not None, 'Expect that key definition for recurrent policy'
 
             state.memory = self.memory.get(key)
-            record, memory = self.policy(state)
+            record, memory = self.policy.select(state)
 
             self.memory[key] = memory
 
             return record
 
-        return self.policy(state)
+        return self.policy.select(state)
 
     @classmethod
     def memory_key(cls, parameters: Input) -> None | str:

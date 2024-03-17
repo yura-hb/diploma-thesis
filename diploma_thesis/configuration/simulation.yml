@@ -12,17 +12,18 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/machine/ppo.yml'
-      template: 'reference/hierarchical'
+      template: 'experimental/hierarchical_flexible'
       mods:
 #        - 'agent/dqn/ddqn.yml'
 #        - 'agent/dqn/dueling.yml'
 #        - 'agent/dqn/prioritized.yml'
 #        - 'agent/dqn/steps/5.yml'
 #        - 'agent/dqn/noisy.yml'
-        - 'agent/ppo/epochs/10.yml'
+        - 'agent/ppo/epochs/4.yml'
         - 'util/rules/all_rules.yml'
         - 'util/optimizer/grad_norm.yml'
-        - 'util/device/mps.yml'
+        - 'util/infrastructure/mps.yml'
+        - 'util/rules/flexible.yml'
 #        - 'util/train_schedule/on_store.yml'
 #        - 'util/infrastructure/compile.yml'
         - 'util/train_schedule/on_stored_data_exclusively.yml'
@@ -66,7 +67,7 @@ task:
     kind: td
     parameters:
       emit_trajectory: true
-      memory: 192
+      memory: 32
 
   run:
     kind: 'mod'
@@ -74,7 +75,7 @@ task:
       base_path: 'configuration/mods/run/run.yml'
       mods:
         - 'n_workers/10.yml'
-        - 'timeline/short_warmup.yml'
+        - 'timeline/no_warmup.yml'
       nested:
         parameters:
           simulations:
@@ -93,7 +94,8 @@ task:
                         - [ 'duration/10000.yml' ]
                         - [ 'size/jsp/10.yml' ]
                         - [ 'utilization/80.yml', 'utilization/90.yml']
-                        - [ 'initial_assignment/2.yml' ]
+                        - [ 'initial_assignment/5.yml' ]
+                        - [ 'deduce_naive_actions.yml']
                     nested:
                       parameters:
                         dispatch:

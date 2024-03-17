@@ -6,6 +6,7 @@ from torch.optim.swa_utils import AveragedModel, get_ema_avg_fn
 
 from agents.utils.memory import NotReadyException
 from agents.utils.rl.rl import *
+from agents.utils.return_estimator import ValueFetchMethod
 
 
 class DeepQTrainer(RLTrainer):
@@ -24,6 +25,7 @@ class DeepQTrainer(RLTrainer):
     def __init__(self, configuration: Configuration, *args, **kwargs):
         super().__init__(*args, is_episodic=False, **kwargs)
 
+        self.return_estimator.update(ValueFetchMethod.ACTION)
         self._target_model: AveragedModel | None = None
         self.configuration = configuration
 
@@ -46,9 +48,7 @@ class DeepQTrainer(RLTrainer):
         _, actions = model(batch.state)
         loss = self.loss(actions, q_values)
 
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
+        self.step(loss, self.optimizer)
 
         self.record_loss(loss)
 

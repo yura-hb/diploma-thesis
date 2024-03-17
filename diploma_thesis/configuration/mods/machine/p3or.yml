@@ -5,6 +5,7 @@ parameters:
     kind: 'deep_multi_rule'
     parameters:
       __rules__: ''
+      compile: False
 
       policy:
         kind: 'discrete_action'
@@ -34,29 +35,32 @@ parameters:
                     parameters:
                       step: 1
                   action_selector:
-                    kind: 'epsilon_greedy'
-                    parameters:
-                      epsilon: 0.4
+                    kind: 'uniform'
                 - phase:
                     kind: 'training'
                   action_selector:
-                    kind: 'epsilon_greedy'
+                    kind: 'sample'
                     parameters:
-                      epsilon: 0.1
+                      is_distribution: False
 
   __encoder__: ''
 
   trainer:
-    kind: 'dqn'
+    kind: 'p3or'
     parameters:
-      memory:
-        kind: 'replay'
-        parameters:
-          size: 8192
-          batch_size: 128
-          prefetch: 2
+      sample_ratio: 0.75
+      policy_step_ratio: 0.15
+      entropy_regularization: 0.5
+      rollback_ratio: 0.15
+
+      epochs: 1
 
       loss:
+        kind: 'cross_entropy'
+        parameters:
+          reduction: 'none'
+
+      value_loss:
         kind: 'mse'
 
       optimizer:
@@ -65,7 +69,15 @@ parameters:
           parameters:
             lr: 0.001
 
-      return:
-        kind: 'no'
+      memory:
+        kind: 'replay'
         parameters:
-          discount_factor: 0.9
+          size: 16
+          batch_size: 1
+          prefetch: 2
+
+      return:
+        kind: 'gae'
+        parameters:
+          discount_factor: 0.99
+          lambda: 0.95

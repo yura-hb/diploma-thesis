@@ -11,11 +11,11 @@ parameters:
         parameters:
           policy_method: 'independent'
 
-          value_model:
-            __model__: ''
+          critic:
+            __critic__: ''
 
-          action_model:
-            __model__: ''
+          actor:
+            __actor__: ''
 
           action_selector:
             kind: 'phase_selector'

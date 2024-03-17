@@ -1,7 +1,8 @@
 
 from dataclasses import dataclass
-from environment import Machine
+
 from agents.base import Graph
+from environment import Machine
 
 
 @dataclass

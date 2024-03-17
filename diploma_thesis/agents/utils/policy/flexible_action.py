@@ -1,115 +1,59 @@
-from enum import StrEnum
-from typing import Dict
+from .action_policy import *
+from agents.base.state import State, Graph
 
-import torch
-
-from agents.utils import NeuralNetwork, Phase
-from agents.utils.action import ActionSelector, from_cli as action_selector_from_cli
-from .policy import *
+import torch_geometric as pyg
 
 
-class PolicyEstimationMethod(StrEnum):
-    DUELING_ARCHITECTURE = "dueling_architecture"
-    INDEPENDENT = "independent"
+class FlexibleAction(ActionPolicy):
 
+    @property
+    def is_recurrent(self):
+        return False
 
-class FlexibleAction(Policy[Input]):
+    def post_encode(self, state: State, value: torch.FloatTensor, actions: torch.FloatTensor):
+        if state.graph is not None and isinstance(state.graph, pyg.data.Batch):
+            result = []
+            lengths = []
 
-    def __init__(self,
-                 value_model: NeuralNetwork,
-                 action_model: NeuralNetwork,
-                 action_selector: ActionSelector,
-                 policy_method: PolicyEstimationMethod = PolicyEstimationMethod.INDEPENDENT,
-                 noise_parameters: Dict = None):
-        super().__init__()
+            store = state.graph[Graph.OPERATION_KEY] if isinstance(state.graph, pyg.data.HeteroData) else state.graph
 
-        self.value_model = value_model
-        self.action_model = action_model
-        self.action_selector = action_selector
-        self.policy_estimation_method = policy_method
-        self.noise_parameters = noise_parameters
-        self.run_configuration = None
+            prev_count = 0
 
-        self.__configure__()
+            for i, j in zip(state.graph.ptr, state.graph.ptr[1:]):
+                target = store[Graph.TARGET_KEY][i:j]
+                target_nodes_count = target.sum()
 
-    def update(self, phase: Phase):
-        self.phase = phase
+                result += [actions[prev_count:prev_count+target_nodes_count].view(-1)]
+                lengths += [target_nodes_count]
 
-        for module in [self.value_model, self.action_model, self.action_selector]:
-            if isinstance(module, PhaseUpdatable):
-                module.update(phase)
+                prev_count += target_nodes_count
 
-    def configure(self, configuration: RunConfiguration):
-        self.run_configuration = configuration
+            actions = torch.nn.utils.rnn.pad_sequence(result, batch_first=True, padding_value=torch.nan)
+            lengths = torch.tensor(lengths)
 
-        if configuration.compile:
-            for model in [self.action_model, self.value_model]:
-                if model is not None:
-                    model.compile()
+            return value, (actions, lengths)
 
-        if self.action_model is not None:
-            self.action_model = self.action_model.to(configuration.device)
+        return value, actions
 
-        if self.value_model is not None:
-            self.value_model = self.value_model.to(configuration.device)
+    def __estimate_policy__(self, value, actions):
+        if isinstance(actions, tuple):
+            # Encode as logits with zero probability
+            min_value = torch.finfo(torch.float32).min
+            post_process = lambda x: torch.nan_to_num(x, nan=min_value)
 
-    def __get_values__(self, state):
-        return self.value_model(state)
+            match self.policy_estimation_method:
+                case PolicyEstimationMethod.DUELING_ARCHITECTURE:
+                    if isinstance(actions, tuple):
+                        actions, lengths = actions
+                        means = torch.nan_to_num(actions, nan=0.0).sum(dim=-1) / lengths
 
-    def __get_actions__(self, state):
-        return self.action_model(state)
+                        return value, post_process(value + actions - means)
+                case _:
+                    return value, post_process(actions[0])
 
-    def forward(self, state: State):
-        actions = torch.tensor(0, dtype=torch.long)
-
-        if self.action_model is not None:
-            actions = self.__get_actions__(state)
-
-        if self.value_model is not None:
-            values = self.__get_values__(state)
-        else:
-            values = actions
-
-        match self.policy_estimation_method:
-            case PolicyEstimationMethod.INDEPENDENT:
-                return values, actions
-            case PolicyEstimationMethod.DUELING_ARCHITECTURE:
-                return values, values + (actions - actions.mean(dim=-1, keepdim=True))
-            case _:
-                raise ValueError(f"Policy estimation method {self.policy_estimation_method} is not supported")
-
-    def select(self, state: State, parameters: Input) -> Record:
-        if state.device != self.run_configuration.device:
-            state = state.to(self.run_configuration.device)
-
-        values, actions = self.__call__(state)
-        values, actions = values.squeeze(), actions.squeeze()
-        action, policy = self.action_selector(actions)
-        action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
-
-        info = TensorDict({
-            "policy": policy,
-            "values": values,
-            "actions": actions
-        }, batch_size=[])
-
-        return Record(state, action, info, batch_size=[]).detach().cpu()
-
-    def __configure__(self):
-        if self.noise_parameters is not None:
-            self.action_model.to_noisy(self.noise_parameters)
+        return super().__estimate_policy__(value, actions)
 
     @classmethod
     def from_cli(cls, parameters: Dict) -> 'Policy':
         return FlexibleAction(**cls.base_parameters_from_cli(parameters))
 
-    @staticmethod
-    def base_parameters_from_cli(parameters: Dict):
-        return dict(
-            value_model=NeuralNetwork.from_cli(parameters['value_model']) if parameters.get('value_model') else None,
-            action_model=NeuralNetwork.from_cli(parameters['action_model']) if parameters.get('action_model') else None,
-            action_selector=action_selector_from_cli(parameters['action_selector']),
-            policy_method=PolicyEstimationMethod(parameters['policy_method']) if parameters.get('policy_method')
-            else PolicyEstimationMethod.INDEPENDENT,
-            noise_parameters=parameters.get('noise')
-        )

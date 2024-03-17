@@ -1,36 +1,28 @@
-from .flexible_action import *
 
-from agents.utils.nn.layers import Linear
+from .action_policy import *
 
 
-class DiscreteAction(FlexibleAction):
+class DiscreteAction(ActionPolicy):
 
     def __init__(self, n_actions: int, base_parameters):
         self.n_actions = n_actions
 
         super().__init__(**base_parameters)
 
-    def __get_values__(self, state: State):
-        hidden = self.value_model(state)
-        values = self.value_layer(hidden)
+        self.action_layer = self.make_linear_layer(self.n_actions)
+        self.value_layer = self.make_linear_layer(1)
 
-        return values.expand(-1, self.n_actions)
+    def configure(self, configuration: RunConfiguration):
+        super().configure(configuration)
 
-    def __get_actions__(self, state: State):
-        hidden = self.action_model(state)
+        self.action_layer.to(configuration.device)
+        self.value_layer.to(configuration.device)
 
-        return hidden
+    def post_encode(self, state, value: torch.FloatTensor, actions: torch.FloatTensor):
+        value = self.value_layer(value)
+        actions = self.action_layer(actions)
 
-    # Utilities
-
-    def __configure__(self):
-        if self.action_model is not None:
-            self.action_model.append_output_layer(Linear(dim=self.n_actions, activation='none', dropout=0))
-
-        if self.value_model is not None:
-            self.value_model.append_output_layer(Linear(dim=1, activation='none', dropout=0))
-
-        super().__configure__()
+        return value, actions
 
     @classmethod
     def from_cli(cls, parameters: Dict) -> 'Policy':

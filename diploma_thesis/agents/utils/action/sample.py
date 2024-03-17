@@ -10,12 +10,14 @@ class Sample(ActionSelector):
         self.is_distribution = is_distribution
 
     def __call__(self, distribution: torch.Tensor) -> Tuple[int, torch.Tensor]:
+        distribution = torch.atleast_1d(distribution)
+
         if self.is_distribution:
             distribution = torch.distributions.Categorical(probs=distribution)
         else:
             distribution = torch.distributions.Categorical(logits=distribution)
 
-        print(distribution.probs.max(), distribution.probs)
+        print(distribution.probs)
 
         action = distribution.sample().item()
 

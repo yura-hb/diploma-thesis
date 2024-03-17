@@ -1,4 +1,4 @@
-
+import copy
 from abc import ABCMeta, abstractmethod
 from dataclasses import field
 from typing import TypeVar, List, Generic, Dict
@@ -27,7 +27,7 @@ class Configuration:
 @tensorclass
 class Record:
     POLICY_KEY = "policy"
-    VALUES_KEY = "values"
+    VALUE_KEY = "value"
     REWARD_KEY = "reward"
     RETURN_KEY = "return"
     ACTION_KEY = "actions"
@@ -72,6 +72,7 @@ class Memory(Generic[_Configuration], metaclass=ABCMeta):
             raise NotReadyException()
 
         result = self.buffer.sample(return_info=return_info)
+        result = copy.deepcopy(result)
 
         if self.configuration.is_tensordict_storage:
             if not isinstance(result, list):

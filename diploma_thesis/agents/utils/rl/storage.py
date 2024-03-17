@@ -26,6 +26,11 @@ class Storage:
         for record in records:
             record.info['episode'] = sample.episode_id
 
+            # Remove extra fields for training record
+            if record.state.graph is not None:
+                del record.state.graph.data[Graph.JOB_INDEX_MAP]
+                del record.next_state.graph.data[Graph.JOB_INDEX_MAP]
+
         if self.is_episodic:
             self.memory.store([records])
         else:
@@ -109,6 +114,10 @@ class Storage:
 
     def __merge_batched_data__(self, batch, batch_graphs, device):
         batch = [element.view(-1) for element in batch]
+        items = self.__collate_variable_length_info_values__(batch)
+
+        if batch[0].state.memory is None and batch[1].state.memory is not None:
+            batch[0].state.memory = torch.zeros_like(batch[1].state.memory)
 
         if batch[0].state.graph is not None:
             state_graph = []
@@ -130,7 +139,35 @@ class Storage:
         else:
             result = torch.cat(batch, dim=0)
 
+        for key, value in items.items():
+            result.info[key] = value
+
         return result.to(device)
+
+    def __collate_variable_length_info_values__(self, batch):
+        keys = [Record.POLICY_KEY, Record.ACTION_KEY]
+
+        result = dict()
+
+        for key in keys:
+            result[key] = []
+
+        for element in batch:
+            for key in keys:
+                result[key] += torch.atleast_2d(element.info[key])
+
+                del element.info[key]
+
+        for key in keys:
+            match key:
+                case Record.POLICY_KEY:
+                    fill_value = 0.0
+                case Record.ACTION_KEY:
+                    fill_value = torch.finfo(result[key][0].dtype).min
+
+            result[key] = torch.nn.utils.rnn.pad_sequence(result[key], batch_first=True, padding_value=fill_value)
+
+        return result
 
     def __collate_graphs__(self, records: List[Graph], batch_graphs, device: torch.device):
         graphs = [record[0].to_pyg_graph() for record in records]

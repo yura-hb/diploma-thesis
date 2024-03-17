@@ -3,6 +3,8 @@ import torch
 from abc import abstractmethod
 from typing import TypeVar, Generic
 
+import torch_geometric as pyg
+
 from torch_geometric.transforms import ToUndirected
 
 from utils import Loggable
@@ -22,12 +24,13 @@ class Encoder(Loggable, Generic[Input]):
 
 class GraphEncoder(Encoder, Generic[Input]):
 
-    def __init__(self, is_homogeneous: False, is_undirected: False, is_local: False):
+    def __init__(self, is_homogeneous: False, is_undirected: False, is_local: False, append_target_mask: bool):
         super().__init__()
 
         self.is_homogeneous = is_homogeneous
         self.is_undirected = is_undirected
         self.is_local = is_local
+        self.append_target_mask = append_target_mask
         self.to_undirected = ToUndirected()
 
     def encode(self, parameters: Input) -> State:
@@ -41,6 +44,13 @@ class GraphEncoder(Encoder, Generic[Input]):
 
         if self.is_homogeneous:
             result.graph = result.graph.to_homogeneous(node_attrs=[Graph.X, Graph.TARGET_KEY])
+            result.info[Graph.OPERATION_KEY] = torch.tensor(
+                [i for i, name in enumerate(result.graph._node_type_names) if name == Graph.OPERATION_KEY][0]
+            )
+
+        if self.append_target_mask:
+            store = result.graph if self.is_homogeneous else result.graph[Graph.OPERATION_KEY]
+            store[Graph.X] = torch.cat([store[Graph.X], store[Graph.TARGET_KEY].view(-1, 1)], dim=1)
 
         del result.graph[Graph.MACHINE_INDEX_KEY]
 
@@ -55,7 +65,11 @@ class GraphEncoder(Encoder, Generic[Input]):
     def __encode__(self, parameters: Input) -> State:
         pass
 
-    def __post_encode__(self, graph: Graph, parameters: Input) -> Graph:
+    @abstractmethod
+    def __localize__(self, graph: Graph, parameters: Input):
+        pass
+
+    def __post_encode__(self, graph: pyg.data.HeteroData, parameters: Input) -> pyg.data.HeteroData:
         return graph
 
     @staticmethod
@@ -73,7 +87,7 @@ class GraphEncoder(Encoder, Generic[Input]):
     @staticmethod
     def __localize_with_job_ids__(graph: Graph, job_ids: torch.Tensor):
         job_ids_ = graph[Graph.JOB_INDEX_MAP][:, 0]
-        mask = torch.isin(job_ids_, job_ids, assume_unique=True)
+        mask = torch.isin(job_ids_, job_ids, assume_unique=False)
         idx = torch.nonzero(mask).view(-1)
 
         if idx.numel() == 0:
@@ -89,5 +103,6 @@ class GraphEncoder(Encoder, Generic[Input]):
         return dict(
             is_homogeneous=parameters.get('is_homogeneous', False),
             is_undirected=parameters.get('is_undirected', False),
-            is_local=parameters.get('is_local', False)
+            is_local=parameters.get('is_local', False),
+            append_target_mask=parameters.get('append_target_mask', False)
         )

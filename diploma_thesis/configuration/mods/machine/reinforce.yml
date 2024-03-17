@@ -12,8 +12,8 @@ parameters:
         parameters:
           policy_method: 'independent'
 
-          action_model:
-            __model__: ''
+          actor:
+            __actor__: ''
 
           action_selector:
             kind: 'phase_selector'
@@ -76,7 +76,7 @@ parameters:
           loss:
             kind: 'mse'
           neural_network:
-            __model__: ''
+            __critic__: ''
 
       return:
         kind: 'gae'
