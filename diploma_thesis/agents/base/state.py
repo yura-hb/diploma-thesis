@@ -56,6 +56,8 @@ class Graph:
             result[Graph.EDGE_INDEX] = data.edge_index
             result[Graph.NODE_TYPE] = data.node_type
             result[Graph.EDGE_TYPE] = data.edge_type
+            result[Graph.JOB_INDEX_MAP] = data[Graph.JOB_INDEX_MAP]
+            result[Graph.TARGET_KEY] = data[Graph.TARGET_KEY]
 
             if data.edge_attr is not None:
                 result[Graph.EDGE_ATTR] = data.edge_attr
@@ -77,8 +79,9 @@ class Graph:
 
         if Graph.X in keys:
             data = pyg.data.Data()
+            keys = [Graph.X, Graph.EDGE_INDEX, Graph.NODE_TYPE, Graph.EDGE_ATTR, Graph.TARGET_KEY, Graph.JOB_INDEX_MAP]
 
-            for key in [Graph.X, Graph.EDGE_INDEX, Graph.NODE_TYPE, Graph.EDGE_ATTR]:
+            for key in keys:
                 if key in self.data.keys():
                     data[key] = self.data[key]
 

@@ -40,9 +40,8 @@ class GraphEncoder(Encoder, Generic[Input]):
         result.graph = self.__post_encode__(result.graph, parameters)
 
         if self.is_homogeneous:
-            result.graph = result.graph.to_homogeneous(node_attrs=['x'])
+            result.graph = result.graph.to_homogeneous(node_attrs=[Graph.X, Graph.TARGET_KEY])
 
-        del result.graph[Graph.JOB_INDEX_MAP]
         del result.graph[Graph.MACHINE_INDEX_KEY]
 
         if self.is_undirected:
