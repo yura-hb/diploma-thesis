@@ -24,8 +24,8 @@ class P3OR(PPOMixin):
         self.trpo_loss = Loss(configuration=Loss.Configuration(kind='cross_entropy', parameters=dict()))
         self.auxiliary_head = None
 
-    def __configure__(self, model: Policy, configuration: RunConfiguration):
-        super(RLTrainer).__configure__(model, configuration)
+    def configure(self, model: Policy, configuration: RunConfiguration):
+        super().configure(model, configuration)
 
         self.auxiliary_head = model.make_linear_layer(1).to(configuration.device)
 
@@ -39,16 +39,21 @@ class P3OR(PPOMixin):
             for minibatch in generator:
                 self.__step__(minibatch, model, self.configuration)
 
+            # Load batch
+            batch = batch()
+
             # Auxiliary step
             self.__auxiliary_step__(model, batch)
         except NotReadyException:
             return
 
     def __auxiliary_step__(self, model: Policy, batch: Batch):
-        actions = model.encode(batch.state, return_values=False)
-        actions = model.post_encode(values=None, actions=actions)
+        values, actions = model.encode(batch.state)
 
+        # TODO: Aggregate Q values
         values = self.auxiliary_head(actions)
+
+        _, actions = model.post_encode(batch.state, values, actions)
 
         loss = self.configuration.value_loss(values.view(-1), batch.info[Record.RETURN_KEY])
         loss += self.configuration.trpo_penalty * self.trpo_loss(actions, batch.info[Record.POLICY_KEY])

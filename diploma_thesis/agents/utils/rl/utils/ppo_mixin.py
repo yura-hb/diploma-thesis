@@ -13,6 +13,7 @@ class PPOConfiguration:
     entropy_regularization: float
     update_advantages: bool
     rollback_ratio: float
+    epochs: int
 
     @staticmethod
     def base_parameters_from_cli(parameters: Dict):
@@ -23,6 +24,7 @@ class PPOConfiguration:
             entropy_regularization=parameters.get('entropy_regularization', 0.0),
             update_advantages=parameters.get('update_advantages', True),
             rollback_ratio=parameters.get('rollback_ratio', 0.1),
+            epochs=parameters.get('epochs', 1)
         )
 
 
@@ -35,7 +37,6 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
         value, logits = model(batch.state)
 
         loss = self.actor_loss(batch, logits, configuration, self.run_configuration.device)
-        # Maximization of negative value is equivalent to minimization
         loss -= configuration.value_loss(value.view(-1), batch.info[Record.RETURN_KEY])
 
         # Want to maximize

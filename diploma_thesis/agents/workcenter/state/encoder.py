@@ -24,7 +24,8 @@ class GraphStateEncoder(GraphEncoder, metaclass=ABCMeta):
 
     def __post_encode__(self, graph: pyg.data.HeteroData, parameters: StateEncoder.Input) -> pyg.data.HeteroData:
         queued_jobs = torch.hstack(list(set([job.id for job in parameters.work_center.queue])))
-        is_in_queue = torch.isin(graph[Graph.JOB_INDEX_MAP][:, 0].view(-1), queued_jobs, assume_unique=True)
+        # TODO: assume_unique=False doesn't work well on MPS
+        is_in_queue = torch.isin(graph[Graph.JOB_INDEX_MAP][:, 0].view(-1), queued_jobs, assume_unique=False)
         is_target = graph[Graph.JOB_INDEX_MAP][:, [2]] == parameters.work_center.work_center_idx
 
         graph[Graph.OPERATION_KEY][Graph.TARGET_KEY] = torch.logical_and(is_in_queue, is_target)

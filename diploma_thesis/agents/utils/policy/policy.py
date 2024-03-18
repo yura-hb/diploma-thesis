@@ -66,7 +66,7 @@ class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
         pass
 
     def make_linear_layer(self, output_dim):
-        return Linear(output_dim, noise_parameters=self.noise_parameters)
+        return Linear(output_dim, noise_parameters=self.noise_parameters, activation='none', dropout=0)
 
     def clone(self):
         return copy.deepcopy(self)

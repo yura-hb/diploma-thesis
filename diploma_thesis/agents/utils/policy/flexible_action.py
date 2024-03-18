@@ -6,11 +6,24 @@ import torch_geometric as pyg
 
 class FlexibleAction(ActionPolicy):
 
+    def __init__(self, base_parameters):
+        super().__init__(**base_parameters)
+
+        self.action_layer = self.make_linear_layer(1)
+
     @property
     def is_recurrent(self):
         return False
 
+    def configure(self, configuration: RunConfiguration):
+        super().configure(configuration)
+
+        self.action_layer.to(configuration.device)
+
     def post_encode(self, state: State, value: torch.FloatTensor, actions: torch.FloatTensor):
+        actions = self.action_layer(actions)
+
+        # Unpack node embeddings obtained from graph batch
         if state.graph is not None and isinstance(state.graph, pyg.data.Batch):
             result = []
             lengths = []
@@ -31,9 +44,9 @@ class FlexibleAction(ActionPolicy):
             actions = torch.nn.utils.rnn.pad_sequence(result, batch_first=True, padding_value=torch.nan)
             lengths = torch.tensor(lengths)
 
-            return value, (actions, lengths)
+            return super().post_encode(state, value, (actions, lengths))
 
-        return value, actions
+        return super().post_encode(state, value, actions)
 
     def __estimate_policy__(self, value, actions):
         if isinstance(actions, tuple):
@@ -55,5 +68,5 @@ class FlexibleAction(ActionPolicy):
 
     @classmethod
     def from_cli(cls, parameters: Dict) -> 'Policy':
-        return FlexibleAction(**cls.base_parameters_from_cli(parameters))
+        return FlexibleAction(cls.base_parameters_from_cli(parameters))
 

@@ -48,9 +48,9 @@ parameters:
     kind: 'ppo'
     parameters:
       sample_ratio: 0.75
-      policy_step_ratio: 0.15
-      entropy_regularization: 0.5
-      rollback_ratio: 0.15
+      policy_step_ratio: 0.2
+      entropy_regularization: 0.2
+      rollback_ratio: 0.05
 
       epochs: 1
 

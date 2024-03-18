@@ -63,9 +63,8 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
             state = state.to(self.run_configuration.device)
 
         values, actions = self.encode(state)
-        values, actions = self.post_encode(state, values, actions)
 
-        return self.__estimate_policy__(values, actions)
+        return self.post_encode(state, values, actions)
 
     def encode(self, state: State, return_values: bool = True, return_actions: bool = True):
         values, actions = None, None
@@ -79,6 +78,9 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
             values = actions
 
         return values, actions
+
+    def post_encode(self, state: State, values: torch.FloatTensor, actions: torch.FloatTensor):
+        return self.__estimate_policy__(values, actions)
 
     def select(self, state: State) -> Record:
         value, actions = self.__call__(state)

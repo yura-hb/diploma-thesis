@@ -251,19 +251,34 @@ class Encoder:
     def __reset_forward_graph__(result: Graph):
         t = torch.tensor([], dtype=torch.long).view(2, 0)
 
-        result.data[edge(Graph.OPERATION_KEY, Graph.FORWARD_RELATION_KEY, Graph.GROUP_KEY)][Graph.EDGE_INDEX] = t
-        result.data[edge(Graph.GROUP_KEY, Graph.FORWARD_RELATION_KEY, Graph.OPERATION_KEY)][Graph.EDGE_INDEX] = t
-        result.data[edge(Graph.OPERATION_KEY, Graph.FORWARD_RELATION_KEY, Graph.OPERATION_KEY)][Graph.EDGE_INDEX] = t
+        edges = [
+            edge(Graph.OPERATION_KEY, Graph.FORWARD_RELATION_KEY, Graph.GROUP_KEY),
+            edge(Graph.GROUP_KEY, Graph.FORWARD_RELATION_KEY, Graph.OPERATION_KEY),
+            edge(Graph.OPERATION_KEY, Graph.FORWARD_RELATION_KEY, Graph.OPERATION_KEY)
+        ]
+
+        for edge_ in edges:
+            if edge_ in result.data.keys(include_nested=True):
+                del result.data[edge_]
+
+            result.data[edge_, Graph.EDGE_INDEX] = t
 
     @staticmethod
     def __reset_schedule_graph__(result: Graph):
         t = torch.tensor([], dtype=torch.long).view(2, 0)
 
-        result.data[edge(Graph.OPERATION_KEY, Graph.SCHEDULED_RELATION_KEY, Graph.OPERATION_KEY)][Graph.EDGE_INDEX] = t
-        result.data[edge(Graph.OPERATION_KEY, Graph.PROCESSED_RELATION_KEY, Graph.OPERATION_KEY)][Graph.EDGE_INDEX] = t
+        edges = [
+            edge(Graph.OPERATION_KEY, Graph.SCHEDULED_RELATION_KEY, Graph.OPERATION_KEY),
+            edge(Graph.OPERATION_KEY, Graph.PROCESSED_RELATION_KEY, Graph.OPERATION_KEY),
+            edge(Graph.MACHINE_KEY, Graph.SCHEDULED_RELATION_KEY, Graph.OPERATION_KEY),
+            edge(Graph.MACHINE_KEY, Graph.PROCESSED_RELATION_KEY, Graph.OPERATION_KEY)
+        ]
 
-        result.data[edge(Graph.MACHINE_KEY, Graph.SCHEDULED_RELATION_KEY, Graph.OPERATION_KEY)][Graph.EDGE_INDEX] = t
-        result.data[edge(Graph.MACHINE_KEY, Graph.PROCESSED_RELATION_KEY, Graph.OPERATION_KEY)][Graph.EDGE_INDEX] = t
+        for edge_ in edges:
+            if edge_ in result.data.keys(include_nested=True):
+                del result.data[edge_]
+
+            result.data[edge_, Graph.EDGE_INDEX] = t
 
     def __encode_graph__(self, graph: torch.Tensor, index: torch.Tensor):
         src_nodes = self.__get_node_ids__(graph[[0, 1], :], index)

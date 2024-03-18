@@ -22,7 +22,7 @@ class DiscreteAction(ActionPolicy):
         value = self.value_layer(value)
         actions = self.action_layer(actions)
 
-        return value, actions
+        return super().post_encode(state, value, actions)
 
     @classmethod
     def from_cli(cls, parameters: Dict) -> 'Policy':

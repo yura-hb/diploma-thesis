@@ -189,6 +189,8 @@ class GraphModel(Delegate):
                     if key in key_ and key_ in result.keys(include_nested=True):
                         del result[key_]
 
+        del data
+
         return result
 
     @staticmethod

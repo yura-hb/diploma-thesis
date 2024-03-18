@@ -10,12 +10,14 @@ from .dqn import DeepQTrainer
 from .reinforce import Reinforce
 from .ppo import PPO
 from .rl import RLTrainer
+from .p3or import P3OR
 
 key_to_class = {
     'dqn': DeepQTrainer,
     'ddqn': DoubleDeepQTrainer,
     'reinforce': Reinforce,
-    'ppo': PPO
+    'ppo': PPO,
+    'p3or': P3OR
 }
 
 

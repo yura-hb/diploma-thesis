@@ -52,6 +52,7 @@ parameters:
       policy_step_ratio: 0.15
       entropy_regularization: 0.5
       rollback_ratio: 0.15
+      trpo_penalty: 0.1
 
       epochs: 1
 
@@ -73,7 +74,7 @@ parameters:
         kind: 'replay'
         parameters:
           size: 16
-          batch_size: 1
+          batch_size: 4
           prefetch: 2
 
       return:

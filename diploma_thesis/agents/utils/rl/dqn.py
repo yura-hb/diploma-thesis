@@ -43,10 +43,14 @@ class DeepQTrainer(RLTrainer):
             return
 
         with torch.no_grad():
-            q_values, td_error = self.estimate_q(model, batch)
+            q_values = self.estimate_q(model, batch)
 
         _, actions = model(batch.state)
+        actions = actions[range(batch.shape[0]), batch.action]
+
         loss = self.loss(actions, q_values)
+
+        td_error = torch.square(actions - q_values)
 
         self.step(loss, self.optimizer)
 
@@ -59,21 +63,12 @@ class DeepQTrainer(RLTrainer):
             self.storage.update_priority(info['index'], td_error)
 
     def estimate_q(self, model: Policy, batch: Record | tensordict.TensorDictBase):
-        # Note:
-        # The idea is that we compute the Q-values only for performed actions. Other actions wouldn't be updated,
-        # because there will be zero loss and so zero gradient
-        _, actions = model(batch.next_state)
-        orig_q = actions.clone()[range(batch.shape[0]), batch.action]
-
         _, target = self.target_model(batch.next_state)
         target = target.max(dim=1).values
 
         q = batch.reward + self.return_estimator.discount_factor * target * (1 - batch.done.int())
-        actions[range(batch.shape[0]), batch.action] = q
 
-        td_error = torch.square(orig_q - q)
-
-        return actions, td_error
+        return q
 
     @property
     def target_model(self):

@@ -68,13 +68,7 @@ class RLTrainer(Loggable):
         if self.train_schedule != TrainSchedule.ON_TIMELINE:
             return
 
-        import time
-
-        start = time.time()
-
         self.__train__(model)
-
-        print(f"Training step took {time.time() - start} seconds")
 
     def __train__(self, model: Policy):
         pass
@@ -119,3 +113,4 @@ class RLTrainer(Loggable):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        optimizer.zero_grad()

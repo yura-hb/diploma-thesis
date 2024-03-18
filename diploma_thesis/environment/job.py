@@ -401,10 +401,10 @@ class Job:
             case JobEvent.Kind.dispatch:
                 self.current_step_idx = torch.tensor(0, dtype=torch.long)
             case JobEvent.Kind.forward:
-                self.current_step_idx = self.current_step_idx.clone() + 1
+                self.current_step_idx = self.current_step_idx + 1
                 self.current_machine_idx = torch.tensor(-1, dtype=torch.long)
             case JobEvent.Kind.arrival_on_machine:
-                self.current_machine_idx = event.machine_idx.clone()
+                self.current_machine_idx = event.machine_idx
             case _:
                 pass
 

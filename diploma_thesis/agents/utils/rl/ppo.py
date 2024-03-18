@@ -8,12 +8,10 @@ from .utils.ppo_mixin import *
 
 @dataclass
 class Configuration(PPOConfiguration):
-    epochs: int
 
     @staticmethod
     def from_cli(parameters: Dict):
-        return Configuration(**PPOConfiguration.base_parameters_from_cli(parameters),
-                             epochs=parameters.get('epochs', 1))
+        return Configuration(**PPOConfiguration.base_parameters_from_cli(parameters))
 
 
 class PPO(PPOMixin):

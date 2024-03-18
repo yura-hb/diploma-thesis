@@ -4,7 +4,7 @@ graph:
   - kind: 'graph_model'
     parameters:
       layers:
-        - kind: 'sage'
+        - kind: 'gin'
           parameters:
             in_channels: -1
             out_channels: 64
@@ -17,12 +17,8 @@ output:
   - kind: 'linear'
     parameters:
       dim: 64
-      activation: 'tanh'
-  - kind: 'linear'
-    parameters:
-      dim: 64
-      activation: 'tanh'
+      activation: 'relu'
   - kind: 'linear'
     parameters:
       dim: 1
-      activation: 'tanh'
+      activation: 'none'

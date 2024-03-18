@@ -4,6 +4,6 @@ encoder:
   kind: 'hierarchical'
   parameters:
     is_homogeneous: True
-    is_undirected: True
+    is_undirected: False
     is_local: True
     append_target_mask: True
