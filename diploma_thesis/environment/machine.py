@@ -271,7 +271,7 @@ class Machine:
     # Timeline
 
     def __produce__(self):
-        while True:
+        while self.shop_floor is not None:
             did_breakdown = yield self.environment.process(self.__breakdown_if_needed__())
             did_starve = yield self.environment.process(self.__starve_if_needed__())
 
@@ -330,6 +330,9 @@ class Machine:
             self.shop_floor.did_breakdown(self, repair_duration)
 
             yield self.environment.timeout(repair_duration)
+
+            if self.shop_floor is None:
+                return
 
             self.history.with_breakdown_end(self.environment.now)
             self.shop_floor.did_repair(self)

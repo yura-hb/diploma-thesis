@@ -36,6 +36,9 @@ class MachineQueue(Queue):
         self.__append_to_queue__(context, machine, record, mode)
 
     def did_produce(self, context: Context, machine: Machine, job: Job):
+        if len(self.queue[machine.key]) == 0:
+            return
+
         record = self.queue[machine.key][-1]
         record.record.reward = self.reward.reward_after_production(record.context)
 

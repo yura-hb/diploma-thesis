@@ -6,7 +6,7 @@ graph: &graph
       kind: 'base'
       parameters:
         forward:
-          kind: 'adding_arc'
+          kind: 'complete'
 
         schedule:
           kind: 'complete'
@@ -24,7 +24,7 @@ reinforce: &reinforce
   mods:
     __factory__:
       - [ 'util/optimizer/grad_norm.yml' ]
-      - [ 'util/device/mps.yml' ]
+      - [ 'util/infrastructure/mps.yml' ]
       - [ 'util/rules/simple_rules.yml' ]
       - [
           '__none__',
@@ -47,7 +47,7 @@ ppo: &ppo
   mods:
     __factory__:
       - [ 'util/optimizer/grad_norm.yml' ]
-      - [ 'util/device/mps.yml' ]
+      - [ 'util/infrastructure/mps.yml' ]
       - [ 'util/rules/simple_rules.yml' ]
       - [
           'agent/ppo/epochs/4.yml',
@@ -59,8 +59,6 @@ ppo: &ppo
 #         ['util/agent/centralized.yml', 'util/optimizer/lr_0001.yml'],
 #      ]
       - [
-#        '__none__',
-        'util/train_schedule/on_store.yml',
         'util/train_schedule/on_stored_data_exclusively.yml',
       ]
 
@@ -87,6 +85,7 @@ long_single_source_run: &long_single_source_run
         - [ [ 'size/jsp/10.yml' ]]
         - [ [ 'utilization/80.yml' ] ]
         - [ [ 'initial_assignment/2.yml' ] ]
+        - [ [ 'deduce_naive_actions.yml' ] ]
     nested:
       parameters:
         dispatch:
@@ -99,9 +98,10 @@ short_single_source_run: &short_single_source_run
     mods:
       __inout_factory__:
         - [ [ 'duration/256.yml' ] ]
+        - [ [ 'duration/256.yml' ] ]
         - [ [ 'size/jsp/10.yml' ] ]
         - [ [ 'utilization/80.yml' ] ]
-        - [ [ 'initial_assignment/2.yml' ] ]
+        - [ [ 'deduce_naive_actions.yml' ] ]
     nested:
       parameters:
         dispatch:
@@ -124,7 +124,7 @@ short_single_source_run: &short_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 1
+  n_workers: 2
   debug: False
   log_run: True
   store_run_statistics: False
@@ -167,7 +167,7 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 96
+              memory: 32
               emit_trajectory: True
 
           graph:
@@ -215,7 +215,7 @@ task:
                       parameters:
                         values:
                           __concat__:
-#                            - *short_single_source_run
+                            - *short_single_source_run
                             - *long_single_source_run
 
     - kind: 'multi_value'

@@ -56,21 +56,11 @@ def __evaluate__(tournament: 'Tournament',
     simulator.with_logger(logger)
 
     if not tournament.debug:
-        simulations = configuration.simulations
-        simulations = chunked(simulations, configuration.n_workers)
-        result = []
+        def on_simulation_end(simulation: Simulation):
+            tournament.__evaluate_criteria__(candidate, [simulation], criteria, candidate_output_dir)
 
-        for batch in tqdm(simulations, desc=f'Candidate: {candidate.name}'):
-            try:
-                configuration.simulations = batch
-
-                simulator.evaluate(environment=environment, config=configuration)
-
-                result += batch
-            except:
-                print(f'Error {traceback.format_exc()}')
-
-        return tournament.__evaluate_criteria__(candidate, result, criteria, candidate_output_dir)
+        simulator.evaluate(environment=environment, config=configuration, on_simulation_end=on_simulation_end)
+        return
 
     return {}
 

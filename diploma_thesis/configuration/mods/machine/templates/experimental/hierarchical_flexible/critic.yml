@@ -17,7 +17,7 @@ output:
   - kind: 'linear'
     parameters:
       dim: 64
-      activation: 'relu'
+      activation: 'tanh'
   - kind: 'linear'
     parameters:
       dim: 1

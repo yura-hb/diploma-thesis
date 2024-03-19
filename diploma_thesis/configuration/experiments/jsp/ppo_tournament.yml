@@ -3,7 +3,7 @@ task:
 
   n_workers: 1
   name: 'static_rules'
-  output_dir: 'results/jsp/experiments/ppo_reinforce_path/tournaments/test'
+  output_dir: 'results/jsp/experiments/ppo_reinforce_path/tournaments/hierarchical'
   store_run_statistics: False
   debug: False
 
@@ -15,7 +15,7 @@ task:
     - kind: 'persisted_agents'
       parameters:
         prefix: 'ppo'
-        path: 'results/jsp/experiments/ppo_reinforce_path/test/'
+        path: 'results/jsp/experiments/ppo_reinforce_path/runs/hierarchical'
     - kind: 'static'
       parameters:
         scheduling: 'all'

@@ -6,7 +6,10 @@ import simpy
 import torch
 import yaml
 
+from functools import partial
+
 import simulator
+
 from agents import work_center_from_cli, machine_from_cli
 from agents.base.rl_agent import RLAgent
 from simulator import from_cli as simulator_from_cli, Simulator, RewardCache
@@ -15,6 +18,7 @@ from simulator.graph import GraphModel
 from simulator.tape import TapeModel
 from utils import save
 from .workflow import Workflow
+
 
 
 class Simulation(Workflow):
@@ -78,19 +82,18 @@ class Simulation(Workflow):
 
         config = run_configuration_from_cli(config, logger=logger)
 
+        did_finish_simulation = partial(self.did_finish, output_dir=simulation_output_dir)
+
         if self.is_debug:
             config.timeline.duration = 2048
             config.n_workers = 1
             config.timeline.warm_up_phases = [0]
 
-            simulator.train(environment, config)
+            simulator.train(environment, config, on_simulation_end=did_finish_simulation)
         else:
-            reward_cache = simulator.train(environment, config)
+            reward_cache = simulator.train(environment, config, on_simulation_end=did_finish_simulation)
 
-            self.__store_simulations__(config.simulations,
-                                       reward_cache,
-                                       self.store_run_statistics,
-                                       simulation_output_dir)
+            self.__store_rewards__(config.simulations, reward_cache, simulation_output_dir)
 
         agent_output_dir = os.path.join(output_dir, 'agent')
 
@@ -120,13 +123,10 @@ class Simulation(Workflow):
 
         config = evaluate_configuration_from_cli(config, logger=logger)
 
-        if not self.is_debug:
-            simulator.evaluate(environment, config)
+        did_finish_simulation = partial(self.did_finish, output_dir=simulation_output_dir)
 
-            self.__store_simulations__(config.simulations,
-                                       reward_cache=None,
-                                       store_run_statistics=self.store_run_statistics,
-                                       output_dir=simulation_output_dir)
+        if not self.is_debug:
+            simulator.evaluate(environment, config, on_simulation_end=did_finish_simulation)
 
     def __make_simulator__(self):
         machine = machine_from_cli(parameters=self.parameters['machine_agent'])
@@ -143,11 +143,27 @@ class Simulation(Workflow):
 
         return simulator
 
+    def did_finish(self, simulation, output_dir: str):
+        path = os.path.join(output_dir, simulation.simulation_id)
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        if shop_floor := simulation.shop_floor:
+            statistics = shop_floor.statistics
+
+            if self.store_run_statistics:
+                statistics.save(path)
+
+            with open(os.path.join(path, 'report.txt'), 'w') as file:
+                file.write(str(statistics.report()))
+
+            del simulation.shop_floor
+
+            simulation.shop_floor = None
+
     @staticmethod
-    def __store_simulations__(simulations: List[simulator.Simulation],
-                              reward_cache: RewardCache,
-                              store_run_statistics: bool,
-                              output_dir: str):
+    def __store_rewards__(simulations: List[simulator.Simulation], reward_cache: RewardCache, output_dir: str):
         reward_cache = RewardCache(batch_size=[]) if reward_cache is None else reward_cache
         machine_reward, work_center_reward = Simulation.__process_reward_cache__(reward_cache)
 
@@ -157,19 +173,10 @@ class Simulation(Workflow):
             if not os.path.exists(path):
                 os.makedirs(path)
 
-            if shop_floor := simulation.shop_floor:
-                statistics = shop_floor.statistics
+            sh_id = simulation.simulation_index
 
-                if store_run_statistics:
-                    statistics.save(path)
-
-                sh_id = shop_floor.id.item()
-
-                Simulation.__store_reward_record__(path, machine_reward, sh_id, 'machine_reward.csv')
-                Simulation.__store_reward_record__(path, work_center_reward, sh_id, 'work_center_reward.csv')
-
-                with open(os.path.join(path, 'report.txt'), 'w') as file:
-                    file.write(str(statistics.report()))
+            Simulation.__store_reward_record__(path, machine_reward, sh_id, 'machine_reward.csv')
+            Simulation.__store_reward_record__(path, work_center_reward, sh_id, 'work_center_reward.csv')
 
     @staticmethod
     def __process_reward_cache__(reward_cache: RewardCache):

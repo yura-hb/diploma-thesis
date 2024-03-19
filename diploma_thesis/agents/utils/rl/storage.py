@@ -23,14 +23,11 @@ class Storage:
     def store(self, sample: TrainingSample):
         records = self.__prepare__(sample)
 
-        if records[0].state.graph is None:
-            print(records[0].state.graph)
-
         for record in records:
             record.info['episode'] = sample.episode_id
 
             # Remove extra fields for training record
-            if record.state.graph is not None:
+            if record.state.graph is not None and Graph.JOB_INDEX_MAP in record.state.graph.data.keys():
                 del record.state.graph.data[Graph.JOB_INDEX_MAP]
                 del record.next_state.graph.data[Graph.JOB_INDEX_MAP]
 

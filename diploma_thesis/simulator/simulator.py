@@ -83,7 +83,10 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         return self
 
     @reset_tape()
-    def train(self, environment: simpy.Environment, config: RunConfiguration):
+    def train(self,
+              environment: simpy.Environment,
+              config: RunConfiguration,
+              on_simulation_end: Callable[[Simulation], None] = None):
         assert self.machine.is_trainable or self.work_center.is_trainable, 'At least one agent should be trainable'
 
         self.cache = RewardCache(batch_size=[])
@@ -124,7 +127,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                 run_event=run_end,
                 n_workers=config.n_workers,
                 simulations=config.simulations,
-                is_training=True
+                is_training=True,
+                on_simulation_end=on_simulation_end
             )
         )
         env.process(self.__terminate_if_needed__(
@@ -142,7 +146,10 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         return reward_record
 
     @reset_tape()
-    def evaluate(self, environment: simpy.Environment, config: EvaluateConfiguration):
+    def evaluate(self,
+                 environment: simpy.Environment,
+                 config: EvaluateConfiguration,
+                 on_simulation_end: Callable[[Simulation], None] = None):
         self.__log__(f'Evaluation Started')
 
         self.__update__(EvaluationPhase())
@@ -155,7 +162,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                 run_event=run_end,
                 n_workers=config.n_workers,
                 simulations=config.simulations,
-                is_training=False
+                is_training=False,
+                on_simulation_end=on_simulation_end
             )
         )
 
@@ -247,7 +255,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                 run_event: simpy.Event,
                 n_workers: int,
                 simulations: List[Simulation],
-                is_training: bool):
+                is_training: bool,
+                on_simulation_end: Callable):
         resource = simpy.Resource(environment, capacity=n_workers)
 
         def consume(simulation: Simulation):
@@ -274,6 +283,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
                 if is_training:
                     self.did_finish_simulation(simulation)
+
+                on_simulation_end(simulation)
 
         processes = [environment.process(consume(simulation)) for simulation in simulations]
 
@@ -370,7 +381,6 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
             by_size = sorted(by_size.items(), key=lambda pair: torch.prod(torch.tensor(pair[0])) * pair[1], reverse=True)
 
             print(by_size)
-
             print(reduce(lambda x, pair: x + torch.prod(torch.tensor(pair[0])) * pair[1], by_size, 0))
 
     def __terminate_if_needed__(self, environment: simpy.Environment, run_event: simpy.Event, delay: float):

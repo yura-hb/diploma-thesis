@@ -46,7 +46,7 @@ class MultiSimulation(Workflow):
 
         n_workers = self.parameters.get('n_workers', -1)
 
-        Parallel(n_jobs=n_workers, backend='threading')(delayed(__run__)(s) for s in parameters)
+        Parallel(n_jobs=n_workers)(delayed(__run__)(s) for s in parameters)
 
     def __fetch_tasks__(self):
         result: [Dict] = []
