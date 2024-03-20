@@ -15,8 +15,6 @@ class Configuration:
 
     @staticmethod
     def from_cli_arguments(configuration: Dict) -> 'Configuration':
-        print(configuration.get('deduce_naive_actions'))
-
         return Configuration(
             timespan=configuration['timespan'],
             machines_per_work_center=configuration['machines_per_work_center'],

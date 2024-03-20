@@ -41,7 +41,7 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         for key in self.keys:
             if self.is_model_distributed:
                 self.model[key] = copy.deepcopy(base_model)
-                self.model.configure(self.configuration)
+                self.model[key].configure(self.configuration)
 
             self.trainer[key] = copy.deepcopy(base_trainer)
 
@@ -75,7 +75,7 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         for key in self.keys:
             self.trainer[key].train_step(self.__model_for_key__(key).policy)
 
-    @filter(lambda self, *args: self.phase == TrainingPhase())
+    @filter(lambda self, *args: self.phase != EvaluationPhase())
     def store(self, key: Key, sample: TrainingSample):
         self.trainer[key].store(sample, self.__model_for_key__(key).policy)
 
@@ -112,7 +112,7 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         state_dict = dict(is_configured=self.is_configured, keys=self.keys)
 
         if self.is_configured:
-            model = {key: model.state_dict() for key, model in self.model.item()} \
+            model = {key: model.state_dict() for key, model in self.model.items()} \
                      if self.is_model_distributed else self.model.state_dict()
 
             state_dict.update(dict(

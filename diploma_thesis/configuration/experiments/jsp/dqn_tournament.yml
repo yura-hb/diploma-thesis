@@ -1,7 +1,7 @@
 task:
   kind: 'tournament'
 
-  n_workers: 6
+  n_workers: 1
   name: 'static_rules'
   output_dir: 'results/jsp/experiments/dqn_path/tournaments/marl_indirect_test'
   store_run_statistics: False
@@ -78,7 +78,7 @@ task:
             kind: 'simulation'
             parameters:
               configuration:
-                timespan: 3000
+                timespan: 2000
                 machines_per_work_center: 1
                 work_center_count: 10
 

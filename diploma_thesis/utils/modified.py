@@ -20,11 +20,9 @@ def modified(parameters):
 
     mods_dir = os.path.dirname(base_path)
     mods_dir = os.path.join(mods_dir, 'mods')
+    mod_dirs = parameters.get('mod_dirs', []) + [mods_dir]
 
-    for mod in mods:
-        with open(os.path.join(mods_dir, mod)) as file:
-            mod = yaml.safe_load(file)
-            base_parameters = merge_dicts(base_parameters, mod)
+    base_parameters = __fetch_mods__(base_parameters, mods, mod_dirs)
 
     for key, value in template.items():
         if key in base_parameters:
@@ -34,6 +32,33 @@ def modified(parameters):
 
     if 'nested' in parameters:
         base_parameters = merge_dicts(base_parameters, parameters['nested'])
+
+    return base_parameters
+
+
+def __fetch_mods__(base_parameters, mods, dirs):
+    for mod in mods:
+        did_found_mod = False
+
+        for directory in dirs:
+            if len(mods) == 0:
+                break
+
+            path = os.path.join(directory, mod)
+
+            if not os.path.exists(path):
+                continue
+
+            did_found_mod = True
+
+            with open(path) as file:
+                mod = yaml.safe_load(file)
+                base_parameters = merge_dicts(base_parameters, mod)
+
+            break
+
+        if not did_found_mod:
+            raise ValueError(f'Mod does not exist {mod} in {dirs}')
 
     return base_parameters
 

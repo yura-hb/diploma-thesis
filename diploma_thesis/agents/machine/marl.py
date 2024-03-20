@@ -28,6 +28,6 @@ class MARLMachine(MARLAgent[MachineKey]):
 
         return MARLMachine(is_model_distributed=is_model_distributed,
                            model=model,
-                           state_encoder=encoder,
+                           encoder=encoder,
                            trainer=trainer,
                            configuration=configuration)

@@ -6,6 +6,7 @@ task:
   output_dir: 'results/jsp/experiments/ppo_reinforce_path/tournaments/hierarchical'
   store_run_statistics: False
   debug: False
+  log_run: True
 
   candidates:
 #    - kind: 'persisted_agents'
@@ -18,7 +19,8 @@ task:
         path: 'results/jsp/experiments/ppo_reinforce_path/runs/hierarchical'
     - kind: 'static'
       parameters:
-        scheduling: 'all'
+        scheduling:
+          - 'fifo'
         routing:
           - 'ct'
 
@@ -39,7 +41,7 @@ task:
     points: 1
 
   simulator:
-    n_workers: 10
+    n_workers: 20
     simulations:
       - name: 'tailard'
         kind: 'jsp_dataset'
@@ -58,20 +60,20 @@ task:
             kind: 'simulation'
             parameters:
               configuration:
-                timespan: 3000
+                timespan: 2000
                 machines_per_work_center: 1
                 work_center_count: 10
+                deduce_naive_actions: True
 
               dispatch:
                 initial_job_assignment:
                   kind: 'n_per_machine'
                   parameters:
-                    n: 5
+                    n: 0
 
                 job_sampler:
                   kind: 'dynamic'
                   parameters:
-                    n_jobs: 100
                     processing_times: # Sampler
                       kind: 'uniform'
                       parameters:
@@ -107,11 +109,27 @@ task:
             parameters:
               dispatch:
                 seed:
-                  - 122341523
-                  - 314123123
-                  - 431234231
-                  - 646547353
-                  - 745634563
+                  - 0
+                  - 1
+                  - 2
+                  - 3
+                  - 4
+                  - 5
+                  - 6
+                  - 7
+                  - 8
+                  - 9
+                  - 10
+                  - 11
+                  - 12
+                  - 13
+                  - 14
+                  - 15
+                  - 16
+                  - 17
+                  - 18
+                  - 19
+
 
                 job_sampler:
                   parameters:
@@ -121,4 +139,3 @@ task:
                           - 0.7
                           - 0.8
                           - 0.9
-                          - 0.95

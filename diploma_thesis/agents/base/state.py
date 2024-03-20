@@ -111,5 +111,5 @@ class Graph:
 class State:
     state: torch.FloatTensor | None = None
     graph: Graph | None = None
-    memory: torch.FloatTensor | None = None
+    memory: TensorDictBase = field(default_factory=lambda: TensorDict({}, batch_size=[]))
     info: TensorDictBase = field(default_factory=lambda: TensorDict({}, batch_size=[]))

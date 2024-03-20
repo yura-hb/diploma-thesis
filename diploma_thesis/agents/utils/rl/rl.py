@@ -3,6 +3,7 @@ from abc import abstractmethod
 from enum import StrEnum
 
 import pandas as pd
+import torch.jit
 
 from agents.utils.run_configuration import RunConfiguration
 from agents.utils.nn import Loss, Optimizer

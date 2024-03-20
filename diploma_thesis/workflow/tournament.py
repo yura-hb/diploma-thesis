@@ -56,11 +56,22 @@ def __evaluate__(tournament: 'Tournament',
     simulator.with_logger(logger)
 
     if not tournament.debug:
+        result = []
+
         def on_simulation_end(simulation: Simulation):
-            tournament.__evaluate_criteria__(candidate, [simulation], criteria, candidate_output_dir)
+            nonlocal result
+
+            try:
+                result += tournament.__evaluate_criteria__(candidate,
+                                                           simulations=[simulation],
+                                                           criteria=criteria,
+                                                           output_dir=candidate_output_dir)
+            except:
+                traceback.print_exc()
 
         simulator.evaluate(environment=environment, config=configuration, on_simulation_end=on_simulation_end)
-        return
+
+        return result
 
     return {}
 

@@ -71,16 +71,16 @@ class Memory(Generic[_Configuration], metaclass=ABCMeta):
         if len(self.buffer) < self.configuration.batch_size:
             raise NotReadyException()
 
-        result = self.buffer.sample(return_info=return_info)
-        result = copy.deepcopy(result)
+        result, index = self.buffer.sample(return_info=True)
+        result = self.__clone__(result)
 
         if self.configuration.is_tensordict_storage:
             if not isinstance(result, list):
                 result = [result]
 
-            return list(record.unbind(dim=0) for record in result)
+            return list(record.unbind(dim=0) for record in result), index
 
-        return result
+        return result, index
 
     def sample_n(self, batch_size: int) -> Record:
         return self.buffer.sample(batch_size=batch_size)
@@ -117,3 +117,11 @@ class Memory(Generic[_Configuration], metaclass=ABCMeta):
     def __setstate__(self, state):
         self.configuration = state
         self.buffer = self.__make_buffer__()
+
+    @classmethod
+    def __clone__(cls, batch):
+        if isinstance(batch, Record):
+            return batch.clone()
+
+        if isinstance(batch, list):
+            return [cls.__clone__(element) for element in batch]

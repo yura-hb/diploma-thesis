@@ -2,7 +2,7 @@ task:
   kind: 'task'
 
   name: 'test'
-  output_dir: 'results/jsp/experiments/ppo_reinforce_path/test'
+  output_dir: 'results/jsp/experiments/dqn_path/test'
   log_stdout: True
   log_run: True
   debug: False
@@ -11,23 +11,25 @@ task:
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/machine/ppo.yml'
-      template: 'experimental/hierarchical_flexible'
+      base_path: 'configuration/experiments/jsp/marl_dqn/machine.yml'
+      template: 'marl_direct'
+      mod_dirs:
+        - 'configuration/mods/machine/mods'
       mods:
-#        - 'agent/dqn/ddqn.yml'
-#        - 'agent/dqn/dueling.yml'
-#        - 'agent/dqn/prioritized.yml'
-#        - 'agent/dqn/steps/5.yml'
-#        - 'agent/dqn/noisy.yml'
-        - 'agent/ppo/epochs/10.yml'
+        - 'agent/dqn/ddqn.yml'
+        - 'agent/dqn/dueling.yml'
+        - 'agent/dqn/prioritized.yml'
+        - 'agent/dqn/steps/5.yml'
+        - 'agent/dqn/noisy.yml'
+#        - 'agent/ppo/epochs/10.yml'
 #        - 'util/rules/all_rules.yml'
-        - 'util/optimizer/grad_norm.yml'
-        - 'util/infrastructure/mps.yml'
-        - 'util/rules/simple_rules.yml'
+#        - 'util/optimizer/grad_norm.yml'
+#        - 'util/infrastructure/mps.yml'
+#        - 'util/rules/simple_rules.yml'
 #        - 'util/train_schedule/on_store.yml'
 #        - 'util/infrastructure/compile.yml'
-        - 'util/train_schedule/on_stored_data_exclusively.yml'
-#        - 'util/agent/multi_agent.yml'
+#        - 'util/train_schedule/on_stored_data_exclusively.yml'
+        - 'util/agent/multi_agent.yml'
 #        - 'util/infrastructure/compile.yml'
 
   work_center_agent:
@@ -42,7 +44,7 @@ task:
 
   tape:
     machine_reward:
-      kind: 'surrogate_tardiness'
+      kind: 'global_decomposed_tardiness'
 
     work_center_reward:
       kind: 'no'
@@ -51,31 +53,32 @@ task:
 
   graph:
     transition_model:
-      kind: 'base'
-      parameters:
-        forward:
-          kind: 'adding_arc'
+      kind: 'no'
+#      parameters:
+#        forward:
+#          kind: 'adding_arc'
+#
+#        schedule:
+#          kind: 'compressed'
 
-        schedule:
-          kind: 'compressed'
-
-    memory: 0
-    is_machine_set_in_work_center_connected: True
-    is_work_center_set_in_shop_floor_connected: True
+#    memory: 0
+#    is_machine_set_in_work_center_connected: True
+#    is_work_center_set_in_shop_floor_connected: True
 
   simulator:
-    kind: episodic
-    parameters:
+    kind: td
+#    parameters:
 #      emit_trajectory: true
-#      memory: 16
+#      memory:
 
   run:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/run/run.yml'
+      base_path: 'configuration/experiments/jsp/marl_dqn/run.yml'
+      mod_dirs:
+         - 'configuration/mods/run/mods'
       mods:
-        - 'n_workers/4.yml'
-        - 'timeline/no_warmup.yml'
+        - 'n_workers/1.yml'
       nested:
         parameters:
           simulations:
@@ -85,13 +88,15 @@ task:
                 base:
                   kind: 'mod'
                   parameters:
-                    base_path: 'configuration/mods/simulation/simulation.yml'
+                    base_path: 'configuration/experiments/jsp/marl_dqn/simulation.yml'
+                    mod_dirs:
+                      - 'configuration/mods/simulation/mods'
                     mods: [ ]
                 values:
                   parameters:
                     mods:
                       __factory__:
-                        - [ 'duration/256.yml' ]
+                        - [ 'duration/10000.yml' ]
                         - [ 'size/jsp/10.yml' ]
                         - [ 'utilization/80.yml', 'utilization/90.yml']
                         - [ 'initial_assignment/2.yml' ]
@@ -101,25 +106,25 @@ task:
                         dispatch:
                           seed: [
                             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                            11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                            21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-                            31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-                            41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-                            51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-                            61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
-                            71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-                            81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
-                            91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
-                            101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
-                            111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
-                            121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
-                            131, 132, 133, 134, 135, 136, 137, 138, 139, 140,
-                            141, 142, 143, 144, 145, 146, 148, 148, 149, 150,
-                            151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
-                            161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
-                            171, 172, 173, 174, 175, 176, 177, 178, 179, 180,
-                            181, 182, 183, 184, 185, 186, 187, 188, 189, 190,
-                            191, 192, 193, 194, 195, 196, 197, 198, 199
+#                            11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+#                            21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+#                            31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+#                            41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+#                            51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+#                            61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
+#                            71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+#                            81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+#                            91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
+#                            101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+#                            111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
+#                            121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
+#                            131, 132, 133, 134, 135, 136, 137, 138, 139, 140,
+#                            141, 142, 143, 144, 145, 146, 148, 148, 149, 150,
+#                            151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
+#                            161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
+#                            171, 172, 173, 174, 175, 176, 177, 178, 179, 180,
+#                            181, 182, 183, 184, 185, 186, 187, 188, 189, 190,
+#                            191, 192, 193, 194, 195, 196, 197, 198, 199
                           ]
 #            - kind: 'mod'
 #              parameters:

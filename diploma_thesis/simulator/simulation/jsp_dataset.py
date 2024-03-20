@@ -29,6 +29,7 @@ class JSPDataset:
                         timespan=100000,
                         machines_per_work_center=1,
                         work_center_count=machines_count,
+                        deduce_naive_actions=True
                     ),
                     dispatch=dict(
                         job_sampler=dict(

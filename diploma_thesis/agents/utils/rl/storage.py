@@ -159,8 +159,11 @@ class Storage:
             result[key] = []
 
         for element in batch:
+            keys_ = element.info.keys()
+
             for key in keys:
-                result[key] += torch.atleast_2d(element.info[key])
+                if key in keys_:
+                    result[key] += torch.atleast_2d(element.info[key])
 
         for key in keys:
             match key:
@@ -173,8 +176,10 @@ class Storage:
 
         # In some cases batch can be sampled with repetition
         for element in batch:
+            keys_ = element.info.keys()
+
             for key in keys:
-                if key in element.info.keys():
+                if key in keys_:
                     del element.info[key]
 
         return result

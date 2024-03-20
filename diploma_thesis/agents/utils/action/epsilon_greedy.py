@@ -8,6 +8,8 @@ class EpsilonGreedy(ActionSelector):
         self.epsilon = epsilon
 
     def __call__(self, distribution: torch.Tensor) -> Tuple[int, torch.Tensor]:
+        distribution = torch.atleast_1d(distribution)
+
         action = torch.argmax(distribution).item()
         policy = torch.zeros_like(distribution) + self.epsilon / distribution.size(0)
         policy[action] += 1 - self.epsilon

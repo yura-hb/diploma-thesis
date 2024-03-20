@@ -365,23 +365,26 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
             yield environment.timeout(log_tick)
 
             import gc
-            from functools import reduce
 
             gc.collect()
 
-            by_size = dict()
+            # TODO: Improve
 
-            for obj in gc.get_objects():
-                try:
-                    if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
-                        by_size[obj.size()] = by_size.get(obj.size(), 0) + 1
-                except:
-                    pass
+            # from functools import reduce
 
-            by_size = sorted(by_size.items(), key=lambda pair: torch.prod(torch.tensor(pair[0])) * pair[1], reverse=True)
-
-            print(by_size)
-            print(reduce(lambda x, pair: x + torch.prod(torch.tensor(pair[0])) * pair[1], by_size, 0))
+            # by_size = dict()
+            #
+            # for obj in gc.get_objects():
+            #     try:
+            #         if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
+            #             by_size[obj.size()] = by_size.get(obj.size(), 0) + 1
+            #     except:
+            #         pass
+            #
+            # by_size = sorted(by_size.items(), key=lambda pair: torch.prod(torch.tensor(pair[0])) * pair[1], reverse=True)
+            #
+            # print(by_size)
+            # print(reduce(lambda x, pair: x + torch.prod(torch.tensor(pair[0])) * pair[1], by_size, 0))
 
     def __terminate_if_needed__(self, environment: simpy.Environment, run_event: simpy.Event, delay: float):
         yield environment.timeout(delay)

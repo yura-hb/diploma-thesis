@@ -37,6 +37,10 @@ class DeepQTrainer(RLTrainer):
         self._target_model = AveragedModel(model.clone(), avg_fn=avg_fn).to(configuration.device)
 
     def __train__(self, model: Policy):
+        import time
+
+        start = time.time()
+
         try:
             batch, info = self.storage.sample(update_returns=False, device=self.run_configuration.device)
         except NotReadyException:
@@ -61,6 +65,8 @@ class DeepQTrainer(RLTrainer):
                 self._target_model.update_parameters(model)
 
             self.storage.update_priority(info['index'], td_error)
+
+        print('Duration: ', time.time() - start)
 
     def estimate_q(self, model: Policy, batch: Record | tensordict.TensorDictBase):
         _, target = self.target_model(batch.next_state)
