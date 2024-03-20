@@ -4,7 +4,7 @@ import torch
 from dataclasses import dataclass
 
 
-class Loss:
+class Loss(torch.nn.Module):
 
     @dataclass
     class Configuration:
@@ -12,10 +12,12 @@ class Loss:
         parameters: dict
 
     def __init__(self, configuration: Configuration):
+        super().__init__()
+        
         self.configuration = configuration
         self.loss = self.__make_loss__()
 
-    def __call__(self, *args, **kwargs):
+    def forward(self, *args, **kwargs):
         return self.loss(*args, **kwargs)
 
     def __make_loss__(self) -> torch.nn.Module:

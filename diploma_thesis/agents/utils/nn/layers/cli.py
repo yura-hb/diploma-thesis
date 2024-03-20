@@ -8,6 +8,7 @@ def from_cli(*args, **kwargs):
     from .merge import Merge
     from .graph_model import GraphModel
     from .partial_instance_norm_1d import PartialInstanceNorm1d
+    from .output import Output
 
     from utils import from_cli as from_cli_
 
@@ -31,6 +32,8 @@ def from_cli(*args, **kwargs):
         'add_pool': AddPool,
         'max_pool': MaxPool,
         'mean_pool': MeanPool,
+
+        'output': Output
     }
 
     return from_cli_(*args, **kwargs, key_to_class=key_to_class)

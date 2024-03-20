@@ -6,8 +6,8 @@ from .layer import *
 
 class Merge(Layer):
 
-    def __init__(self, kind: str = 'pass'):
-        super().__init__()
+    def __init__(self, kind: str, signature: str):
+        super().__init__(signature=signature)
 
         self.kind = kind
 
@@ -32,4 +32,4 @@ class Merge(Layer):
 
     @classmethod
     def from_cli(cls, parameters: dict) -> 'Layer':
-        return Merge(kind=parameters['kind'])
+        return Merge(kind=parameters['kind'], signature=parameters['signature'])

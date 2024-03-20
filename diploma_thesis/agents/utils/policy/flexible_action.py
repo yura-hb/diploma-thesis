@@ -20,7 +20,9 @@ class FlexibleAction(ActionPolicy):
 
         self.action_layer.to(configuration.device)
 
-    def post_encode(self, state: State, value: torch.FloatTensor, actions: torch.FloatTensor):
+    def post_encode(self, state: State, outputs):
+        values, actions = self.__fetch_values_and_actions__(outputs)
+
         actions = self.action_layer(actions)
 
         # Unpack node embeddings obtained from graph batch
@@ -44,9 +46,9 @@ class FlexibleAction(ActionPolicy):
             actions = torch.nn.utils.rnn.pad_sequence(result, batch_first=True, padding_value=torch.nan)
             lengths = torch.tensor(lengths)
 
-            return super().post_encode(state, value, (actions, lengths))
+            return values, self.__estimate_policy__(values, (actions, lengths))
 
-        return super().post_encode(state, value, actions)
+        return values, self.__estimate_policy__(values, actions)
 
     def __estimate_policy__(self, value, actions):
         if isinstance(actions, tuple):

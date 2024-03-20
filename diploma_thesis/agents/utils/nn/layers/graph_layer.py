@@ -6,11 +6,7 @@ from .layer import *
 
 
 class GraphLayer(Layer):
-
-    @property
-    @abstractmethod
-    def signature(self) -> str | None:
-        pass
+    pass
 
 
 class BaseWrapper(GraphLayer):

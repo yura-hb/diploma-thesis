@@ -2,6 +2,7 @@
 import copy
 from abc import ABCMeta, abstractmethod
 from dataclasses import field
+from enum import StrEnum
 from typing import TypeVar, Generic
 
 import torch
@@ -11,8 +12,8 @@ from torch import nn
 
 from agents.base.state import State
 from agents.utils import PhaseUpdatable
-from agents.utils.run_configuration import RunConfiguration
 from agents.utils.nn.layers.linear import Linear
+from agents.utils.run_configuration import RunConfiguration
 
 Action = TypeVar('Action')
 Rule = TypeVar('Rule')
@@ -24,6 +25,12 @@ class Record:
     state: State
     action: Action
     info: TensorDict = field(default_factory=lambda: TensorDict({}, batch_size=[]))
+
+
+class Keys(StrEnum):
+    ACTIONS = 'actions'
+    VALUE = 'value'
+    POLICY = 'policy'
 
 
 class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
@@ -55,7 +62,7 @@ class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def post_encode(self, state: State, values: torch.FloatTensor, actions: torch.FloatTensor):
+    def post_encode(self, state: State, output: TensorDict):
         pass
 
     @property
@@ -66,7 +73,7 @@ class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
         pass
 
     def make_linear_layer(self, output_dim):
-        return Linear(output_dim, noise_parameters=self.noise_parameters, activation='none', dropout=0)
+        return Linear(output_dim, noise_parameters=self.noise_parameters, activation='none', dropout=0, signature='')
 
     def clone(self):
         return copy.deepcopy(self)

@@ -114,4 +114,3 @@ class RLTrainer(Loggable):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        optimizer.zero_grad()

@@ -6,8 +6,8 @@ from typing import List
 
 class Flatten(Layer):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, signature):
+        super().__init__(signature)
 
         self.layer = nn.Flatten()
 
@@ -16,13 +16,13 @@ class Flatten(Layer):
 
     @classmethod
     def from_cli(cls, parameters: dict) -> 'Layer':
-        return Flatten()
+        return Flatten(parameters['signature'])
 
 
 class LayerNorm(Layer):
 
-    def __init__(self, normalized_shape: int | List[int]):
-        super().__init__()
+    def __init__(self, normalized_shape: int | List[int], signature):
+        super().__init__(signature)
 
         self.layer = nn.LayerNorm(normalized_shape=normalized_shape)
 
@@ -31,13 +31,13 @@ class LayerNorm(Layer):
 
     @classmethod
     def from_cli(cls, parameters: dict) -> 'Layer':
-        return LayerNorm(normalized_shape=parameters['normalized_shape'])
+        return LayerNorm(normalized_shape=parameters['normalized_shape'], signature=parameters['signature'])
 
 
 class InstanceNorm(Layer):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, signature):
+        super().__init__(signature)
 
         self.layer = nn.LazyInstanceNorm1d()
 
@@ -46,4 +46,4 @@ class InstanceNorm(Layer):
 
     @classmethod
     def from_cli(cls, parameters: dict) -> 'Layer':
-        return InstanceNorm()
+        return InstanceNorm(signature=parameters['signature'])

@@ -14,15 +14,13 @@ class PolicyEstimationMethod(StrEnum):
 class ActionPolicy(Policy[Input], metaclass=ABCMeta):
 
     def __init__(self,
-                 actor: NeuralNetwork | None,
-                 critic: NeuralNetwork | None,
+                 model: NeuralNetwork | None,
                  action_selector: ActionSelector,
                  policy_method: PolicyEstimationMethod = PolicyEstimationMethod.INDEPENDENT,
                  noise_parameters: Dict = None):
         super().__init__()
 
-        self.actor = actor
-        self.critic = critic
+        self.model = model
         self.action_selector = action_selector
         self.policy_estimation_method = policy_method
         self.noise_parameters = noise_parameters
@@ -45,16 +43,13 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
                 if model is not None:
                     model.compile()
 
-        if self.actor is not None:
-            self.actor = self.actor.to(configuration.device)
-
-        if self.critic is not None:
-            self.critic = self.critic.to(configuration.device)
+        if self.model is not None:
+            self.model = self.model.to(configuration.device)
 
     def update(self, phase: Phase):
         self.phase = phase
 
-        for module in [self.critic, self.actor, self.action_selector]:
+        for module in [self.model, self.action_selector]:
             if isinstance(module, PhaseUpdatable):
                 module.update(phase)
 
@@ -62,24 +57,18 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
         if state.device != self.run_configuration.device:
             state = state.to(self.run_configuration.device)
 
-        values, actions = self.encode(state)
+        output = self.encode(state)
 
-        return self.post_encode(state, values, actions)
+        return self.post_encode(state, output)
 
-    def encode(self, state: State, return_values: bool = True, return_actions: bool = True):
-        values, actions = None, None
+    def encode(self, state: State):
+        output = self.model(state)
 
-        if self.actor is not None:
-            actions = self.actor(state)
+        return output
 
-        if self.critic is not None:
-            values = self.critic(state)
-        else:
-            values = actions
+    def post_encode(self, state: State, output: TensorDict):
+        values, actions = self.__fetch_values_and_actions__(output)
 
-        return values, actions
-
-    def post_encode(self, state: State, values: torch.FloatTensor, actions: torch.FloatTensor):
         return self.__estimate_policy__(values, actions)
 
     def select(self, state: State) -> Record:
@@ -89,9 +78,9 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
         action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
 
         info = TensorDict({
-            "policy": policy,
-            "value": value,
-            "actions": actions
+            Keys.POLICY: policy,
+            Keys.VALUE: value,
+            Keys.ACTIONS: actions
         }, batch_size=[])
 
         return Record(state, action, info, batch_size=[]).detach().cpu()
@@ -111,10 +100,16 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
                 raise ValueError(f"Policy estimation method {self.policy_estimation_method} is not supported")
 
     @staticmethod
+    def __fetch_values_and_actions__(output: TensorDict):
+        actions = output[Keys.ACTIONS]
+        values = output.get(Keys.VALUE, actions)
+
+        return actions, values
+
+    @staticmethod
     def base_parameters_from_cli(parameters: Dict):
         return dict(
-            actor=NeuralNetwork.from_cli(parameters['actor']),
-            critic=NeuralNetwork.from_cli(parameters['critic']) if parameters.get('critic') else None,
+            model=NeuralNetwork.from_cli(parameters['model']),
             action_selector=action_selector_from_cli(parameters['action_selector']),
             policy_method=PolicyEstimationMethod(parameters['policy_method']) if parameters.get('policy_method')
             else PolicyEstimationMethod.INDEPENDENT,

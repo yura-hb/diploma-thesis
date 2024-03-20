@@ -14,6 +14,7 @@ class GraphModel(Layer):
     @dataclass
     class Configuration:
         layers: List[Tuple[Layer, str | None]]
+        signature: str
 
         hetero_aggregation: str = 'mean'
         hetero_aggregation_key: str = 'operation'
@@ -27,6 +28,7 @@ class GraphModel(Layer):
                     (from_cli(layer), layer.get('parameters', {}).get('signature'))
                     for layer in parameters['layers']
                 ],
+                signature=parameters.get('signature'),
                 hetero_aggregation=parameters.get('hetero_aggregation', 'mean'),
                 hetero_aggregation_key=parameters.get('hetero_aggregation_key', 'operation')
             )

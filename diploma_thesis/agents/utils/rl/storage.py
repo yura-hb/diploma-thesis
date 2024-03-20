@@ -152,6 +152,7 @@ class Storage:
 
     def __collate_variable_length_info_values__(self, batch):
         keys = [Record.POLICY_KEY, Record.ACTION_KEY]
+        fill_values = {Record.POLICY_KEY: 0.0, Record.ACTION_KEY: torch.finfo(torch.float32).min}
 
         result = dict()
 
@@ -159,20 +160,11 @@ class Storage:
             result[key] = []
 
         for element in batch:
-            keys_ = element.info.keys()
-
             for key in keys:
-                if key in keys_:
-                    result[key] += torch.atleast_2d(element.info[key])
+                result[key] += torch.atleast_2d(element.info[key])
 
         for key in keys:
-            match key:
-                case Record.POLICY_KEY:
-                    fill_value = 0.0
-                case Record.ACTION_KEY:
-                    fill_value = torch.finfo(result[key][0].dtype).min
-
-            result[key] = torch.nn.utils.rnn.pad_sequence(result[key], batch_first=True, padding_value=fill_value)
+            result[key] = torch.nn.utils.rnn.pad_sequence(result[key], batch_first=True, padding_value=fill_values[key])
 
         # In some cases batch can be sampled with repetition
         for element in batch:

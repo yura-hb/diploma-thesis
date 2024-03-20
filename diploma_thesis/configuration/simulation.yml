@@ -11,8 +11,8 @@ task:
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/experiments/jsp/marl_dqn/machine.yml'
-      template: 'marl_direct'
+      base_path: 'configuration/mods/machine/dqn.yml'
+      template: 'experimental/marl_indirect'
       mod_dirs:
         - 'configuration/mods/machine/mods'
       mods:
@@ -20,7 +20,7 @@ task:
         - 'agent/dqn/dueling.yml'
         - 'agent/dqn/prioritized.yml'
         - 'agent/dqn/steps/5.yml'
-        - 'agent/dqn/noisy.yml'
+#        - 'agent/dqn/noisy.yml'
 #        - 'agent/ppo/epochs/10.yml'
 #        - 'util/rules/all_rules.yml'
 #        - 'util/optimizer/grad_norm.yml'
@@ -29,7 +29,7 @@ task:
 #        - 'util/train_schedule/on_store.yml'
 #        - 'util/infrastructure/compile.yml'
 #        - 'util/train_schedule/on_stored_data_exclusively.yml'
-        - 'util/agent/multi_agent.yml'
+#        - 'util/agent/multi_agent.yml'
 #        - 'util/infrastructure/compile.yml'
 
   work_center_agent:

@@ -4,17 +4,17 @@ import torch
 
 class Activation(Layer):
 
-    def __init__(self, kind: str):
-        super().__init__()
+    def __init__(self, kind: str, signature: str):
+        super().__init__(signature=signature)
 
         self.kind = kind
         self.activation = self.__make_activation__()
 
-    def forward(self, batch: torch.FloatTensor) -> torch.FloatTensor:
+    def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
         if self.activation is None:
-            return batch
+            return x
 
-        return self.activation(batch)
+        return self.activation(x)
 
     def __make_activation__(self):
         match self.kind:
@@ -33,4 +33,4 @@ class Activation(Layer):
 
     @classmethod
     def from_cli(cls, parameters: dict) -> 'Layer':
-        return Activation(kind=parameters['kind'])
+        return Activation(kind=parameters['kind'], signature=parameters['signature'])

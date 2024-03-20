@@ -19,11 +19,12 @@ class Linear(Layer):
                  dim: int,
                  activation: str,
                  dropout: float,
-                 noise_parameters: Dict = None):
-        super().__init__()
+                 noise_parameters: Dict,
+                 signature: str):
+        super().__init__(signature=signature)
 
         self.dim = dim
-        self.activation = Activation(kind=activation)
+        self.activation = Activation(kind=activation, signature='')
         self.dropout = nn.Dropout(p=dropout) if dropout is not None else None
         self.noise_parameters = noise_parameters or dict()
 
@@ -65,5 +66,6 @@ class Linear(Layer):
             dim=parameters['dim'],
             activation=parameters['activation'],
             dropout=parameters.get('dropout'),
-            noise_parameters=parameters.get('noise', dict()).get('parameters', dict())
+            noise_parameters=parameters.get('noise', dict()).get('parameters', dict()),
+            signature=parameters['signature']
         )

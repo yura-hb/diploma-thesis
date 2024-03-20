@@ -1,4 +1,5 @@
 
+
 graph:
   - kind: 'graph_model'
     parameters:
@@ -19,5 +20,5 @@ output:
       activation: 'tanh'
   - kind: 'linear'
     parameters:
-      dim: 64
-      activation: 'tanh'
+      dim: 1
+      activation: 'none'

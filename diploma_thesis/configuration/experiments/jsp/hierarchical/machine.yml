@@ -1,6 +1,7 @@
 
 kind: 'rl'
 parameters:
+
   model:
     kind: 'deep_multi_rule'
     parameters:
@@ -11,8 +12,11 @@ parameters:
         parameters:
           policy_method: 'independent'
 
-          model:
-            __model__: ''
+          critic:
+            __critic__: ''
+
+          actor:
+            __actor__: ''
 
           action_selector:
             kind: 'phase_selector'
@@ -46,23 +50,27 @@ parameters:
   trainer:
     kind: 'dqn'
     parameters:
+      decay: 1.0
+      update_steps: 50
+
       memory:
         kind: 'replay'
         parameters:
           size: 1024
           batch_size: 64
-          prefetch: 2
+          prefetch: 8
 
       loss:
-        kind: 'huber'
+        kind: 'smooth_l1'
 
       optimizer:
         model:
-          kind: 'adam'
+          kind: 'sgd'
           parameters:
             lr: 0.001
+            momentum: 0.9
 
       return:
         kind: 'no'
         parameters:
-          discount_factor: 0.9
+          discount_factor: 0.95

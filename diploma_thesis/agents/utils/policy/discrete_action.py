@@ -18,11 +18,13 @@ class DiscreteAction(ActionPolicy):
         self.action_layer.to(configuration.device)
         self.value_layer.to(configuration.device)
 
-    def post_encode(self, state, value: torch.FloatTensor, actions: torch.FloatTensor):
-        value = self.value_layer(value)
-        actions = self.action_layer(actions)
+    def post_encode(self, state, output):
+        values, actions = self.__fetch_values_and_actions__(output)
 
-        return super().post_encode(state, value, actions)
+        actions = self.action_layer(actions)
+        values = self.value_layer(values)
+
+        return self.__estimate_policy__(values, actions)
 
     @classmethod
     def from_cli(cls, parameters: Dict) -> 'Policy':
