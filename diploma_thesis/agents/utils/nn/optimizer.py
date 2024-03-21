@@ -85,6 +85,8 @@ class Optimizer:
                 cls = torch.optim.SGD
             case 'asgd':
                 cls = torch.optim.ASGD
+            case 'rmsprop':
+                cls = torch.optim.RMSprop
             case _:
                 raise ValueError(f'Unknown optimizer kind: {self.configuration.optimizer.kind}')
 

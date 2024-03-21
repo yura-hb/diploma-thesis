@@ -12,11 +12,8 @@ parameters:
         parameters:
           policy_method: 'independent'
 
-          critic:
-            __critic__: ''
-
-          actor:
-            __actor__: ''
+          model:
+            __model__: ''
 
           action_selector:
             kind: 'phase_selector'
@@ -65,10 +62,9 @@ parameters:
 
       optimizer:
         model:
-          kind: 'sgd'
+          kind: 'rmsprop'
           parameters:
             lr: 0.001
-            momentum: 0.9
 
       return:
         kind: 'no'

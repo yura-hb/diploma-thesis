@@ -30,10 +30,7 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
 
     def __post_init__(self):
         if self.noise_parameters is not None:
-            self.actor.to_noisy(self.noise_parameters)
-
-            if self.critic is not None:
-                self.critic.to_noisy(self.noise_parameters)
+            self.model.to_noisy(self.noise_parameters)
 
     def configure(self, configuration: RunConfiguration):
         self.run_configuration = configuration
@@ -104,7 +101,7 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
         actions = output[Keys.ACTIONS]
         values = output.get(Keys.VALUE, actions)
 
-        return actions, values
+        return values, actions
 
     @staticmethod
     def base_parameters_from_cli(parameters: Dict):

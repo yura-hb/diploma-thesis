@@ -11,11 +11,8 @@ parameters:
         parameters:
           policy_method: 'independent'
 
-          critic:
-            __critic__: ''
-
-          actor:
-            __actor__: ''
+          model:
+            __model__: ''
 
           action_selector:
             kind: 'phase_selector'

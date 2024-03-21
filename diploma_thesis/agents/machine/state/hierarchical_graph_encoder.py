@@ -19,9 +19,9 @@ class HierarchicalGraphEncoder(GraphStateEncoder):
                 if j == 0:
                     moment = parameters.machine.shop_floor.now
                 else:
-                    moment = completions_times[j-1].max()
+                    moment = completions_times[j-1]
 
-                completions_times[j] = moment + job.processing_times[j]
+                completions_times[j] = moment + job.processing_times[j].min()
 
             status = torch.ones_like(job.step_idx)
             status = self.__fill_job_matrix__(job, status)

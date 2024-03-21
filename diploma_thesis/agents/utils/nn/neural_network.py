@@ -27,12 +27,16 @@ class NeuralNetwork(nn.Module):
     def __init__(self, configuration: Configuration):
         super().__init__()
 
+        self.is_configured = False
+
         self.configuration = configuration
 
         self.__build__()
 
     def forward(self, state):
         output = self.__forward__(state)
+
+        self.is_configured = True
 
         return output
 

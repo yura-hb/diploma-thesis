@@ -1,7 +1,9 @@
 from typing import Dict
 
+import torch.nn
 import torch_geometric as pyg
 
+from agents.base.state import Graph
 from .layer import *
 
 
@@ -12,20 +14,16 @@ class GraphLayer(Layer):
 class BaseWrapper(GraphLayer):
 
     def __init__(self, configuration):
-        super().__init__()
-
-        self.configuration = configuration
+        self._signature = configuration.get('signature')
 
         if 'signature' in configuration:
-            self._signature = configuration['signature']
-
             del configuration['signature']
-        else:
-            self._signature = None
+
+        super().__init__(self._signature)
 
     @property
     def signature(self):
-        return self._signature or 'x -> x'
+        return self._signature
 
     @classmethod
     def from_cli(cls, parameters: Dict):
@@ -111,3 +109,18 @@ class MeanPool(GraphFunctionWrapper):
 
     def __init__(self, configuration):
         super().__init__(pyg.nn.global_mean_pool, configuration)
+
+
+class SelectTarget(BaseWrapper):
+
+    def __init__(self, configuration):
+        super().__init__(configuration)
+
+    def forward(self, graph: Graph | pyg.data.Batch, embeddings: torch.FloatTensor):
+        storage = graph
+
+        if isinstance(graph, Graph):
+            storage = graph.data
+
+        return embeddings[storage[Graph.TARGET_KEY]]
+

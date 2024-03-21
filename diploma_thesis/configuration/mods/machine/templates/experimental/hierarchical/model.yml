@@ -1,0 +1,70 @@
+layers:
+
+  - kind: 'graph_model'
+    parameters:
+      layers:
+        - kind: 'gin'
+          parameters:
+            in_channels: -1
+            out_channels: 64
+            num_layers: 3
+            hidden_channels: 64
+
+      signature: 'graph -> actions_hidden'
+
+  - kind: 'select_target'
+    parameters:
+      signature: 'graph, actions_hidden -> actions_hidden'
+
+  - kind: 'linear'
+    parameters:
+      dim: 64
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 64
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 64
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_hidden'
+
+  - kind: 'graph_model'
+    parameters:
+      layers:
+        - kind: 'gin'
+          parameters:
+            in_channels: -1
+            out_channels: 64
+            num_layers: 3
+            hidden_channels: 64
+
+      signature: 'graph -> values_hidden'
+
+  - kind: 'mean_pool'
+    parameters:
+      signature: 'values_hidden -> values_hidden'
+
+  - kind: 'linear'
+    parameters:
+      dim: 64
+      activation: 'relu'
+      signature: 'values_hidden -> values_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 64
+      activation: 'relu'
+      signature: 'values_hidden -> values_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 1
+      activation: 'relu'
+      signature: 'values_hidden -> values_hidden'
+
+  - kind: 'output'
+    parameters:
+      value: 'values_hidden'
+      actions: 'actions_hidden'

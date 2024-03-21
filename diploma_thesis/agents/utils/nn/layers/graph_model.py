@@ -28,13 +28,13 @@ class GraphModel(Layer):
                     (from_cli(layer), layer.get('parameters', {}).get('signature'))
                     for layer in parameters['layers']
                 ],
-                signature=parameters.get('signature'),
+                signature=parameters['signature'],
                 hetero_aggregation=parameters.get('hetero_aggregation', 'mean'),
                 hetero_aggregation_key=parameters.get('hetero_aggregation_key', 'operation')
             )
 
     def __init__(self, configuration: Configuration):
-        super().__init__()
+        super().__init__(configuration.signature)
 
         self.is_configured = False
         self.model: pyg.nn.Sequential = None
@@ -42,7 +42,7 @@ class GraphModel(Layer):
 
         self.__build__()
 
-    def forward(self, graph: Graph | pyg.data.Batch) -> torch.Tensor:
+    def forward(self, graph: Graph | pyg.data.Batch) -> Tuple[torch.Tensor, torch.Tensor] | torch.Tensor:
         batch: pyg.data.Batch = None
 
         if isinstance(graph, Graph):
@@ -52,18 +52,10 @@ class GraphModel(Layer):
 
         self.__configure_if_needed__(batch)
 
-        if isinstance(batch, pyg.data.HeteroData):
-            return self.forward_heterogeneous(graph, batch)
+        # if isinstance(batch, pyg.data.HeteroData):
+        #     return self.forward_heterogeneous(graph, batch), batch.batch_dict
 
-        return self.forward_homogeneous(graph, batch)
-
-    def forward_homogeneous(self, graph, batch):
-        hidden = self.model(batch.x, batch.edge_index, batch.batch)
-
-        if hidden.shape[0] == batch.num_graphs:
-            return hidden
-        else:
-            return hidden[batch.target]
+        return self.model(batch.x, batch.edge_index, batch.batch), batch.batch
 
     def forward_heterogeneous(self, graph, batch):
         assert False, "Heterogeneous input is not yet supported"

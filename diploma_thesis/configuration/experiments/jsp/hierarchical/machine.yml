@@ -3,20 +3,16 @@ kind: 'rl'
 parameters:
 
   model:
-    kind: 'deep_multi_rule'
+    kind: 'deep_rule'
     parameters:
-      __rules__: ''
 
       policy:
-        kind: 'discrete_action'
+        kind: 'flexible_action'
         parameters:
           policy_method: 'independent'
 
-          critic:
-            __critic__: ''
-
-          actor:
-            __actor__: ''
+          model:
+            __model__: ''
 
           action_selector:
             kind: 'phase_selector'
@@ -35,42 +31,49 @@ parameters:
                     parameters:
                       step: 1
                   action_selector:
-                    kind: 'epsilon_greedy'
-                    parameters:
-                      epsilon: 0.4
+                    kind: 'uniform'
                 - phase:
                     kind: 'training'
                   action_selector:
-                    kind: 'epsilon_greedy'
+                    kind: 'sample'
                     parameters:
-                      epsilon: 0.1
+                      is_distribution: False
 
   __encoder__: ''
 
   trainer:
-    kind: 'dqn'
+    kind: 'ppo'
     parameters:
-      decay: 1.0
-      update_steps: 50
+      sample_ratio: 0.75
+      policy_step_ratio: 0.2
+      entropy_regularization: 0.2
+      rollback_ratio: 0.05
+
+      epochs: 1
+
+      loss:
+        kind: 'cross_entropy'
+        parameters:
+          reduction: 'none'
+
+      value_loss:
+        kind: 'mse'
+
+      optimizer:
+        model:
+          kind: 'adam'
+          parameters:
+            lr: 0.001
 
       memory:
         kind: 'replay'
         parameters:
-          size: 1024
-          batch_size: 64
-          prefetch: 8
-
-      loss:
-        kind: 'smooth_l1'
-
-      optimizer:
-        model:
-          kind: 'sgd'
-          parameters:
-            lr: 0.001
-            momentum: 0.9
+          size: 1
+          batch_size: 1
+          prefetch: 1
 
       return:
-        kind: 'no'
+        kind: 'gae'
         parameters:
-          discount_factor: 0.95
+          discount_factor: 0.99
+          lambda: 0.95

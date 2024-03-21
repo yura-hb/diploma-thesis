@@ -6,6 +6,7 @@ def from_cli(*args, **kwargs):
     from .common import Flatten, InstanceNorm, LayerNorm
     from .activation import Activation
     from .merge import Merge
+    from .shared import Shared
     from .graph_model import GraphModel
     from .partial_instance_norm_1d import PartialInstanceNorm1d
     from .output import Output
@@ -33,6 +34,8 @@ def from_cli(*args, **kwargs):
         'max_pool': MaxPool,
         'mean_pool': MeanPool,
 
+        'select_target': SelectTarget,
+        'shared': Shared,
         'output': Output
     }
 

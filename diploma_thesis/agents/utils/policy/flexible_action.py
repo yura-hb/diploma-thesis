@@ -9,8 +9,6 @@ class FlexibleAction(ActionPolicy):
     def __init__(self, base_parameters):
         super().__init__(**base_parameters)
 
-        self.action_layer = self.make_linear_layer(1)
-
     @property
     def is_recurrent(self):
         return False
@@ -18,12 +16,8 @@ class FlexibleAction(ActionPolicy):
     def configure(self, configuration: RunConfiguration):
         super().configure(configuration)
 
-        self.action_layer.to(configuration.device)
-
     def post_encode(self, state: State, outputs):
         values, actions = self.__fetch_values_and_actions__(outputs)
-
-        actions = self.action_layer(actions)
 
         # Unpack node embeddings obtained from graph batch
         if state.graph is not None and isinstance(state.graph, pyg.data.Batch):
@@ -46,9 +40,9 @@ class FlexibleAction(ActionPolicy):
             actions = torch.nn.utils.rnn.pad_sequence(result, batch_first=True, padding_value=torch.nan)
             lengths = torch.tensor(lengths)
 
-            return values, self.__estimate_policy__(values, (actions, lengths))
+            return self.__estimate_policy__(values, (actions, lengths))
 
-        return values, self.__estimate_policy__(values, actions)
+        return self.__estimate_policy__(values, actions)
 
     def __estimate_policy__(self, value, actions):
         if isinstance(actions, tuple):
