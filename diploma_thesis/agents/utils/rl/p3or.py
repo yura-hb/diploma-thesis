@@ -1,5 +1,7 @@
 
 from agents.utils.memory import NotReadyException
+from agents.utils.policy.policy import Keys
+
 from .utils.ppo_mixin import *
 
 
@@ -22,12 +24,6 @@ class P3OR(PPOMixin):
 
         self.configuration = configuration
         self.trpo_loss = Loss(configuration=Loss.Configuration(kind='cross_entropy', parameters=dict()))
-        self.auxiliary_head = None
-
-    def configure(self, model: Policy, configuration: RunConfiguration):
-        super().configure(model, configuration)
-
-        self.auxiliary_head = model.make_linear_layer(1).to(configuration.device)
 
     def __train__(self, model: Policy):
         try:
@@ -48,18 +44,21 @@ class P3OR(PPOMixin):
             return
 
     def __auxiliary_step__(self, model: Policy, batch: Batch):
-        values, actions = model.encode(batch.state)
+        output = model.encode(batch.state)
 
-        # TODO: Aggregate Q values
-        values = self.auxiliary_head(actions)
+        assert Keys.ACTOR_VALUE in output, (f"Actor value not found in output. It should be a value "
+                                            f"representing value estimate for actor head")
 
-        _, actions = model.post_encode(batch.state, values, actions)
+        actor_values = output[Keys.ACTOR_VALUE]
 
-        loss = self.configuration.value_loss(values.view(-1), batch.info[Record.RETURN_KEY])
+        _, actions = model.post_encode(batch.state, output)
+
+        loss = self.configuration.value_loss(actor_values.view(-1), batch.info[Record.RETURN_KEY])
         loss += self.configuration.trpo_penalty * self.trpo_loss(actions, batch.info[Record.POLICY_KEY])
 
-        # TODO: Shouldn't it be a separate optimizer ????
         self.step(loss, self.optimizer)
+
+        self.record_loss(loss, key='auxiliary')
 
     @classmethod
     def from_cli(cls,

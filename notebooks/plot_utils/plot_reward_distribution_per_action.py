@@ -14,7 +14,7 @@ def plot_reward_distribution_per_action(data: pd.DataFrame, name: str, figsize=(
     # Create violins for each action
     for i, action in enumerate(actions):
         action_data = data[data["action"] == action]["reward"]
-        violin_parts = ax.violinplot(
+        violin_parts = ax.boxplot(
             action_data,
             positions=[i],
             showmeans=True,

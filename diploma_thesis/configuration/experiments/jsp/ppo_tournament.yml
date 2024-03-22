@@ -4,7 +4,7 @@ task:
   n_workers: 1
   name: 'static_rules'
   output_dir: 'results/jsp/experiments/ppo_reinforce_path/tournaments/hierarchical'
-  store_run_statistics: False
+  store_run_statistics: True
   debug: False
   log_run: True
 

@@ -6,3 +6,4 @@ from .plot_reward_model_across_runs import plot_reward_per_model_across_runs
 from .plot_reward_per_run import plot_reward_per_run
 from .plot_value import plot_value
 from .plot_value_per_run import plot_value_per_run
+from .plot_normalized_performance import plot_normalized_performance

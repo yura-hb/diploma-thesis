@@ -368,6 +368,9 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
             gc.collect()
 
+            torch.mps.empty_cache()
+            torch.cuda.empty_cache()
+
             # TODO: Improve
 
             # from functools import reduce

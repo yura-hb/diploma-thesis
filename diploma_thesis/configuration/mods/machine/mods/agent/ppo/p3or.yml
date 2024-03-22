@@ -1,0 +1,6 @@
+
+parameters:
+  trainer:
+    kind: 'p3or'
+    parameters:
+      trpo_penalty: 0.1

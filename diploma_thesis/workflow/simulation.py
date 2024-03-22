@@ -20,7 +20,6 @@ from utils import save
 from .workflow import Workflow
 
 
-
 class Simulation(Workflow):
 
     def __init__(self, parameters: Dict):

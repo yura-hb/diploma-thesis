@@ -48,7 +48,7 @@ def plot_performance_across_runs(data, info):
                     label=title)
 
 
-    ax.grid(True)
+    ax.xaxis.grid(True)
 
     ax.set_xlabel(info['xlabel'])
     ax.set_ylabel(info['ylabel'])

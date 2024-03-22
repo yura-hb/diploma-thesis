@@ -22,7 +22,7 @@ parameters:
           parameters:
             uniform: [ 1, 99 ]
         permutation:
-          uneveness: 2
+          uneveness: 5
         due_time:
           kind: 'uniform'
           parameters:

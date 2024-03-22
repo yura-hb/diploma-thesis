@@ -6,6 +6,7 @@ from enum import StrEnum
 from typing import TypeVar, Generic
 
 import torch
+
 from tensordict import TensorDict
 from tensordict.prototype import tensorclass
 from torch import nn
@@ -30,6 +31,7 @@ class Record:
 class Keys(StrEnum):
     ACTIONS = 'actions'
     VALUE = 'value'
+    ACTOR_VALUE = 'actor_value'
     POLICY = 'policy'
 
 

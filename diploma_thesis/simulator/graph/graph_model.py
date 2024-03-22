@@ -45,7 +45,6 @@ class GraphModel(Delegate):
         self.transition_model = transition_model
         self.encoder = Encoder(configuration)
         self.cache = {}
-        self.job_operation_map: Dict[str, GraphModel.Record] = dict()
 
     def graph(self, context: Context) -> Graph | None:
         record = self.cache.get(context.shop_floor.id)

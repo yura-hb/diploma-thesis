@@ -1,12 +1,12 @@
 
-template: &template 'experimental/hierarchical'
+template: &template 'hierarchical'
 
 graph: &graph
     transition_model:
       kind: 'base'
       parameters:
         forward:
-          kind: 'adding_arc'
+          kind: 'complete'
 
         schedule:
           kind: 'complete'
@@ -18,34 +18,23 @@ graph: &graph
 
 ##############################################################################################
 
-reinforce: &reinforce
-  base_path: 'configuration/mods/machine/reinforce.yml'
+ppo: &ppo
+  base_path: 'configuration/experiments/jsp/hierarchical/machine.yml'
   template: *template
+  mod_dirs:
+    - ['configuration/mods/machine/mods']
   mods:
     __factory__:
       - [ 'util/optimizer/grad_norm.yml' ]
       - [ 'util/infrastructure/mps.yml' ]
-      - [ 'util/rules/flexible.yml' ]
       - [
           '__none__',
-          'agent/reinforce/critics/1.yml',
-        ]
-      - [
-        'util/train_schedule/on_stored_data_exclusively.yml',
-      ]
-
-ppo: &ppo
-  base_path: 'configuration/mods/machine/ppo.yml'
-  template: *template
-  mods:
-    __factory__:
-      - [ 'util/optimizer/grad_norm.yml' ]
-      - [ 'util/infrastructure/mps.yml' ]
-      - [ 'util/rules/flexible.yml' ]
-      - [
           'agent/ppo/epochs/4.yml',
-          'agent/ppo/epochs/10.yml',
         ]
+      - [
+          '__none__',
+          'agent/ppo/p3or.yml'
+      ]
       - [
         'util/train_schedule/on_stored_data_exclusively.yml',
       ]
@@ -53,52 +42,26 @@ ppo: &ppo
 ###############################################################################################
 
 reward: &reward
-  - kind: 'global_decomposed_tardiness'
-    parameters:
-      span: 256
-  - kind: 'surrogate_tardiness'
-
-intermediate_reward: &intermediate_reward
   - kind: 'surrogate_tardiness'
 
 ##############################################################################################
 
-# 8 runs
 
-long_single_source_run: &long_single_source_run
-  parameters:
-    mods:
-      __inout_factory__:
-        - [ [ 'duration/10000.yml' ] ]
-        - [ [ 'utilization/80.yml' ] ]
-        - [ [ 'initial_assignment/2.yml' ] ]
-    nested:
-      parameters:
-        dispatch:
-          seed: [ [ 0, 1, 2, 3, 4, 5, 6, 7 ] ]
-
-# 200 runs
+# 600 runs
 
 short_single_source_run: &short_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ [ 'duration/256.yml' ] ]
-        - [ [ 'utilization/80.yml',  ] ]
+        - [ [ 'duration/1024.yml' ] ]
+        - [ [ 'size/jsp/10.yml', 'size/jsp/20.yml' ] ]
+        - [ [ 'utilization/70.yml', 'utilization/80.yml', 'utilization/90.yml' ] ]
     nested:
       parameters:
         dispatch:
           seed: [ [
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
             11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-            21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-            31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-            41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-            51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-            61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
-            71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-            81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
-            91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
           ] ]
 
 
@@ -107,105 +70,18 @@ short_single_source_run: &short_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 2
+  n_workers: 1
   debug: False
   log_run: True
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/ppo_reinforce_path/runs/hierarchical'
+  output_dir: 'results/jsp/experiments/ppo_reinforce_path/runs/hierarchical_tardiness'
 
   tasks:
-    # TD - n-step short single source
-    # We can evaluate all models, which performs n-step return estimation with intermediate rewards
-
     - kind: 'multi_value'
       parameters:
         base:
           name: 'model'
-          output_dir: '1'
-          log_stdout: False
-
-          machine_agent:
-            kind: 'mod'
-            parameters:
-              base_path: 'configuration/mods/machine_agent/model.yml'
-              mods: [ ]
-
-          work_center_agent:
-            kind: 'static'
-            parameters:
-              model:
-                kind: 'static'
-                parameters:
-                  rule: 'et'
-              encoder:
-                kind: 'plain'
-
-          tape:
-            machine_reward:
-              kind: 'global_tardiness'
-
-            work_center_reward:
-              kind: 'no'
-
-          simulator:
-            kind: 'td'
-            parameters:
-              memory: 32
-              emit_trajectory: True
-
-          graph:
-            *graph
-
-          run:
-            kind: 'mod'
-            parameters:
-              base_path: 'configuration/mods/run/run.yml'
-              mods:
-                - 'n_workers/2.yml'
-              nested:
-                parameters:
-                  simulations:
-                    - name: ''
-                      kind: 'multi_value'
-                      parameters:
-                        base:
-                          kind: 'mod'
-                          parameters:
-                            base_path: 'configuration/mods/simulation/simulation.yml'
-                            mods: [ ]
-                        values:
-        values:
-          __concat__:
-#            - output_dir: '1'
-#              machine_agent:
-#                parameters:
-#                  *reinforce
-            - output_dir: '2'
-              machine_agent:
-                parameters:
-                  *ppo
-
-          tape:
-            machine_reward:
-              *intermediate_reward
-
-          run:
-            parameters:
-              nested:
-                parameters:
-                  simulations:
-                    __0__:
-                      parameters:
-                        values:
-                          __concat__:
-                            - *short_single_source_run
-                            - *long_single_source_run
-
-    - kind: 'multi_value'
-      parameters:
-        base:
-          name: 'model'
-          output_dir: '2'
+          output_dir: ''
           log_stdout: False
 
           machine_agent:
@@ -241,6 +117,8 @@ task:
             kind: 'mod'
             parameters:
               base_path: 'configuration/mods/run/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
               mods:
                 - 'n_workers/2.yml'
                 - 'timeline/warmup.yml'
@@ -254,18 +132,16 @@ task:
                           kind: 'mod'
                           parameters:
                             base_path: 'configuration/mods/simulation/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
                             mods: [ ]
                         values:
         values:
           __concat__:
-#            - output_dir: '1'
-#              machine_agent:
-#                parameters:
-#                  - *reinforce
-            - output_dir: '2'
+            - output_dir: 'ppo'
               machine_agent:
                 parameters:
-                  - *ppo
+                  *ppo
 
           tape:
             machine_reward:
