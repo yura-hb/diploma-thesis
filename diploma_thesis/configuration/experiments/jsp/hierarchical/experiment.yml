@@ -72,7 +72,7 @@ task:
   kind: 'multi_task'
   n_workers: 1
   debug: False
-  log_run: True
+  log_run: False
   store_run_statistics: False
   output_dir: 'results/jsp/experiments/ppo_reinforce_path/runs/hierarchical_tardiness'
 

@@ -9,6 +9,7 @@ def from_cli(*args, **kwargs):
     from .shared import Shared
     from .graph_model import GraphModel
     from .partial_instance_norm_1d import PartialInstanceNorm1d
+    from .recurrent import Recurrent
     from .output import Output
 
     from utils import from_cli as from_cli_
@@ -36,6 +37,7 @@ def from_cli(*args, **kwargs):
 
         'select_target': SelectTarget,
         'shared': Shared,
+        'recurrent': Recurrent,
         'output': Output
     }
 

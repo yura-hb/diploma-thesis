@@ -65,7 +65,10 @@ class Reinforce(RLTrainer):
                 baseline = torch.squeeze(baseline)
 
         # Perform policy step
-        loss = self.loss(model(batch.state)[1], batch.action)
+        output = model(batch.state)
+        _, actions, _ = model.__fetch_values__(output)
+
+        loss = self.loss(actions, batch.action)
 
         if loss.numel() == 1:
             raise ValueError('Loss should not have reduction to single value')

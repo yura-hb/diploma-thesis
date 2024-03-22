@@ -17,7 +17,7 @@ class FlexibleAction(ActionPolicy):
         super().configure(configuration)
 
     def post_encode(self, state: State, outputs):
-        values, actions = self.__fetch_values_and_actions__(outputs)
+        values, actions, _ = self.__fetch_values__(outputs)
 
         # Unpack node embeddings obtained from graph batch
         if state.graph is not None and isinstance(state.graph, pyg.data.Batch):
@@ -40,11 +40,15 @@ class FlexibleAction(ActionPolicy):
             actions = torch.nn.utils.rnn.pad_sequence(result, batch_first=True, padding_value=torch.nan)
             lengths = torch.tensor(lengths)
 
-            return self.__estimate_policy__(values, (actions, lengths))
+            outputs[Keys.ACTIONS] = (actions, lengths)
 
-        return self.__estimate_policy__(values, actions)
+            return self.__estimate_policy__(outputs)
 
-    def __estimate_policy__(self, value, actions):
+        return self.__estimate_policy__(outputs)
+
+    def __estimate_policy__(self, output):
+        value, actions, _ = self.__fetch_values__(output)
+
         if isinstance(actions, tuple):
             # Encode as logits with zero probability
             min_value = torch.finfo(torch.float32).min
@@ -56,11 +60,15 @@ class FlexibleAction(ActionPolicy):
                         actions, lengths = actions
                         means = torch.nan_to_num(actions, nan=0.0).sum(dim=-1) / lengths
 
-                        return value, post_process(value + actions - means)
-                case _:
-                    return value, post_process(actions[0])
+                        output[Keys.ACTIONS] = post_process(value + actions - means)
 
-        return super().__estimate_policy__(value, actions)
+                        return output
+                case _:
+                    output[Keys.ACTIONS] = post_process(actions[0])
+
+                    return output
+
+        return super().__estimate_policy__(output)
 
     @classmethod
     def from_cli(cls, parameters: Dict) -> 'Policy':

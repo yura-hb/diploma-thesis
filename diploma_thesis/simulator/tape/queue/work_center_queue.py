@@ -50,7 +50,10 @@ class WorkCenterQueue(Queue):
         if record.mode != NextStateRecordMode.on_produce:
             return
 
-        state = self.simulator.encode_work_center_state(context=context, work_center=machine.work_center, job=job)
+        state = self.simulator.encode_work_center_state(context=context,
+                                                        work_center=machine.work_center,
+                                                        job=job,
+                                                        memory=record.memory)
 
         record.record.next_state = state
 
@@ -105,6 +108,7 @@ class WorkCenterQueue(Queue):
                 done=torch.tensor(False, dtype=torch.bool),
             ),
             context=self.reward.record_job_action(record.result, work_center),
+            memory=record.record.memory,
             moment=context.moment,
             mode=mode
         )]

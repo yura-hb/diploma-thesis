@@ -123,8 +123,7 @@ class Storage:
         batch = [element.view(-1) for element in batch]
         items = self.__collate_variable_length_info_values__(batch)
 
-        if batch[0].state.memory is None and batch[1].state.memory is not None:
-            batch[0].state.memory = torch.zeros_like(batch[1].state.memory)
+        self.__fill_empty_memory__(batch)
 
         if batch[0].state.graph is not None:
             state_graph = []
@@ -149,6 +148,20 @@ class Storage:
             result.info[key] = value
 
         return result.to(device)
+
+    def __fill_empty_memory__(self, batch):
+        non_zero_memory = [element for element in batch if element.state.memory is not None]
+
+        # Some records can have no memory
+        if len(non_zero_memory) > 0:
+            non_zero_memory = torch.zeros_like(non_zero_memory[0].state.memory)
+
+            for element in batch:
+                if element.state.memory is None:
+                    element.state.memory = non_zero_memory
+
+                if element.next_state.memory is None:
+                    element.next_state.memory = non_zero_memory
 
     def __collate_variable_length_info_values__(self, batch):
         keys = [Record.POLICY_KEY, Record.ACTION_KEY]

@@ -26,7 +26,7 @@ class Output(Layer):
         return result
 
     def __extract_values__(self, keys, leaf_to_arg: dict[str, torch.Tensor]):
-        result = dict()
+        result = TensorDict({}, batch_size=[])
 
         for key, nested in keys.items():
             if isinstance(nested, dict):

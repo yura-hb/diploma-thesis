@@ -9,10 +9,10 @@ WorkCenterState = TypeVar('WorkCenterState')
 
 class SimulatorInterface:
 
-    def encode_machine_state(self, context: Context, machine: Machine) -> MachineState:
+    def encode_machine_state(self, context: Context, machine: Machine, memory) -> MachineState:
         pass
 
-    def encode_work_center_state(self, context: Context, work_center: WorkCenter, job: Job) -> WorkCenterState:
+    def encode_work_center_state(self, context: Context, work_center: WorkCenter, job: Job, memory) -> WorkCenterState:
         pass
 
     def did_prepare_machine_record(self, context: Context, machine: Machine, record: Record):

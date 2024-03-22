@@ -43,26 +43,11 @@ class DeepPolicyModel(Model[Input, Action, Result], PhaseUpdatable, metaclass=AB
         super().__init__()
 
         self.policy = policy
-        self.memory = dict()
 
     def __call__(self, state: State, parameters: Input) -> PolicyRecord:
-        if self.policy.is_recurrent:
-            key = self.memory_key(parameters)
-
-            assert key is not None, 'Expect that key definition for recurrent policy'
-
-            state.memory = self.memory.get(key)
-            record, memory = self.policy.select(state)
-
-            self.memory[key] = memory
-
-            return record
+        state.memory = parameters.memory
 
         return self.policy.select(state)
-
-    @classmethod
-    def memory_key(cls, parameters: Input) -> None | str:
-        return None
 
     def update(self, phase: Phase):
         super().update(phase)

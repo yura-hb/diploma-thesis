@@ -44,14 +44,14 @@ class P3OR(PPOMixin):
             return
 
     def __auxiliary_step__(self, model: Policy, batch: Batch):
-        output = model.encode(batch.state)
+        output = model(batch.state)
 
-        assert Keys.ACTOR_VALUE in output, (f"Actor value not found in output. It should be a value "
-                                            f"representing value estimate for actor head")
+        assert Keys.ACTOR_VALUE in output.keys(), (f"Actor value not found in output. It should be a value "
+                                                   f"representing value estimate for actor head")
 
         actor_values = output[Keys.ACTOR_VALUE]
 
-        _, actions = model.post_encode(batch.state, output)
+        _, actions, _ = model.__fetch_values__(output)
 
         loss = self.configuration.value_loss(actor_values.view(-1), batch.info[Record.RETURN_KEY])
         loss += self.configuration.trpo_penalty * self.trpo_loss(actions, batch.info[Record.POLICY_KEY])

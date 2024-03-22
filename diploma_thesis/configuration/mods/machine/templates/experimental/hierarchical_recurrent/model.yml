@@ -1,0 +1,113 @@
+layers:
+
+  # Actor
+
+  - kind: 'graph_model'
+    parameters:
+      layers:
+        - kind: 'gin'
+          parameters:
+            in_channels: -1
+            out_channels: 64
+            num_layers: 1
+            hidden_channels: 64
+
+      signature: 'graph -> actions_hidden, actions_batch'
+
+  - kind: 'mean_pool'
+    parameters:
+      signature: 'actions_hidden, actions_batch -> actions_value'
+
+  - kind: 'recurrent'
+    parameters:
+      kind: 'rnn'
+      signature: 'actions_value, memory -> actions_value, actions_hidden_state'
+      input_size: 64
+      hidden_size: 64
+      memory_key: 'actions_model'
+
+  - kind: 'select_target'
+    parameters:
+      signature: 'graph, actions_hidden -> actions_hidden'
+
+  - kind: 'shared'
+    parameters:
+      values:
+        - 'actions_hidden'
+        - 'actions_value'
+      input_args: 'x'
+      layers:
+        - kind: 'linear'
+          parameters:
+            dim: 64
+            activation: 'tanh'
+            signature: 'x -> x'
+        - kind: 'linear'
+          parameters:
+            dim: 64
+            activation: 'tanh'
+            signature: 'x -> x'
+
+  - kind: 'linear'
+    parameters:
+        dim: 1
+        activation: 'none'
+        signature: 'actions_hidden -> actions_hidden'
+
+  - kind: 'linear'
+    parameters:
+      dim: 1
+      activation: 'none'
+      signature: 'actions_value -> actions_value'
+
+  # Critic
+
+  - kind: 'graph_model'
+    parameters:
+      layers:
+        - kind: 'gin'
+          parameters:
+            in_channels: -1
+            out_channels: 64
+            num_layers: 1
+            hidden_channels: 64
+
+      signature: 'graph -> values_hidden, values_batch'
+
+  - kind: 'mean_pool'
+    parameters:
+      signature: 'values_hidden, values_batch -> values_hidden'
+
+
+  - kind: 'recurrent'
+    parameters:
+      kind: 'rnn'
+      signature: 'values_hidden, memory -> values_hidden, values_hidden_state'
+      input_size: 64
+      hidden_size: 64
+      memory_key: 'values_model'
+
+  - kind: 'linear'
+    parameters:
+      dim: 64
+      activation: 'tanh'
+      signature: 'values_hidden -> values_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 64
+      activation: 'tanh'
+      signature: 'values_hidden -> values_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 1
+      activation: 'tanh'
+      signature: 'values_hidden -> values_hidden'
+
+  - kind: 'output'
+    parameters:
+      value: 'values_hidden'
+      actions: 'actions_hidden'
+      actor_value: 'actions_value'
+      memory:
+        actions_model: 'actions_hidden_state'
+        values_model: 'values_hidden_state'

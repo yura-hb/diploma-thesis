@@ -25,12 +25,14 @@ Input = TypeVar('Input')
 class Record:
     state: State
     action: Action
+    memory: TensorDict | None
     info: TensorDict = field(default_factory=lambda: TensorDict({}, batch_size=[]))
 
 
 class Keys(StrEnum):
     ACTIONS = 'actions'
     VALUE = 'value'
+    MEMORY = 'memory'
     ACTOR_VALUE = 'actor_value'
     POLICY = 'policy'
 
@@ -66,10 +68,6 @@ class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
     @abstractmethod
     def post_encode(self, state: State, output: TensorDict):
         pass
-
-    @property
-    def is_recurrent(self):
-        return False
 
     def configure(self, configuration: RunConfiguration):
         pass

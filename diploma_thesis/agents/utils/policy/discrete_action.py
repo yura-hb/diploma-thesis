@@ -19,12 +19,12 @@ class DiscreteAction(ActionPolicy):
         self.value_layer.to(configuration.device)
 
     def post_encode(self, state, output):
-        values, actions = self.__fetch_values_and_actions__(output)
+        value, action, _ = self.__fetch_values__(output)
 
-        actions = self.action_layer(actions)
-        values = self.value_layer(values)
+        output[Keys.VALUE] = self.value_layer(value)
+        output[Keys.ACTIONS] = self.action_layer(action)
 
-        return self.__estimate_policy__(values, actions)
+        return self.__estimate_policy__(output)
 
     @classmethod
     def from_cli(cls, parameters: Dict) -> 'Policy':

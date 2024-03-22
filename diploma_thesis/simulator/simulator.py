@@ -1,4 +1,3 @@
-import gc
 import logging
 from abc import ABCMeta, abstractmethod
 from dataclasses import field
@@ -13,11 +12,12 @@ from agents import MachineInput, WorkCenterInput
 from agents import TrainingPhase, EvaluationPhase, WarmUpPhase, Phase
 from agents.utils.memory import Record
 from environment import Agent, Job, Machine, WorkCenter, Context, Delegate
-from simulator.tape import TapeModel, SimulatorInterface
 from utils import Loggable
 from .configuration import RunConfiguration, EvaluateConfiguration
 from .graph import GraphModel
+from .memory import MemoryModel
 from .simulation import Simulation
+from .tape import TapeModel, SimulatorInterface
 
 
 def reset_tape():
@@ -69,6 +69,9 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         self.machine = machine
         self.tape_model = tape_model
         self.tape_model.connect(self)
+
+        self.memory_model = MemoryModel()
+        self.memory_model.connect(self)
 
         self.graph_model = graph_model
         self.cache = None
@@ -175,17 +178,19 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
     # Reward
 
-    def encode_machine_state(self, context: Context, machine: Machine):
+    def encode_machine_state(self, context: Context, machine: Machine, memory):
         parameters = MachineInput(machine=machine,
                                   now=context.moment,
-                                  graph=self.graph_model.graph(context=context))
+                                  graph=self.graph_model.graph(context=context),
+                                  memory=memory)
 
         return self.machine.encode_state(parameters)
 
-    def encode_work_center_state(self, context: Context, work_center: WorkCenter, job: Job):
+    def encode_work_center_state(self, context: Context, work_center: WorkCenter, memory, job: Job):
         parameters = WorkCenterInput(work_center=work_center,
                                      job=job,
-                                     graph=self.graph_model.graph(context=context))
+                                     graph=self.graph_model.graph(context=context),
+                                     memory=memory)
 
         return self.work_center.encode_state(parameters)
 
@@ -225,18 +230,23 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
     def schedule(self, context: Context, machine: Machine) -> Job | None:
         graph = self.graph_model.graph(context=context)
-        parameters = MachineInput(machine=machine, now=context.moment, graph=graph)
+        memory = self.memory_model.get_schedule_record(context=context, key=machine.key)
+        parameters = MachineInput(machine=machine, now=context.moment, graph=graph, memory=memory)
 
         result = self.machine.schedule(machine.key, parameters)
 
         if self.machine.is_trainable:
             self.tape_model.register_machine_reward_preparation(context=context, machine=machine, record=result)
 
+        if result.record is not None:
+            self.memory_model.store_schedule_record(context=context, key=machine.key, memory=result.record.memory)
+
         return result.result
 
     def route(self, context: Context, work_center: WorkCenter, job: Job) -> 'Machine | None':
         graph = self.graph_model.graph(context=context)
-        parameters = WorkCenterInput(work_center=work_center, job=job, graph=graph)
+        memory = self.memory_model.get_route_record(context=context, key=work_center.key)
+        parameters = WorkCenterInput(work_center=work_center, job=job, graph=graph, memory=memory)
 
         result = self.work_center.schedule(work_center.key, parameters)
 
@@ -245,6 +255,9 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                                                                     work_center=work_center,
                                                                     job=job,
                                                                     record=result)
+
+        if result.record is not None:
+            self.memory_model.store_route_record(context=context, key=work_center.key, memory=result.record.memory)
 
         return result.result
 

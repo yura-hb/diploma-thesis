@@ -45,8 +45,7 @@ class DeepQTrainer(RLTrainer):
         with torch.no_grad():
             q_values = self.estimate_q(model, batch)
 
-        _, actions = model(batch.state)
-        actions = actions[range(batch.shape[0]), batch.action]
+        actions = self.__get_action_values__(model, batch.state, batch.action)
 
         loss = self.loss(actions, q_values)
         td_error = torch.square(actions - q_values)
@@ -62,12 +61,22 @@ class DeepQTrainer(RLTrainer):
             self.storage.update_priority(info['index'], td_error)
 
     def estimate_q(self, model: Policy, batch: Record | tensordict.TensorDictBase):
-        _, target = self.target_model(batch.next_state)
+        target = self.__get_action_values__(self.target_model, batch.next_state, None)
         target = target.max(dim=1).values
 
         q = batch.reward + self.return_estimator.discount_factor * target * (1 - batch.done.int())
 
         return q
+
+    @staticmethod
+    def __get_action_values__(model: Policy, state, actions):
+        output = model(state)
+        _, action_values, _ = model.__fetch_values__(output)
+
+        if actions is None:
+            return action_values
+
+        return action_values[range(actions.shape[0]), actions]
 
     @property
     def target_model(self):

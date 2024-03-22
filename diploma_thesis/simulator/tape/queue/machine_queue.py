@@ -43,7 +43,7 @@ class MachineQueue(Queue):
         record.record.reward = self.reward.reward_after_production(record.context)
 
         if record.mode == NextStateRecordMode.on_produce:
-            state = self.simulator.encode_machine_state(context=context, machine=machine)
+            state = self.simulator.encode_machine_state(context=context, machine=machine, memory=record.memory)
 
             record.record.next_state = state
 
@@ -98,6 +98,7 @@ class MachineQueue(Queue):
                 batch_size=[]
             ),
             context=self.reward.record_job_action(record.result, machine, context.moment),
+            memory=record.record.memory,
             moment=context.moment,
             mode=mode
         )]

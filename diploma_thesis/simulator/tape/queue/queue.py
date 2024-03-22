@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import TypeVar
 
+from tensordict import TensorDict
+
 from agents.utils.memory import Record
 from environment import Job, ShopFloor, Machine
 from simulator.tape.utils.simulator_interface import SimulatorInterface
@@ -27,6 +29,7 @@ class TapeRecord:
     record: Record
     context: Context
     moment: int
+    memory: TensorDict
     mode: NextStateRecordMode = NextStateRecordMode.on_produce
 
 

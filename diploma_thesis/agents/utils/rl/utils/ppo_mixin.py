@@ -34,7 +34,8 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
         super().__init__(*args, is_episodic=True, **kwargs)
 
     def __step__(self, batch: Record, model: Policy, configuration: PPOConfiguration):
-        value, logits = model(batch.state)
+        output = model(batch.state)
+        value, logits, _ = model.__fetch_values__(output)
 
         loss = self.actor_loss(batch, logits, configuration, self.run_configuration.device)
         loss -= configuration.value_loss(value.view(-1), batch.info[Record.RETURN_KEY])

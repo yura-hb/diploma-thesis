@@ -11,14 +11,15 @@ task:
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/experiments/jsp/hierarchical/machine.yml'
-      template: 'hierarchical'
+      base_path: 'configuration/mods/machine/ppo.yml'
+      template: 'experimental/hierarchical_recurrent'
       mod_dirs:
         - 'configuration/mods/machine/mods'
       mods:
         - 'agent/ppo/epochs/4.yml'
         - 'util/optimizer/grad_norm.yml'
         - 'agent/ppo/p3or.yml'
+        - 'util/rules/flexible.yml'
         - 'util/infrastructure/mps.yml'
         - 'util/train_schedule/on_stored_data_exclusively.yml'
 
@@ -84,7 +85,7 @@ task:
                   parameters:
                     mods:
                       __factory__:
-                        - [ 'duration/1024.yml' ]
+                        - [ 'duration/256.yml' ]
                         - [ 'size/jsp/20.yml' ]
                         - [ 'utilization/80.yml', 'utilization/90.yml']
                         - [ 'initial_assignment/2.yml' ]

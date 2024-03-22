@@ -64,13 +64,17 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
         return output
 
     def post_encode(self, state: State, output: TensorDict):
-        values, actions = self.__fetch_values_and_actions__(output)
-
-        return self.__estimate_policy__(values, actions)
+        return self.__estimate_policy__(output)
 
     def select(self, state: State) -> Record:
-        value, actions = self.__call__(state)
+        output = self.__call__(state)
+        value, actions, memory = self.__fetch_values__(output)
         value, actions = value.squeeze(), actions.squeeze()
+
+        if memory is not None:
+            for key, item in memory.items(include_nested=True, leaves_only=True):
+                memory[key] = item.squeeze()
+
         action, policy = self.action_selector(actions)
         action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
 
@@ -80,28 +84,36 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
             Keys.ACTIONS: actions
         }, batch_size=[])
 
-        return Record(state, action, info, batch_size=[]).detach().cpu()
+        return Record(state, action, memory, info, batch_size=[]).detach().cpu()
 
-    def __estimate_policy__(self, value, actions):
+    def __estimate_policy__(self, output):
         match self.policy_estimation_method:
             case PolicyEstimationMethod.INDEPENDENT:
-                return value, actions
+                return output
             case PolicyEstimationMethod.DUELING_ARCHITECTURE:
+                actions = output[Keys.ACTIONS]
+                value = output.get(Keys.VALUE, actions)
+
                 if isinstance(actions, tuple):
                     actions, lengths = actions
 
-                    return value, value + actions - actions.sum(dim=-1) / lengths
+                    output[Keys.ACTIONS] = value + actions - actions.sum(dim=-1) / lengths
+
+                    return output
                 else:
-                    return value, value + actions - actions.mean(dim=-1, keepdim=True)
+                    output[Keys.ACTIONS] = value + actions - actions.mean(dim=-1, keepdim=True)
+
+                    return output
             case _:
                 raise ValueError(f"Policy estimation method {self.policy_estimation_method} is not supported")
 
     @staticmethod
-    def __fetch_values_and_actions__(output: TensorDict):
+    def __fetch_values__(output: TensorDict):
         actions = output[Keys.ACTIONS]
         values = output.get(Keys.VALUE, actions)
+        memory = output.get(Keys.MEMORY, None)
 
-        return values, actions
+        return values, actions, memory
 
     @staticmethod
     def base_parameters_from_cli(parameters: Dict):
