@@ -1,15 +1,13 @@
-import copy
 from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass
 from dataclasses import field
 from typing import TypeVar, List, Generic, Dict
 
 import torch
-
 from tensordict import TensorDict
 from tensordict.prototype import tensorclass
-from torchrl.data import ReplayBuffer
-from dataclasses import dataclass
 from torchrl.data import LazyMemmapStorage, ListStorage
+from torchrl.data import ReplayBuffer
 
 State = TypeVar('State')
 Action = TypeVar('Action')

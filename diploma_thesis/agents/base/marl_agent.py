@@ -131,13 +131,25 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
 
     def load_state_dict(self, state_dict: dict):
         self.is_configured = state_dict['is_configured']
-        self.keys=self.keys
+        self.keys = state_dict['keys']
+
+        # TODO: Load trainers
 
         if self.is_configured:
+            base_model = self.model
+            base_trainer = self.trainer
+
+            if self.is_model_distributed:
+                self.model = dict()
+
+            self.trainer = dict()
+
             for key in self.keys:
                 if self.is_model_distributed:
+                    self.model[key] = copy.deepcopy(base_model)
                     self.model[key].load_state_dict(state_dict['model'][key])
 
+                self.trainer[key] = copy.deepcopy(base_trainer)
                 self.trainer[key].load_state_dict(state_dict['trainer'][key])
 
             if not self.is_model_distributed:
@@ -146,4 +158,3 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
             return
 
         self.model.load_state_dict(state_dict['model'])
-        self.trainer.load_state_dict(state_dict['trainer'])

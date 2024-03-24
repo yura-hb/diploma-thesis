@@ -1,7 +1,6 @@
 from typing import Dict
 
 from agents.base.agent import Agent, Key, TrainingSample
-from agents.utils.memory import Record
 from environment import MachineKey
 from .model import MachineModel, from_cli as model_from_cli
 from .state import StateEncoder, from_cli as state_encoder_from_cli

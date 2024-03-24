@@ -43,7 +43,7 @@ class Encoder:
             self.__append_machine_nodes__(result, graph, shop_floor)
 
         if did_change_jobs:
-            self.__update_job_index__(result, graph, job_operation_map)
+            self.__update_job_index__(result, graph, job_operation_map, shop_floor)
 
         self.__update_forward_graph__(result, graph, shop_floor, job_operation_map)
         self.__update_schedule_graphs__(result, graph)
@@ -90,12 +90,24 @@ class Encoder:
 
     # Append Forward Edges
 
-    def __update_job_index__(self, result: Graph, source: Graph, job_operation_map: JOB_OPERATION_MAP_TYPE):
+    def __update_job_index__(self,
+                             result: Graph,
+                             source: Graph,
+                             job_operation_map: JOB_OPERATION_MAP_TYPE,
+                             shop_floor: ShopFloor):
         job_ids = self.__get_job_ids__(source)
+        min_job_id = unkey(job_ids[0])
+        max_job_id = unkey(job_ids[-1])
 
         n_all_ops = 0
 
+        config = shop_floor.configuration.configuration
+        n_ops_per_job = config.machines_per_work_center * config.work_center_count
+
         result.data[Graph.JOB_INDEX_MAP] = torch.tensor([], dtype=torch.long).view(0, 4)
+
+        job_index = []
+        operation_index = torch.zeros((max_job_id - min_job_id + 1, n_ops_per_job), dtype=torch.int32)
 
         for job_id in job_ids:
             if job_id not in job_operation_map:
@@ -118,8 +130,12 @@ class Encoder:
                 ]
             )
 
-            result.data[Graph.JOB_INDEX_MAP] = torch.cat([result.data[Graph.JOB_INDEX_MAP], index.T], dim=0)
+            job_index += [index.T]
 
+            operation_index[unkey(job_id) - min_job_id, :n_ops] = torch.arange(min_operation_id, max_operation_id + 1)
+
+        result.data[Graph.JOB_INDEX_MAP] = torch.cat(job_index, dim=0)
+        result.data[Graph.OPERATION_JOB_MAP_KEY] = (unkey(job_ids[0], is_tensor=True), operation_index)
         result.data[Graph.OPERATION_KEY, Graph.X] = torch.zeros(n_all_ops, dtype=torch.float32).view(-1, 1)
 
     def __append_machine_nodes__(self, result: Graph, source: Graph, shop_floor: ShopFloor):
@@ -134,7 +150,9 @@ class Encoder:
                     torch.arange(len(work_center.machines))
                 ])
 
-                machine_node_id = self.__get_node_ids__(machine_index, result.data[Graph.MACHINE_INDEX_KEY].T)
+                machine_node_id = self.__get_node_ids__(
+                    values=machine_index, store=result.data[Graph.MACHINE_INDEX_KEY].T
+                )
 
                 edges = itertools.combinations(machine_node_id, 2)
                 edges = torch.tensor(list(edges), dtype=torch.long).view(-1, 2).T
@@ -166,10 +184,15 @@ class Encoder:
             return
 
         has_groups = (source.data[Graph.JOB_KEY][job_ids[0]][Graph.FORWARD_GRAPH_KEY] < 0).sum() > 0
+        has_groups = has_groups.item()
         n_groups = 0
+        keys = job_operation_map.keys()
+        to_group_edges = []
+        from_group_edges = []
+        operation_edges = []
 
         for job_id in job_ids:
-            if job_id not in job_operation_map.keys():
+            if job_id not in keys:
                 continue
 
             job = shop_floor.job(unkey(job_id, is_tensor=True))
@@ -198,26 +221,39 @@ class Encoder:
 
                 n_groups += n_steps
                 to_group_edges = forward_graph[1, :] < 0
-
                 forward_graph = local_operation_to_global_map[forward_graph]
 
-                s = result.data[edge(Graph.OPERATION_KEY, Graph.FORWARD_RELATION_KEY, Graph.GROUP_KEY)]
-                s[Graph.EDGE_INDEX] = torch.cat([s[Graph.EDGE_INDEX], forward_graph[:, to_group_edges]], dim=1)
-
-                s = result.data[edge(Graph.GROUP_KEY, Graph.FORWARD_RELATION_KEY, Graph.OPERATION_KEY)]
-                s[Graph.EDGE_INDEX] = torch.cat([s[Graph.EDGE_INDEX], forward_graph[:, ~to_group_edges]], dim=1)
+                to_group_edges += [forward_graph[:, to_group_edges]]
+                from_group_edges += [forward_graph[:, ~to_group_edges]]
             else:
-                s = result.data[edge(Graph.OPERATION_KEY, Graph.FORWARD_RELATION_KEY, Graph.OPERATION_KEY)]
-                s[Graph.EDGE_INDEX] = torch.cat(
-                    [s[Graph.EDGE_INDEX], local_operation_to_global_map[forward_graph]], dim=1
-                )
+                operation_edges += [local_operation_to_global_map[forward_graph]]
+
+        if has_groups:
+            result.data[
+                edge(Graph.OPERATION_KEY, Graph.FORWARD_RELATION_KEY, Graph.GROUP_KEY), Graph.EDGE_INDEX
+            ] = torch.cat(to_group_edges, dim=1)
+
+            result.data[
+                edge(Graph.GROUP_KEY, Graph.FORWARD_RELATION_KEY, Graph.OPERATION_KEY), Graph.EDGE_INDEX
+            ] = torch.cat(from_group_edges, dim=1)
+        else:
+            result.data[
+                edge(Graph.OPERATION_KEY, Graph.FORWARD_RELATION_KEY, Graph.OPERATION_KEY), Graph.EDGE_INDEX
+            ] = torch.cat(operation_edges, dim=1)
 
         result.data[Graph.GROUP_KEY][Graph.X] = torch.zeros(n_groups, dtype=torch.float32).view(1, -1)
 
     def __update_schedule_graphs__(self, result: Graph, source: Graph):
         self.__reset_schedule_graph__(result)
 
-        index = result.data[Graph.JOB_INDEX_MAP][:, [0, 1]].T
+        min_job_id, index = result.data[Graph.OPERATION_JOB_MAP_KEY]
+
+        def __encode__(graph_edges):
+            job_ids = graph_edges[0, :] - min_job_id
+
+            return index[job_ids, graph_edges[1, :]]
+
+        edges = dict()
 
         for machine_id in range(result.data[Graph.MACHINE_KEY, Graph.X].shape[0]):
             machine_id = key(machine_id)
@@ -229,27 +265,41 @@ class Encoder:
                 relation_key = [Graph.SCHEDULED_RELATION_KEY, Graph.PROCESSED_RELATION_KEY]
 
                 for graph, relation in zip(graph_key, relation_key):
+                    if graph not in source.data[Graph.MACHINE_KEY, machine_id].keys():
+                        continue
+
                     graph = source.data[Graph.MACHINE_KEY, machine_id, graph]
-                    s = result.data[edge(Graph.OPERATION_KEY, relation, Graph.OPERATION_KEY)]
-                    s[Graph.EDGE_INDEX] = torch.cat([s[Graph.EDGE_INDEX], self.__encode_graph__(graph, index)], dim=1)
+
+                    relation = edge(Graph.OPERATION_KEY, relation, Graph.OPERATION_KEY)
+                    edges[relation] = edges.get(relation, [])
+                    edges[relation] += [
+                        torch.vstack([__encode__(graph[[0, 1], :]), __encode__(graph[[2, 3], :])]).view(2, -1)
+                    ]
             else:
                 op_key = [Graph.SCHEDULED_KEY, Graph.PROCESSED_KEY]
                 relation_key = [Graph.SCHEDULED_RELATION_KEY, Graph.PROCESSED_RELATION_KEY]
 
                 for op, relation in zip(op_key, relation_key):
-                    s = result.data[(Graph.MACHINE_KEY, relation, Graph.OPERATION_KEY)]
+                    if op not in source.data[Graph.MACHINE_KEY, machine_id].keys():
+                        continue
+
+                    relation = edge(Graph.MACHINE_KEY, relation, Graph.OPERATION_KEY)
+                    edges[relation] = edges.get(relation, [])
 
                     scheduled_operations = source.data[Graph.MACHINE_KEY, machine_id, op]
-                    scheduled_operations = self.__get_node_ids__(scheduled_operations, index)
+                    scheduled_operations = __encode__(scheduled_operations)
 
-                    s[Graph.EDGE_INDEX] = torch.cat([s[Graph.EDGE_INDEX], torch.vstack([
-                        torch.full((scheduled_operations.shape[1],), fill_value=machine_id),
+                    edges[relation] += [torch.vstack([
+                        torch.full((scheduled_operations.shape[0],), fill_value=unkey(machine_id, is_tensor=True)),
                         scheduled_operations
-                    ])], dim=1)
+                    ])]
+
+        for relation, graph in edges.items():
+            result.data[relation, Graph.EDGE_INDEX] = torch.cat(graph, dim=1)
 
     @staticmethod
     def __reset_forward_graph__(result: Graph):
-        t = torch.tensor([], dtype=torch.long).view(2, 0)
+        t = torch.tensor([], dtype=torch.int32).view(2, 0)
 
         edges = [
             edge(Graph.OPERATION_KEY, Graph.FORWARD_RELATION_KEY, Graph.GROUP_KEY),
@@ -265,7 +315,7 @@ class Encoder:
 
     @staticmethod
     def __reset_schedule_graph__(result: Graph):
-        t = torch.tensor([], dtype=torch.long).view(2, 0)
+        t = torch.tensor([], dtype=torch.int32).view(2, 0)
 
         edges = [
             edge(Graph.OPERATION_KEY, Graph.SCHEDULED_RELATION_KEY, Graph.OPERATION_KEY),
@@ -280,19 +330,16 @@ class Encoder:
 
             result.data[edge_, Graph.EDGE_INDEX] = t
 
-    def __encode_graph__(self, graph: torch.Tensor, index: torch.Tensor):
-        src_nodes = self.__get_node_ids__(graph[[0, 1], :], index)
-        dst_nodes = self.__get_node_ids__(graph[[2, 3], :], index)
-
-        return torch.vstack([src_nodes, dst_nodes])
-
-    def __get_node_ids__(self, values, store):
+    @staticmethod
+    @torch.jit.script
+    def __get_node_ids__(values, store):
         if values.numel() == 0:
-            return torch.tensor([], dtype=torch.long).view(1, 0)
+            return torch.empty(size=(1, 0), dtype=torch.int32)
 
-        result = torch.abs(store - values.unsqueeze(dim=0).T)
+        a = torch.abs(store - values.unsqueeze(dim=0).T)
+        b = (a.sum(dim=-2) == torch.tensor(0)).nonzero()[:, 1]
 
-        return (result.sum(axis=-2) == 0).nonzero()[:, 1]
+        return b
 
     def __get_job_ids__(self, graph) -> [torch.Tensor]:
         job_ids = graph.data[Graph.JOB_KEY].keys()

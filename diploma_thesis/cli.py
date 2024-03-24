@@ -1,10 +1,18 @@
 
+import torch
+import numpy as np
+import random
 import argparse
 from typing import Dict
 
 import yaml
 
 from workflow import Workflow, Simulation, Tournament, MultiSimulation
+
+random.seed(0)
+np.random.seed(0)
+
+torch.use_deterministic_algorithms(True)
 
 
 def make_workflow(configuration: Dict) -> Workflow:

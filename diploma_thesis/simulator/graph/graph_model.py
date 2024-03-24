@@ -75,6 +75,8 @@ class GraphModel(Delegate):
         new_encoded_graph_data = new_encoded_graph.data
         new_encoded_graph_data = self.__trim_empty_records__(new_encoded_graph_data)
 
+        del new_encoded_graph_data[Graph.OPERATION_JOB_MAP_KEY]
+
         return Graph(data=new_encoded_graph_data, batch_size=[])
 
     def did_start_simulation(self, context: Context):

@@ -29,10 +29,8 @@ class ScheduleTransition(metaclass=ABCMeta):
     # Utils
 
     def __append_operations_to_scheduled_graph__(self, operations: torch.LongTensor, machine_index: str, graph: Graph):
-        graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY] = torch.cat([
-            graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY],
-            operations
-        ], dim=1)
+        self.__append__(graph.data[Graph.MACHINE_KEY, machine_index], Graph.SCHEDULED_KEY, operations, dim=1)
+
 
     @classmethod
     def __get_current_machine_index__(cls, graph: Graph, job: Job) -> torch.LongTensor | None:
@@ -61,6 +59,13 @@ class ScheduleTransition(metaclass=ABCMeta):
 
     def __current_operation_id__(cls, graph: Graph, job: Job) -> torch.Tensor | None:
         return cls.__operation_id__(graph, job, job.current_step_idx, job.current_machine_idx)
+
+    @staticmethod
+    def __append__(store, key, values, dim):
+        if key in store.keys():
+            store[key] = torch.cat([store[key], values], dim=dim)
+        else:
+            store[key] = values
 
     @classmethod
     def __delete_by_first_row__(cls, value: torch.Tensor, tensor: torch.Tensor):

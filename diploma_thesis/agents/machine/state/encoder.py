@@ -31,7 +31,6 @@ class GraphStateEncoder(GraphEncoder, metaclass=ABCMeta):
         job_index = graph[Graph.JOB_INDEX_MAP]
 
         queued_jobs = torch.hstack([job.id for job in parameters.machine.queue])
-        # TODO: assume_unique=False doesn't work well on MPS
         is_in_queue = torch.isin(job_index[:, 0].view(-1), queued_jobs, assume_unique=False)
 
         index = torch.hstack([parameters.machine.work_center_idx, parameters.machine.machine_idx])

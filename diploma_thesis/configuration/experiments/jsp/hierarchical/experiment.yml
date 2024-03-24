@@ -26,7 +26,7 @@ ppo: &ppo
   mods:
     __factory__:
       - [ 'util/optimizer/grad_norm.yml' ]
-      - [ 'util/infrastructure/mps.yml' ]
+#      - [ 'util/infrastructure/mps.yml' ]
       - [
           '__none__',
           'agent/ppo/epochs/4.yml',
@@ -53,15 +53,15 @@ short_single_source_run: &short_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ [ 'duration/1024.yml' ] ]
-        - [ [ 'size/jsp/10.yml', 'size/jsp/20.yml' ] ]
+        - [ [ 'duration/2048.yml' ] ]
+        - [ [ 'size/jsp/20.yml', 'size/jsp/10.yml', ] ]
         - [ [ 'utilization/70.yml', 'utilization/80.yml', 'utilization/90.yml' ] ]
     nested:
       parameters:
         dispatch:
           seed: [ [
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-            11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            10, 11, 12, 13, 14, 15, 16, 17, 18, 19
           ] ]
 
 
@@ -71,8 +71,10 @@ short_single_source_run: &short_single_source_run
 task:
   kind: 'multi_task'
   n_workers: 1
+  n_threads: 8
   debug: False
-  log_run: False
+  log_run: True
+
   store_run_statistics: False
   output_dir: 'results/jsp/experiments/ppo_reinforce_path/runs/hierarchical_tardiness'
 
@@ -124,6 +126,7 @@ task:
                 - 'timeline/warmup.yml'
               nested:
                 parameters:
+                  log_tick: 5000
                   simulations:
                     - name: ''
                       kind: 'multi_value'

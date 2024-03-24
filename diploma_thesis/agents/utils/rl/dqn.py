@@ -92,7 +92,8 @@ class DeepQTrainer(RLTrainer):
     def load_state_dict(self, state_dict: dict):
         super().load_state_dict(state_dict)
 
-        self.target_model.load_state_dict(state_dict['target_model'])
+        if self._target_model is not None:
+            self.target_model.load_state_dict(state_dict['target_model'])
 
     @classmethod
     def from_cli(cls,

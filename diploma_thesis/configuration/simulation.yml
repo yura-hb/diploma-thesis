@@ -3,8 +3,8 @@ task:
 
   name: 'test'
   output_dir: 'results/jsp/experiments/ppo_reinforce/test'
-  log_stdout: True
-  log_run: True
+  log_stdout: False
+  log_run: False
   debug: False
   store_run_statistics: False
 
@@ -12,7 +12,7 @@ task:
     kind: 'mod'
     parameters:
       base_path: 'configuration/mods/machine/ppo.yml'
-      template: 'experimental/hierarchical_recurrent'
+      template: 'experimental/hierarchical'
       mod_dirs:
         - 'configuration/mods/machine/mods'
       mods:

@@ -1,6 +1,3 @@
-
-import os
-
 from typing import Dict
 
 from joblib import Parallel, delayed
@@ -10,8 +7,12 @@ from .simulation import Simulation
 from .workflow import *
 
 
-@task(lambda s: s['name'])
-def __run__(s: Dict):
+@task(lambda s, _: s['name'])
+def __run__(s: Dict, threads):
+    import torch
+
+    torch.set_num_threads(threads)
+
     s = Simulation(s)
 
     s.run()
@@ -45,8 +46,13 @@ class MultiSimulation(Workflow):
         print(f'Running {len(parameters)} simulations')
 
         n_workers = self.parameters.get('n_workers', -1)
+        threads = self.__get_n_threads__(n_workers, self.parameters.get('n_threads'))
 
-        Parallel(n_jobs=n_workers)(delayed(__run__)(s) for s in parameters)
+        if n_workers == 1:
+            for s in parameters:
+                __run__(s, threads)
+        else:
+            Parallel(n_jobs=n_workers)(delayed(__run__)(s, threads) for s in parameters)
 
     def __fetch_tasks__(self):
         result: [Dict] = []

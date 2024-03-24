@@ -89,3 +89,15 @@ class Workflow(metaclass=ABCMeta):
         os.makedirs(output_path)
 
         return output_path
+
+    @staticmethod
+    def __get_n_threads__(n_workers, n_threads):
+        import multiprocessing as mp
+
+        cpus = n_threads or mp.cpu_count()
+
+        # Limit the number of threads to be at max of the number of cpu cores. Otherwise, torch oversubscription
+        # cause significant slowdown https://github.com/pytorch/pytorch/issues/44025
+        threads = max(1, cpus // n_workers if n_workers > 0 else cpus)
+
+        return threads

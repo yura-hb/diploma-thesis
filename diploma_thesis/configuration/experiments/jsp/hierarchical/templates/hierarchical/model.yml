@@ -8,9 +8,9 @@ layers:
         - kind: 'gin'
           parameters:
             in_channels: -1
-            out_channels: 64
+            out_channels: 128
             num_layers: 1
-            hidden_channels: 64
+            hidden_channels: 128
 
       signature: 'graph -> actions_hidden, actions_batch'
 
@@ -31,13 +31,13 @@ layers:
       layers:
         - kind: 'linear'
           parameters:
-            dim: 64
-            activation: 'tanh'
+            dim: 128
+            activation: 'relu'
             signature: 'x -> x'
         - kind: 'linear'
           parameters:
-            dim: 64
-            activation: 'tanh'
+            dim: 128
+            activation: 'relu'
             signature: 'x -> x'
 
   - kind: 'linear'
@@ -60,9 +60,9 @@ layers:
         - kind: 'gin'
           parameters:
             in_channels: -1
-            out_channels: 64
+            out_channels: 128
             num_layers: 1
-            hidden_channels: 64
+            hidden_channels: 128
 
       signature: 'graph -> values_hidden, values_batch'
 
@@ -72,18 +72,18 @@ layers:
 
   - kind: 'linear'
     parameters:
-      dim: 64
-      activation: 'tanh'
+      dim: 128
+      activation: 'relu'
       signature: 'values_hidden -> values_hidden'
   - kind: 'linear'
     parameters:
-      dim: 64
-      activation: 'tanh'
+      dim: 128
+      activation: 'relu'
       signature: 'values_hidden -> values_hidden'
   - kind: 'linear'
     parameters:
       dim: 1
-      activation: 'tanh'
+      activation: 'none'
       signature: 'values_hidden -> values_hidden'
 
   - kind: 'output'

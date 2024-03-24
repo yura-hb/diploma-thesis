@@ -1,8 +1,4 @@
-
-from dataclasses import dataclass
-from typing import Dict
-
-from torchrl.data import LazyMemmapStorage, TensorDictPrioritizedReplayBuffer, PrioritizedReplayBuffer, ListStorage
+from torchrl.data import TensorDictPrioritizedReplayBuffer, PrioritizedReplayBuffer
 
 from .memory import *
 

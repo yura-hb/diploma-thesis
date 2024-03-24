@@ -12,7 +12,7 @@ class CompleteTransition(ForwardTransition):
     """
 
     def construct(self, job: Job) -> torch.Tensor:
-        edge_index = torch.IntTensor([]).view(2, 0)
+        edges = []
         operations_count = 0
 
         for step_id, work_center_id in enumerate(job.step_idx):
@@ -49,9 +49,9 @@ class CompleteTransition(ForwardTransition):
 
             operations_count += current_step_op_count
 
-            edge_index = torch.cat([edge_index, result], dim=1)
+            edges += [result]
 
-        return edge_index
+        return torch.cat(edges, dim=1)
 
     @staticmethod
     def from_cli(parameters: Dict):

@@ -1,8 +1,8 @@
-import os.path
 import logging
+import os.path
+import traceback
 from functools import reduce
 from typing import Dict, List
-import traceback
 
 import numpy as np
 import pandas as pd
@@ -10,16 +10,15 @@ import simpy
 import tqdm
 from joblib import Parallel, delayed
 from tabulate import tabulate
-
 from tqdm import tqdm
+
 from environment import Statistics
 from simulator import EvaluateConfiguration, EpisodicSimulator, Simulation
-from simulator.tape import TapeModel, NoMachineReward, NoWorkCenterReward
 from simulator.graph import GraphModel
 from simulator.graph.graph_model import Configuration as GraphRunConfiguration
 from simulator.graph.transition import No as NoTransitionModel
+from simulator.tape import TapeModel, NoMachineReward, NoWorkCenterReward
 from utils import task
-from utils import chunked
 from workflow.candidates import from_cli as candidates_from_cli, Candidate
 from workflow.criterion import from_cli as criterion_from_cli, Criterion, Direction, Scale
 from .workflow import Workflow
@@ -33,7 +32,12 @@ def __evaluate__(tournament: 'Tournament',
                  criteria: List[Criterion],
                  configuration: EvaluateConfiguration,
                  logger: logging.Logger,
-                 output_dir: str):
+                 output_dir: str,
+                 threads: int):
+    import torch
+
+    torch.set_num_threads(threads)
+
     environment = simpy.Environment()
     candidate_output_dir = os.path.join(output_dir, 'candidates', candidate.name)
 
@@ -43,12 +47,19 @@ def __evaluate__(tournament: 'Tournament',
     if 'graph' in candidate.parameters:
         graph_model = GraphModel.from_cli(candidate.parameters['graph'])
 
-    candidate.machine.with_logger(logger)
-    candidate.work_center.with_logger(logger)
+    try:
+        machine, work_center = candidate.load()
+    except:
+        traceback.print_exc()
+        print(f'Error loading candidate {candidate.name}')
+        return []
+
+    machine.with_logger(logger)
+    work_center.with_logger(logger)
 
     simulator = EpisodicSimulator(
-        machine=candidate.machine,
-        work_center=candidate.work_center,
+        machine=machine,
+        work_center=work_center,
         tape_model=TapeModel(NoMachineReward(), NoWorkCenterReward()),
         graph_model=graph_model,
     )
@@ -67,13 +78,14 @@ def __evaluate__(tournament: 'Tournament',
                                                            criteria=criteria,
                                                            output_dir=candidate_output_dir)
             except:
+                print(f'Skip simulation { simulation.simulation_id } due to error')
                 traceback.print_exc()
 
         simulator.evaluate(environment=environment, config=configuration, on_simulation_end=on_simulation_end)
 
         return result
 
-    return {}
+    return []
 
 
 class Tournament(Workflow):
@@ -112,19 +124,24 @@ class Tournament(Workflow):
 
         print(f'Evaluating {len(candidates)} candidates')
 
-        cpus = self.parameters['n_workers']
+        n_workers = self.parameters['n_workers']
+        threads = self.__get_n_threads__(n_workers, self.parameters.get('n_threads'))
 
-        iter = Parallel(n_jobs=cpus, return_as='generator')(
-            delayed(__evaluate__)(self, candidate, criteria, configuration, logger, output_dir)
+        iter = Parallel(n_jobs=n_workers, return_as='generator')(
+            delayed(__evaluate__)(self, candidate, criteria, configuration, logger, output_dir, threads)
             for candidate in candidates
         )
 
         result = []
 
         for metrics in tqdm(iter, total=len(candidates)):
-            result += metrics
+            if metrics is not None:
+                result += metrics
 
         result = pd.DataFrame(result)
+
+        self.__save_result__(result, output_dir=output_dir)
+
         result = self.__reward__(result, criteria)
 
         self.__save_result__(result, output_dir=output_dir)

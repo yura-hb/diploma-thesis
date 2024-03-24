@@ -1,18 +1,12 @@
-import logging
-
 from .template import Template, Candidate
 
-from agents.machine import StaticMachine
-from agents.machine.model import StaticMachineModel, SchedulingRule
-from agents.machine.state import PlainEncoder
-from agents.machine.model.rule import ALL_SCHEDULING_RULES
-
-from agents.workcenter import StaticWorkCenter
-from agents.workcenter.model import StaticWorkCenterModel, RoutingRule
-from agents.workcenter.state import PlainEncoder
-from agents.workcenter.model.rule import ALL_ROUTING_RULES
-
 from typing import List
+
+from agents.machine.model import SchedulingRule
+from agents.machine.model.rule import ALL_SCHEDULING_RULES
+from agents.workcenter.model import RoutingRule
+from agents.workcenter.model.rule import ALL_ROUTING_RULES
+from .template import Template, Candidate
 
 
 class StaticCandidates(Template):
@@ -28,15 +22,8 @@ class StaticCandidates(Template):
         return [
             Candidate(
                 name=cls.__id__(scheduling_rule, routing_rule),
-                parameters=parameters,
-                machine=StaticMachine(
-                    model=StaticMachineModel(scheduling_rule),
-                    state_encoder=PlainEncoder()
-                ),
-                work_center=StaticWorkCenter(
-                    model=StaticWorkCenterModel(routing_rule),
-                    state_encoder=PlainEncoder()
-                )
+                kind='static',
+                parameters=dict(scheduling_rule=scheduling_rule, routing_rule=routing_rule)
             )
             for scheduling_rule in scheduling_rules
             for routing_rule in routing_rules

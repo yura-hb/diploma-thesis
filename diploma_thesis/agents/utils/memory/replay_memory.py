@@ -1,9 +1,8 @@
-from torchrl.data import LazyMemmapStorage, TensorDictReplayBuffer, ListStorage
+from torchrl.data import TensorDictReplayBuffer
 
 from .memory import *
-from .sampler import *
-
 from .memory import Configuration as MemoryConfiguration
+from .sampler import *
 
 
 @dataclass

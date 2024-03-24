@@ -1,4 +1,5 @@
 import logging
+import time
 from abc import ABCMeta, abstractmethod
 from dataclasses import field
 from typing import Callable, List
@@ -229,17 +230,27 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
     # Agent
 
     def schedule(self, context: Context, machine: Machine) -> Job | None:
+        start = time.time()
+
         graph = self.graph_model.graph(context=context)
         memory = self.memory_model.get_schedule_record(context=context, key=machine.key)
         parameters = MachineInput(machine=machine, now=context.moment, graph=graph, memory=memory)
 
+        encode_end = time.time()
+
         result = self.machine.schedule(machine.key, parameters)
+
+        forward_end = time.time()
 
         if self.machine.is_trainable:
             self.tape_model.register_machine_reward_preparation(context=context, machine=machine, record=result)
 
         if result.record is not None:
             self.memory_model.store_schedule_record(context=context, key=machine.key, memory=result.record.memory)
+
+        store_end = time.time()
+
+        print(f'Time: Encode { encode_end - start },  Forward: { forward_end - encode_end }, Store { store_end - forward_end}')
 
         return result.result
 
@@ -273,31 +284,34 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         resource = simpy.Resource(environment, capacity=n_workers)
 
         def consume(simulation: Simulation):
-            with resource.request() as req:
-                yield req
+            try:
+                with resource.request() as req:
+                    yield req
 
-                delegate = Delegate([self.tape_model, self.graph_model])
+                    delegate = Delegate([self.tape_model, self.graph_model])
 
-                simulation.prepare(self, delegate, environment)
+                    simulation.prepare(self, delegate, environment)
 
-                self.machine.setup(simulation.shop_floor)
-                self.work_center.setup(simulation.shop_floor)
+                    self.machine.setup(simulation.shop_floor)
+                    self.work_center.setup(simulation.shop_floor)
 
-                if is_training:
-                    self.tape_model.register(simulation.shop_floor,
-                                             self.machine.is_trainable,
-                                             self.work_center.is_trainable)
+                    if is_training:
+                        self.tape_model.register(simulation.shop_floor,
+                                                 self.machine.is_trainable,
+                                                 self.work_center.is_trainable)
 
-                self.__log__(f'Simulation Started {simulation.simulation_id}')
+                    self.__log__(f'Simulation Started {simulation.simulation_id}')
 
-                yield environment.process(simulation.run())
+                    yield environment.process(simulation.run())
 
-                self.__log__(f'Simulation Finished {simulation.simulation_id}')
+                    self.__log__(f'Simulation Finished {simulation.simulation_id}')
 
-                if is_training:
-                    self.did_finish_simulation(simulation)
+                    if is_training:
+                        self.did_finish_simulation(simulation)
 
-                on_simulation_end(simulation)
+                    on_simulation_end(simulation)
+            except:
+                self.__log__(f'Skip simulation {simulation.simulation_id} due to error')
 
         processes = [environment.process(consume(simulation)) for simulation in simulations]
 
@@ -377,30 +391,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
             yield environment.timeout(log_tick)
 
-            import gc
-
-            gc.collect()
-
             torch.mps.empty_cache()
             torch.cuda.empty_cache()
-
-            # TODO: Improve
-
-            # from functools import reduce
-
-            # by_size = dict()
-            #
-            # for obj in gc.get_objects():
-            #     try:
-            #         if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
-            #             by_size[obj.size()] = by_size.get(obj.size(), 0) + 1
-            #     except:
-            #         pass
-            #
-            # by_size = sorted(by_size.items(), key=lambda pair: torch.prod(torch.tensor(pair[0])) * pair[1], reverse=True)
-            #
-            # print(by_size)
-            # print(reduce(lambda x, pair: x + torch.prod(torch.tensor(pair[0])) * pair[1], by_size, 0))
 
     def __terminate_if_needed__(self, environment: simpy.Environment, run_event: simpy.Event, delay: float):
         yield environment.timeout(delay)

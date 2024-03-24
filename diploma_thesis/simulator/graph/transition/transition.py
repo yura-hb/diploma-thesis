@@ -61,14 +61,6 @@ class GraphTransition:
 
             graph.data[Graph.MACHINE_KEY, index] = TensorDict({}, batch_size=[])
 
-            t = torch.tensor([], dtype=torch.int)
-
-            graph.data[Graph.MACHINE_KEY, index, Graph.SCHEDULED_KEY] = t.clone().view(2, 0)
-            graph.data[Graph.MACHINE_KEY, index, Graph.PROCESSED_KEY] = t.clone().view(2, 0)
-
-            graph.data[Graph.MACHINE_KEY, index, Graph.SCHEDULED_GRAPH_KEY] = t.clone().view(4, 0)
-            graph.data[Graph.MACHINE_KEY, index, Graph.PROCESSED_GRAPH_KEY] = t.clone().view(4, 0)
-
         graph.data[Graph.MACHINE_INDEX_KEY] = machine_index
 
     # Append
@@ -81,9 +73,8 @@ class GraphTransition:
 
         job_id = key(job.id)
 
-        graph.data[Graph.JOB_KEY][job_id] = dict()
-        graph.data[Graph.JOB_KEY][job_id]['job_id'] = job.id
-        graph.data[Graph.JOB_KEY][job_id][Graph.FORWARD_GRAPH_KEY] = self.forward_transition.construct(job)
+        graph.data[Graph.JOB_KEY, job_id, 'job_id'] = job.id
+        graph.data[Graph.JOB_KEY, job_id, Graph.FORWARD_GRAPH_KEY] = self.forward_transition.construct(job)
 
     # Update
 
@@ -93,7 +84,7 @@ class GraphTransition:
         if job_id not in graph.data[Graph.JOB_KEY].keys():
             return
 
-        graph.data[Graph.JOB_KEY][job_id][Graph.FORWARD_GRAPH_KEY] = self.forward_transition.construct(job)
+        graph.data[Graph.JOB_KEY, job_id, Graph.FORWARD_GRAPH_KEY] = self.forward_transition.construct(job)
 
     # Remove
 

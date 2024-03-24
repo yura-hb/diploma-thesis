@@ -1,46 +1,48 @@
 task:
   kind: 'tournament'
 
-  n_workers: 1
-  name: 'static_rules'
-  output_dir: 'results/jsp/experiments/tournaments/static_rules'
+  n_workers: 8
+  n_threads: 8
+  name: 'surrogate_tardiness'
+  output_dir: 'results/jsp/experiments/tournaments/marl_direct'
   store_run_statistics: True
+  log_run: False
   debug: False
 
   candidates:
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'dqn'
-#        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/1'
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'ddqn'
-#        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/2'
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'dueling'
-#        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/3'
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: '3-step'
-#        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/4'
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'prioritized'
-#        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/5'
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'noisy'
-#        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/6'
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'all'
-#        path: 'results/jsp/experiments/dqn_path/runs/marl_indirect_test/7'
-    - kind: 'static'
+    - kind: 'persisted_agents'
       parameters:
-        scheduling: 'all'
-        routing:
-          - 'ct'
+        prefix: 'dqn'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/1'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: 'ddqn'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/2'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: 'dueling'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/3'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: '3-step'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/4'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: 'prioritized'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/5'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: 'noisy'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/6'
+    - kind: 'persisted_agents'
+      parameters:
+        prefix: 'all'
+        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/7'
+#    - kind: 'static'
+#      parameters:
+#        scheduling: 'all'
+#        routing:
+#          - 'ct'
 
   criteria:
     - kind: 'makespan'
@@ -59,7 +61,7 @@ task:
     points: 1
 
   simulator:
-    n_workers: 4
+    n_workers: 1
     simulations:
       - name: 'tailard'
         kind: 'jsp_dataset'
@@ -78,7 +80,7 @@ task:
             kind: 'simulation'
             parameters:
               configuration:
-                timespan: 2000
+                timespan: 4000
                 machines_per_work_center: 1
                 work_center_count: 10
 
@@ -154,9 +156,19 @@ task:
 
                 job_sampler:
                   parameters:
-                    job_arrival_time_on_machine:
-                      parameters:
-                        value:
-                          - 0.7
-                          - 0.8
-                          - 0.9
+                    __concat__:
+                      - job_arrival_time_on_machine:
+                          parameters:
+                            value:
+                              - 0.7
+                        n_jobs: 60
+                      - job_arrival_time_on_machine:
+                          parameters:
+                            value:
+                              - 0.8
+                        n_jobs: 80
+                      - job_arrival_time_on_machine:
+                          parameters:
+                            value:
+                              - 0.9
+                        n_jobs: 100
