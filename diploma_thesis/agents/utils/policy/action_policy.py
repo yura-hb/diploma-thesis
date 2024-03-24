@@ -1,7 +1,8 @@
-from enum import StrEnum
+import logging
+import torch
 from typing import Dict
 
-from agents.utils import NeuralNetwork, Phase
+from agents.utils import NeuralNetwork
 from agents.utils.action import ActionSelector, from_cli as action_selector_from_cli
 from .policy import *
 
@@ -32,6 +33,15 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
         if self.noise_parameters is not None:
             self.model.to_noisy(self.noise_parameters)
 
+    def with_logger(self, logger: logging.Logger):
+        super().with_logger(logger)
+
+        for module in [self.model, self.action_selector]:
+            if isinstance(module, Loggable):
+                module.with_logger(logger)
+
+        return self
+
     def configure(self, configuration: RunConfiguration):
         self.run_configuration = configuration
 
@@ -44,7 +54,7 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
             self.model = self.model.to(configuration.device)
 
     def update(self, phase: Phase):
-        self.phase = phase
+        super().update(phase)
 
         for module in [self.model, self.action_selector]:
             if isinstance(module, PhaseUpdatable):

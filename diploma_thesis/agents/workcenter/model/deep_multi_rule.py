@@ -8,7 +8,7 @@ from .model import *
 from .rule import ALL_ROUTING_RULES, RoutingRule, IdleRoutingRule
 
 
-class DeepMultiRule(DeepPolicyWorkCenterModel, DiscreteAction):
+class DeepMultiRule(DeepPolicyWorkCenterModel):
 
     def __init__(self, rules: List[RoutingRule], policy: Policy[WorkCenterInput]):
         super().__init__(policy)

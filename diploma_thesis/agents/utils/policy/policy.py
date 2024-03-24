@@ -5,16 +5,15 @@ from dataclasses import field
 from enum import StrEnum
 from typing import TypeVar, Generic
 
-import torch
-
 from tensordict import TensorDict
 from tensordict.prototype import tensorclass
 from torch import nn
 
 from agents.base.state import State
-from agents.utils import PhaseUpdatable
+from agents.utils import PhaseUpdatable, Phase, EvaluationPhase
 from agents.utils.nn.layers.linear import Linear
 from agents.utils.run_configuration import RunConfiguration
+from utils import Loggable
 
 Action = TypeVar('Action')
 Rule = TypeVar('Rule')
@@ -37,12 +36,21 @@ class Keys(StrEnum):
     POLICY = 'policy'
 
 
-class Policy(Generic[Input], nn.Module, PhaseUpdatable, metaclass=ABCMeta):
+class Policy(nn.Module, Loggable, Generic[Input], PhaseUpdatable, metaclass=ABCMeta):
 
     def __init__(self):
         super().__init__()
 
         self.noise_parameters = None
+
+    def update(self, phase: Phase):
+        super().update(phase)
+
+        if isinstance(phase, EvaluationPhase):
+            self.eval()
+        else:
+            self.train()
+
 
     @abstractmethod
     def forward(self, state: State):
