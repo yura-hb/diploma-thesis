@@ -1,4 +1,4 @@
-
+import logging
 from abc import ABCMeta, abstractmethod
 from typing import TypeVar, Generic
 
@@ -16,12 +16,15 @@ Action = TypeVar('Action')
 Result = TypeVar('Result')
 
 
-class Model(Loggable, Generic[Input, Action, Result], metaclass=ABCMeta):
+class Model(Generic[Input, Action, Result], Loggable, metaclass=ABCMeta):
 
     @tensorclass
     class Record:
         result: Result
         record: PolicyRecord | None
+
+    def __init__(self):
+        super().__init__()
 
     @abstractmethod
     def __call__(self, state: State, parameters: Input) -> Record:

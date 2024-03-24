@@ -58,6 +58,14 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
 
         return result
 
+    def update(self, phase: Phase):
+        super().update(phase)
+
+        if self.is_model_distributed and self.is_configured:
+            for _, model in self.model.items():
+                if isinstance(model, PhaseUpdatable):
+                    model.update(phase)
+
     @property
     def is_trainable(self):
         return True
