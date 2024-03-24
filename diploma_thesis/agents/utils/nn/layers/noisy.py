@@ -1,3 +1,5 @@
+from typing import Mapping, Any
+
 import torch
 import torch.nn as nn
 
@@ -20,15 +22,21 @@ class AbstractNoisyLayer(nn.modules.lazy.LazyModuleMixin, nn.Module):
         self.sigma_weight = nn.UninitializedParameter()
 
     def initialize_parameters(self, input) -> None:
-        if self.has_uninitialized_params():
-            with torch.no_grad():
+        with torch.no_grad():
+            has_uninitialized_params = self.has_uninitialized_params()
+
+            if not has_uninitialized_params and self.input_features is not None:
+                return
+
+            if self.input_features is None:
                 self.input_features = input.shape[-1]
 
+            if has_uninitialized_params:
                 self.mu_weight.materialize((self.output_features, self.input_features))
                 self.sigma_weight.materialize((self.output_features, self.input_features))
 
-                self.parameter_initialization()
-                self.sample_noise()
+            self.parameter_initialization()
+            self.sample_noise()
 
     def forward(self, x: torch.Tensor, sample_noise: bool = True) -> torch.Tensor:
         if not self.training:
@@ -53,7 +61,7 @@ class AbstractNoisyLayer(nn.modules.lazy.LazyModuleMixin, nn.Module):
     def parameter_initialization(self) -> None:
         raise NotImplementedError
 
-    def get_noise_tensor(self, features: int) -> torch.Tensor:
+    def get_noise_tensor(self, features: int) -> torch.Tensor | None:
         noise = torch.zeros(features).uniform_(-self.bound, self.bound).to(self.mu_bias.device)
 
         return torch.sign(noise) * torch.sqrt(torch.abs(noise))
