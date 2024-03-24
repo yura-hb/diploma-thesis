@@ -40,7 +40,11 @@ parameters:
                   action_selector:
                     kind: 'epsilon_greedy'
                     parameters:
-                      epsilon: 0.1
+                      epsilon: 0.4
+                      min_epsilon: 0.01
+                      decay_factor: 0.99
+                      decay_steps: 50
+
 
   __encoder__: ''
 

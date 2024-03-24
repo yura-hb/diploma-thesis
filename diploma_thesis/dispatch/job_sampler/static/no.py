@@ -28,7 +28,7 @@ class No(JobSampler):
         event = Job.Event(kind=Job.Event.Kind.creation, moment=moment)
         job = job.with_event(event)
 
-        return job.with_due_at(100000)
+        return job.with_due_at(1)
 
     def sample_next_arrival_time(self) -> float:
         return 0.0

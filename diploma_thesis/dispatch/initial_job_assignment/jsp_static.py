@@ -33,11 +33,11 @@ class JSPStatic(InitialJobAssignment):
             job.processing_times = torch.tensor(processing_times, dtype=torch.float32)
             job.processing_times = torch.atleast_2d(job.processing_times).T
 
-            job.with_due_at(job.processing_times.sum() * self.due_ratio)
+            job.with_due_at(shop_floor.now + job.processing_times.sum() + self.due_ratio * job_count)
 
             yield job
 
     @staticmethod
     def from_cli(parameters: Dict):
-        return JSPStatic(path=parameters['path'], due_ratio=parameters.get('due_ratio', 4))
+        return JSPStatic(path=parameters['path'], due_ratio=parameters.get('due_ratio', 50))
 

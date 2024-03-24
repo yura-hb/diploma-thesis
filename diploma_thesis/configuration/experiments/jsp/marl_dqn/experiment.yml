@@ -278,7 +278,7 @@ task:
   n_threads: 8
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/dqn_path/runs/marl_direct_global_decomposed_tardiness'
+  output_dir: 'results/jsp/experiments/dqn_path/runs/marl_direct/global_decomposed_tardiness'
 
   tasks:
     - kind: 'multi_value'
