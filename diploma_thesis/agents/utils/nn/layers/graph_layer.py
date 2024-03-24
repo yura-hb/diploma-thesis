@@ -60,13 +60,13 @@ class SAGEConv(GraphModuleWrapper):
 class GATConv(GraphModuleWrapper):
 
     def __init__(self, configuration):
-        super().__init__(pyg.nn.GATConv, configuration)
+        super().__init__(pyg.nn.GAT, configuration)
 
 
 class GCNConv(GraphModuleWrapper):
 
     def __init__(self, configuration):
-        super().__init__(pyg.nn.GCNConv, configuration)
+        super().__init__(pyg.nn.GCN, configuration)
 
 
 class DeepGCNConv(GraphModuleWrapper):
