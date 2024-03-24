@@ -1,3 +1,5 @@
+import logging
+
 from agents.utils import Phase, PhaseUpdatable
 from .action_selector import *
 
@@ -11,6 +13,14 @@ class PhaseSelector(ActionSelector, PhaseUpdatable):
         self.phase = None
         self.default = default
         self.phase_to_action_selector = phase_to_action_selector
+
+    def with_logger(self, logger: logging.Logger):
+        super().with_logger(logger)
+
+        for _, action_selector in self.phase_to_action_selector.items():
+            action_selector.with_logger(logger)
+
+        return self
 
     def __call__(self, distribution: torch.Tensor) -> Tuple[int, torch.Tensor]:
         if self.phase in self.phase_to_action_selector:

@@ -1,14 +1,14 @@
 
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Tuple
+from typing import Tuple
 
 import torch
 
+from typing import Dict
+from utils import Loggable
 
-class ActionSelector(metaclass=ABCMeta):
 
-    def __init__(self):
-        pass
+class ActionSelector(Loggable, metaclass=ABCMeta):
 
     @abstractmethod
     def __call__(self, distribution: torch.Tensor) -> Tuple[int, torch.Tensor]:

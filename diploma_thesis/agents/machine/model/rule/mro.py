@@ -3,7 +3,7 @@ from .scheduling_rule import *
 
 class MROSchedulingRule(SchedulingRule):
     """
-    Least Remaining Operations rule, i.e. selects jobs, which has the largest number of remaining operations
+    Most Remaining Operations rule, i.e. selects jobs, which has the largest number of remaining operations
     """
 
     @property

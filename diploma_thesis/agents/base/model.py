@@ -47,6 +47,14 @@ class DeepPolicyModel(Model[Input, Action, Result], PhaseUpdatable, metaclass=AB
 
         self.policy = policy
 
+    def with_logger(self, logger: logging.Logger):
+        super().with_logger(logger)
+
+        if isinstance(self.policy, Loggable):
+            self.policy.with_logger(logger)
+
+        return self
+
     def __call__(self, state: State, parameters: Input) -> PolicyRecord:
         state.memory = parameters.memory
 
