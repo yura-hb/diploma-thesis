@@ -7,17 +7,17 @@ import torch_geometric as pyg
 class FlexibleAction(ActionPolicy):
 
     def __init__(self, base_parameters):
-        super().__init__(**base_parameters)
-
-    @property
-    def is_recurrent(self):
-        return False
+        super().__init__(action_layer=lambda: self.make_linear_layer(1),
+                         value_layer=lambda: self.make_linear_layer(1),
+                         **base_parameters)
 
     def configure(self, configuration: RunConfiguration):
         super().configure(configuration)
 
-    def post_encode(self, state: State, outputs):
-        values, actions, _ = self.__fetch_values__(outputs)
+    def encode(self, state):
+        output = super().encode(state)
+
+        values, actions, _ = self.__fetch_values__(output)
 
         # Unpack node embeddings obtained from graph batch
         if state.graph is not None and isinstance(state.graph, pyg.data.Batch):
@@ -32,43 +32,17 @@ class FlexibleAction(ActionPolicy):
                 target = store[Graph.TARGET_KEY][i:j]
                 target_nodes_count = target.sum()
 
-                result += [actions[prev_count:prev_count+target_nodes_count].view(-1)]
+                result += [actions[prev_count:prev_count + target_nodes_count].view(-1)]
                 lengths += [target_nodes_count]
 
                 prev_count += target_nodes_count
 
-            actions = torch.nn.utils.rnn.pad_sequence(result, batch_first=True, padding_value=torch.nan)
+            actions = torch.nn.utils.rnn.pad_sequence(result, batch_first=True, padding_value=-float('inf'))
             lengths = torch.tensor(lengths)
 
-            outputs[Keys.ACTIONS] = (actions, lengths)
+            output[Keys.ACTIONS] = (actions, lengths)
 
-            return self.__estimate_policy__(outputs)
-
-        return self.__estimate_policy__(outputs)
-
-    def __estimate_policy__(self, output):
-        value, actions, _ = self.__fetch_values__(output)
-
-        if isinstance(actions, tuple):
-            # Encode as logits with zero probability
-            min_value = torch.finfo(torch.float32).min
-            post_process = lambda x: torch.nan_to_num(x, nan=min_value)
-
-            match self.policy_estimation_method:
-                case PolicyEstimationMethod.DUELING_ARCHITECTURE:
-                    if isinstance(actions, tuple):
-                        actions, lengths = actions
-                        means = torch.nan_to_num(actions, nan=0.0).sum(dim=-1) / lengths
-
-                        output[Keys.ACTIONS] = post_process(value + actions - means)
-
-                        return output
-                case _:
-                    output[Keys.ACTIONS] = post_process(actions[0])
-
-                    return output
-
-        return super().__estimate_policy__(output)
+        return output
 
     @classmethod
     def from_cli(cls, parameters: Dict) -> 'Policy':

@@ -1,5 +1,6 @@
 import logging
 import time
+import traceback
 from abc import ABCMeta, abstractmethod
 from dataclasses import field
 from typing import Callable, List
@@ -250,7 +251,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
         store_end = time.time()
 
-        print(f'Time: Encode { encode_end - start },  Forward: { forward_end - encode_end }, Store { store_end - forward_end}')
+        # print(f'Time: Encode { encode_end - start },  Forward: { forward_end - encode_end }, Store { store_end - forward_end}')
 
         return result.result
 
@@ -284,8 +285,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         resource = simpy.Resource(environment, capacity=n_workers)
 
         def consume(simulation: Simulation):
-            try:
-                with resource.request() as req:
+            with resource.request() as req:
+                try:
                     yield req
 
                     delegate = Delegate([self.tape_model, self.graph_model])
@@ -310,8 +311,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                         self.did_finish_simulation(simulation)
 
                     on_simulation_end(simulation)
-            except:
-                self.__log__(f'Skip simulation {simulation.simulation_id} due to error')
+                except:
+                    self.__log__(f'Skip simulation {simulation.simulation_id} due to error {traceback.print_exc()}')
 
         processes = [environment.process(consume(simulation)) for simulation in simulations]
 

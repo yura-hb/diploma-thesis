@@ -9,9 +9,6 @@ import yaml
 
 from workflow import Workflow, Simulation, Tournament, MultiSimulation
 
-random.seed(0)
-np.random.seed(0)
-
 torch.use_deterministic_algorithms(True)
 
 

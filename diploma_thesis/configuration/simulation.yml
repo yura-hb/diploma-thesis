@@ -11,17 +11,18 @@ task:
   machine_agent:
     kind: 'mod'
     parameters:
-      base_path: 'configuration/mods/machine/ppo.yml'
-      template: 'experimental/hierarchical'
+      base_path: 'configuration/experiments/jsp/marl_dqn/machine.yml'
+      template: 'marl_direct'
       mod_dirs:
         - 'configuration/mods/machine/mods'
       mods:
-        - 'agent/ppo/epochs/4.yml'
-        - 'util/optimizer/grad_norm.yml'
-        - 'agent/ppo/p3or.yml'
-        - 'util/rules/flexible.yml'
-        - 'util/infrastructure/mps.yml'
-        - 'util/train_schedule/on_stored_data_exclusively.yml'
+        - 'agent/dqn/ddqn.yml'
+        - 'agent/dqn/prioritized.yml'
+        - 'agent/dqn/steps/3.yml'
+        - 'agent/dqn/steps/off_policy.yml'
+        - 'agent/dqn/dueling.yml'
+        - 'agent/dqn/noisy.yml'
+        - 'util/agent/centralized.yml'
 
   work_center_agent:
     kind: 'static'

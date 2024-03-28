@@ -134,7 +134,7 @@ class Optimizer:
 
     def state_dict(self):
         return dict(
-            optimizer=self._optimizer.state_dict(),
+            optimizer=self._optimizer.state_dict() if self._optimizer is not None else None,
             scheduler=self._scheduler.state_dict() if self._scheduler is not None else None,
             step_idx=self.step_idx
         )

@@ -1,17 +1,19 @@
+import copy
+
 import simpy
 import torch
 
 from environment import ShopFloor, Machine, Configuration
-from .job_sampler import JobSampler
+from utils import Loggable
 from .breakdown import Breakdown
-from .initial_job_assignment import InitialJobAssignment
-
 from .breakdown import from_cli as breakdown_from_cli
-from .job_sampler import from_cli as job_sampler_from_cli
+from .initial_job_assignment import InitialJobAssignment
 from .initial_job_assignment import from_cli as initial_job_assignment_from_cli
+from .job_sampler import JobSampler
+from .job_sampler import from_cli as job_sampler_from_cli
 
 
-class Dispatch:
+class Dispatch(Loggable):
 
     def __init__(self,
                  environment: simpy.Environment,
@@ -19,6 +21,8 @@ class Dispatch:
                  breakdown: Breakdown,
                  initial_job_assignment: InitialJobAssignment,
                  seed: int = 0):
+        super().__init__()
+
         self.environment = environment
         self.job_sampler = job_sampler
         self.breakdown = breakdown
@@ -30,6 +34,10 @@ class Dispatch:
         generator = generator.manual_seed(self.seed)
 
         self.breakdown.connect(generator)
+
+        generator = torch.Generator()
+        generator = generator.manual_seed(self.seed)
+
         self.job_sampler.connect(generator)
 
         event = shop_floor.start()

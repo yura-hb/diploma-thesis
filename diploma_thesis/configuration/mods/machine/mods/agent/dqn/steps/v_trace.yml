@@ -3,6 +3,5 @@ parameters:
   trainer:
     parameters:
       return:
-        kind: 'n_step'
         parameters:
-          n: 3
+          vtrace_clip: 0.2

@@ -24,6 +24,9 @@ from workflow.criterion import from_cli as criterion_from_cli, Criterion, Direct
 from .workflow import Workflow
 
 reward_suffix = '_reward'
+result_filename = 'result.csv'
+candidates_dir = 'candidates'
+statistics_filename = 'statistics'
 
 
 @task(lambda _, candidate, *args: candidate.name)
@@ -35,11 +38,15 @@ def __evaluate__(tournament: 'Tournament',
                  output_dir: str,
                  threads: int):
     import torch
+    import random
 
     torch.set_num_threads(threads)
+    torch.manual_seed(0)
+    random.seed(0)
+    np.random.seed(0)
 
     environment = simpy.Environment()
-    candidate_output_dir = os.path.join(output_dir, 'candidates', candidate.name)
+    candidate_output_dir = os.path.join(output_dir, candidates_dir, candidate.name)
 
     graph_model = GraphModel(transition_model=NoTransitionModel(forward_transition=None, schedule_transition=None),
                              configuration=GraphRunConfiguration(memory=1))
@@ -78,7 +85,7 @@ def __evaluate__(tournament: 'Tournament',
                                                            criteria=criteria,
                                                            output_dir=candidate_output_dir)
             except:
-                print(f'Skip simulation { simulation.simulation_id } due to error')
+                print(f'Skip simulation {simulation.simulation_id} due to error')
                 traceback.print_exc()
 
         simulator.evaluate(environment=environment, config=configuration, on_simulation_end=on_simulation_end)
@@ -108,13 +115,19 @@ class Tournament(Workflow):
         return self.parameters.get('store_run_statistics', False)
 
     @property
+    def should_update(self):
+        return self.parameters.get('update', False)
+
+    @property
     def debug(self) -> bool:
         return self.parameters.get('debug', False)
 
     def run(self):
         candidates = self.__make_candidates__()
         criteria = self.__make_criteria__()
-        output_dir = self.__make_output_dir__(self.parameters['name'], self.parameters['output_dir'])
+        output_dir = self.__make_output_dir__(
+            self.parameters['name'], self.parameters['output_dir'], remove=not self.should_update
+        )
 
         logger = self.__make_logger__(name='Tournament',
                                       filename=self.run_log_file(output_dir),
@@ -122,17 +135,26 @@ class Tournament(Workflow):
 
         configuration = EvaluateConfiguration.from_cli(parameters=self.parameters['simulator'], logger=logger)
 
-        print(f'Evaluating {len(candidates)} candidates')
-
         n_workers = self.parameters['n_workers']
         threads = self.__get_n_threads__(n_workers, self.parameters.get('n_threads'))
+
+        result = []
+
+        if self.should_update:
+            if filtered := self.__load_and_filter_current_candidates__(candidates, criteria, output_dir):
+                candidates = filtered[0]
+                result += filtered[1]
+
+        print(f'Evaluating {len(candidates)} candidates')
+
+        if len(candidates) == 0:
+            print('No candidates were found')
+            return
 
         iter = Parallel(n_jobs=n_workers, return_as='generator')(
             delayed(__evaluate__)(self, candidate, criteria, configuration, logger, output_dir, threads)
             for candidate in candidates
         )
-
-        result = []
 
         for metrics in tqdm(iter, total=len(candidates)):
             if metrics is not None:
@@ -155,19 +177,27 @@ class Tournament(Workflow):
         result = list()
 
         for simulation in simulations:
-            record = {
-                'candidate': candidate.name,
-                'run': simulation.simulation_id,
-            }
-
             statistics = simulation.shop_floor.statistics
-            record |= {criterion.key: criterion.compute(statistics) for criterion in criteria}
+            record = self.__evaluate_criteria_for_statistics__(candidate, simulation.simulation_id, statistics, criteria)
 
             self.__save_statistics__(simulation, statistics, output_dir)
 
             result.append(record)
 
         return result
+
+    @staticmethod
+    def __evaluate_criteria_for_statistics__(
+        candidate: Candidate, run_id: str, statistics: Statistics, criteria: List[Criterion]
+    ) -> Dict:
+        record = {
+            'candidate': candidate.name,
+            'run': run_id,
+        }
+
+        record |= {criterion.key: criterion.compute(statistics) for criterion in criteria}
+
+        return record
 
     def __reward__(self, metrics: pd.DataFrame, criteria: List['Criterion']) -> pd.DataFrame:
         reward_parameters = self.parameters.get('tape', {})
@@ -210,6 +240,33 @@ class Tournament(Workflow):
 
         return metrics
 
+    def __load_and_filter_current_candidates__(self, candidates, criteria, output_dir):
+        result_output_file = os.path.join(output_dir, result_filename)
+
+        if not os.path.exists(result_output_file):
+            return None
+
+        records = []
+        result = []
+
+        for candidate in candidates:
+            candidate_output_path: str = os.path.join(output_dir, candidates_dir, candidate.name)
+
+            if os.path.exists(candidate_output_path):
+                for run in os.listdir(candidate_output_path):
+                    run_path = os.path.join(candidate_output_path, run)
+
+                    if os.path.isdir(run_path):
+                        statistics = Statistics.load(os.path.join(run_path, statistics_filename))
+
+                        records += [
+                            self.__evaluate_criteria_for_statistics__(candidate, run, statistics, criteria)
+                        ]
+            else:
+                result += [candidate]
+
+        return result, records
+
     def __make_candidates__(self) -> List[Candidate]:
         candidates = self.parameters['candidates']
 
@@ -227,7 +284,7 @@ class Tournament(Workflow):
         return reduce(lambda x, y: x + [criterion_from_cli(y)], criteria, [])
 
     def __save_result__(self, result: pd.DataFrame, output_dir: str):
-        result_output_file = os.path.join(output_dir, 'result.csv')
+        result_output_file = os.path.join(output_dir, result_filename)
         result.to_csv(result_output_file)
 
     def __save_report__(self, result: pd.DataFrame, output_dir: str):
@@ -254,7 +311,7 @@ class Tournament(Workflow):
             os.makedirs(simulation_output_dir)
 
         if self.store_run_statistics:
-            statistics_output_dir = os.path.join(simulation_output_dir, 'statistics')
+            statistics_output_dir = os.path.join(simulation_output_dir, statistics_filename)
             statistics.save(statistics_output_dir)
 
         report_output_file = os.path.join(simulation_output_dir, 'report.txt')

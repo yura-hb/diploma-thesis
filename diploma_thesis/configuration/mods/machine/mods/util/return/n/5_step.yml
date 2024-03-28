@@ -1,8 +1,0 @@
-
-parameters:
-  trainer:
-    parameters:
-      return:
-        kind: 'n_step'
-        parameters:
-          n: 5

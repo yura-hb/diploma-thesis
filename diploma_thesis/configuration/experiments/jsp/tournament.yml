@@ -1,49 +1,60 @@
 task:
   kind: 'tournament'
 
-  n_workers: 8
-  n_threads: 8
+  n_workers: 1
+  n_threads: 2
   name: 'surrogate_tardiness'
-  output_dir: 'results/jsp/experiments/tournaments/marl_direct'
+  output_dir: 'results/jsp/experiments/tournaments/djsp_experiment/'
   store_run_statistics: True
   log_run: False
+  update: True
   debug: False
 
   candidates:
+#    - kind: 'persisted_agents'
+#      parameters:
+#        prefix: ''
+#        path: 'results/jsp/experiments/ppo_reinforce_path/runs/hierarchical/surrogate_tardiness/ppo'
+
     - kind: 'persisted_agents'
       parameters:
         prefix: 'dqn'
-        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/1'
+        path: 'results/jsp/experiments/dqn_path/runs/djsp_experiment/surrogate_tardiness/1'
     - kind: 'persisted_agents'
       parameters:
         prefix: 'ddqn'
-        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/2'
+        path: 'results/jsp/experiments/dqn_path/runs/djsp_experiment/surrogate_tardiness/2'
     - kind: 'persisted_agents'
       parameters:
         prefix: 'dueling'
-        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/3'
+        path: 'results/jsp/experiments/dqn_path/runs/djsp_experiment/surrogate_tardiness/3'
     - kind: 'persisted_agents'
       parameters:
-        prefix: '3-step'
-        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/4'
+        prefix: '5-step'
+        path: 'results/jsp/experiments/dqn_path/runs/djsp_experiment/surrogate_tardiness/4'
     - kind: 'persisted_agents'
       parameters:
         prefix: 'prioritized'
-        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/5'
+        path: 'results/jsp/experiments/dqn_path/runs/djsp_experiment/surrogate_tardiness/5'
     - kind: 'persisted_agents'
       parameters:
         prefix: 'noisy'
-        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/6'
+        path: 'results/jsp/experiments/dqn_path/runs/djsp_experiment/surrogate_tardiness/6'
     - kind: 'persisted_agents'
       parameters:
         prefix: 'all'
-        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_surrogate_tardiness/7'
-
-#    - kind: 'static'
+        path: 'results/jsp/experiments/dqn_path/runs/djsp_experiment/surrogate_tardiness/7'
+#    - kind: 'persisted_agents'
 #      parameters:
-#        scheduling: 'all'
-#        routing:
-#          - 'ct'
+#        prefix: 'all_plus'
+#        path: 'results/jsp/experiments/dqn_path/runs/marl_direct_experiment/surrogate_tardiness/8'
+
+
+#      - kind: 'static'
+#        parameters:
+#          scheduling: 'all'
+#          routing:
+#            - 'ct'
 
   criteria:
     - kind: 'makespan'
@@ -62,7 +73,7 @@ task:
     points: 1
 
   simulator:
-    n_workers: 1
+    n_workers: 8
     simulations:
       - name: 'tailard'
         kind: 'jsp_dataset'

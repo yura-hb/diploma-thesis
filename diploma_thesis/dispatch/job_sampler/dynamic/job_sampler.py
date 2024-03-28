@@ -14,12 +14,14 @@ class JobSampler(JSampler):
     def __init__(self, problem: Configuration):
         super().__init__(problem)
 
-        self._number_of_jobs = 0
+        self._number_of_jobs = None
         self._processing_time_sampler: Callable[[Tuple[int]], torch.FloatTensor] = None
         self._step_sampler: Callable[[int], torch.LongTensor] = None
         self._due_time_sampler: Callable[['Job', int], torch.FloatTensor] = None
         self.samplers: [Sampler] = []
         self.arrival_time_sampler = None
+
+        self._jobs = []
 
     def connect(self, generator: torch.Generator):
         for sampler in self.samplers:

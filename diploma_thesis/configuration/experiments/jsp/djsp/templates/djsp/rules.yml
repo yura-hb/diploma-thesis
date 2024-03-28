@@ -5,6 +5,5 @@ rules:
   - 'lpt'
   - 'fifo'
   - 'lifo'
-  - 'mor'
   - 'lro'
   - 'mro'

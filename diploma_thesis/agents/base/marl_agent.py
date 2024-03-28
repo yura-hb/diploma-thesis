@@ -53,7 +53,7 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         model = self.__model_for_key__(key)
         result = model(state, parameters)
 
-        if not self.trainer[key].is_configured:
+        if key in self.trainer and not self.trainer[key].is_configured:
             self.trainer[key].configure(model.policy, configuration=self.configuration)
 
         return result
@@ -80,6 +80,9 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
 
     @filter(lambda self: self.phase == TrainingPhase())
     def train_step(self):
+        if not self.is_configured:
+            return
+
         for key in self.keys:
             self.trainer[key].train_step(self.__model_for_key__(key).policy)
 

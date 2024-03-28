@@ -4,4 +4,5 @@ parameters:
     parameters:
       policy:
         parameters:
-          policy_method: 'dueling_architecture'
+          estimator:
+            is_dueling: True

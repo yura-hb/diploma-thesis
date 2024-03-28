@@ -37,14 +37,17 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
         output = model(batch.state)
         value, logits, _ = model.__fetch_values__(output)
 
-        loss = self.actor_loss(batch, logits, configuration, self.run_configuration.device)
-        loss -= configuration.value_loss(value.view(-1), batch.info[Record.RETURN_KEY])
+        actor_loss = self.actor_loss(batch, logits, configuration, self.run_configuration.device)
+        critic_loss = configuration.value_loss(value.view(-1), batch.info[Record.RETURN_KEY])
 
-        # Want to maximize
+        # Want to maximize actor loss and minimize critic loss
+        loss = actor_loss - critic_loss
         loss = -loss
 
         self.step(loss, self.optimizer)
         self.record_loss(loss)
+        self.record_loss(actor_loss, key='actor')
+        self.record_loss(critic_loss, key='critic')
 
     @staticmethod
     def actor_loss(batch, logits, configuration: PPOConfiguration, device):

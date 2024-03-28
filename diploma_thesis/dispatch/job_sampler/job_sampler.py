@@ -1,17 +1,19 @@
 
 from abc import ABCMeta, abstractmethod
 
-import simpy
 import torch
 
 import environment
 from environment import Configuration
+from utils import Loggable
 
 
-class JobSampler(metaclass=ABCMeta):
+class JobSampler(Loggable, metaclass=ABCMeta):
 
     def __init__(self, problem: Configuration):
         self.problem = problem
+
+        super().__init__()
 
     def connect(self, generator: torch.Generator):
         pass

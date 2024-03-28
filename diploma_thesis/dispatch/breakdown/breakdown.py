@@ -1,9 +1,12 @@
-import torch
 from abc import ABCMeta
+
+import torch
+
 import environment
+from utils import Loggable
 
 
-class Breakdown(metaclass=ABCMeta):
+class Breakdown(Loggable, metaclass=ABCMeta):
 
     def connect(self, generator: torch.Generator):
         pass
