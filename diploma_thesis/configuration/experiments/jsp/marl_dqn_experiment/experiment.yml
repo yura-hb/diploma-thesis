@@ -297,7 +297,6 @@ marl_dqn_centralized_8: &centralized_dqn_8
     - 'agent/dqn/steps/off_policy.yml'
     - 'agent/dqn/steps/v_trace.yml'
     - 'agent/dqn/dueling.yml'
-#    - 'agent/dqn/noisy.yml'
     - 'util/agent/centralized.yml'
     - *default_mods
 
@@ -398,42 +397,42 @@ task:
                         values:
         values:
           __concat__:
-            - output_dir: '1'
-              machine_agent:
-                parameters:
-                  - *dqn_1
-                  - *marl_dqn_1
-                  - *centralized_dqn_1
-            - output_dir: '2'
-              machine_agent:
-                parameters:
-                  - *dqn_2
-                  - *marl_dqn_2
-                  - *centralized_dqn_2
-            - output_dir: '3'
-              machine_agent:
-                parameters:
-                  - *dqn_3
-                  - *marl_dqn_3
-                  - *centralized_dqn_3
+#            - output_dir: '1'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_1
+#                  - *marl_dqn_1
+#                  - *centralized_dqn_1
+#            - output_dir: '2'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_2
+#                  - *marl_dqn_2
+#                  - *centralized_dqn_2
+#            - output_dir: '3'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_3
+#                  - *marl_dqn_3
+#                  - *centralized_dqn_3
             - output_dir: '4'
               machine_agent:
                 parameters:
                   - *dqn_4
                   - *marl_dqn_4
                   - *centralized_dqn_4
-            - output_dir: '5'
-              machine_agent:
-                parameters:
-                  - *dqn_5
-                  - *marl_dqn_5
-                  - *centralized_dqn_5
-            - output_dir: '6'
-              machine_agent:
-                parameters:
-                  - *dqn_6
-                  - *marl_dqn_6
-                  - *centralized_dqn_6
+#            - output_dir: '5'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_5
+#                  - *marl_dqn_5
+#                  - *centralized_dqn_5
+#            - output_dir: '6'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_6
+#                  - *marl_dqn_6
+#                  - *centralized_dqn_6
             - output_dir: '7'
               machine_agent:
                 parameters:

@@ -9,16 +9,16 @@ layers:
           parameters:
             in_channels: -1
             out_channels: 128
-            num_layers: 3
+            num_layers: 2
             hidden_channels: 128
             normalize: True
             improved: True
 
       signature: 'graph -> actions_hidden, actions_batch'
 
-  - kind: 'select_target'
+  - kind: 'mean_pool'
     parameters:
-      signature: 'graph, actions_hidden -> actions_hidden'
+      signature: 'actions_hidden, actions_batch -> actions_hidden'
 
   - kind: 'linear'
     parameters:
@@ -30,7 +30,21 @@ layers:
       dim: 128
       activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
-
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'actions_hidden -> actions_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'actions_hidden -> actions_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'actions_hidden -> actions_hidden'
 
   # Critic
 
@@ -41,7 +55,7 @@ layers:
           parameters:
             in_channels: -1
             out_channels: 128
-            num_layers: 3
+            num_layers: 2
             hidden_channels: 128
             normalize: True
             improved: True
@@ -52,6 +66,21 @@ layers:
     parameters:
       signature: 'values_hidden, values_batch -> values_hidden'
 
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'values_hidden -> values_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'values_hidden -> values_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'values_hidden -> values_hidden'
   - kind: 'linear'
     parameters:
       dim: 128

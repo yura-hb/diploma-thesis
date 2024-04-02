@@ -14,6 +14,6 @@ class DoubleDeepQTrainer(DeepQTrainer):
 
         target = self.__get_action_values__(self.target_model, batch.next_state, best_actions)
 
-        q = batch.reward + self.return_estimator.discount_factor * target * (1 - batch.done.int())
+        q = batch.reward.squeeze() + self.return_estimator.discount_factor * target * (1 - batch.done.squeeze().int())
 
         return q

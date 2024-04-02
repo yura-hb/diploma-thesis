@@ -11,7 +11,7 @@ parameters:
 
   machine_train_schedule:
     pretrain_steps: 10
-    train_interval: 50
+    train_interval: 100
     max_training_steps: 100000000
 
   work_center_train_schedule:

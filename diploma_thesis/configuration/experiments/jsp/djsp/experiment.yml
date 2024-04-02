@@ -283,7 +283,9 @@ dqn_8: &dqn_8
 reward: &reward
   - kind: 'surrogate_tardiness'
     parameters:
-      span: 196
+      winq_factor: 0.2
+      span: 20
+      critical_level_factor: 64
 
 ##############################################################################################
 

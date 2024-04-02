@@ -83,7 +83,15 @@ class NStep(Estimator):
             for j in range(n):
                 g += td_errors[i + j] * lambdas[j] * weights[j] * self.configuration.discount_factor ** j
 
-            records[i].reward = g
+            next_value_idx = i + n
+            previous_value_idx = next_value_idx - 1
+
+            # Preprocess trajectory for n-step learning
+            records[i].reward = g - (self.get_value(records[next_value_idx]) if next_value_idx < len(records) else 0)
+            records[i].next_state = records[previous_value_idx].next_state
+            records[i].done = records[next_value_idx].done \
+                if next_value_idx < len(records) \
+                else records[previous_value_idx].done
 
         return records
 

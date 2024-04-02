@@ -3,7 +3,7 @@
 kind: 'simulation'
 parameters:
   configuration:
-    timespan: 50000
+    timespan: 25000
     machines_per_work_center: 1
     work_center_count: 10
     deduce_naive_actions: True
@@ -20,9 +20,9 @@ parameters:
         processing_times:
           kind: 'uniform'
           parameters:
-            uniform: [ 1, 99 ]
+            uniform: [ 1, 50 ]
         permutation:
-          uneveness: 5
+          uneveness: 2
         due_time:
           kind: 'uniform'
           parameters:
@@ -30,7 +30,7 @@ parameters:
         job_arrival_time_on_machine:
           kind: 'expected_utilization'
           parameters:
-            value: 1
+            value: 0.0
 
     breakdown:
       kind: 'dynamic'

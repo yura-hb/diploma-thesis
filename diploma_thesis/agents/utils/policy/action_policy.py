@@ -132,6 +132,7 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
         output = self.__call__(state)
         value, actions, memory = self.__fetch_values__(output)
         value, actions = value.squeeze(), actions.squeeze()
+        value, actions = torch.atleast_1d(value), torch.atleast_1d(actions)
 
         if memory is not None:
             for key, item in memory.items(include_nested=True, leaves_only=True):
@@ -175,9 +176,12 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
 
             if isinstance(actions, tuple):
                 actions, lengths = actions
+                mask = torch.isfinite(actions)
+                means = torch.nan_to_num(actions, neginf=0.0).sum(dim=-1, keepdim=True) / torch.atleast_2d(lengths).T
 
                 # Here we suppose that pad value ios neginf
-                output[Keys.ACTIONS] = value + actions - torch.nan_to_num(actions, neginf=0.0).sum(dim=-1) / lengths
+                output[Keys.ACTIONS] = value + actions - means
+                output[Keys.ACTIONS][~mask] = min_value
                 output[Keys.ACTIONS] = torch.nan_to_num(output[Keys.ACTIONS], neginf=min_value)
             else:
                 output[Keys.ACTIONS] = value + actions - actions.mean(dim=-1, keepdim=True)

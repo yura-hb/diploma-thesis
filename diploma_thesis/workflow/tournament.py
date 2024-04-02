@@ -147,18 +147,15 @@ class Tournament(Workflow):
 
         print(f'Evaluating {len(candidates)} candidates')
 
-        if len(candidates) == 0:
-            print('No candidates were found')
-            return
+        if len(candidates) > 0:
+            iter = Parallel(n_jobs=n_workers, return_as='generator')(
+                delayed(__evaluate__)(self, candidate, criteria, configuration, logger, output_dir, threads)
+                for candidate in candidates
+            )
 
-        iter = Parallel(n_jobs=n_workers, return_as='generator')(
-            delayed(__evaluate__)(self, candidate, criteria, configuration, logger, output_dir, threads)
-            for candidate in candidates
-        )
-
-        for metrics in tqdm(iter, total=len(candidates)):
-            if metrics is not None:
-                result += metrics
+            for metrics in tqdm(iter, total=len(candidates)):
+                if metrics is not None:
+                    result += metrics
 
         result = pd.DataFrame(result)
 

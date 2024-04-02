@@ -2,6 +2,7 @@
 
 template: &template 'marl_indirect'
 base_model: &base_model 'configuration/experiments/jsp/marl_dqn/machine.yml'
+marl_model: &marl_model 'configuration/experiments/jsp/marl_dqn/marl_machine.yml'
 
 default_mods: &default_mods []
 #  - 'util/infrastructure/mps.yml'
@@ -20,7 +21,7 @@ dqn_1: &dqn_1
     *default_mods
 
 marl_dqn_1: &marl_dqn_1
-  base_path: *base_model
+  base_path: *marl_model
   template: *template
   mod_dirs:
     - 'configuration/mods/machine/mods'
@@ -49,7 +50,7 @@ dqn_2: &dqn_2
     - *default_mods
 
 marl_dqn_2: &marl_dqn_2
-  base_path: *base_model
+  base_path: *marl_model
   template: *template
   mod_dirs:
     - 'configuration/mods/machine/mods'
@@ -80,7 +81,7 @@ dqn_3: &dqn_3
     - *default_mods
 
 marl_dqn_3: &marl_dqn_3
-  base_path: *base_model
+  base_path: *marl_model
   template: *template
   mod_dirs:
     - 'configuration/mods/machine/mods'
@@ -113,7 +114,7 @@ dqn_4: &dqn_4
     - *default_mods
 
 marl_dqn_4: &marl_dqn_4
-  base_path: *base_model
+  base_path: *marl_model
   template: *template
   mod_dirs:
     - 'configuration/mods/machine/mods'
@@ -148,7 +149,7 @@ dqn_5: &dqn_5
     - *default_mods
 
 marl_dqn_5: &marl_dqn_5
-  base_path: *base_model
+  base_path: *marl_model
   template: *template
   mod_dirs:
     - 'configuration/mods/machine/mods'
@@ -180,7 +181,7 @@ dqn_6: &dqn_6
     - *default_mods
 
 marl_dqn_6: &marl_dqn_6
-  base_path: *base_model
+  base_path: *marl_model
   template: *template
   mod_dirs:
     - 'configuration/mods/machine/mods'
@@ -220,7 +221,7 @@ dqn_7: &dqn_7
 #    - 'util/action_selector/sample.yml'
 
 marl_dqn_7: &marl_dqn_7
-  base_path: *base_model
+  base_path: *marl_model
   template: *template
   mod_dirs:
     - 'configuration/mods/machine/mods'
@@ -255,62 +256,12 @@ marl_dqn_centralized_7: &centralized_dqn_7
 
 ###############################################################################################
 
-
-dqn_8: &dqn_8
-  base_path: *base_model
-  template: *template
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
-    - 'agent/dqn/steps/off_policy.yml'
-    - 'agent/dqn/steps/v_trace.yml'
-    - 'agent/dqn/dueling.yml'
-    - 'agent/dqn/noisy.yml'
-    - *default_mods
-#    - 'util/action_selector/sample.yml'
-
-marl_dqn_8: &marl_dqn_8
-  base_path: *base_model
-  template: *template
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
-    - 'agent/dqn/steps/off_policy.yml'
-    - 'agent/dqn/steps/v_trace.yml'
-    - 'agent/dqn/dueling.yml'
-    - 'agent/dqn/noisy.yml'
-    - 'util/agent/multi_agent.yml'
-    - *default_mods
-#    - 'util/action_selector/sample.yml'
-
-marl_dqn_centralized_8: &centralized_dqn_8
-  base_path: *base_model
-  template: *template
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
-    - 'agent/dqn/steps/off_policy.yml'
-    - 'agent/dqn/steps/v_trace.yml'
-    - 'agent/dqn/dueling.yml'
-    - 'agent/dqn/noisy.yml'
-    - 'util/agent/centralized.yml'
-    - *default_mods
-
-###############################################################################################
-
 reward: &reward
   - kind: 'surrogate_tardiness'
     parameters:
-      span: 196
+      winq_factor: 0.2
+      span: 20
+      critical_level_factor: 64
 
 ##############################################################################################
 
@@ -407,43 +358,43 @@ task:
                 parameters:
                   - *dqn_1
                   - *marl_dqn_1
-                  - *centralized_dqn_1
+#                  - *centralized_dqn_1
             - output_dir: '2'
               machine_agent:
                 parameters:
                   - *dqn_2
                   - *marl_dqn_2
-                  - *centralized_dqn_2
+#                  - *centralized_dqn_2
             - output_dir: '3'
               machine_agent:
                 parameters:
                   - *dqn_3
                   - *marl_dqn_3
-                  - *centralized_dqn_3
+#                  - *centralized_dqn_3
             - output_dir: '4'
               machine_agent:
                 parameters:
                   - *dqn_4
                   - *marl_dqn_4
-                  - *centralized_dqn_4
+#                  - *centralized_dqn_4
             - output_dir: '5'
               machine_agent:
                 parameters:
                   - *dqn_5
                   - *marl_dqn_5
-                  - *centralized_dqn_5
+#                  - *centralized_dqn_5
             - output_dir: '6'
               machine_agent:
                 parameters:
                   - *dqn_6
                   - *marl_dqn_6
-                  - *centralized_dqn_6
+#                  - *centralized_dqn_6
             - output_dir: '7'
               machine_agent:
                 parameters:
                   - *dqn_7
                   - *marl_dqn_7
-                  - *centralized_dqn_7
+#                  - *centralized_dqn_7
 
           tape:
             machine_reward:

@@ -1,0 +1,8 @@
+
+encoder:
+  kind: 'djsp'
+  parameters:
+    is_homogeneous: True
+    is_undirected: True
+    is_local: False
+    append_target_mask: False

@@ -1,0 +1,234 @@
+# Evaluate the effectivenes of basic DQNs on the JSP environment
+
+base_model: &base_model 'configuration/experiments/jsp/djsp_graph_flexible/machine.yml'
+
+graph: &graph
+    transition_model:
+      kind: 'base'
+      parameters:
+        forward:
+          kind: 'complete'
+
+        schedule:
+          kind: 'complete'
+
+    memory: 0
+    is_machine_set_in_work_center_connected: True
+    is_work_center_set_in_shop_floor_connected: True
+
+default_mods: &default_mods []
+#  - 'util/infrastructure/mps.yml'
+#  - 'util/optimizer/grad_norm.yml'
+#  - 'util/rules/all_rules.yml'
+#  - 'util/infrastructure/compile.yml'
+
+###############################################################################################
+
+dqn_gat_1: &dqn_gat_1
+  base_path: *base_model
+  template: 'gat_djsp'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    *default_mods
+
+dqn_gcn_1: &dqn_gcn_1
+  base_path: *base_model
+  template: 'gcn_djsp'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    *default_mods
+
+dqn_gin_1: &dqn_gin_1
+  base_path: *base_model
+  template: 'gin_djsp'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    *default_mods
+
+dqn_sage_1: &dqn_sage_1
+  base_path: *base_model
+  template: 'sage_djsp'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    *default_mods
+
+##############################################################################################
+
+all_mods: &all_mods
+  - 'agent/dqn/ddqn.yml'
+  - 'agent/dqn/prioritized.yml'
+  - 'agent/dqn/steps/5.yml'
+  - 'agent/dqn/steps/off_policy.yml'
+  - 'agent/dqn/dueling.yml'
+  - 'agent/dqn/noisy.yml'
+  - *default_mods
+
+dqn_gat_2: &dqn_gat_2
+  base_path: *base_model
+  template: 'gat_djsp'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    *all_mods
+
+dqn_gcn_2: &dqn_gcn_2
+  base_path: *base_model
+  template: 'gcn_djsp'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+   *all_mods
+
+dqn_gin_2: &dqn_gin_2
+  base_path: *base_model
+  template: 'gin_djsp'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    *default_mods
+
+dqn_sage_2: &dqn_sage_2
+  base_path: *base_model
+  template: 'sage_djsp'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    *all_mods
+
+###############################################################################################
+
+reward: &reward
+  - kind: 'surrogate_tardiness'
+    parameters:
+      winq_factor: 0.2
+      span: 20
+      critical_level_factor: 64
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ ['utilization/80.yml'] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ] ]
+
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 2
+  n_threads: 4
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/dqn_path/runs/djsp_graph_flexible/surrogate_tardiness'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/djsp_graph/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+            parameters:
+              memory: 6
+
+          graph:
+            *graph
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/djsp_graph_flexible/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods:
+                - 'n_workers/1.yml'
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/djsp_graph_flexible/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+            - output_dir: 'gin'
+              machine_agent:
+                parameters:
+                  - *dqn_gin_1
+                  - *dqn_gin_2
+            - output_dir: 'gat'
+              machine_agent:
+                parameters:
+                  - *dqn_gat_1
+                  - *dqn_gat_2
+            - output_dir: 'sage'
+              machine_agent:
+                parameters:
+                  - *dqn_sage_1
+                  - *dqn_sage_2
+            - output_dir: 'gcn'
+              machine_agent:
+                parameters:
+                  - *dqn_gcn_1
+                  - *dqn_gcn_2
+
+          tape:
+            machine_reward:
+              *reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run

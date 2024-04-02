@@ -23,6 +23,7 @@ task:
         - 'agent/dqn/dueling.yml'
         - 'agent/dqn/noisy.yml'
         - 'util/agent/centralized.yml'
+        - 'util/action_selector/sample.yml'
 
   work_center_agent:
     kind: 'static'

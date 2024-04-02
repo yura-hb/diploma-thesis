@@ -5,6 +5,8 @@ parameters:
   model:
     kind: 'deep_rule'
     parameters:
+      __rules__: ''
+
       policy:
         kind: 'flexible_action'
         parameters:
@@ -40,8 +42,8 @@ parameters:
                     parameters:
                       epsilon: 0.6
                       min_epsilon: 0.01
-                      decay_factor: 0.995
-                      decay_steps: 80
+                      decay_factor: 0.99
+                      decay_steps: 25
 
   __encoder__: ''
 
@@ -49,17 +51,17 @@ parameters:
     kind: 'dqn'
     parameters:
       decay: 1.0
-      update_steps: 100
+      update_steps: 25
 
       memory:
         kind: 'replay'
         parameters:
           size: 2048
-          batch_size: 256
-          prefetch: 2
+          batch_size: 64
+          prefetch: 1
 
       loss:
-        kind: 'smooth_l1'
+        kind: 'mse'
 
       optimizer:
         model:

@@ -5,14 +5,13 @@ layers:
   - kind: 'graph_model'
     parameters:
       layers:
-        - kind: 'gcn'
+        - kind: 'gat'
           parameters:
             in_channels: -1
             out_channels: 128
-            num_layers: 3
+            num_layers: 2
             hidden_channels: 128
-            normalize: True
-            improved: True
+            v2: True
 
       signature: 'graph -> actions_hidden, actions_batch'
 
@@ -30,21 +29,34 @@ layers:
       dim: 128
       activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
-
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'actions_hidden -> actions_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'actions_hidden -> actions_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'actions_hidden -> actions_hidden'
 
   # Critic
 
   - kind: 'graph_model'
     parameters:
       layers:
-        - kind: 'gcn'
+        - kind: 'gat'
           parameters:
             in_channels: -1
             out_channels: 128
-            num_layers: 3
+            num_layers: 2
             hidden_channels: 128
-            normalize: True
-            improved: True
+            v2: True
 
       signature: 'graph -> values_hidden, values_batch'
 
@@ -52,6 +64,21 @@ layers:
     parameters:
       signature: 'values_hidden, values_batch -> values_hidden'
 
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'values_hidden -> values_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'values_hidden -> values_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'tanh'
+      signature: 'values_hidden -> values_hidden'
   - kind: 'linear'
     parameters:
       dim: 128
