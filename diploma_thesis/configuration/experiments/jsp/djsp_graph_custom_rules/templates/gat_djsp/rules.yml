@@ -1,0 +1,11 @@
+
+
+rules:
+  - 'atc'
+  - 'crspt'
+  - 'dptwinqnpt'
+  - 'mod'
+  - 'ptwinq'
+  - 'spmwkspt'
+  - 'fifo'
+  - 'lifo'

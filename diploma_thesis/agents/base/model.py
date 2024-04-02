@@ -72,4 +72,4 @@ class DeepPolicyModel(Model[Input, Action, Result], PhaseUpdatable, metaclass=AB
         return self.policy.state_dict()
 
     def load_state_dict(self, state_dict: dict):
-        self.policy.load_state_dict(state_dict)
+        self.policy.load_state_dict(state_dict, strict=False)

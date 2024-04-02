@@ -1,6 +1,7 @@
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
+from functools import lru_cache
 
 import torch
 
@@ -122,14 +123,15 @@ class Job:
     # The processing time of the job in work_center & machine,
     # i.e. the tensor of shape (num_work_centers, num_machines_per_work_center)
     processing_times: torch.LongTensor = field(default_factory=torch.LongTensor)
-    # The step in job sequence, which is currently being processed
-    current_step_idx: torch.LongTensor = torch.tensor(-1)
-    # The index of the machine in the work-center where the job is being processed
-    current_machine_idx: torch.LongTensor = torch.tensor(-1)
     # The priority of the Job
     priority: torch.FloatTensor = torch.tensor([1.0])
     # The due time of the job, i.e. deadline
     due_at: torch.FloatTensor = torch.tensor([0.0])
+
+    # The step in job sequence, which is currently being processed
+    current_step_idx: torch.LongTensor = torch.tensor(-1)
+    # The index of the machine in the work-center where the job is being processed
+    current_machine_idx: torch.LongTensor = torch.tensor(-1)
     # History of the job
     history: History = None
 
@@ -157,13 +159,17 @@ class Job:
         """
         Returns: The processing time of the current operation in machine
         """
-        return self.__processing_time_on_machine__(self.current_step_idx, self.current_machine_idx)
+        return self.__processing_time_on_machine__(
+            self.step_idx, self.processing_times, self.current_step_idx, self.current_machine_idx
+        )
 
     def current_operation_processing_time_in_work_center(self, strategy: ReductionStrategy = ReductionStrategy.none):
         """
         Returns: Returns the processing time of the current operation in work center
         """
-        return self.__processing_time_on_work_center__(self.current_step_idx, strategy)
+        return self.__processing_time_on_work_center__(
+            self.step_idx, self.processing_times, self.current_step_idx, strategy
+        )
 
     def operation_processing_time_in_work_center(
         self, work_center_idx: int, strategy: ReductionStrategy = ReductionStrategy.mean
@@ -173,19 +179,23 @@ class Job:
         """
         step_idx = torch.argwhere(self.step_idx == work_center_idx).item()
 
-        return self.__processing_time_on_work_center__(step_idx, strategy)
+        return self.__processing_time_on_work_center__(
+            self.step_idx, self.processing_times, step_idx, strategy
+        )
 
     def remaining_processing_time(self, strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The total processing time of the remaining operations
         """
-        return self.__remaining_processing_time__(self.current_step_idx, self.current_machine_idx, strategy)
+        return self.__remaining_processing_time__(
+            self.step_idx, self.processing_times, self.current_step_idx, self.current_machine_idx, strategy
+        )
 
     def next_remaining_processing_time(self, strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The remaining processing time of the operation excluding processing time on current machine
         """
-        return self.__next_remaining_processing_time__(self.current_step_idx, strategy)
+        return self.__next_remaining_processing_time__(self.processing_times, self.current_step_idx, strategy)
 
     def total_processing_time(self, strategy: ReductionStrategy = ReductionStrategy.mean):
         """
@@ -269,6 +279,7 @@ class Job:
         result = max(self.step_idx.shape[0] - self.current_step_idx, 0.0)
 
         return result if torch.is_tensor(result) else torch.tensor(result)
+
     @property
     def processed_operations_count(self):
         """
@@ -292,7 +303,7 @@ class Job:
         """
         Returns: The processing time of the next operation
         """
-        return self.__next_processing_time__(self.current_step_idx, strategy)
+        return self.__next_processing_time__(self.step_idx, self.processing_times, self.current_step_idx, strategy)
 
     def slack_upon_moment(self, now: torch.FloatTensor, strategy: ReductionStrategy = ReductionStrategy.mean):
         """
@@ -377,7 +388,9 @@ class Job:
 
         machine_idx = self.history.arrived_machine_idx[step_idx]
         arrival_time = self.history.arrived_at_machine[step_idx]
-        remaining_processing_time = self.__remaining_processing_time__(step_idx, machine_idx)
+        remaining_processing_time = self.__remaining_processing_time__(
+            self.step_idx, self.processing_times, step_idx, machine_idx
+        )
 
         return self.due_at - arrival_time - remaining_processing_time
 
@@ -392,6 +405,14 @@ class Job:
         The completion rate of the job based on the remaining processing time
         """
         return self.remaining_processing_time(strategy) / self.total_processing_time(strategy)
+
+    def estimated_completion_time(self, now: torch.FloatTensor):
+        """
+        Args:
+            now: Current time
+        """
+
+        return now + self.remaining_processing_time(strategy=ReductionStrategy.min)
 
     # State Update
 
@@ -419,57 +440,87 @@ class Job:
 
     # Utils
 
-    def __processing_time_on_work_center__(self, step_idx: int, strategy: ReductionStrategy = ReductionStrategy.mean):
+    @classmethod
+    @lru_cache
+    def __processing_time_on_work_center__(cls,
+                                           steps: torch.LongTensor,
+                                           processing_times: torch.LongTensor,
+                                           step_idx: int, 
+                                           strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The processing time of the operation in work center
         """
-        if step_idx < 0 or step_idx >= len(self.step_idx):
+        if step_idx < 0 or step_idx >= len(steps):
             return torch.tensor(0.0, dtype=torch.float)
 
-        pt = self.processing_times[step_idx]
+        pt = processing_times[step_idx]
 
         return reduce(pt.float(), strategy)
 
-    def __processing_time_on_machine__(self, step_idx: int, machine_idx: int):
+    @classmethod
+    @lru_cache
+    def __processing_time_on_machine__(cls,
+                                       steps: torch.LongTensor,
+                                       processing_times: torch.LongTensor, 
+                                       step_idx: int,
+                                       machine_idx: int):
         """
         Returns: The processing time of the operation in machine
         """
-        if (step_idx < 0 or step_idx >= len(self.step_idx) or
-                machine_idx < 0 or machine_idx >= self.processing_times.shape[1]):
+        if (step_idx < 0 or step_idx >= len(steps) or
+                machine_idx < 0 or machine_idx >= processing_times.shape[1]):
             return torch.tensor(0.0, dtype=torch.float)
 
-        return self.processing_times[step_idx][machine_idx]
+        return processing_times[step_idx][machine_idx]
 
-    def __next_processing_time__(self, step_idx: int, strategy: ReductionStrategy = ReductionStrategy.mean):
+    @classmethod
+    @lru_cache
+    def __next_processing_time__(cls,
+                                 steps: torch.LongTensor,
+                                 processing_times: torch.LongTensor,
+                                 step_idx: int, 
+                                 strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The processing time of the next operation
         """
-        return self.__processing_time_on_work_center__(step_idx + 1, strategy)
+        return cls.__processing_time_on_work_center__(steps, processing_times, step_idx + 1, strategy)
 
-    def __remaining_processing_time__(self, step_idx: int, machine_idx: int, strategy: ReductionStrategy = ReductionStrategy.mean):
+    @classmethod
+    @lru_cache
+    def __remaining_processing_time__(cls,
+                                      steps: torch.LongTensor,
+                                      processing_times: torch.LongTensor,
+                                      step_idx: int,
+                                      machine_idx: int,
+                                      strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The remaining processing time of the operation
         """
         result = torch.FloatTensor([0.0])
 
-        if step_idx >= len(self.step_idx):
+        if step_idx >= len(steps):
             return result
 
         if machine_idx >= 0:
-            result += self.__processing_time_on_machine__(step_idx, machine_idx)
+            result += cls.__processing_time_on_machine__(steps, processing_times, step_idx, machine_idx)
         else:
-            result += self.__processing_time_on_work_center__(step_idx, strategy)
+            result += cls.__processing_time_on_work_center__(steps, processing_times, step_idx, strategy)
 
-        result += self.__next_remaining_processing_time__(step_idx, strategy)
+        result += cls.__next_remaining_processing_time__(processing_times, step_idx, strategy)
 
         return result
-
-    def __next_remaining_processing_time__(self, step_idx: int, strategy: ReductionStrategy = ReductionStrategy.mean):
+    
+    @classmethod
+    @lru_cache
+    def __next_remaining_processing_time__(cls,
+                                           processing_times: torch.LongTensor, 
+                                           step_idx: int, 
+                                           strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The remaining processing time of the next operation
         """
         result = torch.tensor(0.0, dtype=torch.float)
-        expected_processing_time = self.processing_times[max(step_idx + 1, 0):]
+        expected_processing_time = processing_times[max(step_idx + 1, 0):]
 
         if expected_processing_time.numel() == 0:
             return result

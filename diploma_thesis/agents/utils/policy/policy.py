@@ -51,7 +51,6 @@ class Policy(nn.Module, Loggable, Generic[Input], PhaseUpdatable, metaclass=ABCM
         else:
             self.train()
 
-
     @abstractmethod
     def forward(self, state: State):
         """

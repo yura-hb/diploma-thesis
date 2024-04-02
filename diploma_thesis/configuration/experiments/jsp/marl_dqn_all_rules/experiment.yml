@@ -1,8 +1,8 @@
 # Evaluate the effectivenes of basic DQNs on the JSP environment
 
 template: &template 'marl_direct'
-base_model: &base_model 'configuration/experiments/jsp/marl_dqn/machine.yml'
-marl_model: &marl_model 'configuration/experiments/jsp/marl_dqn/marl_machine.yml'
+base_model: &base_model 'configuration/experiments/jsp/marl_dqn_all_rules/machine.yml'
+marl_model: &marl_model 'configuration/experiments/jsp/marl_dqn_all_rules/marl_machine.yml'
 
 default_mods: &default_mods []
 #  - 'util/infrastructure/mps.yml'
@@ -287,7 +287,7 @@ task:
   n_threads: 4
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/dqn_path/runs/marl_direct/surrogate_tardiness'
+  output_dir: 'results/jsp/experiments/dqn_path/runs/marl_direct_all_rules/surrogate_tardiness'
 
   tasks:
     - kind: 'multi_value'
@@ -332,7 +332,7 @@ task:
           run:
             kind: 'mod'
             parameters:
-              base_path: 'configuration/experiments/jsp/marl_dqn/run.yml'
+              base_path: 'configuration/experiments/jsp/marl_dqn_all_rules/run.yml'
               mod_dirs:
                 - 'configuration/mods/run/mods'
               mods:
@@ -346,7 +346,7 @@ task:
                         base:
                           kind: 'mod'
                           parameters:
-                            base_path: 'configuration/experiments/jsp/marl_dqn/simulation.yml'
+                            base_path: 'configuration/experiments/jsp/marl_dqn_all_rules/simulation.yml'
                             mod_dirs:
                               - 'configuration/mods/simulation/mods'
                             mods: [ ]

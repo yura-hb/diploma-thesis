@@ -10,7 +10,7 @@ from .global_decomposed_tardiness import GlobalDecomposedTardiness
 from .surrogate_tardiness import SurrogateTardiness
 from .global_MDPI_reward import GlobalMDPI
 from .surrogate_slack import SurrogateSlack
-
+from .makespan import Makespan
 
 key_to_cls = {
     'no': No,
@@ -18,7 +18,8 @@ key_to_cls = {
     'global_decomposed_tardiness': GlobalDecomposedTardiness,
     'global_mdpi': GlobalMDPI,
     'surrogate_tardiness': SurrogateTardiness,
-    'surrogate_slack': SurrogateSlack
+    'surrogate_slack': SurrogateSlack,
+    'makespan': Makespan
 }
 
 
