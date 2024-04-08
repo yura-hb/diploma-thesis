@@ -1,0 +1,9 @@
+
+
+rules:
+  - 'spt'
+  - 'lpt'
+  - 'fifo'
+  - 'lifo'
+  - 'lro'
+  - 'mro'

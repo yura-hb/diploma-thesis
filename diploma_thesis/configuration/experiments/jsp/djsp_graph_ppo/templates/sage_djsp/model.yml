@@ -1,0 +1,72 @@
+layers:
+
+  # Actor
+
+  - kind: 'graph_model'
+    parameters:
+      layers:
+        - kind: 'sage'
+          parameters:
+            in_channels: -1
+            out_channels: 256
+            num_layers: 2
+            hidden_channels: 256
+
+      signature: 'graph -> actions_hidden, actions_batch'
+
+  - kind: 'max_pool'
+    parameters:
+      signature: 'actions_hidden, actions_batch -> actions_value'
+
+  - kind: 'select_target'
+    parameters:
+      signature: 'graph, actions_hidden -> actions_hidden'
+
+  - kind: 'shared'
+    parameters:
+      values:
+        - 'actions_hidden'
+        - 'actions_value'
+      input_args: 'x'
+      layers:
+        - kind: 'linear'
+          parameters:
+            dim: 256
+            activation: 'relu'
+            signature: 'x -> x'
+
+  - kind: 'linear'
+    parameters:
+      dim: 1
+      activation: 'none'
+      signature: 'actions_value -> actions_value'
+
+  # Critic
+
+  - kind: 'graph_model'
+    parameters:
+      layers:
+        - kind: 'sage'
+          parameters:
+            in_channels: -1
+            out_channels: 256
+            num_layers: 1
+            hidden_channels: 256
+
+      signature: 'graph -> values_hidden, values_batch'
+
+  - kind: 'max_pool'
+    parameters:
+      signature: 'values_hidden, values_batch -> values_hidden'
+
+  - kind: 'linear'
+    parameters:
+      dim: 256
+      activation: 'tanh'
+      signature: 'values_hidden -> values_hidden'
+
+  - kind: 'output'
+    parameters:
+      value: 'values_hidden'
+      actor_value: 'actions_value'
+      actions: 'actions_hidden'

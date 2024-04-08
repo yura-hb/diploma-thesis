@@ -1,0 +1,187 @@
+# Evaluate the effectivenes of basic DQNs on the JSP environment
+
+template: &template 'marl_direct'
+base_model: &base_model 'configuration/experiments/jsp/marl_ppo_all_rules/machine.yml'
+
+default_mods: &default_mods []
+#  - 'util/infrastructure/mps.yml'
+#  - 'util/optimizer/grad_norm.yml'
+#  - 'util/rules/all_rules.yml'
+#  - 'util/infrastructure/compile.yml'
+##############################################################################################
+
+ppo: &ppo
+  base_path: 'configuration/experiments/jsp/marl_ppo_all_rules/machine.yml'
+  template: *template
+  mod_dirs:
+    - ['configuration/mods/machine/mods']
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+#      - [ 'util/infrastructure/mps.yml' ]
+      - [
+          'agent/ppo/epochs/4.yml',
+          'agent/ppo/epochs/10.yml',
+        ]
+      - [
+          '__none__',
+          'agent/ppo/p3or.yml'
+      ]
+      - [
+        'util/train_schedule/on_store.yml',
+        'util/train_schedule/on_stored_data_exclusively.yml',
+      ]
+      - [
+        '__none__',
+        'util/agent/multi_agent.yml'
+      ]
+
+###############################################################################################
+
+short_single_source_run: &short_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ [ 'duration/4096.yml' ] ]
+        - [ [ 'size/jsp/10.yml' ] ]
+        - [ [ 'utilization/70.yml', 'utilization/80.yml', 'utilization/90.yml' ] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [
+            100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+            110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+            120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+            130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
+            140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+
+            150, 151, 152, 153, 154, 155, 156, 157, 158, 159,
+            160, 161, 162, 163, 164, 165, 166, 167, 168, 169,
+            170, 171, 172, 173, 174, 175, 176, 177, 178, 179,
+            180, 181, 182, 183, 184, 185, 186, 187, 188, 189,
+            190, 191, 192, 193, 194, 195, 196, 197, 198, 199,
+
+            200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
+            210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
+            220, 221, 222, 223, 224, 225, 226, 227, 228, 229,
+            230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
+            240, 241, 242, 243, 244, 245, 246, 247, 248, 249,
+
+            100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+            110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+            120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+            130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
+            140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+
+            150, 151, 152, 153, 154, 155, 156, 157, 158, 159,
+            160, 161, 162, 163, 164, 165, 166, 167, 168, 169,
+            170, 171, 172, 173, 174, 175, 176, 177, 178, 179,
+            180, 181, 182, 183, 184, 185, 186, 187, 188, 189,
+            190, 191, 192, 193, 194, 195, 196, 197, 198, 199,
+
+            200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
+            210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
+            220, 221, 222, 223, 224, 225, 226, 227, 228, 229,
+            230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
+            240, 241, 242, 243, 244, 245, 246, 247, 248, 249,
+          ] ]
+###############################################################################################
+
+reward: &reward
+  - kind: 'surrogate_tardiness'
+    parameters:
+      winq_factor: 0.2
+      span: 20
+      critical_level_factor: 64
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 4
+  n_threads: 8
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/dqn_path/runs/marl_ppo_all_rules/surrogate_tardiness'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'episodic'
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/marl_ppo_all_rules/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods:
+                - 'n_workers/1.yml'
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/marl_ppo_all_rules/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+            - output_dir: 'ppo'
+              machine_agent:
+                parameters:
+                  *ppo
+          tape:
+            machine_reward:
+              *reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *short_single_source_run

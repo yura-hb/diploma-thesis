@@ -141,6 +141,8 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
         action, policy = self.action_selector(actions)
         action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
 
+        print(actions, policy)
+
         info = TensorDict({
             Keys.POLICY: policy,
             Keys.VALUE: value,

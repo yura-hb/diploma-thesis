@@ -1,0 +1,82 @@
+
+kind: 'rl'
+parameters:
+
+  model:
+    kind: 'deep_multi_rule'
+    parameters:
+      __rules__: ''
+
+      policy:
+        kind: 'discrete_action'
+        parameters:
+          policy_method: 'independent'
+
+          model:
+            __model__: ''
+
+          action_selector:
+            kind: 'phase_selector'
+            parameters:
+              default:
+                kind: 'greedy'
+              phases:
+                - phase:
+                    kind: 'warm_up'
+                    parameters:
+                      step: 0
+                  action_selector:
+                    kind: 'uniform'
+                - phase:
+                    kind: 'warm_up'
+                    parameters:
+                      step: 1
+                  action_selector:
+                    kind: 'uniform'
+                - phase:
+                    kind: 'training'
+                  action_selector:
+                    kind: 'sample'
+                    parameters:
+                      is_distribution: False
+
+
+
+  __encoder__: ''
+
+  trainer:
+    kind: 'ppo'
+    parameters:
+      sample_ratio: 0.8
+      policy_step_ratio: 0.2
+      entropy_regularization: 0.025
+      rollback_ratio: 0.05
+
+      epochs: 1
+
+      loss:
+        kind: 'cross_entropy'
+        parameters:
+          reduction: 'none'
+
+      value_loss:
+        kind: 'huber'
+
+      optimizer:
+        model:
+          kind: 'radam'
+          parameters:
+            lr: 0.001
+
+      memory:
+        kind: 'replay'
+        parameters:
+          size: 8
+          batch_size: 1
+          prefetch: 1
+
+      return:
+        kind: 'gae'
+        parameters:
+          discount_factor: 0.95
+          lambda: 0.99

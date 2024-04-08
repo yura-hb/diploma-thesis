@@ -38,7 +38,7 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
         value, logits, _ = model.__fetch_values__(output)
 
         actor_loss = self.actor_loss(batch, logits, configuration, self.run_configuration.device)
-        critic_loss = configuration.value_loss(value.view(-1), batch.info[Record.RETURN_KEY])
+        critic_loss = configuration.value_loss(value, batch.info[Record.RETURN_KEY])
 
         # Want to maximize actor loss and minimize critic loss
         loss = actor_loss - critic_loss
