@@ -34,6 +34,21 @@ class LayerNorm(Layer):
         return LayerNorm(normalized_shape=parameters['normalized_shape'], signature=parameters['signature'])
 
 
+class BatchNorm1d(Layer):
+
+    def __init__(self, signature):
+        super().__init__(signature)
+
+        self.layer = nn.LazyBatchNorm1d()
+
+    def forward(self, batch: torch.FloatTensor) -> torch.FloatTensor:
+        return self.layer(batch)
+
+    @classmethod
+    def from_cli(cls, parameters: dict) -> 'Layer':
+        return BatchNorm1d(signature=parameters['signature'])
+
+
 class InstanceNorm(Layer):
 
     def __init__(self, signature):

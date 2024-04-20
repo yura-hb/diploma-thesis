@@ -27,30 +27,21 @@ class PPO(PPOMixin):
 
     def __train__(self, model: Policy):
         try:
-            _, generator = self.storage.sample_minibatches(update_returns=self.configuration.update_advantages,
-                                                           device=self.run_configuration.device,
-                                                           n=self.configuration.epochs,
-                                                           sample_ratio=self.configuration.sample_ratio)
+            _, generator, info = self.storage.sample_minibatches(device=self.device,
+                                                                 n=self.configuration.epochs,
+                                                                 sample_count=self.configuration.sample_count)
 
             for minibatch in generator:
                 self.__step__(minibatch, model, self.configuration)
+
+            self.__increase_memory_priority__(info, self.configuration)
         except NotReadyException:
             return
 
     @classmethod
-    def from_cli(cls,
-                 parameters: Dict,
-                 memory: Memory,
-                 loss: Loss,
-                 optimizer: Optimizer,
-                 return_estimator: ReturnEstimator):
+    def from_cli(cls, parameters: Dict, **kwargs):
         schedule = TrainSchedule.from_cli(parameters)
         configuration = Configuration.from_cli(parameters)
 
-        return cls(configuration=configuration,
-                   memory=memory,
-                   optimizer=optimizer,
-                   loss=loss,
-                   return_estimator=return_estimator,
-                   train_schedule=schedule)
+        return cls(configuration=configuration, train_schedule=schedule, **kwargs)
 

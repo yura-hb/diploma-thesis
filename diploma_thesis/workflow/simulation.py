@@ -1,6 +1,7 @@
 import os
 from typing import Dict, List
 
+import traceback
 import pandas as pd
 import simpy
 import torch
@@ -83,16 +84,17 @@ class Simulation(Workflow):
 
         did_finish_simulation = partial(self.did_finish, output_dir=simulation_output_dir)
 
-        if self.is_debug:
-            config.timeline.duration = 2048
-            config.n_workers = 1
-            config.timeline.warm_up_phases = [0]
+        try:
+            if self.is_debug:
+                config.timeline.duration = 2048
+                config.n_workers = 1
+                config.timeline.warm_up_phases = []
 
-            simulator.train(environment, config, on_simulation_end=did_finish_simulation)
-        else:
-            reward_cache = simulator.train(environment, config, on_simulation_end=did_finish_simulation)
-
-            self.__store_rewards__(config.simulations, reward_cache, simulation_output_dir)
+                simulator.train(environment, config, on_simulation_end=did_finish_simulation)
+            else:
+                simulator.train(environment, config, on_simulation_end=did_finish_simulation)
+        except:
+            traceback.print_exc()
 
         agent_output_dir = os.path.join(output_dir, 'agent')
 
@@ -122,7 +124,7 @@ class Simulation(Workflow):
 
         config = evaluate_configuration_from_cli(config, logger=logger)
 
-        did_finish_simulation = partial(self.did_finish, output_dir=simulation_output_dir)
+        did_finish_simulation = partial(self.did_finish, rewards=None, output_dir=simulation_output_dir)
 
         if not self.is_debug:
             simulator.evaluate(environment, config, on_simulation_end=did_finish_simulation)
@@ -142,7 +144,7 @@ class Simulation(Workflow):
 
         return simulator
 
-    def did_finish(self, simulation, output_dir: str):
+    def did_finish(self, simulation, rewards, output_dir: str = ''):
         path = os.path.join(output_dir, simulation.simulation_id)
 
         if not os.path.exists(path):
@@ -161,27 +163,29 @@ class Simulation(Workflow):
 
             simulation.shop_floor = None
 
-    @staticmethod
-    def __store_rewards__(simulations: List[simulator.Simulation], reward_cache: RewardCache, output_dir: str):
+        self.__store_reward__(simulation, rewards, output_dir)
+
+    @classmethod
+    def __store_reward__(cls, simulation: simulator.Simulation, reward_cache: RewardCache, output_dir: str):
         reward_cache = RewardCache(batch_size=[]) if reward_cache is None else reward_cache
-        machine_reward, work_center_reward = Simulation.__process_reward_cache__(reward_cache)
+        machine_reward, work_center_reward = cls.__process_reward_cache__(reward_cache)
 
-        for simulation in simulations:
-            path = os.path.join(output_dir, simulation.simulation_id)
+        path = os.path.join(output_dir, simulation.simulation_id)
 
-            if not os.path.exists(path):
-                os.makedirs(path)
+        if not os.path.exists(path):
+            os.makedirs(path)
 
-            sh_id = simulation.simulation_index
+        sh_id = simulation.simulation_index
 
-            Simulation.__store_reward_record__(path, machine_reward, sh_id, 'machine_reward.csv')
-            Simulation.__store_reward_record__(path, work_center_reward, sh_id, 'work_center_reward.csv')
+        cls.__store_reward_record__(path, machine_reward, 'machine_reward.csv')
+        cls.__store_reward_record__(path, work_center_reward, 'work_center_reward.csv')
 
-    @staticmethod
-    def __process_reward_cache__(reward_cache: RewardCache):
+
+    @classmethod
+    def __process_reward_cache__(cls, reward_cache: RewardCache):
         def __to_dataframe__(data):
             if data.batch_size == torch.Size([]):
-                return pd.DataFrame(columns=['shop_floor_id'])
+                return pd.DataFrame(columns=[])
 
             data = data.to_dict()
 
@@ -220,6 +224,6 @@ class Simulation(Workflow):
                 model.clear_memory()
 
     @staticmethod
-    def __store_reward_record__(output_path, df, shop_floor_id, filename):
+    def __store_reward_record__(output_path, df, filename):
         path = os.path.join(output_path, filename)
-        df[df['shop_floor_id'] == shop_floor_id].to_csv(path, index=False)
+        df.to_csv(path, index=False)

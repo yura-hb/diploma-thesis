@@ -28,11 +28,13 @@ def from_cli(parameters):
     loss = Loss.from_cli(_parameters['loss'])
     optimizer = Optimizer.from_cli(_parameters['optimizer'])
     return_estimator = return_estimator_from_cli(_parameters['return'])
+    device = _parameters.get('device', 'cpu')
 
     return partial(
         _from_cli,
         key_to_class=key_to_class,
         memory=memory, loss=loss,
         optimizer=optimizer,
-        return_estimator=return_estimator
+        return_estimator=return_estimator,
+        device=device
     )(parameters)

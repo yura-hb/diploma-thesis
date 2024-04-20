@@ -258,6 +258,17 @@ class Machine:
         return self.state.run_time
 
     @property
+    def utilization_rate(self) -> torch.FloatTensor:
+        if self.environment.now == 0:
+            return torch.FloatTensor([0])
+
+        return (self.cumulative_run_time / self.environment.now).clip(0, 1)
+
+    @property
+    def is_disrupted(self):
+        return self.state.will_breakdown or self.shop_floor.now < self.state.restart_at
+
+    @property
     def arriving_jobs(self) -> List[environment.Job]:
         """
         Returns: A list of jobs which are about to arrive at the machine, i.e. they were selected for processing on

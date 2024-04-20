@@ -63,7 +63,7 @@ class ScheduleTransition(metaclass=ABCMeta):
     @staticmethod
     def __append__(store, key, values, dim):
         if key in store.keys():
-            store[key] = torch.cat([store[key], values], dim=dim)
+            store[key] = torch.unique(torch.cat([store[key], values], dim=dim), dim=1)
         else:
             store[key] = values
 

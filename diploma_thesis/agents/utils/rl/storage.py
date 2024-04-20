@@ -38,45 +38,32 @@ class Storage:
 
             self.memory.store(records)
 
-    def sample(self, update_returns: bool, device: torch.device, batch_graphs: bool = True):
+    def sample(self, device: torch.device, merge: bool = True):
         batch, info = self.memory.sample(return_info=True)
 
         if self.is_episodic:
-            return self.__process_episodic_batched_data__(batch, update_returns, batch_graphs, device), info
+            return self.__process_episodic_batched_data__(batch, merge, device), info
 
-        return self.__process_batched_data__(batch, update_returns, batch_graphs, device), info
+        return self.__process_batched_data__(batch, merge, device), info
 
-    def sample_minibatches(self, update_returns, device, n, sample_ratio) -> Tuple[Callable, Generator]:
-        batch, info = self.sample(update_returns, device, batch_graphs=False)
+    def sample_minibatches(self, device, n, sample_count):
+        batch, info = self.sample(device, merge=False)
 
         def generator(batch):
-            mask = torch.zeros(batch.batch_size, device=device)
-
             for i in range(n):
-                mask_ = mask.uniform_() < sample_ratio
-                idx = mask_.nonzero()
+                idx = torch.randint(0, len(batch), (sample_count,))
 
-                minibatch = batch[mask_]
-
-                if batch[0].state.graph is not None:
-                    minibatch.state.graph = Batch.from_data_list([
-                        batch.state.graph[index] for index in idx
-                    ]).to(device)
-
-                    minibatch.next_state.graph = Batch.from_data_list(
-                        [batch.next_state.graph[index] for index in idx]
-                    ).to(device)
+                minibatch = [batch[index] for index in idx]
+                minibatch = self.__merge_batched_data__(minibatch, merge=True, device=device)
 
                 yield minibatch
 
+                del minibatch
+
         def load_batch():
-            if batch[0].state.graph is not None:
-                batch.state.graph = Batch.from_data_list(batch.state.graph).to(device)
-                batch.next_state.graph = Batch.from_data_list(batch.next_state.graph).to(device)
+            return self.__merge_batched_data__(batch, merge=True, device=device)
 
-            return batch
-
-        return load_batch, generator(batch)
+        return load_batch, generator(batch), info
 
     def update_priority(self, indices: torch.LongTensor, priorities: torch.FloatTensor):
         self.memory.update_priority(indices, priorities)
@@ -101,25 +88,22 @@ class Storage:
             case _:
                 raise ValueError(f'Unknown sample type: {type(sample)}')
 
-    def __process_episodic_batched_data__(self, batch, update_returns: bool, batch_graphs, device: torch.device):
+    def __process_episodic_batched_data__(self, batch, merge, device: torch.device):
         batch = [element[0] for element in batch]
-
-        if update_returns:
-            batch = [self.return_estimator.update_returns(trajectory) for trajectory in batch]
 
         result = reduce(lambda x, y: x + y, batch, [])
 
-        return self.__merge_batched_data__(result, batch_graphs, device)
+        return self.__merge_batched_data__(result, merge, device)
 
-    def __process_batched_data__(self, batch, update_returns: bool, batch_graphs, device: torch.device):
+    def __process_batched_data__(self, batch, merge, device: torch.device):
         batch = [element[0] for element in batch]
 
-        if update_returns:
-            batch = self.return_estimator.update_returns(batch)
+        return self.__merge_batched_data__(batch, merge, device)
 
-        return self.__merge_batched_data__(batch, batch_graphs, device)
+    def __merge_batched_data__(self, batch, merge, device):
+        if not merge:
+            return batch
 
-    def __merge_batched_data__(self, batch, batch_graphs, device):
         batch = [element.view(-1) for element in batch]
         items = self.__collate_variable_length_info_values__(batch)
 
@@ -139,8 +123,8 @@ class Storage:
 
             result = torch.cat(batch, dim=0)
 
-            result.state.graph = self.__collate_graphs__(state_graph, batch_graphs, device)
-            result.next_state.graph = self.__collate_graphs__(next_state_graph, batch_graphs, device)
+            result.state.graph = self.__collate_graphs__(state_graph, merge, device)
+            result.next_state.graph = self.__collate_graphs__(next_state_graph, merge, device)
         else:
             result = torch.cat(batch, dim=0)
 
@@ -189,10 +173,10 @@ class Storage:
 
         return result
 
-    def __collate_graphs__(self, records: List[Graph], batch_graphs, device: torch.device):
+    def __collate_graphs__(self, records: List[Graph], merge, device: torch.device):
         graphs = [record.to_pyg_graph() for record in records]
 
-        if not batch_graphs:
+        if not merge:
             return graphs
 
         batch = Batch.from_data_list(graphs).to(device)

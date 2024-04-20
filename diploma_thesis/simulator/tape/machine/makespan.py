@@ -23,7 +23,7 @@ class Makespan(MachineReward):
         span: int = 256
         clip: bool = False
 
-        @staticmethod
+        # @staticmethod
         def from_cli(parameters: Dict) -> 'Makespan.Configuration':
             return Makespan.Configuration(span=parameters.get('span', 256), clip=parameters.get('clip', False))
 

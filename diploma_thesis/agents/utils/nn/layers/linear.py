@@ -13,7 +13,7 @@ class NoiseType(StrEnum):
     factorized = auto()
 
 
-class Linear(Layer):
+class Linear(torch.nn.modules.lazy.LazyModuleMixin, Layer):
 
     def __init__(self,
                  dim: int,
@@ -29,6 +29,13 @@ class Linear(Layer):
         self.noise_parameters = noise_parameters or dict()
 
         self.__build__()
+
+    def initialize_parameters(self, input) -> None:
+        self.linear.initialize_parameters(input)
+
+        if isinstance(self.linear, torch.nn.Linear):
+            torch.nn.init.orthogonal_(self.linear.weight)
+            torch.nn.init.zeros_(self.linear.bias)
 
     def forward(self, batch: torch.FloatTensor) -> torch.FloatTensor:
         batch = self.linear(batch)

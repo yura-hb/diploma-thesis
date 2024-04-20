@@ -1,0 +1,10 @@
+
+rules:
+  - 'crspt'
+  - 'dptwinqnpt'
+  - 'ms'
+  - 'winq'
+  - 'mon'
+  - 'spt'
+  - 'fifo'
+  - 'lifo'

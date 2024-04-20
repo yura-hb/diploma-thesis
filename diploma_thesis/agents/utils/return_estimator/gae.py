@@ -20,19 +20,24 @@ class GAE(Estimator):
     def update_returns(self, records: List[Record]) -> List[Record]:
         coef = self._discount_factor * self._lambda
 
-        for i in reversed(range(len(records))):
+        # Drop the last record to preserve the value of the last state
+        for i in reversed(range(len(records) - 1)):
             record = records[i]
-            next_record = records[i + 1] if i < len(records) - 1 else None
+            next_record = records[i + 1]
 
             next_value = 0 if next_record is None else self.get_value(next_record)
             value = self.get_value(record)
             advantage = record.reward + self._discount_factor * next_value - value
-            next_advantage = 0 if next_record is None else next_record.info[Record.ADVANTAGE_KEY]
+
+            if Record.ADVANTAGE_KEY in next_record.info.keys():
+                next_advantage = next_record.info[Record.ADVANTAGE_KEY]
+            else:
+                next_advantage = next_record.info[Record.ACTION_KEY][next_record.action] - self.get_value(next_record)
 
             records[i].info[Record.ADVANTAGE_KEY] = coef ** i * advantage + next_advantage
             records[i].info[Record.RETURN_KEY] = records[i].info[Record.ADVANTAGE_KEY] + value
 
-        return records
+        return records[:-1]
 
     @staticmethod
     def from_cli(parameters: Dict):

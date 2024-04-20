@@ -12,6 +12,7 @@ def __run__(s: Dict, threads):
     import torch
 
     torch.set_num_threads(threads)
+    torch.manual_seed(0)
 
     s = Simulation(s)
 

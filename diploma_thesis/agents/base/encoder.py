@@ -5,7 +5,7 @@ from typing import TypeVar, Generic
 
 import torch_geometric as pyg
 
-from torch_geometric.transforms import ToUndirected
+from torch_geometric.transforms import ToUndirected, RemoveIsolatedNodes, RemoveDuplicatedEdges
 
 from utils import Loggable
 from .state import State, Graph
@@ -32,6 +32,8 @@ class GraphEncoder(Encoder, Generic[Input]):
         self.is_local = is_local
         self.append_target_mask = append_target_mask
         self.to_undirected = ToUndirected()
+        self.remove_isolated_nodes = RemoveIsolatedNodes()
+        self.remove_duplicated_edges = RemoveDuplicatedEdges()
 
     def encode(self, parameters: Input) -> State:
         parameters.graph = parameters.graph.to_pyg_graph()
@@ -57,6 +59,9 @@ class GraphEncoder(Encoder, Generic[Input]):
         if self.is_undirected:
             result.graph = self.to_undirected(result.graph)
 
+        result.graph = self.remove_isolated_nodes(result.graph)
+        result.graph = self.remove_duplicated_edges(result.graph)
+
         result.graph = Graph.from_pyg_graph(result.graph)
 
         return result
@@ -73,14 +78,20 @@ class GraphEncoder(Encoder, Generic[Input]):
         return graph
 
     @staticmethod
-    def __fill_job_matrix__(job: Job, tensor):
-        result = torch.zeros_like(job.processing_times)
+    def __fill_job_matrix__(job: Job, tensor, initial_matrix=None, until_current_step: bool = True):
+        result = initial_matrix if initial_matrix is not None else torch.zeros_like(job.processing_times)
 
         idx = job.current_step_idx + (1 if job.is_completed else 0)
 
         result[
             torch.arange(idx, dtype=torch.long), job.history.arrived_machine_idx[:idx].int()
         ] = tensor[:idx].float()
+
+        if not job.is_completed:
+            result[idx, job.current_machine_idx] = tensor[idx].float()
+
+            if not until_current_step:
+                result[idx + 1:, :] = tensor[idx + 1:].unsqueeze(-1).float()
 
         return result
 

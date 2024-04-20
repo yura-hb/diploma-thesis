@@ -41,18 +41,18 @@ class Reinforce(RLTrainer):
         self.is_critics_configured = False
         self.configuration = configuration
 
-    def configure(self, model: Policy, configuration: RunConfiguration):
-        super().configure(model, configuration)
+    def configure(self, model: Policy):
+        super().configure(model)
 
         layer = Linear(1, 'none', dropout=None)
 
         for critic in self.configuration.critics:
             critic.neural_network.append_output_layer(layer)
-            critic.neural_network = critic.neural_network.to(configuration.device)
+            critic.neural_network = critic.neural_network.to(self.device)
 
     def __train__(self, model: Policy):
         try:
-            batch, index = self.storage.sample(update_returns=False, device=self.run_configuration.device)
+            batch, index = self.storage.sample(device=self.device)
         except NotReadyException:
             return
 
@@ -65,17 +65,21 @@ class Reinforce(RLTrainer):
                 baseline = torch.squeeze(baseline)
 
         # Perform policy step
-        output = model(batch.state)
-        _, actions, _ = model.__fetch_values__(output)
+        def compute_loss():
+            output = model(batch.state)
+            _, actions, _ = model.__fetch_values__(output)
 
-        loss = self.loss(actions, batch.action)
+            loss = self.loss(actions, batch.action)
 
-        if loss.numel() == 1:
-            raise ValueError('Loss should not have reduction to single value')
+            if loss.numel() == 1:
+                raise ValueError('Loss should not have reduction to single value')
 
-        loss = (batch.reward - baseline) * loss
-        loss = loss.mean()
-        self.step(loss, self.optimizer)
+            loss = (batch.reward - baseline) * loss
+            loss = loss.mean()
+
+            return loss, ()
+
+        loss = self.step(compute_loss, self.optimizer)
         self.record_loss(loss, key='policy')
 
         # Perform critics step
@@ -118,16 +122,8 @@ class Reinforce(RLTrainer):
     @classmethod
     def from_cli(cls,
                  parameters: Dict,
-                 memory: Memory,
-                 loss: Loss,
-                 optimizer: Optimizer,
-                 return_estimator: ReturnEstimator):
+                 **kwargs):
         schedule = TrainSchedule.from_cli(parameters)
         configuration = Configuration.from_cli(parameters)
 
-        return cls(configuration=configuration,
-                   memory=memory,
-                   optimizer=optimizer,
-                   loss=loss,
-                   return_estimator=return_estimator,
-                   train_schedule=schedule)
+        return cls(configuration=configuration, train_schedule=schedule, **kwargs)

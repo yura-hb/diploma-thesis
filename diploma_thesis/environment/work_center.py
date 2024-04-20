@@ -118,6 +118,15 @@ class WorkCenter:
 
         return waiting_times.mean()
 
+    @property
+    def utilization_rate(self) -> torch.FloatTensor:
+        return torch.FloatTensor([machine.utilization_rate for machine in self.machines]).mean()
+
+    @property
+    def processing_power(self) -> torch.FloatTensor:
+        return torch.FloatTensor([not machine.is_disrupted for machine in self.machines]).mean()
+
+
     # Timeline
 
     def __dispatch__(self):

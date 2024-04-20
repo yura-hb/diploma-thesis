@@ -76,7 +76,7 @@ def __evaluate__(tournament: 'Tournament',
     if not tournament.debug:
         result = []
 
-        def on_simulation_end(simulation: Simulation):
+        def on_simulation_end(simulation: Simulation, *args, **kwargs):
             nonlocal result
 
             try:

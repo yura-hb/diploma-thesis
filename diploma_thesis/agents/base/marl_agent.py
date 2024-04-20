@@ -54,7 +54,7 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         result = model(state, parameters)
 
         if key in self.trainer and not self.trainer[key].is_configured:
-            self.trainer[key].configure(model.policy, configuration=self.configuration)
+            self.trainer[key].configure(model.policy)
 
         return result
 

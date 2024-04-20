@@ -4,6 +4,8 @@ from .transition import *
 from typing import Dict
 from itertools import product
 
+# TODO: Correct Disjunctive graph
+
 
 class CompleteTransition(ForwardTransition):
     """

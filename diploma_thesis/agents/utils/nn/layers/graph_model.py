@@ -55,7 +55,14 @@ class GraphModel(Layer):
         # if isinstance(batch, pyg.data.HeteroData):
         #     return self.forward_heterogeneous(graph, batch), batch.batch_dict
 
-        return self.model(batch.x, batch.edge_index, batch.batch), batch.batch
+        result = self.model(batch.x, batch.edge_index, batch.batch, batch.target)
+
+        # TODO: Fix this due to Mask and SAG layers
+
+        if isinstance(result, tuple) and len(result) in [2, 3]:
+            return result[0], result[-1]
+
+        return result, batch.batch
 
     def forward_heterogeneous(self, graph, batch):
         assert False, "Heterogeneous input is not yet supported"
@@ -67,7 +74,7 @@ class GraphModel(Layer):
 
     def __build__(self):
         def encode_layer(layer, signature):
-            if isinstance(layer, GraphLayer) and layer.signature is not None:
+            if isinstance(layer, Layer) and layer.signature is not None:
                 return layer, layer.signature
 
             if signature is not None:
@@ -77,7 +84,7 @@ class GraphModel(Layer):
 
         layers = [encode_layer(layer, signature) for layer, signature in self.configuration.layers]
 
-        self.model = pyg.nn.Sequential('x, edge_index, batch', layers)
+        self.model = pyg.nn.Sequential('x, edge_index, batch, target', layers)
 
     def __configure_if_needed__(self, graph: pyg.data.Data | pyg.data.HeteroData):
         if not self.is_configured:

@@ -11,6 +11,7 @@ from .surrogate_tardiness import SurrogateTardiness
 from .global_MDPI_reward import GlobalMDPI
 from .surrogate_slack import SurrogateSlack
 from .makespan import Makespan
+from .unary import Unary
 
 key_to_cls = {
     'no': No,
@@ -19,7 +20,8 @@ key_to_cls = {
     'global_mdpi': GlobalMDPI,
     'surrogate_tardiness': SurrogateTardiness,
     'surrogate_slack': SurrogateSlack,
-    'makespan': Makespan
+    'makespan': Makespan,
+    'unary': Unary
 }
 
 

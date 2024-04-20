@@ -1,0 +1,3 @@
+
+Minimum Representation model from "A deep multi-agent reinforcement learning approach to
+solve dynamic jobshop scheduling problem" paper

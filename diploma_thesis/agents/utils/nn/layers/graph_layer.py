@@ -75,6 +75,16 @@ class DeepGCNConv(GraphModuleWrapper):
         super().__init__(pyg.nn.DeepGCNLayer, configuration)
 
 
+class GraphInstanceNorm(GraphModuleWrapper):
+
+    def __init__(self, configuration):
+        super().__init__(pyg.nn.InstanceNorm, configuration)
+
+    @property
+    def signature(self):
+        return self._signature or 'x, batch -> x'
+
+
 class GraphFunctionWrapper(BaseWrapper):
 
     def __init__(self, fn, configuration):
@@ -124,3 +134,43 @@ class SelectTarget(BaseWrapper):
 
         return embeddings[storage[Graph.TARGET_KEY]]
 
+
+class MaskTarget(BaseWrapper):
+
+    def __init__(self, configuration):
+        super().__init__(configuration)
+
+    def forward(self, x: torch.FloatTensor, edge_index, batch: Graph | pyg.data.Batch, target):
+        edge_index, _ = pyg.utils.subgraph(edge_index=edge_index, subset=target, relabel_nodes=True, num_nodes=x.shape[0])
+
+        return x[target], edge_index, batch[target]
+
+    @property
+    def signature(self):
+        return self._signature or 'x, edge_index, batch, target -> x, edge_index, batch'
+
+
+class SAGPool(BaseWrapper):
+
+    def __init__(self, configuration):
+        from .cli import from_cli
+
+        super().__init__(configuration)
+
+        if 'layer' in configuration:
+            layer = from_cli(configuration['layer'])
+
+            configuration['GNN'] = layer
+
+            del configuration['layer']
+
+        self.model = pyg.nn.SAGPooling(**configuration)
+
+    def forward(self, x, edge_index, batch):
+        x, edge_index, _, batch, _, _ = self.model(x, edge_index=edge_index, batch=batch)
+
+        return tuple([x, edge_index, batch])
+
+    @property
+    def signature(self):
+        return self._signature or 'x, edge_index, batch -> x, edge_index, batch'

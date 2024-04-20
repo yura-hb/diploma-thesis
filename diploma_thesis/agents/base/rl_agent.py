@@ -23,7 +23,7 @@ class RLAgent(Generic[Key], Agent[Key]):
         result = super().schedule(key, parameters)
 
         if not self.trainer.is_configured:
-            self.trainer.configure(self.model.policy, configuration=self.configuration)
+            self.trainer.configure(self.model.policy)
 
         return result
 

@@ -29,28 +29,31 @@ class DeepQTrainer(RLTrainer):
         self._target_model: AveragedModel | None = None
         self.configuration = configuration
 
-    def configure(self, model: Policy, configuration: RunConfiguration):
-        super().configure(model, configuration)
+    def configure(self, model: Policy):
+        super().configure(model)
 
         avg_fn = get_ema_avg_fn(self.configuration.decay)
 
-        self._target_model = AveragedModel(model.clone(), avg_fn=avg_fn).to(configuration.device)
+        self._target_model = AveragedModel(model.clone(), avg_fn=avg_fn).to(self.device)
 
     def __train__(self, model: Policy):
         try:
-            batch, info = self.storage.sample(update_returns=False, device=self.run_configuration.device)
+            batch, info = self.storage.sample(device=self.device)
         except NotReadyException:
             return
 
         with torch.no_grad():
             q_values = self.estimate_q(model, batch)
 
-        actions = self.__get_action_values__(model, batch.state, batch.action)
+        def compute_loss():
+            actions = self.__get_action_values__(model, batch.state, batch.action)
 
-        loss = self.loss(actions, q_values)
-        td_error = torch.square(actions - q_values)
+            loss_ = self.loss(actions, q_values)
+            td_error_ = torch.square(actions - q_values)
 
-        self.step(loss, self.optimizer)
+            return loss_, td_error_
+
+        loss, td_error = self.step(compute_loss, self.optimizer)
 
         self.record_loss(loss)
 
@@ -96,20 +99,8 @@ class DeepQTrainer(RLTrainer):
             self.target_model.load_state_dict(state_dict['target_model'])
 
     @classmethod
-    def from_cli(cls,
-                 parameters,
-                 memory: Memory,
-                 loss: Loss,
-                 optimizer: Optimizer,
-                 return_estimator: ReturnEstimator):
+    def from_cli(cls, parameters, **kwargs):
         train_schedule = TrainSchedule.from_cli(parameters)
         configuration = DeepQTrainer.Configuration.from_cli(parameters)
 
-        return cls(
-            configuration=configuration,
-            memory=memory,
-            loss=loss,
-            optimizer=optimizer,
-            return_estimator=return_estimator,
-            train_schedule=train_schedule
-        )
+        return cls(configuration=configuration, train_schedule=train_schedule, **kwargs)

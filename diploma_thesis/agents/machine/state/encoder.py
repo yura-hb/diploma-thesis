@@ -40,3 +40,19 @@ class GraphStateEncoder(GraphEncoder, metaclass=ABCMeta):
 
         return graph
 
+    def __estimate_completion_times__(self, job):
+        lower_completions_times = self.__fill_job_matrix__(job, job.history.finished_at - job.history.dispatched_at)
+        mean_completion_time = lower_completions_times.clone()
+        upper_completions_times = lower_completions_times.clone()
+
+        for j in range(job.current_step_idx, len(job.step_idx)):
+            if j == 0:
+                moment = 0
+            else:
+                moment = lower_completions_times[j - 1]
+
+            lower_completions_times[j] = moment + job.processing_times[j].min()
+            mean_completion_time[j] = moment + job.processing_times[j].mean()
+            upper_completions_times[j] = moment + job.processing_times[j].max()
+
+        return lower_completions_times, mean_completion_time, upper_completions_times

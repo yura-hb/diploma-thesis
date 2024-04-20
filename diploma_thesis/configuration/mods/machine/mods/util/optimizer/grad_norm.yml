@@ -6,4 +6,4 @@ parameters:
         grad_norm:
           kind: 'norm'
           parameters:
-            value: 1.0
+            value: 0.5

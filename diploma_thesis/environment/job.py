@@ -322,6 +322,9 @@ class Job:
         Args:
             now: Moment to start computing time until due
         """
+        if self.is_completed:
+            return self.due_at - self.history.completed_at
+
         return self.due_at - now
 
     def is_tardy_at(self, now: torch.FloatTensor):
@@ -331,7 +334,7 @@ class Job:
 
         Returns: True if the job is tardy at the moment, False otherwise
         """
-        return self.time_until_due(now) < 0
+        return self.time_until_due(now) <= 0
 
     def is_expected_to_be_tardy_at(self, now: torch.FloatTensor, strategy: ReductionStrategy = ReductionStrategy.mean):
         """

@@ -4,7 +4,7 @@ from .scheduling_rule import *
 
 class LWTSchedulingRule(SchedulingRule):
     """
-    Shortest Waiting  rule, i.e. selects jobs, in which current operation has the smallest waiting time
+    Longest Waiting  rule, i.e. selects jobs, in which current operation has the smallest waiting time
     """
 
     @property

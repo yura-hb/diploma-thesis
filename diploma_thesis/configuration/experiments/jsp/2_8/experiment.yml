@@ -1,0 +1,261 @@
+# Evaluate the effectivenes of basic DQNs on the JSP environment
+
+base_model: &base_model 'configuration/experiments/jsp/2_8/machine.yml'
+
+graph: &graph
+    transition_model:
+      kind: 'base'
+      parameters:
+        forward:
+          kind: 'complete'
+
+        schedule:
+          kind: 'complete'
+
+    memory: 0
+    is_machine_set_in_work_center_connected: True
+    is_work_center_set_in_shop_floor_connected: True
+
+##############################################################################################
+
+ppo_1: &ppo_1
+  base_path: 'configuration/experiments/jsp/2_8/machine.yml'
+  template: 'max'
+  mod_dirs:
+    - ['configuration/mods/machine/mods']
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+      - [
+          '__none__',
+          'agent/ppo/p3or.yml'
+      ]
+      - [
+        '__none__',
+#        'util/agent/multi_agent.yml'
+      ]
+#      - [
+#        'util/train_schedule/on_store.yml'
+#      ]
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ ['utilization/80.yml']]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0 ] ]
+
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 4
+  n_threads: 8
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/2_8'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+            parameters:
+              memory: 64
+              emit_trajectory: True
+
+          graph:
+            *graph
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/2_8/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods: []
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/2_8/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+            - output_dir: 'default'
+              machine_agent:
+                parameters:
+                  *ppo_1
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'complete'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: True
+                is_work_center_set_in_shop_floor_connected: True
+
+            - output_dir: 'complete_machine_compressed'
+              machine_agent:
+                parameters:
+                  *ppo_1
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'machine_compressed'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: True
+                is_work_center_set_in_shop_floor_connected: True
+
+            - output_dir: 'complete_operation_compressed'
+              machine_agent:
+                parameters:
+                  *ppo_1
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'operation_compressed'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: True
+                is_work_center_set_in_shop_floor_connected: True
+
+            - output_dir: 'adding_arc_complete'
+              machine_agent:
+                parameters:
+                  *ppo_1
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'adding_arc'
+
+                    schedule:
+                      kind: 'complete'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: True
+                is_work_center_set_in_shop_floor_connected: True
+
+            - output_dir: 'adding_arc_machine_compressed'
+              machine_agent:
+                parameters:
+                  *ppo_1
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'adding_arc'
+
+                    schedule:
+                      kind: 'machine_compressed'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: True
+                is_work_center_set_in_shop_floor_connected: True
+
+            - output_dir: 'adding_arc_operation_compressed'
+              machine_agent:
+                parameters:
+                  *ppo_1
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'adding_arc'
+
+                    schedule:
+                      kind: 'operation_compressed'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: True
+                is_work_center_set_in_shop_floor_connected: True
+
+
+          tape:
+            machine_reward:
+#              - kind: 'global_tardiness'
+#                parameters:
+#                  span: 128
+              - kind: 'surrogate_tardiness'
+                parameters:
+                  winq_factor: 0.2
+                  span: 64
+                  critical_level_factor: 128
+#              - kind: 'global_decomposed_tardiness'
+#                parameters:
+#                  span: 128
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run

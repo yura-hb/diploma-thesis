@@ -11,9 +11,6 @@ class DiscreteAction(ActionPolicy):
                          value_layer=lambda: self.make_linear_layer(1),
                          **base_parameters)
 
-    def configure(self, configuration: RunConfiguration):
-        super().configure(configuration)
-
     def encode(self, state: State):
         output = super().encode(state)
 

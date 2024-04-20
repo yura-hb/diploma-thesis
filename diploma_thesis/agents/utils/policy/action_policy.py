@@ -74,6 +74,10 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
             self.action_layer.to_noisy(self.noise_parameters)
             self.value_layer.to_noisy(self.noise_parameters)
 
+    @property
+    def device(self):
+        return next(self.parameters()).device
+
     def with_logger(self, logger: logging.Logger):
         super().with_logger(logger)
 
@@ -140,8 +144,6 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
 
         action, policy = self.action_selector(actions)
         action = action if torch.is_tensor(action) else torch.tensor(action, dtype=torch.long)
-
-        print(actions, policy)
 
         info = TensorDict({
             Keys.POLICY: policy,

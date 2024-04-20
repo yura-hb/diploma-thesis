@@ -173,7 +173,8 @@ class ShopFloor:
             work_centers=[
                 Map.WorkCenter(
                     idx=work_center.work_center_idx,
-                    machines=torch.cat([torch.atleast_1d(machine.state.machine_idx) for machine in work_center.machines])
+                    machines=torch.cat(
+                        [torch.atleast_1d(machine.state.machine_idx) for machine in work_center.machines])
                     if len(work_center.machines) > 1 else torch.atleast_1d(work_center.machines[0].state.machine_idx),
                     batch_size=[]
                 )
@@ -206,15 +207,23 @@ class ShopFloor:
         work_center_idx = job.next_work_center_idx
 
         if work_center_idx is None:
-            return 0
+            return torch.tensor(0.0)
 
         return self.work_centers[work_center_idx].work_load
+
+    def processing_power_in_next_queue(self, job: environment.Job) -> torch.FloatTensor:
+        work_center_idx = job.next_work_center_idx
+
+        if work_center_idx is None:
+            return torch.tensor(1.0)
+
+        return self.work_centers[work_center_idx].processing_power
 
     def average_waiting_in_next_queue(self, job: environment.Job) -> torch.FloatTensor:
         work_center_idx = job.next_work_center_idx
 
         if work_center_idx is None:
-            return 0
+            return torch.tensor(0.0)
 
         return self.work_centers[work_center_idx].average_waiting_time
 
@@ -241,8 +250,20 @@ class ShopFloor:
 
         return tardy_jobs / len(in_system_jobs)
 
-    def expected_tardy_rate(self, now: float,
-                            reduction_strategy: environment.JobReductionStrategy) -> torch.FloatTensor:
+    def actual_tardy_rate(self, now: float) -> torch.FloatTensor:
+        in_system_jobs = [job for _, job in self.history.jobs.items()]
+
+        tardy_jobs = torch.LongTensor([
+            job.is_tardy_at(now=now) for job in in_system_jobs
+        ]).sum()
+
+        return tardy_jobs / len(in_system_jobs)
+
+    def expected_tardy_rate(
+            self,
+            now: float,
+            reduction_strategy: environment.JobReductionStrategy = environment.JobReductionStrategy.mean
+    ) -> torch.FloatTensor:
         in_system_jobs = self.in_system_running_jobs
 
         expected_tardy_jobs = torch.LongTensor([
@@ -250,6 +271,11 @@ class ShopFloor:
         ]).sum()
 
         return expected_tardy_jobs / len(in_system_jobs)
+
+    def utilization_rate(self) -> torch.FloatTensor:
+        return torch.FloatTensor([
+            work_center.utilization_rate for work_center in self.work_centers
+        ]).mean()
 
     # Navigation
 

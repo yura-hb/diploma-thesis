@@ -10,6 +10,7 @@ from functools import reduce
 FACTORY_SUFFIX = '__factory__'
 CONCATENATE_SUFFIX = '__concat__'
 INOUT_FACTORY_SUFFIX = '__inout_factory__'
+RANGE_SUFFIX = '__range__'
 NONE_TAG = '__none__'
 
 
@@ -74,6 +75,11 @@ def iterate_all_combinations(value: Dict) -> [Dict]:
             flatten[key.rstrip(INOUT_FACTORY_SUFFIX) + FACTORY_SUFFIX] = __parse_factory__(value)
 
             del flatten[key]
+
+            continue
+
+        if key.endswith(RANGE_SUFFIX):
+            flatten[key.rstrip("." + RANGE_SUFFIX)] = list(range(*value))
 
             continue
 

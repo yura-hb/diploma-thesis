@@ -40,7 +40,6 @@ def reset_tape():
 class RewardCache:
     @tensorclass
     class Record:
-        shop_floor_id: torch.Tensor = torch.tensor([])
         action: torch.Tensor = torch.tensor([])
         reward: torch.Tensor = torch.tensor([])
         moment: torch.Tensor = torch.tensor([])
@@ -76,7 +75,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
         self.memory_model.connect(self)
 
         self.graph_model = graph_model
-        self.cache = None
+        self.cache = dict()
 
     def with_logger(self, logger: logging.Logger):
         super().with_logger(logger)
@@ -94,7 +93,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
               on_simulation_end: Callable[[Simulation], None] = None):
         assert self.machine.is_trainable or self.work_center.is_trainable, 'At least one agent should be trainable'
 
-        self.cache = RewardCache(batch_size=[])
+        self.cache = dict()
 
         env = environment
         warmup_end = env.event()
@@ -198,11 +197,11 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
     @abstractmethod
     def did_prepare_machine_record(self, context: Context, machine: Machine, record: Record):
-        if self.cache is None:
+        if context.shop_floor.name not in self.cache.keys():
             return
 
-        self.cache.machines = self.__update_cache__(
-            self.cache.machines,
+        self.cache[context.shop_floor.name].machines = self.__update_cache__(
+            self.cache[context.shop_floor.name].machines,
             cls=RewardCache.MachineRecord,
             shop_floor=context.shop_floor,
             record=record,
@@ -213,11 +212,11 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
     @abstractmethod
     def did_prepare_work_center_record(self, context: Context, work_center: WorkCenter, record: Record):
-        if self.cache is None:
+        if context.shop_floor.name not in self.cache.keys():
             return
 
-        self.cache.work_centers = self.__update_cache__(
-            self.cache.work_centers,
+        self.cache[context.shop_floor.name].work_centers = self.__update_cache__(
+            self.cache[context.shop_floor.name].work_centers,
             cls=RewardCache.WorkCenterRecord,
             shop_floor=context.shop_floor,
             record=record,
@@ -250,8 +249,6 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
             self.memory_model.store_schedule_record(context=context, key=machine.key, memory=result.record.memory)
 
         store_end = time.time()
-
-        # print(f'Time: Encode { encode_end - start },  Forward: { forward_end - encode_end }, Store { store_end - forward_end}')
 
         return result.result
 
@@ -289,6 +286,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                 try:
                     yield req
 
+                    self.cache[simulation.simulation_id] = RewardCache(batch_size=[])
+
                     delegate = Delegate([self.tape_model, self.graph_model])
 
                     simulation.prepare(self, delegate, environment)
@@ -297,9 +296,9 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                     self.work_center.setup(simulation.shop_floor)
 
                     if is_training:
-                        self.tape_model.register(simulation.shop_floor,
-                                                 self.machine.is_trainable,
-                                                 self.work_center.is_trainable)
+                        self.tape_model.register(
+                            simulation.shop_floor, self.machine.is_trainable, self.work_center.is_trainable
+                        )
 
                     self.__log__(f'Simulation Started {simulation.simulation_id}')
 
@@ -307,10 +306,12 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
                     self.__log__(f'Simulation Finished {simulation.simulation_id}')
 
+                    rewards = self.cache.pop(simulation.simulation_id, RewardCache(batch_size=[]))
+
                     if is_training:
                         self.did_finish_simulation(simulation)
 
-                    on_simulation_end(simulation)
+                    on_simulation_end(simulation, rewards)
                 except:
                     self.__log__(f'Skip simulation {simulation.simulation_id} due to error {traceback.print_exc()}')
 
@@ -392,6 +393,10 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
             yield environment.timeout(log_tick)
 
+            import gc
+
+            gc.collect()
+
             torch.mps.empty_cache()
             torch.cuda.empty_cache()
 
@@ -420,7 +425,6 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
             decision_moment = torch.tensor(decision_moment)
 
         record = cls(
-            shop_floor_id=shop_floor.id,
             action=record.action,
             reward=record.reward,
             moment=decision_moment,

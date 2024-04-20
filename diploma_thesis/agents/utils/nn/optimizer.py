@@ -2,6 +2,7 @@
 import torch
 
 from dataclasses import dataclass
+from .optimizers import SAM
 
 
 @dataclass
@@ -48,13 +49,19 @@ class Optimizer:
     def zero_grad(self):
         self._optimizer.zero_grad()
 
-    def step(self):
+    def step(self, compute_grad):
         self.step_idx += 1
 
-        self._optimizer.step()
+        if isinstance(self._optimizer, SAM):
+            result = self._optimizer.step(closure=compute_grad)
+        else:
+            result = compute_grad()
+            self._optimizer.step()
 
         if self._scheduler is not None:
             self._scheduler.step()
+
+        return result
 
     @property
     def step_count(self):
@@ -75,22 +82,16 @@ class Optimizer:
         cls = None
 
         match self.configuration.optimizer.kind:
-            case 'adam':
-                cls = torch.optim.Adam
-            case 'adam_w':
-                cls = torch.optim.AdamW
-            case 'adamax':
-                cls = torch.optim.Adamax
-            case 'sgd':
-                cls = torch.optim.SGD
-            case 'asgd':
-                cls = torch.optim.ASGD
-            case 'rmsprop':
-                cls = torch.optim.RMSprop
-            case 'radam':
-                cls = torch.optim.RAdam
+            case 'sam':
+                cls = SAM
+
+                base_optimizer = self.configuration.optimizer.parameters.get('base_optimizer')
+
+                assert base_optimizer is not None, "You must reference base optimizer kind for SAM"
+
+                self.configuration.optimizer.parameters['base_optimizer'] = self.__optimizer_class__(base_optimizer)
             case _:
-                raise ValueError(f'Unknown optimizer kind: {self.configuration.optimizer.kind}')
+                cls = self.__optimizer_class__(self.configuration.optimizer.kind)
 
         return cls(parameters, **self.configuration.optimizer.parameters)
 
@@ -152,6 +153,32 @@ class Optimizer:
             self._scheduler.load_state_dict(scheduler_state)
 
         self.step_idx = state_dict['step_idx']
+
+    @staticmethod
+    def __optimizer_class__(kind):
+        cls = None
+
+        match kind:
+            case 'adam':
+                cls = torch.optim.Adam
+            case 'adam_w':
+                cls = torch.optim.AdamW
+            case 'adamax':
+                cls = torch.optim.Adamax
+            case 'sgd':
+                cls = torch.optim.SGD
+            case 'asgd':
+                cls = torch.optim.ASGD
+            case 'rmsprop':
+                cls = torch.optim.RMSprop
+            case 'radam':
+                cls = torch.optim.RAdam
+            case 'sam':
+                cls = SAM
+            case _:
+                raise ValueError(f'Unknown optimizer kind: {kind}')
+
+        return cls
 
     @staticmethod
     def from_cli(parameters):

@@ -11,4 +11,4 @@ class UTRoutingRule(RoutingRule):
         return torch.argmin
 
     def criterion(self, job: Job, work_center: WorkCenter) -> torch.FloatTensor:
-        return torch.FloatTensor([machine.cumulative_run_time for machine in work_center.machines])
+        return torch.FloatTensor([machine.utilization_rate for machine in work_center.machines])

@@ -92,26 +92,19 @@ class CompleteTransition(ScheduleTransition):
     def __update_scheduled_graph__(self, machine_index, graph: Graph):
         dj = graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_KEY]
 
-        # Construct new disjunctive edges, i.e complete graph
-        history = graph.data.get(
-            (Graph.MACHINE_KEY, machine_index, Graph.PROCESSED_KEY), default=torch.tensor([]).view(4, 0)
-        )
+        if dj.shape[-1] > 1:
+            range = torch.arange(dj.shape[-1])
+            combinations = torch.combinations(range, 2)
 
-        if history.numel() == 0 and dj.shape[1] > 1:
-            # If no operation was processed on machine, then it can start with any of them in the queue. Hence, we
-            # need to construct a complete graph
-            edges = [dj[:, i] for i in range(dj.shape[1])]
-            edges = list(combinations(edges, 2))
-            edges = [torch.atleast_2d(torch.cat([edge[0], edge[1]])).T for edge in edges]
-            edges = torch.hstack(edges)
-        elif (history.numel() == 0 and dj.shape[1] <= 1) or dj.shape[1] == 0:
-            # If there is number of nodes in graph is less than two, then there is no edges
-            edges = torch.tensor([], dtype=torch.long).view(4, 0)
+            src = dj[:, combinations[:, 0]]
+            dst = dj[:, combinations[:, 1]]
+
+            edges = torch.hstack([
+                torch.vstack([src, dst]),
+                torch.vstack([dst, src])
+            ])
         else:
-            # Otherwise, we need to select one edge from last processed operation to all operations in the disjunction
-            edges = torch.zeros((2, dj.shape[1]), dtype=torch.long)
-            edges += history[:, -1].view(2, 1)
-            edges = torch.vstack([edges, dj])
+            edges = torch.tensor([], dtype=torch.long).view(4, 0)
 
         # Replace disjunctive edges
         graph.data[Graph.MACHINE_KEY, machine_index, Graph.SCHEDULED_GRAPH_KEY] = edges

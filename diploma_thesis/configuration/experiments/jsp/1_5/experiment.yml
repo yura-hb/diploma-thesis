@@ -1,0 +1,199 @@
+# Evaluate the effectivenes of basic DQNs on the JSP environment
+
+template: &template 'marl_direct'
+all_rules_template: &all_rules_template 'marl_direct_all_rules'
+preferred_rules_template: &preferred_rules_template 'marl_direct_preferred_rules'
+
+base_model: &base_model 'configuration/experiments/jsp/1_5/machine.yml'
+marl_model: &marl_model 'configuration/experiments/jsp/1_5/marl_machine.yml'
+
+default_mods: &default_mods
+  - 'agent/dqn/ddqn.yml'
+  - 'agent/dqn/prioritized.yml'
+  - 'agent/dqn/steps/3.yml'
+  - 'agent/dqn/dueling.yml'
+  - 'agent/dqn/noisy.yml'
+
+###############################################################################################
+
+dqn_20: &dqn_20
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/return/discount_factor/20.yml'
+
+dqn_40: &dqn_40
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/return/discount_factor/40.yml'
+
+dqn_60: &dqn_60
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/return/discount_factor/60.yml'
+
+dqn_80: &dqn_80
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/return/discount_factor/80.yml'
+
+dqn_100: &dqn_100
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/return/discount_factor/100.yml'
+
+
+###############################################################################################
+
+reward: &reward
+  - kind: 'surrogate_tardiness'
+    parameters:
+      winq_factor: 0.2
+      span: 40
+      critical_level_factor: 128
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ ['utilization/80.yml'] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0 ] ]
+
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 5
+  n_threads: 5
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/1_5'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+            parameters:
+              memory: 4
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/1_5/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods:
+                - 'n_workers/1.yml'
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/1_5/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+            - output_dir: '20'
+              machine_agent:
+                parameters:
+                  - *dqn_20
+            - output_dir: '40'
+              machine_agent:
+                parameters:
+                  - *dqn_40
+            - output_dir: '60'
+              machine_agent:
+                parameters:
+                  - *dqn_60
+            - output_dir: '80'
+              machine_agent:
+                parameters:
+                  - *dqn_80
+            - output_dir: '100'
+              machine_agent:
+                parameters:
+                  - *dqn_100
+
+
+          tape:
+            machine_reward:
+              *reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run

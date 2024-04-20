@@ -1,0 +1,188 @@
+# Evaluate the effectivenes of basic DQNs on the JSP environment
+
+base_model: &base_model 'configuration/experiments/jsp/2_1/machine.yml'
+
+graph: &graph
+    transition_model:
+      kind: 'base'
+      parameters:
+        forward:
+          kind: 'complete'
+
+        schedule:
+          kind: 'complete'
+
+    memory: 0
+    is_machine_set_in_work_center_connected: True
+    is_work_center_set_in_shop_floor_connected: True
+
+default_mods: &default_mods
+  - 'agent/dqn/ddqn.yml'
+  - 'agent/dqn/prioritized.yml'
+  - 'agent/dqn/dueling.yml'
+#  - 'agent/dqn/noisy.yml'
+  - 'util/optimizer/adam_w.yml'
+  - 'util/return/discount_factor/40.yml'
+
+
+##############################################################################################
+
+dqn_1: &dqn_1
+  base_path: *base_model
+  template: 'djsp'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+
+dqn_2: &dqn_2
+  base_path: *base_model
+  template: 'hierarchical'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+
+dqn_4: &dqn_4
+  base_path: *base_model
+  template: 'proposed'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+
+dqn_5: &dqn_5
+  base_path: *base_model
+  template: 'vpt'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+
+##############################################################################################
+
+reward: &reward
+  - kind: 'global_decomposed_tardiness'
+    parameters:
+      span: 128
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ ['utilization/80.yml']]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0 ] ]
+
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 4
+  n_threads: 10
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/part_2_1_jsp'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+            parameters:
+              memory: 1
+
+          graph:
+            *graph
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/2_1/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods:
+                - 'n_workers/1.yml'
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/2_1/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+            - output_dir: 'djsp'
+              machine_agent:
+                parameters:
+                  - *dqn_1
+            - output_dir: 'hierarchical'
+              machine_agent:
+                parameters:
+                  - *dqn_2
+            - output_dir: 'custom'
+              machine_agent:
+                parameters:
+                  - *dqn_4
+            - output_dir: 'vpt'
+              machine_agent:
+                parameters:
+                  - *dqn_5
+
+          tape:
+            machine_reward:
+              *reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run

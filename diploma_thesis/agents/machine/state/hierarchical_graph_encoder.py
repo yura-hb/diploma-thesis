@@ -3,6 +3,11 @@ from .encoder import *
 
 class HierarchicalGraphEncoder(GraphStateEncoder):
 
+    def __init__(self, include_due_dates: bool = False, **kwargs):
+        self.include_due_dates = include_due_dates
+
+        super().__init__(**kwargs)
+
     def __encode__(self, parameters: StateEncoder.Input) -> State:
         if parameters.graph is None:
             raise ValueError("Graph is not provided")
@@ -13,26 +18,34 @@ class HierarchicalGraphEncoder(GraphStateEncoder):
 
         for job_id in job_ids:
             job = parameters.machine.shop_floor.job(job_id)
-            completions_times = self.__fill_job_matrix__(job, job.history.finished_at)
+            completions_times, mean_completion_time, _ = self.__estimate_completion_times__(job)
 
-            for j in range(job.current_step_idx, len(job.step_idx)):
-                if j == 0:
-                    moment = parameters.machine.shop_floor.now
-                else:
-                    moment = completions_times[j-1]
+            status = torch.zeros_like(job.step_idx)
+            status[:job.current_step_idx] = 1
+            status = self.__fill_job_matrix__(
+                job,
+                status,
+                initial_matrix=-torch.ones_like(job.processing_times),
+                until_current_step=False
+            )
 
-                completions_times[j] = moment + job.processing_times[j].min()
+            values = [completions_times.view(-1), status.view(-1)]
 
-            status = torch.ones_like(job.step_idx)
-            status = self.__fill_job_matrix__(job, status)
+            if self.include_due_dates:
+                slack_times = job.due_at - mean_completion_time
 
-            states += [torch.vstack([completions_times.view(-1), status.view(-1)])]
+                states += [torch.vstack(values + [slack_times.view(-1)])]
+            else:
+                states += [torch.vstack(values)]
 
-        states = torch.cat(states, dim=1).T if len(states) > 0 else torch.tensor([]).view(0, 2)
+        states = torch.cat(states, dim=1).T if len(states) > 0 else torch.tensor([]).view(0, self.include_due_dates + 2)
         graph[Graph.OPERATION_KEY].x = states
 
         return State(graph=graph, batch_size=[])
 
     @classmethod
     def from_cli(cls, parameters: dict):
-        return HierarchicalGraphEncoder(**cls.base_parameters_from_cli(parameters))
+        return HierarchicalGraphEncoder(
+            include_due_dates=parameters.get('include_due_dates', False),
+            **cls.base_parameters_from_cli(parameters)
+        )
