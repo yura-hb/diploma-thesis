@@ -1,0 +1,257 @@
+# Evaluate the effectivenes of basic DQNs on the JSP environment
+
+template: &template 'baseline'
+base_model: &base_model 'configuration/experiments/jsp/MARL-DQN/machine.yml'
+marl_model: &marl_model 'configuration/experiments/jsp/MARL-DQN/marl_machine.yml'
+
+default_mods: &default_mods []
+###############################################################################################
+
+dqn_1: &dqn_1
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'agent/dqn/ddqn.yml'
+    - 'configuration/mods/machine/mods'
+  mods:
+    *default_mods
+
+marl_dqn_1: &marl_dqn_1
+  base_path: *marl_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'util/agent/multi_agent.yml'
+    - *default_mods
+
+dqn_1_on_store: &dqn_1_on_store
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+    - 'util/train_schedule/on_store_32.yml'
+
+marl_dqn_1_on_store: &marl_dqn_1_on_store
+  base_path: *marl_model
+  template: *template
+  mod_dirs:
+    - 'agent/dqn/ddqn.yml'
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'util/agent/multi_agent.yml'
+    - *default_mods
+    - 'util/train_schedule/on_store_32.yml'
+
+
+###############################################################################################
+
+dqn_7: &dqn_7
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
+    - 'agent/dqn/steps/3.yml'
+    - 'agent/dqn/dueling.yml'
+    - *default_mods
+
+marl_dqn_7: &marl_dqn_7
+  base_path: *marl_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
+    - 'agent/dqn/steps/3.yml'
+    - 'agent/dqn/dueling.yml'
+    - 'util/agent/multi_agent.yml'
+    - *default_mods
+
+dqn_7_on_store: &dqn_7_on_store
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'util/train_schedule/on_store_32.yml'
+
+marl_dqn_7_on_store: &marl_dqn_7_on_store
+  base_path: *marl_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'util/agent/multi_agent.yml'
+    - *default_mods
+    - 'util/train_schedule/on_store_32.yml'
+
+#############################################################################################
+
+reward: &reward
+  - kind: 'surrogate_tardiness'
+    parameters:
+      winq_factor: 0.2
+      span: 40
+      critical_level_factor: 128
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ ['utilization/90.yml'] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0 ] ]
+
+
+parallel_multi_source_run: &parallel_multi_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ ['utilization/90.yml'] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0, 1, 2 ] ]
+
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 10
+  n_threads: 10
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/1. MARL-DQN/2. Train Schedule/model/'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+            parameters:
+              memory: 4
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/MARL-DQN/experiment/2/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods: []
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/MARL-DQN/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+
+          __concat__:
+            - __concat__:
+                - output_dir: 'DDQN'
+                  machine_agent:
+                    parameters:
+                      - *dqn_1
+                      - *marl_dqn_1
+                - output_dir: 'All not Noisy'
+                  machine_agent:
+                    parameters:
+                      - *dqn_7
+                      - *marl_dqn_7
+
+              tape:
+                machine_reward:
+                  *reward
+
+              run:
+                parameters:
+                  nested:
+                    parameters:
+                      simulations:
+                        __0__:
+                          parameters:
+                            values:
+                              __concat__:
+                                - *long_single_source_run
+
+            - __concat__:
+                - output_dir: 'DDQN (On Store)'
+                  machine_agent:
+                    parameters:
+                      - *dqn_1_on_store
+                      - *marl_dqn_1_on_store
+                - output_dir: 'All not Noisy (On Store)'
+                  machine_agent:
+                    parameters:
+                      - *dqn_7_on_store
+                      - *marl_dqn_7_on_store
+              tape:
+                machine_reward:
+                  *reward
+              run:
+                parameters:
+                  base_path: 'configuration/experiments/jsp/MARL-DQN/experiment/2/parallel_run.yml'
+                  nested:
+                    parameters:
+                      simulations:
+                        __0__:
+                          parameters:
+                            values:
+                              __concat__:
+                                - *parallel_multi_source_run

@@ -38,25 +38,28 @@ class CustomGraphEncoder(GraphStateEncoder):
                 job, torch.arange(1, job.step_idx.shape[0] + 1) / job.step_idx.shape[0], until_current_step=False
             )
 
-            slack_times = job.due_at - mean_completion_time
-            critical_ratios = slack_times / job.due_at
+            slack_times = job.due_at - job.history.dispatched_at - mean_completion_time
+            critical_ratios = 1 - slack_times / (torch.abs(slack_times) + self.norm_factor)
 
             idx = job.next_work_center_idx.item() if job.next_work_center_idx is not None else -1
 
-            if not job.is_completed:
-                if idx not in winq.keys():
-                    winq[idx] = parameters.machine.shop_floor.work_in_next_queue(job) / self.norm_factor
+            if idx not in winq.keys():
+                winq[idx] = parameters.machine.shop_floor.work_in_next_queue(job) / self.norm_factor
 
-                if idx not in avlm.keys():
-                    avlm[idx] = parameters.machine.shop_floor.average_waiting_in_next_queue(job) / self.norm_factor
+            if idx not in avlm.keys():
+                avlm[idx] = parameters.machine.shop_floor.average_waiting_in_next_queue(job) / self.norm_factor
 
-                if idx not in processing_power.keys():
-                    processing_power[idx] = parameters.machine.shop_floor.processing_power_in_next_queue(job)
+            if idx not in processing_power.keys():
+                processing_power[idx] = parameters.machine.shop_floor.processing_power_in_next_queue(job)
 
             placeholder = torch.zeros_like(job.processing_times).view(-1)
 
             values = [
                 job.processing_times.view(-1) / self.norm_factor,
+
+                job.history.arrived_at_machine >= 0,
+                job.history.started_at >= 0,
+                job.history.finished_at >= 0,
 
                 l_completion_time.view(-1) / self.norm_factor,
                 mean_completion_time.view(-1) / self.norm_factor,

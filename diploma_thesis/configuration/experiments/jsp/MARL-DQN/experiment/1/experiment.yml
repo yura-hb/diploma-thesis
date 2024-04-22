@@ -1,15 +1,10 @@
 # Evaluate the effectivenes of basic DQNs on the JSP environment
 
-template: &template 'marl_indirect'
-base_model: &base_model 'configuration/experiments/jsp/1_1/machine.yml'
-marl_model: &marl_model 'configuration/experiments/jsp/1_1/marl_machine.yml'
+template: &template 'baseline'
+base_model: &base_model 'configuration/experiments/jsp/MARL-DQN/machine.yml'
+marl_model: &marl_model 'configuration/experiments/jsp/MARL-DQN/marl_machine.yml'
 
 default_mods: &default_mods []
-#  - 'util/infrastructure/mps.yml'
-#  - 'util/optimizer/grad_norm.yml'
-#  - 'util/rules/all_rules.yml'
-#  - 'util/infrastructure/compile.yml'
-
 ###############################################################################################
 
 dqn_1: &dqn_1
@@ -27,15 +22,6 @@ marl_dqn_1: &marl_dqn_1
     - 'configuration/mods/machine/mods'
   mods:
     - 'util/agent/multi_agent.yml'
-    - *default_mods
-
-marl_dqn_centralized_1: &centralized_dqn_1
-  base_path: *base_model
-  template: *template
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'util/agent/centralized.yml'
     - *default_mods
 
 ###############################################################################################
@@ -59,16 +45,6 @@ marl_dqn_2: &marl_dqn_2
     - 'util/agent/multi_agent.yml'
     - *default_mods
 
-marl_dqn_centralized_2: &centralized_dqn_2
-  base_path: *base_model
-  template: *template
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'util/agent/centralized.yml'
-    - *default_mods
-
   ###############################################################################################
 
 dqn_3: &dqn_3
@@ -90,16 +66,6 @@ marl_dqn_3: &marl_dqn_3
     - 'util/agent/multi_agent.yml'
     - *default_mods
 
-marl_dqn_centralized_3: &centralized_dqn_3
-  base_path: *base_model
-  template: *template
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/dueling.yml'
-    - 'util/agent/centralized.yml'
-    - *default_mods
-
 ###############################################################################################
 
 dqn_4: &dqn_4
@@ -109,8 +75,6 @@ dqn_4: &dqn_4
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/steps/3.yml'
-    - 'agent/dqn/steps/off_policy.yml'
-    - 'agent/dqn/steps/v_trace.yml'
     - *default_mods
 
 marl_dqn_4: &marl_dqn_4
@@ -120,21 +84,7 @@ marl_dqn_4: &marl_dqn_4
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/steps/3.yml'
-    - 'agent/dqn/steps/off_policy.yml'
-    - 'agent/dqn/steps/v_trace.yml'
     - 'util/agent/multi_agent.yml'
-    - *default_mods
-
-marl_dqn_centralized_4: &centralized_dqn_4
-  base_path: *base_model
-  template: *template
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/steps/3.yml'
-    - 'agent/dqn/steps/off_policy.yml'
-    - 'agent/dqn/steps/v_trace.yml'
-    - 'util/agent/centralized.yml'
     - *default_mods
 
 ###############################################################################################
@@ -158,16 +108,6 @@ marl_dqn_5: &marl_dqn_5
     - 'util/agent/multi_agent.yml'
     - *default_mods
 
-marl_dqn_centralized_5: &centralized_dqn_5
-  base_path: *base_model
-  template: *template
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/prioritized.yml'
-    - 'util/agent/centralized.yml'
-    - *default_mods
-
 ###############################################################################################
 
 dqn_6: &dqn_6
@@ -177,7 +117,7 @@ dqn_6: &dqn_6
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/noisy.yml'
-#    - 'util/action_selector/sample.yml'
+    - 'util/action_selector/sample.yml'
     - *default_mods
 
 marl_dqn_6: &marl_dqn_6
@@ -189,18 +129,7 @@ marl_dqn_6: &marl_dqn_6
     - 'agent/dqn/noisy.yml'
     - 'util/agent/multi_agent.yml'
     - *default_mods
-#    - 'util/action_selector/sample.yml'
-
-marl_dqn_centralized_6: &centralized_dqn_6
-  base_path: *base_model
-  template: *template
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/noisy.yml'
-    - 'util/agent/centralized.yml'
-    - *default_mods
-#    - 'util/action_selector/sample.yml'
+    - 'util/action_selector/sample.yml'
 
 ###############################################################################################
 
@@ -213,12 +142,10 @@ dqn_7: &dqn_7
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
     - 'agent/dqn/steps/3.yml'
-    - 'agent/dqn/steps/off_policy.yml'
-    - 'agent/dqn/steps/v_trace.yml'
     - 'agent/dqn/dueling.yml'
     - 'agent/dqn/noisy.yml'
     - *default_mods
-#    - 'util/action_selector/sample.yml'
+    - 'util/action_selector/sample.yml'
 
 marl_dqn_7: &marl_dqn_7
   base_path: *marl_model
@@ -229,28 +156,38 @@ marl_dqn_7: &marl_dqn_7
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
     - 'agent/dqn/steps/3.yml'
-    - 'agent/dqn/steps/off_policy.yml'
-    - 'agent/dqn/steps/v_trace.yml'
     - 'agent/dqn/dueling.yml'
     - 'agent/dqn/noisy.yml'
     - 'util/agent/multi_agent.yml'
     - *default_mods
-#    - 'util/action_selector/sample.yml'
+    - 'util/action_selector/sample.yml'
 
-marl_dqn_centralized_7: &centralized_dqn_7
+###############################################################################################
+
+dqn_8: &dqn_8
   base_path: *base_model
   template: *template
-  mod_dirs: 
+  mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
     - 'agent/dqn/steps/3.yml'
-    - 'agent/dqn/steps/off_policy.yml'
-    - 'agent/dqn/steps/v_trace.yml'
     - 'agent/dqn/dueling.yml'
-    - 'agent/dqn/noisy.yml'
-    - 'util/agent/centralized.yml'
+    - *default_mods
+#    - 'util/action_selector/sample.yml'
+
+marl_dqn_8: &marl_dqn_8
+  base_path: *marl_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
+    - 'agent/dqn/steps/3.yml'
+    - 'agent/dqn/dueling.yml'
+    - 'util/agent/multi_agent.yml'
     - *default_mods
 #    - 'util/action_selector/sample.yml'
 
@@ -271,7 +208,7 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ ['utilization/80.yml'] ]
+        - [ ['utilization/90.yml'] ]
     nested:
       parameters:
         dispatch:
@@ -283,11 +220,11 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 5
-  n_threads: 5
+  n_workers: 10
+  n_threads: 10
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments//1_1'
+  output_dir: 'results/jsp/experiments/1. MARL-DQN/1. DQN Variants/model/'
 
   tasks:
     - kind: 'multi_value'
@@ -332,7 +269,7 @@ task:
           run:
             kind: 'mod'
             parameters:
-              base_path: 'configuration/experiments/jsp/1_1/run.yml'
+              base_path: 'configuration/experiments/jsp/MARL-DQN/run.yml'
               mod_dirs:
                 - 'configuration/mods/run/mods'
               mods:
@@ -346,55 +283,53 @@ task:
                         base:
                           kind: 'mod'
                           parameters:
-                            base_path: 'configuration/experiments/jsp/1_1/simulation.yml'
+                            base_path: 'configuration/experiments/jsp/MARL-DQN/simulation.yml'
                             mod_dirs:
                               - 'configuration/mods/simulation/mods'
                             mods: [ ]
                         values:
         values:
           __concat__:
-            - output_dir: '1'
+            - output_dir: 'DQN'
               machine_agent:
                 parameters:
                   - *dqn_1
                   - *marl_dqn_1
-#                  - *centralized_dqn_1
-            - output_dir: '2'
+            - output_dir: 'DDQN'
               machine_agent:
                 parameters:
                   - *dqn_2
                   - *marl_dqn_2
-#                  - *centralized_dqn_2
-            - output_dir: '3'
+            - output_dir: 'Dueling'
               machine_agent:
                 parameters:
                   - *dqn_3
                   - *marl_dqn_3
-#                  - *centralized_dqn_3
-            - output_dir: '4'
+            - output_dir: '3-step'
               machine_agent:
                 parameters:
                   - *dqn_4
                   - *marl_dqn_4
-#                  - *centralized_dqn_4
-            - output_dir: '5'
+            - output_dir: 'Prioritized'
               machine_agent:
                 parameters:
                   - *dqn_5
                   - *marl_dqn_5
-#                  - *centralized_dqn_5
-            - output_dir: '6'
+            - output_dir: 'Noisy'
               machine_agent:
                 parameters:
                   - *dqn_6
                   - *marl_dqn_6
-#                  - *centralized_dqn_6
-            - output_dir: '7'
+            - output_dir: 'All'
               machine_agent:
                 parameters:
                   - *dqn_7
                   - *marl_dqn_7
-#                  - *centralized_dqn_7
+            - output_dir: 'All not Noisy'
+              machine_agent:
+                parameters:
+                  - *dqn_8
+                  - *marl_dqn_8
 
           tape:
             machine_reward:

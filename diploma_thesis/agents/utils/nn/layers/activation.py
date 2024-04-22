@@ -26,6 +26,8 @@ class Activation(Layer):
                 return nn.Sigmoid()
             case 'softmax':
                 return nn.Softmax(dim=1)
+            case 'leaky_relu':
+                return nn.LeakyReLU()
             case 'none':
                 return None
             case _:

@@ -174,3 +174,31 @@ class SAGPool(BaseWrapper):
     @property
     def signature(self):
         return self._signature or 'x, edge_index, batch -> x, edge_index, batch'
+
+
+class GraphAttention(BaseWrapper):
+
+    def __init__(self, configuration):
+        super().__init__(configuration)
+
+        self.pos_encoding = pyg.nn.PositionalEncoding(**configuration['pos_encoding'])
+        layer = torch.nn.TransformerEncoderLayer(**configuration['layer'])
+        self.model = torch.nn.TransformerEncoder(layer, **configuration['encoder'])
+
+    def forward(self, x, batch):
+        x = x + self.pos_encoding(batch)
+
+        sequences = [x[batch == b] for b in torch.unique(batch)]
+        sequences = torch.nn.utils.rnn.pack_sequence(sequences, enforce_sorted=False)
+        sequences, lengths = torch.nn.utils.rnn.pad_packed_sequence(sequences, batch_first=False)
+
+        out = self.model(sequences)
+        out = torch.nn.utils.rnn.unpad_sequence(out, lengths)
+
+        out = torch.cat(out, dim=0)
+
+        return out
+
+    @property
+    def signature(self):
+        return self._signature or 'x, batch -> x'

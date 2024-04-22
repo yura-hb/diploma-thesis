@@ -23,9 +23,9 @@ class SurrogateTardiness(MachineReward):
 
     @dataclass
     class Configuration:
-        critical_level_factor: float = 64
-        winq_factor: float = 0.2
-        span: int = 20
+        critical_level_factor: float
+        winq_factor: float
+        span: int
         release_reward_after_completion: bool = False
 
         @staticmethod
@@ -39,7 +39,7 @@ class SurrogateTardiness(MachineReward):
 
     def __init__(self,
                  strategy: JobReductionStrategy = JobReductionStrategy.mean,
-                 configuration: Configuration = Configuration()):
+                 configuration: Configuration = Configuration(20, 0.2, 64, False)):
         super().__init__()
 
         self.strategy = strategy

@@ -5,8 +5,9 @@ import torch
 import torch_geometric as pyg
 
 from agents.base import Graph
-from .graph_layer import GraphLayer
 from .layer import *
+
+from tensordict import TensorDict
 
 
 class GraphModel(Layer):
@@ -61,6 +62,9 @@ class GraphModel(Layer):
 
         if isinstance(result, tuple) and len(result) in [2, 3]:
             return result[0], result[-1]
+
+        if isinstance(result, TensorDict):
+            return result['x'], result['batch']
 
         return result, batch.batch
 

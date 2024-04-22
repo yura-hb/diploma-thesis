@@ -12,12 +12,23 @@ class PersistedAgent(Template):
     def from_cli(cls, parameters: Dict) -> List[Candidate]:
         path = parameters['path']
         prefix = parameters.get('prefix', '')
+        depth = parameters.get('depth', 1)
+        result = cls.load_models(prefix, depth, path)
+
+        return result
+
+    @classmethod
+    def load_models(cls, prefix, depth: int, path: str):
         result = []
 
         for file in os.listdir(path):
             target_dir = os.path.join(path, file)
 
             if not os.path.isdir(target_dir):
+                continue
+
+            if depth > 1:
+                result += cls.load_models(prefix + file, depth - 1, target_dir)
                 continue
 
             agents_dir = os.path.join(path, file, 'agent')

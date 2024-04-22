@@ -62,25 +62,8 @@ class TDSimulator(Simulator):
         else:
             agent.store(key, Slice(episode_id=context.shop_floor.id, records=records))
 
-        if not self.emit_trajectory or not self.reset_trajectory:
-            queue.store_slice(context.shop_floor.id, key, dict(zip(moments, records))[1:])
-        #
-        # if queue.group_len(context.shop_floor.id, key) > self.memory:
-        #     # Pass a copy of records to avoid modification of the original
-        #     original_records = queue.pop_group(context.shop_floor.id, key)
-        #     records = [record.clone() for record in original_records]
-        #
-        #     if self.emit_trajectory:
-        #         agent.store(key, Trajectory(episode_id=self.episode, records=records))
-        #
-        #         self.episode += 1
-        #     else:
-        #         agent.store(key, Slice(episode_id=context.shop_floor.id, records=records))
-        #
-        #     if not self.emit_trajectory or not self.reset_trajectory:
-        #         queue.store_group(context.shop_floor.id, key, original_records[1:])
-        #
-        # return
+        if (not self.emit_trajectory or not self.reset_trajectory) and len(prefix) > 1:
+            queue.store_slice(context.shop_floor.id, key, dict(list(zip(moments, records))[1:]))
 
     @staticmethod
     def from_cli(parameters, *args, **kwargs) -> Simulator:

@@ -65,9 +65,10 @@ parameters:
 
       optimizer:
         model:
-          kind: 'adamax'
+          kind: 'adam'
           parameters:
-            lr: 0.001 #0.0005
+            lr: 0.001
+            eps: 0.00001
 
 #        scheduler:
 #          kind: 'exponential'
@@ -75,10 +76,10 @@ parameters:
 #            gamma: 0.9999
 
       memory:
-        kind: 'prioritized_replay'
+        kind: 'replay'
         parameters:
-          size: 64
-          batch_size: 16
+          size: 4
+          batch_size: 4
           prefetch: 1
 
       return:

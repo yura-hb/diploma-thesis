@@ -35,6 +35,7 @@ def from_cli(*args, **kwargs):
         'deep_gcn': DeepGCNConv,
         'graph_instance_norm': GraphInstanceNorm,
         'mask': MaskTarget,
+        'attention': GraphAttention,
 
         'add_pool': AddPool,
         'max_pool': MaxPool,

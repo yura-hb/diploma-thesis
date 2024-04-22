@@ -51,11 +51,20 @@ class DeepQTrainer(RLTrainer):
             loss_ = self.loss(actions, q_values)
             td_error_ = torch.square(actions - q_values)
 
-            return loss_, td_error_
+            entropy = torch.distributions.Categorical(logits=actions).entropy().mean()
 
-        loss, td_error = self.step(compute_loss, self.optimizer)
+            return loss_, (td_error_, entropy)
+
+        loss, result = self.step(compute_loss, self.optimizer)
+
+        td_error, entropy = result
+        td_error_mean = td_error.mean()
 
         self.record_loss(loss)
+        self.record_loss(td_error_mean, key='td_error')
+        self.record_loss(entropy, key='entropy')
+
+        print(f'loss: {loss}, td_error: {td_error_mean}, entropy: {entropy}')
 
         with torch.no_grad():
             if self.optimizer.step_count % self.configuration.update_steps == 0:

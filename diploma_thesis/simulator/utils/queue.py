@@ -13,7 +13,7 @@ class Queue:
 
         if self.is_distributed:
             self.queue[shop_floor_id][key] = self.queue[shop_floor_id].get(key, dict())
-            self.queue[shop_floor_id][key][moment] = record
+            self.queue[shop_floor_id][key][moment] = [record]
         else:
             self.queue[shop_floor_id][moment] = self.queue[shop_floor_id].get(moment, []) + [record]
 

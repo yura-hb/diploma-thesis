@@ -21,15 +21,17 @@ class GlobalDecomposedTardiness(MachineReward):
     @dataclass
     class Configuration:
         exposure: float = 0.2
-        sensitivity_to_slack: float = 200
+        sensitivity_to_slack: float = 100
         span: int = 128
+        rescale_by_naive_action: bool = False
 
         @staticmethod
         def from_cli(parameters: Dict) -> 'GlobalDecomposedTardiness.Configuration':
             return GlobalDecomposedTardiness.Configuration(
                 exposure=parameters.get('exposure', 0.2),
                 sensitivity_to_slack=parameters.get('sensitivity_to_slack', 200),
-                span=parameters.get('span', 128)
+                span=parameters.get('span', 128),
+                rescale_by_naive_action=parameters.get('rescale_by_naive_action', False)
             )
 
     def __init__(self, configuration: Configuration):
@@ -59,6 +61,10 @@ class GlobalDecomposedTardiness(MachineReward):
             restructured_wait *= critical_factor
 
             reward = - torch.square(restructured_wait / self.configuration.span).clip(0, 1)
+
+            if self.configuration.rescale_by_naive_action:
+                reward /= len(contexts)
+                reward *= len(job.step_idx)
 
         return RewardList(indices=torch.arange(len(contexts)),
                           units=torch.vstack([work_center_idx, machine_idx]),

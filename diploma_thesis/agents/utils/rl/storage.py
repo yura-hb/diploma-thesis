@@ -55,6 +55,9 @@ class Storage:
 
                 minibatch = [batch[index] for index in idx]
                 minibatch = self.__merge_batched_data__(minibatch, merge=True, device=device)
+                #
+                # print(f'{minibatch.info[Record.ADVANTAGE_KEY]}')
+                # print(f'{minibatch.info[Record.RETURN_KEY]}')
 
                 yield minibatch
 

@@ -20,9 +20,9 @@ class Configuration(PPOConfiguration):
 class P3OR(PPOMixin):
 
     def __init__(self, configuration: Configuration, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(configuration, *args, **kwargs)
 
-        self.configuration = configuration
+        self.configuration: Configuration = configuration
         self.trpo_loss = Loss(configuration=Loss.Configuration(kind='cross_entropy', parameters=dict()))
 
     def __train__(self, model: Policy):
@@ -32,12 +32,12 @@ class P3OR(PPOMixin):
                                                                      sample_count=self.configuration.sample_count)
 
             for minibatch in generator:
-                self.__step__(minibatch, model, self.configuration)
+                self.__step__(minibatch, model)
 
                 # Auxiliary step
                 self.__auxiliary_step__(model, minibatch)
 
-            self.__increase_memory_priority__(info, self.configuration)
+            self.__increase_memory_priority__(info)
         except NotReadyException:
             return
 

@@ -76,8 +76,8 @@ parameters:
       memory:
         kind: 'prioritized_replay'
         parameters:
-          size: 6
-          batch_size: 6
+          size: 16
+          batch_size: 8
           prefetch: 1
 
       return:

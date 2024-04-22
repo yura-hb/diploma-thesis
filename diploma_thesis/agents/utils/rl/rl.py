@@ -17,7 +17,7 @@ class TrainSchedule:
         ON_STORED_DATA_EXCLUSIVELY = 'on_stored_data_exclusively'
 
     kind: Kind
-    k: int = 1
+    train_every: int = 1
 
     @property
     def is_on_store(self):
@@ -28,7 +28,7 @@ class TrainSchedule:
         if 'train_schedule' not in parameters:
             return TrainSchedule(TrainSchedule.Kind.ON_TIMELINE)
 
-        return TrainSchedule(parameters['train_schedule'])
+        return TrainSchedule(parameters['train_schedule'], train_every=parameters.get('train_every', 1))
 
 
 class RLTrainer(Loggable):
@@ -69,7 +69,7 @@ class RLTrainer(Loggable):
         if not self.is_configured:
             return
 
-        if not self.train_schedule.is_on_store:
+        if self.train_schedule.is_on_store:
             return
 
         self.__train_step__(model)
@@ -81,7 +81,7 @@ class RLTrainer(Loggable):
         return pd.DataFrame(self.loss_cache)
 
     def store(self, sample: TrainingSample, model: Policy):
-        if self.train_schedule.k == TrainSchedule.Kind.ON_STORED_DATA_EXCLUSIVELY:
+        if self.train_schedule.kind == TrainSchedule.Kind.ON_STORED_DATA_EXCLUSIVELY:
             self.storage.clear()
 
         self.storage.store(sample)
@@ -91,11 +91,11 @@ class RLTrainer(Loggable):
 
         self.counter += 1
 
-        if self.counter % self.train_schedule.k == 0:
+        if self.counter % self.train_schedule.train_every == 0:
             self.counter = 0
             self.__train_step__(model)
 
-            if self.train_schedule == TrainSchedule.Kind.ON_STORED_DATA_EXCLUSIVELY:
+            if self.train_schedule.kind == TrainSchedule.Kind.ON_STORED_DATA_EXCLUSIVELY:
                 self.storage.clear()
 
     def __train_step__(self, model: Policy):
@@ -105,7 +105,7 @@ class RLTrainer(Loggable):
 
         self.__train__(model)
 
-        print(f'Train step: { time.time() - start }')
+        print(f'Train step: { time.time() - start } Optimizer Step: { self.optimizer.step_count }')
 
     def clear(self):
         self.loss_cache = []

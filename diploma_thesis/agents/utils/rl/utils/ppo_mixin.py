@@ -8,6 +8,7 @@ from ..rl import *
 @dataclass
 class PPOConfiguration:
     value_loss: Loss
+    value_optimizer: Optimizer
     sample_count: float
     policy_step_ratio: float
     entropy_regularization: float
@@ -20,6 +21,7 @@ class PPOConfiguration:
     def base_parameters_from_cli(parameters: Dict):
         return dict(
             value_loss=Loss.from_cli(parameters['value_loss']),
+            value_optimizer=Optimizer.from_cli(parameters['value_optimizer']) if 'value_optimizer' in parameters else None,
             sample_count=parameters.get('sample_count', 128),
             policy_step_ratio=parameters.get('policy_step_ratio', 1.0),
             entropy_regularization=parameters.get('entropy_regularization', 0.0),
@@ -32,33 +34,83 @@ class PPOConfiguration:
 
 class PPOMixin(RLTrainer, metaclass=ABCMeta):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, configuration: PPOConfiguration, *args, **kwargs):
+        self.configuration = configuration
+
         super().__init__(*args, is_episodic=True, **kwargs)
 
-    def __step__(self, batch: Record, model: Policy, configuration: PPOConfiguration):
+    def configure(self, model: Policy):
+        super().configure(model)
+
+        if self.configuration.value_optimizer is not None and not self.configuration.value_optimizer.is_connected:
+            self.configuration.value_optimizer.connect(model.parameters())
+
+    def __step__(self, batch: Record, model: Policy):
         def compute_loss():
             output = model(batch.state)
             value, logits, _ = model.__fetch_values__(output)
 
-            actor_loss = self.actor_loss(batch, logits, configuration, self.device)
-            critic_loss = configuration.critic_weight * configuration.value_loss(value, batch.info[Record.RETURN_KEY])
+            actor_loss, entropy = self.actor_loss(batch, logits, self.configuration, self.device)
+            critic_loss = self.configuration.critic_weight * self.configuration.value_loss(value, batch.info[Record.RETURN_KEY])
 
-            # Want to maximize actor loss and minimize critic loss
-            loss = actor_loss - critic_loss
-            loss = -loss
+            return actor_loss, critic_loss, entropy
 
-            return loss, (actor_loss, critic_loss)
+        actor_loss, critic_loss, entropy = compute_loss()
 
-        loss, args = self.step(compute_loss, self.optimizer)
-        actor_loss, critic_loss = args
+        print(f'actor_loss: {actor_loss}, critic_loss: {critic_loss}, entropy: {entropy}')
 
-        self.record_loss(loss)
+        if self.configuration.value_optimizer is not None:
+            self.configuration.value_optimizer.zero_grad()
+            self.optimizer.zero_grad()
+
+            def compute_actor_grad():
+                loss = -actor_loss
+
+                loss.backward(retain_graph=True)
+
+                return loss
+
+            def compute_critic_grad():
+                critic_loss.backward()
+
+                return critic_loss
+
+            self.optimizer.step(compute_actor_grad)
+            self.configuration.value_optimizer.step(compute_critic_grad)
+        else:
+            def compute_grad():
+                loss = actor_loss - critic_loss
+                loss = -loss
+
+                loss.backward()
+
+                return loss
+
+            self.optimizer.zero_grad()
+            self.optimizer.step(compute_grad)
+
+        self.record_loss(-actor_loss + critic_loss)
         self.record_loss(actor_loss, key='actor')
         self.record_loss(critic_loss, key='critic')
+        self.record_loss(entropy, key='entropy')
 
-    def __increase_memory_priority__(self, info, configuration: PPOConfiguration):
+    def __increase_memory_priority__(self, info):
         if '_weight' in info:
-            self.storage.update_priority(info['index'], info['_weight'] / configuration.priority_reduction_ratio)
+            self.storage.update_priority(info['index'], info['_weight'] / self.configuration.priority_reduction_ratio)
+
+    def state_dict(self):
+        result = super().state_dict()
+
+        if self.configuration.value_optimizer is not None:
+            result['value_optimizer'] = self.configuration.value_optimizer.state_dict()
+
+        return result
+
+    def load_state_dict(self, state_dict: dict):
+        super().load_state_dict(state_dict)
+
+        if self.configuration.value_optimizer is not None:
+            self.configuration.value_optimizer.load_state_dict(state_dict['value_optimizer'])
 
     @staticmethod
     def actor_loss(batch, logits, configuration: PPOConfiguration, device):
@@ -72,7 +124,7 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
         advantages = batch.info[Record.ADVANTAGE_KEY]
 
         # Normalize advantages
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+        # advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
         action_probs = batch.info[Record.POLICY_KEY][range, batch.action.view(-1)]
 
@@ -87,4 +139,6 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
 
         advantages = torch.min(weights * advantages, clipped_weights * advantages)
 
-        return torch.mean(advantages) + entropy_regularization * distribution.entropy().mean()
+        entropy = distribution.entropy().mean()
+
+        return torch.mean(advantages) + entropy_regularization * entropy, entropy

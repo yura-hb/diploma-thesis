@@ -1,0 +1,111 @@
+layers:
+
+  # Actor
+
+  - kind: 'graph_model'
+    parameters:
+      layers:
+        - kind: 'gin'
+          parameters:
+            in_channels: -1
+            out_channels: 128
+            num_layers: 3
+            hidden_channels: 128
+
+        - kind: 'mask'
+
+        - kind: 'linear'
+          parameters:
+            dim: 128
+            activation: 'relu'
+            signature: 'x -> x'
+
+        - kind: 'attention'
+          parameters:
+            pos_encoding:
+              out_channels: 128
+            layer:
+              d_model: 128
+              nhead: 8
+              dim_feedforward: 256
+            encoder:
+              num_layers: 3
+            signature: 'x, batch -> x'
+
+        - kind: 'output'
+          parameters:
+            x: 'x'
+            batch: 'batch'
+
+      signature: 'graph -> actions_hidden, actions_batch'
+
+  - kind: 'max_pool'
+    parameters:
+      signature: 'actions_hidden, actions_batch -> actions_value'
+
+  - kind: 'max_pool'
+    parameters:
+      signature: 'actions_hidden, actions_batch -> actions_hidden'
+
+  - kind: 'layer_norm'
+    parameters:
+      signature: 'actions_hidden -> actions_hidden'
+      normalized_shape: 128
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_hidden'
+
+  - kind: 'layer_norm'
+    parameters:
+      signature: 'actions_value -> actions_value'
+      normalized_shape: 128
+
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+      signature: 'actions_value -> actions_value'
+
+  - kind: 'linear'
+    parameters:
+      dim: 1
+      activation: 'none'
+      signature: 'actions_value -> actions_value'
+
+
+  # Critic
+
+  - kind: 'graph_model'
+    parameters:
+      layers:
+        - kind: 'gin'
+          parameters:
+            in_channels: -1
+            out_channels: 128
+            num_layers: 3
+            hidden_channels: 128
+
+      signature: 'graph -> values_hidden, values_batch'
+
+  - kind: 'max_pool'
+    parameters:
+      signature: 'values_hidden, values_batch -> values_hidden'
+
+  - kind: 'layer_norm'
+    parameters:
+      signature: 'values_hidden -> values_hidden'
+      normalized_shape: 128
+
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+      signature: 'values_hidden -> values_hidden'
+
+  - kind: 'output'
+    parameters:
+      value: 'values_hidden'
+      actions: 'actions_hidden'
+      actor_value: 'actions_value'

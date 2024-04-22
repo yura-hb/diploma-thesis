@@ -17,9 +17,9 @@ class Configuration(PPOConfiguration):
 class PPO(PPOMixin):
 
     def __init__(self, configuration: Configuration, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(configuration, *args, **kwargs)
 
-        self.configuration = configuration
+        self.configuration: Configuration = configuration
 
     @property
     def is_episodic(self):
@@ -32,9 +32,9 @@ class PPO(PPOMixin):
                                                                  sample_count=self.configuration.sample_count)
 
             for minibatch in generator:
-                self.__step__(minibatch, model, self.configuration)
+                self.__step__(minibatch, model)
 
-            self.__increase_memory_priority__(info, self.configuration)
+            self.__increase_memory_priority__(info)
         except NotReadyException:
             return
 
