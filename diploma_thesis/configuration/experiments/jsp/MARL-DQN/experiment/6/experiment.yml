@@ -4,7 +4,8 @@ template: &template 'baseline'
 base_model: &base_model 'configuration/experiments/jsp/MARL-DQN/machine.yml'
 marl_model: &marl_model 'configuration/experiments/jsp/MARL-DQN/marl_machine.yml'
 
-default_mods: &default_mods []
+default_mods: &default_mods
+  - 'agent/dqn/ddqn.yml'
 
 ###############################################################################################
 
@@ -51,7 +52,7 @@ dqn_100: &dqn_100
     - 'configuration/mods/machine/mods'
   mods:
     - *default_mods
-    - 'util/return/discount_factor/100.yml'
+    - 'util/return/discount_factor/99.yml'
 
 #############################################################################################
 
@@ -173,7 +174,7 @@ task:
                   machine_agent:
                     parameters:
                       - *dqn_80
-                - output_dir: 'Reward 100'
+                - output_dir: 'Reward 99'
                   machine_agent:
                     parameters:
                       - *dqn_100

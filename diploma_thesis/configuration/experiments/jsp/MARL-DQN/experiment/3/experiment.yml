@@ -36,7 +36,6 @@ dqn_7: &dqn_7
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - *default_mods
 
@@ -48,7 +47,6 @@ marl_dqn_7: &marl_dqn_7
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - 'util/agent/multi_agent.yml'
     - *default_mods
@@ -149,7 +147,7 @@ task:
                     parameters:
                       - *dqn_1
                       - *marl_dqn_1
-                - output_dir: 'All not Noisy/Surrogate Tardiness'
+                - output_dir: 'All not Noisy, not 3-step/Surrogate Tardiness'
                   machine_agent:
                     parameters:
                       - *dqn_7
@@ -180,7 +178,7 @@ task:
                     parameters:
                       - *dqn_1
                       - *marl_dqn_1
-                - output_dir: 'All not Noisy/Global Decomposed Tardiness'
+                - output_dir: 'All not Noisy, not 3-step/Global Decomposed Tardiness'
                   machine_agent:
                     parameters:
                       - *dqn_7
@@ -209,7 +207,7 @@ task:
                     parameters:
                       - *dqn_1
                       - *marl_dqn_1
-                - output_dir: 'All not Noisy/Global Tardiness'
+                - output_dir: 'All not Noisy, not 3-step/Global Tardiness'
                   machine_agent:
                     parameters:
                       - *dqn_7
@@ -238,7 +236,7 @@ task:
                     parameters:
                       - *dqn_1
                       - *marl_dqn_1
-                - output_dir: 'All not Noisy/Global MDPI'
+                - output_dir: 'All not Noisy, not 3-step/Global MDPI'
                   machine_agent:
                     parameters:
                       - *dqn_7
@@ -268,7 +266,7 @@ task:
                     parameters:
                       - *dqn_1
                       - *marl_dqn_1
-                - output_dir: 'All not Noisy/Makespan'
+                - output_dir: 'All not Noisy, not 3-step/Makespan'
                   machine_agent:
                     parameters:
                       - *dqn_7
@@ -297,7 +295,7 @@ task:
                     parameters:
                       - *dqn_1
                       - *marl_dqn_1
-                - output_dir: 'All not Noisy/Unary'
+                - output_dir: 'All not Noisy, not 3-step/Unary'
                   machine_agent:
                     parameters:
                       - *dqn_7
@@ -326,7 +324,7 @@ task:
                     parameters:
                       - *dqn_1
                       - *marl_dqn_1
-                - output_dir: 'All not Noisy/Surrogate Slack'
+                - output_dir: 'All not Noisy, not 3-step/Surrogate Slack'
                   machine_agent:
                     parameters:
                       - *dqn_7

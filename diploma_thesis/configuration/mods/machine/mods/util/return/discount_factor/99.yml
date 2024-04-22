@@ -1,0 +1,8 @@
+
+
+parameters:
+  trainer:
+    parameters:
+      return:
+        parameters:
+          discount_factor: 0.99

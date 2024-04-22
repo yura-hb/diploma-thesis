@@ -44,6 +44,7 @@ class RewardCache:
         reward: torch.Tensor = torch.tensor([])
         moment: torch.Tensor = torch.tensor([])
         work_center_id: torch.Tensor = torch.tensor([])
+        entropy: torch.Tensor = torch.tensor([])
 
     @tensorclass
     class MachineRecord(Record):
@@ -423,6 +424,11 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
             decision_moment = decision_moment.view([])
         else:
             decision_moment = torch.tensor(decision_moment)
+
+        policy = record.info[Record.ACTION_KEY]
+        entropy = torch.distributions.Categorical(logits=policy).entropy().mean()
+
+        kwargs['entropy'] = entropy
 
         record = cls(
             action=record.action,

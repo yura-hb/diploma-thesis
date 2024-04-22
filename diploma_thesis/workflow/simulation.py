@@ -196,7 +196,7 @@ class Simulation(Workflow):
 
         for df in [machine_reward, work_center_reward]:
             for column in df.columns:
-                if column in ['moment', 'reward']:
+                if column in ['moment', 'reward', 'entropy']:
                     df[column] = df[column].astype(float)
                 else:
                     df[column] = df[column].astype(int)

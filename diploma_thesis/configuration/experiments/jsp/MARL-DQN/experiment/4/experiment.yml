@@ -59,7 +59,7 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 2
+  n_workers: 5
   n_threads: 10
   debug: False
   store_run_statistics: False
@@ -99,7 +99,7 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 32
+              memory: 64
               emit_trajectory: True
 
           graph:

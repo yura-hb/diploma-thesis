@@ -58,7 +58,6 @@ dqn_7: &dqn_7
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - *default_mods
 
@@ -70,7 +69,6 @@ marl_dqn_7: &marl_dqn_7
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - 'util/agent/multi_agent.yml'
     - *default_mods
@@ -81,6 +79,9 @@ dqn_7_on_store: &dqn_7_on_store
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
+    - 'agent/dqn/dueling.yml'
     - 'util/train_schedule/on_store_32.yml'
 
 marl_dqn_7_on_store: &marl_dqn_7_on_store
@@ -89,6 +90,9 @@ marl_dqn_7_on_store: &marl_dqn_7_on_store
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
+    - 'agent/dqn/dueling.yml'
     - 'util/agent/multi_agent.yml'
     - *default_mods
     - 'util/train_schedule/on_store_32.yml'
@@ -209,7 +213,7 @@ task:
                     parameters:
                       - *dqn_1
                       - *marl_dqn_1
-                - output_dir: 'All not Noisy'
+                - output_dir: 'All not Noisy, not 3-step'
                   machine_agent:
                     parameters:
                       - *dqn_7
@@ -236,7 +240,7 @@ task:
                     parameters:
                       - *dqn_1_on_store
                       - *marl_dqn_1_on_store
-                - output_dir: 'All not Noisy (On Store)'
+                - output_dir: 'All not Noisy, not 3-step (On Store)'
                   machine_agent:
                     parameters:
                       - *dqn_7_on_store

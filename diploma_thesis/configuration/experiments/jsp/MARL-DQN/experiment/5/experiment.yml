@@ -34,7 +34,6 @@ dqn_7: &dqn_7
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - *default_mods
 
@@ -46,7 +45,6 @@ marl_dqn_7: &marl_dqn_7
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - 'util/agent/multi_agent.yml'
     - *default_mods
@@ -81,7 +79,6 @@ dqn_7_preferred: &dqn_7_preferred
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - *default_mods
 
@@ -93,7 +90,6 @@ marl_dqn_7_preferred: &marl_dqn_7_preferred
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - 'util/agent/multi_agent.yml'
     - *default_mods
@@ -128,7 +124,6 @@ dqn_7_all: &dqn_7_all
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - *default_mods
 
@@ -140,7 +135,6 @@ marl_dqn_7_all: &marl_dqn_7_all
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - 'util/agent/multi_agent.yml'
     - *default_mods

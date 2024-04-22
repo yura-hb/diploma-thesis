@@ -201,7 +201,7 @@ task:
               - kind: 'surrogate_tardiness'
                 parameters:
                   winq_factor: 0.2
-                  span: 64
+                  span: 40
                   critical_level_factor: 128
               - kind: 'global_decomposed_tardiness'
                 parameters:

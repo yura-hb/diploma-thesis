@@ -172,7 +172,7 @@ dqn_8: &dqn_8
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
+#    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - *default_mods
 #    - 'util/action_selector/sample.yml'
@@ -185,7 +185,7 @@ marl_dqn_8: &marl_dqn_8
   mods:
     - 'agent/dqn/ddqn.yml'
     - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/steps/3.yml'
+#    - 'agent/dqn/steps/3.yml'
     - 'agent/dqn/dueling.yml'
     - 'util/agent/multi_agent.yml'
     - *default_mods
@@ -325,7 +325,7 @@ task:
                 parameters:
                   - *dqn_7
                   - *marl_dqn_7
-            - output_dir: 'All not Noisy'
+            - output_dir: 'All not 3-step, not Noisy'
               machine_agent:
                 parameters:
                   - *dqn_8
