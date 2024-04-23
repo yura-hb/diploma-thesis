@@ -124,7 +124,7 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
         advantages = batch.info[Record.ADVANTAGE_KEY]
 
         # Normalize advantages
-        # advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
         action_probs = batch.info[Record.POLICY_KEY][range, batch.action.view(-1)]
 

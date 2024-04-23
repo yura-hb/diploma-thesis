@@ -398,7 +398,11 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
             gc.collect()
 
-            torch.mps.empty_cache()
+            try:
+                torch.mps.empty_cache()
+            except:
+                pass
+
             torch.cuda.empty_cache()
 
     def __terminate_if_needed__(self, environment: simpy.Environment, run_event: simpy.Event, delay: float):
