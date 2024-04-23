@@ -50,7 +50,7 @@ parameters:
     parameters:
       device: 'cpu'
       sample_count: 96
-      policy_step_ratio: 0.1
+      policy_step_ratio: 0.2
       entropy_regularization: 0.001
       rollback_ratio: 0.00
       critic_weight: 0.5
@@ -67,15 +67,15 @@ parameters:
 
       optimizer:
         model:
-          kind: 'sgd'
+          kind: 'adam'
           parameters:
-            lr: 0.001
+            lr: 0.0005
 
       memory:
         kind: 'prioritized_replay'
         parameters:
           size: 16
-          batch_size: 16
+          batch_size: 8
           prefetch: 1
 
       return:

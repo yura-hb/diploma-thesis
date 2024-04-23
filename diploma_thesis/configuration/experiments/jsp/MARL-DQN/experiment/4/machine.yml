@@ -66,9 +66,9 @@ parameters:
 
       optimizer:
         model:
-          kind: 'sgd'
+          kind: 'adam'
           parameters:
-            lr: 0.001
+            lr: 0.0005
 
 #        scheduler:
 #          kind: 'exponential'
@@ -79,7 +79,7 @@ parameters:
         kind: 'prioritized_replay'
         parameters:
           size: 16
-          batch_size: 16
+          batch_size: 8
           prefetch: 1
 
       return:
