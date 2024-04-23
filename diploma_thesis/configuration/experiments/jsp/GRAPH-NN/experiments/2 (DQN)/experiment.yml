@@ -70,7 +70,7 @@ marl_dqn_4: &marl_dqn_4
 
 ###############################################################################################
 
-dqn_1_gin: &dqn_1_gin
+dqn_1_gat: &dqn_1_gat
   base_path: *base_model
   template: '2/gat'
   mod_dirs:
@@ -79,9 +79,9 @@ dqn_1_gin: &dqn_1_gin
     - 'agent/dqn/ddqn.yml'
     - *default_mods
 
-marl_dqn_2_gin: &marl_dqn_2_gin
+marl_dqn_2_gat: &marl_dqn_2_gat
   base_path: *marl_model
-  template: '2/gin'
+  template: '2/gat'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
@@ -90,9 +90,9 @@ marl_dqn_2_gin: &marl_dqn_2_gin
     - *default_mods
 
 
-dqn_3_gin: &dqn_3_gin
+dqn_3_gat: &dqn_3_gat
   base_path: *base_model
-  template: '2/gin'
+  template: '2/gat'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
@@ -101,19 +101,19 @@ dqn_3_gin: &dqn_3_gin
     - 'agent/dqn/dueling.yml'
     - *default_mods
 #    - 'util/action_selector/sample.yml'
-
-marl_dqn_4_gin: &marl_dqn_4_gin
-  base_path: *marl_model
-  template: '2/gin'
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/dueling.yml'
-    - 'util/agent/multi_agent.yml'
-    - *default_mods
-#    - 'util/action_selector/sample.yml'
+#
+#marl_dqn_4_gin: &marl_dqn_4_gin
+#  base_path: *marl_model
+#  template: '2/gin'
+#  mod_dirs:
+#    - 'configuration/mods/machine/mods'
+#  mods:
+#    - 'agent/dqn/ddqn.yml'
+#    - 'agent/dqn/prioritized.yml'
+#    - 'agent/dqn/dueling.yml'
+#    - 'util/agent/multi_agent.yml'
+#    - *default_mods
+##    - 'util/action_selector/sample.yml'
 
 ###############################################################################################
 
@@ -315,27 +315,27 @@ task:
                   - *marl_dqn_2
                   - *dqn_3
                   - *marl_dqn_4
-            - output_dir: 'GIN'
+            - output_dir: 'GAT'
               machine_agent:
                 parameters:
-                  - *dqn_1_gin
-                  - *marl_dqn_2_gin
-                  - *dqn_3_gin
-                  - *marl_dqn_4_gin
+                  - *dqn_1_gat
+#                  - *marl_dqn_2_gin
+                  - *dqn_3_gat
+#                  - *marl_dqn_4_gin
             - output_dir: 'SAGE'
               machine_agent:
                 parameters:
                   - *dqn_1_sage
-                  - *marl_dqn_2_sage
+#                  - *marl_dqn_2_sage
                   - *dqn_3_sage
-                  - *marl_dqn_4_sage
+#                  - *marl_dqn_4_sage
             - output_dir: 'GCN'
               machine_agent:
                 parameters:
                   - *dqn_1_gcn
-                  - *marl_dqn_2_gcn
+#                  - *marl_dqn_2_gcn
                   - *dqn_3_gcn
-                  - *marl_dqn_4_gcn
+#                  - *marl_dqn_4_gcn
 
           tape:
             machine_reward:

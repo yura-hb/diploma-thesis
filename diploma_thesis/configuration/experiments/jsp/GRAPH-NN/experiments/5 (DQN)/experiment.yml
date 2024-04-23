@@ -161,6 +161,53 @@ marl_dqn_4_flexible: &marl_dqn_4_flexible
     - *default_mods
 #    - 'util/action_selector/sample.yml'
 
+###############################################################################################
+
+dqn_1_flexible_gat: &dqn_1_flexible_gat
+  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_machine.yml'
+  template: '5/flexible_gat'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+
+marl_dqn_2_flexible_gat: &marl_dqn_2_flexible_gat
+  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_marl_machine.yml'
+  template: '5/flexible_gat'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'util/agent/multi_agent.yml'
+    - *default_mods
+
+
+dqn_3_flexible_gat: &dqn_3_flexible_gat
+  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_machine.yml'
+  template: '5/flexible_gat'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
+    - 'agent/dqn/dueling.yml'
+    - *default_mods
+#    - 'util/action_selector/sample.yml'
+
+marl_dqn_4_flexible_gat: &marl_dqn_4_flexible_gat
+  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_marl_machine.yml'
+  template: '5/flexible_gat'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
+    - 'agent/dqn/dueling.yml'
+    - 'util/agent/multi_agent.yml'
+    - *default_mods
+#    - 'util/action_selector/sample.yml'
+
 
 ###############################################################################################
 
@@ -264,23 +311,27 @@ task:
               machine_agent:
                 parameters:
                   - *dqn_1
-                  - *marl_dqn_2
+#                  - *marl_dqn_2
                   - *dqn_3
-                  - *marl_dqn_4
+#                  - *marl_dqn_4
             - output_dir: 'All'
               machine_agent:
                 parameters:
                   - *dqn_1_all
-                  - *marl_dqn_2_all
+#                  - *marl_dqn_2_all
                   - *dqn_3_all
-                  - *marl_dqn_4_all
+#                  - *marl_dqn_4_all
             - output_dir: 'Flexible'
               machine_agent:
                 parameters:
                   - *dqn_1_flexible
-                  - *marl_dqn_2_flexible
+#                  - *marl_dqn_2_flexible
                   - *dqn_3_flexible
-                  - *marl_dqn_4_flexible
+            - output_dir: 'Flexible GAT'
+              machine_agent:
+                  parameters:
+                    - *dqn_1_flexible_gat
+                    - *dqn_3_flexible_gat
 
           tape:
             machine_reward:

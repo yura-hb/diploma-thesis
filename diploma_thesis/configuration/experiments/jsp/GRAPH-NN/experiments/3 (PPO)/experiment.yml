@@ -196,7 +196,7 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 64
+              memory: 96
               emit_trajectory: True
 
           graph:

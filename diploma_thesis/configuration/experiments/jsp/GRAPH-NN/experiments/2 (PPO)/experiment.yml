@@ -40,7 +40,7 @@ ppo_1: &ppo_1
 
 ppo_2: &ppo_2
   base_path: *base_model
-  template: '2/gin'
+  template: '2/gat'
   mod_dirs:
     - ['configuration/mods/machine/mods']
   mods:
@@ -194,7 +194,7 @@ task:
               machine_agent:
                 parameters:
                   *ppo_1
-            - output_dir: 'GIN'
+            - output_dir: 'GAT'
               machine_agent:
                 parameters:
                   *ppo_2

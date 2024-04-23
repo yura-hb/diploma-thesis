@@ -169,9 +169,9 @@ task:
               machine_agent:
                 parameters:
                   - *dqn_1
-                  - *marl_dqn_2
+#                  - *marl_dqn_2
                   - *dqn_3
-                  - *marl_dqn_4
+#                  - *marl_dqn_4
               graph:
                 transition_model:
                   kind: 'base'
@@ -190,9 +190,9 @@ task:
               machine_agent:
                 parameters:
                   - *dqn_1
-                  - *marl_dqn_2
+#                  - *marl_dqn_2
                   - *dqn_3
-                  - *marl_dqn_4
+#                  - *marl_dqn_4
               graph:
                 transition_model:
                   kind: 'base'
@@ -211,9 +211,9 @@ task:
               machine_agent:
                 parameters:
                   - *dqn_1
-                  - *marl_dqn_2
+#                  - *marl_dqn_2
                   - *dqn_3
-                  - *marl_dqn_4
+#                  - *marl_dqn_4
               graph:
                 transition_model:
                   kind: 'base'
@@ -232,9 +232,9 @@ task:
               machine_agent:
                 parameters:
                   - *dqn_1
-                  - *marl_dqn_2
+#                  - *marl_dqn_2
                   - *dqn_3
-                  - *marl_dqn_4
+#                  - *marl_dqn_4
               graph:
                 transition_model:
                   kind: 'base'
@@ -253,9 +253,9 @@ task:
               machine_agent:
                 parameters:
                   - *dqn_1
-                  - *marl_dqn_2
+#                  - *marl_dqn_2
                   - *dqn_3
-                  - *marl_dqn_4
+#                  - *marl_dqn_4
               graph:
                 transition_model:
                   kind: 'base'
@@ -274,9 +274,9 @@ task:
               machine_agent:
                 parameters:
                   - *dqn_1
-                  - *marl_dqn_2
+#                  - *marl_dqn_2
                   - *dqn_3
-                  - *marl_dqn_4
+#                  - *marl_dqn_4
               graph:
                 transition_model:
                   kind: 'base'
