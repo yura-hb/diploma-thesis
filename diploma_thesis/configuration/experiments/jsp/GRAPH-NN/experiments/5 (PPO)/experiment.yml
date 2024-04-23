@@ -36,6 +36,7 @@ ppo_1: &ppo_1
         '__none__',
 #        'util/agent/multi_agent.yml'
       ]
+      - [ 'util/infrastructure/cuda.yml']
 
 ppo_2: &ppo_2
   base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_machine.yml'
@@ -53,6 +54,7 @@ ppo_2: &ppo_2
         '__none__',
 #        'util/agent/multi_agent.yml'
       ]
+      - [ 'util/infrastructure/cuda.yml']
 
 ppo_3: &ppo_3
   base_path: *base_model
@@ -70,6 +72,7 @@ ppo_3: &ppo_3
         '__none__',
 #        'util/agent/multi_agent.yml'
       ]
+      - [ 'util/infrastructure/cuda.yml']
 
 ###############################################################################################
 

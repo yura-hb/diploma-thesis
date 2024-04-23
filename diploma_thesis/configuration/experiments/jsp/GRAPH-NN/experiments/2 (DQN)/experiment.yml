@@ -18,8 +18,8 @@ graph: &graph
     is_machine_set_in_work_center_connected: False
     is_work_center_set_in_shop_floor_connected: False
 
-default_mods: &default_mods []
-#  - ['util/infrastructure/cuda.yml']
+default_mods: &default_mods
+  - ['util/infrastructure/cuda.yml']
 
 ###############################################################################################
 
