@@ -54,7 +54,7 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ ['utilization/90.yml'] ]
+        - [ ['utilization/80.yml'] ]
     nested:
       parameters:
         dispatch:

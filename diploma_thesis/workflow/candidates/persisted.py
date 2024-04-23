@@ -13,12 +13,13 @@ class PersistedAgent(Template):
         path = parameters['path']
         prefix = parameters.get('prefix', '')
         depth = parameters.get('depth', 1)
-        result = cls.load_models(prefix, depth, path)
+        separator = parameters.get('separator', '|')
+        result = cls.load_models(prefix, depth, path, separator)
 
         return result
 
     @classmethod
-    def load_models(cls, prefix, depth: int, path: str):
+    def load_models(cls, prefix, depth: int, path: str, separator):
         result = []
 
         for file in os.listdir(path):
@@ -28,8 +29,7 @@ class PersistedAgent(Template):
                 continue
 
             if depth > 1:
-                result += cls.load_models(prefix + file, depth - 1, target_dir)
-                continue
+                result += cls.load_models(prefix + separator + file, depth - 1, target_dir, separator)
 
             agents_dir = os.path.join(path, file, 'agent')
             machine_file = os.path.join(agents_dir, 'machine.pt')
