@@ -62,17 +62,12 @@ layers:
         - kind: 'linear'
           parameters:
             dim: 128
-            activation: 'leaky_relu'
+            activation: 'relu'
             signature: 'x -> x'
         - kind: 'linear'
           parameters:
             dim: 128
-            activation: 'leaky_relu'
-            signature: 'x -> x'
-        - kind: 'linear'
-          parameters:
-            dim: 128
-            activation: 'leaky_relu'
+            activation: 'relu'
             signature: 'x -> x'
 
   - kind: 'linear'
@@ -110,17 +105,17 @@ layers:
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'leaky_relu'
+      activation: 'relu'
       signature: 'values_hidden -> values_hidden'
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'leaky_relu'
+      activation: 'relu'
       signature: 'values_hidden -> values_hidden'
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'leaky_relu'
+      activation: 'relu'
       signature: 'values_hidden -> values_hidden'
 
   - kind: 'output'

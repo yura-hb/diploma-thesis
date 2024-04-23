@@ -17,28 +17,29 @@ parameters:
 
           action_selector:
             kind: 'phase_selector'
-            parameters:
-              default:
-                kind: 'greedy'
-              phases:
-                - phase:
-                    kind: 'warm_up'
-                    parameters:
-                      step: 0
-                  action_selector:
-                    kind: 'uniform'
-                - phase:
-                    kind: 'warm_up'
-                    parameters:
-                      step: 1
-                  action_selector:
-                    kind: 'uniform'
-                - phase:
-                    kind: 'training'
-                  action_selector:
-                    kind: 'sample'
-                    parameters:
-                      is_distribution: False
+            default:
+              kind: 'sample'
+              parameters:
+                is_distribution: False
+            phases:
+              - phase:
+                  kind: 'warm_up'
+                  parameters:
+                    step: 0
+                action_selector:
+                  kind: 'uniform'
+              - phase:
+                  kind: 'warm_up'
+                  parameters:
+                    step: 1
+                action_selector:
+                  kind: 'uniform'
+              - phase:
+                  kind: 'training'
+                action_selector:
+                  kind: 'sample'
+                  parameters:
+                    is_distribution: False
 
 
   __encoder__: ''
@@ -65,18 +66,17 @@ parameters:
 
       optimizer:
         model:
-          kind: 'adam'
+          kind: 'sgd'
           parameters:
-            eps: 0.00001
-            lr: 0.0002
+            lr: 0.001
 
-        scheduler:
-          kind: 'exponential'
-          parameters:
-            gamma: 0.9999
+#        scheduler:
+#          kind: 'exponential'
+#          parameters:
+#            gamma: 0.9999
 
       memory:
-        kind: 'priritized_replay'
+        kind: 'prioritized_replay'
         parameters:
           size: 8
           batch_size: 8

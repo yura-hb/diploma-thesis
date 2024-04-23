@@ -1,3 +1,4 @@
+
 layers:
 
   # Actor
@@ -5,11 +6,14 @@ layers:
   - kind: 'graph_model'
     parameters:
       layers:
-        - kind: 'gin'
+        - kind: 'gat'
           parameters:
             in_channels: -1
             out_channels: 128
             num_layers: 2
+            v2: True
+            heads: 2
+            concat: True
             hidden_channels: 128
 
       signature: 'graph -> actions_hidden, actions_batch'
@@ -53,11 +57,14 @@ layers:
   - kind: 'graph_model'
     parameters:
       layers:
-        - kind: 'gin'
+        - kind: 'gat'
           parameters:
             in_channels: -1
             out_channels: 128
             num_layers: 2
+            v2: True
+            heads: 2
+            concat: True
             hidden_channels: 128
 
       signature: 'graph -> values_hidden, values_batch'

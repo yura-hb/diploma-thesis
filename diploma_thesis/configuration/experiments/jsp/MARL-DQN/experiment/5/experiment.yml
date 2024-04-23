@@ -170,8 +170,8 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 10
-  n_threads: 10
+  n_workers: 8
+  n_threads: 8
   debug: False
   store_run_statistics: False
   output_dir: 'results/jsp/experiments/1. MARL-DQN/5. Rule Sets/model/'

@@ -19,7 +19,9 @@ parameters:
             kind: 'phase_selector'
             parameters:
               default:
-                kind: 'greedy'
+                kind: 'epsilon_greedy'
+                parameters:
+                  epsilon: 0.05
               phases:
                 - phase:
                     kind: 'warm_up'
@@ -66,9 +68,10 @@ parameters:
 
       optimizer:
         model:
-          kind: 'adam'
+          kind: 'sgd'
           parameters:
             lr: 0.001
+            momentum: 0.9
 
       return:
         kind: 'no'

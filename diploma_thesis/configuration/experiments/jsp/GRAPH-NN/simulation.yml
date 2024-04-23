@@ -3,7 +3,7 @@
 kind: 'simulation'
 parameters:
   configuration:
-    timespan: 125000
+    timespan: 100000
     machines_per_work_center: 1
     work_center_count: 10
     deduce_naive_actions: True
@@ -23,7 +23,7 @@ parameters:
             uniform: [ 1, 50 ]
             noise: [ 0, 10 ]
         permutation:
-          uneveness: 5
+          uneveness: 3
         due_time:
           kind: 'uniform'
           parameters:

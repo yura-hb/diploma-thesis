@@ -5,14 +5,11 @@ layers:
   - kind: 'graph_model'
     parameters:
       layers:
-        - kind: 'gat'
+        - kind: 'gin'
           parameters:
             in_channels: -1
             out_channels: 128
             num_layers: 2
-            v2: True
-            heads: 2
-            concat: True
             hidden_channels: 128
 
       signature: 'graph -> actions_hidden, actions_batch'
@@ -37,17 +34,12 @@ layers:
         - kind: 'linear'
           parameters:
             dim: 128
-            activation: 'leaky_relu'
+            activation: 'relu'
             signature: 'x -> x'
         - kind: 'linear'
           parameters:
             dim: 128
-            activation: 'leaky_relu'
-            signature: 'x -> x'
-        - kind: 'linear'
-          parameters:
-            dim: 128
-            activation: 'leaky_relu'
+            activation: 'relu'
             signature: 'x -> x'
 
   - kind: 'linear'
@@ -61,14 +53,11 @@ layers:
   - kind: 'graph_model'
     parameters:
       layers:
-        - kind: 'gat'
+        - kind: 'gin'
           parameters:
             in_channels: -1
             out_channels: 128
             num_layers: 2
-            v2: True
-            heads: 2
-            concat: True
             hidden_channels: 128
 
       signature: 'graph -> values_hidden, values_batch'
@@ -85,20 +74,16 @@ layers:
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'leaky_relu'
+      activation: 'relu'
       signature: 'values_hidden -> values_hidden'
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'leaky_relu'
-      signature: 'values_hidden -> values_hidden'
-  - kind: 'linear'
-    parameters:
-      dim: 128
-      activation: 'leaky_relu'
+      activation: 'relu'
       signature: 'values_hidden -> values_hidden'
 
   - kind: 'output'
     parameters:
       value: 'values_hidden'
+      actor_value: 'actions_value'
       actions: 'actions_hidden'

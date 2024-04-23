@@ -19,7 +19,9 @@ parameters:
             kind: 'phase_selector'
             parameters:
               default:
-                kind: 'greedy'
+                kind: 'epsilon_greedy'
+                parameters:
+                  epsilon: 0.05
               phases:
                 - phase:
                     kind: 'warm_up'
@@ -51,7 +53,7 @@ parameters:
     kind: 'dqn'
     parameters:
       decay: 1.0
-      update_steps: 50
+      update_steps: 20
 
       memory:
         kind: 'replay'
@@ -65,7 +67,7 @@ parameters:
 
       optimizer:
         model:
-          kind: 'adam'
+          kind: 'sgd'
           parameters:
             lr: 0.001
 

@@ -263,7 +263,7 @@ task:
                         uniform: [ 1, 50 ]
                         noise: [ 0, 10 ]
                     permutation:
-                      uneveness: 5
+                      uneveness: 3
                     due_time:
                       kind: 'uniform'
                       parameters:

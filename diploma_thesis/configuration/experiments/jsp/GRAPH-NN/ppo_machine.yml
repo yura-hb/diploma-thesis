@@ -19,7 +19,9 @@ parameters:
             kind: 'phase_selector'
             parameters:
               default:
-                kind: 'greedy'
+                kind: 'sample'
+                parameters:
+                  is_distribution: False
               phases:
                 - phase:
                     kind: 'warm_up'
@@ -61,14 +63,13 @@ parameters:
           reduction: 'none'
 
       value_loss:
-        kind: 'mse'
+        kind: 'huber'
 
       optimizer:
         model:
-          kind: 'adam'
+          kind: 'sgd'
           parameters:
-            lr: 0.0002
-            eps: 0.00001
+            lr: 0.001
 
       memory:
         kind: 'prioritized_replay'
