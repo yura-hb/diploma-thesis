@@ -158,8 +158,8 @@ task:
                   kind: 'surrogate_tardiness'
                   parameters:
                       winq_factor: 0.2
-                      span: 40
-                      critical_level_factor: 128
+                      span: 20
+                      critical_level_factor: 64
 
               run:
                 parameters:
