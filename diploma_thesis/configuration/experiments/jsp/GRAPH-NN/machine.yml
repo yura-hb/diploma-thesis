@@ -54,7 +54,7 @@ parameters:
     parameters:
       decay: 1.0
       update_steps: 20
-      epochs: 5
+      epochs: 3
 
       memory:
         kind: 'replay'
