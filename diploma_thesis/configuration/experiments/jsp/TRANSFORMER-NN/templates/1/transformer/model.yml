@@ -68,7 +68,6 @@ layers:
   - kind: 'graph_model'
     parameters:
       layers:
-        - kind: 'mask'
         - kind: 'linear'
           parameters:
             dim: 128
