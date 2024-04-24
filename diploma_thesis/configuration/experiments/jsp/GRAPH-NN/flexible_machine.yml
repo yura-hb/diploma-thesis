@@ -45,7 +45,7 @@ parameters:
                       epsilon: 0.4
                       min_epsilon: 0.05
                       decay_factor: 0.995
-                      decay_steps: 30
+                      decay_steps: 50
 
   __encoder__: ''
 
