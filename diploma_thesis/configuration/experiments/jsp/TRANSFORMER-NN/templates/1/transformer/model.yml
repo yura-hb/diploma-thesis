@@ -22,7 +22,7 @@ layers:
               nhead: 8
               dim_feedforward: 256
             encoder:
-              num_layers: 2
+              num_layers: 4
             signature: 'x, batch -> x'
 
         - kind: 'output'
@@ -69,6 +69,11 @@ layers:
     parameters:
       layers:
         - kind: 'mask'
+        - kind: 'linear'
+          parameters:
+            dim: 128
+            activation: 'relu'
+            signature: 'x -> x'
         - kind: 'attention'
           parameters:
             pos_encoding:
@@ -78,7 +83,7 @@ layers:
               nhead: 8
               dim_feedforward: 256
             encoder:
-              num_layers: 2
+              num_layers: 4
             signature: 'x, batch -> x'
 
       signature: 'graph -> values_hidden, values_batch'

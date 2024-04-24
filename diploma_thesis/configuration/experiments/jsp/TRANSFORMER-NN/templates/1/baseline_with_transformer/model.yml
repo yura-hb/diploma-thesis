@@ -29,7 +29,7 @@ layers:
               nhead: 8
               dim_feedforward: 256
             encoder:
-              num_layers: 2
+              num_layers: 4
             signature: 'x, batch -> x'
 
         - kind: 'output'
@@ -91,7 +91,7 @@ layers:
               nhead: 8
               dim_feedforward: 256
             encoder:
-              num_layers: 2
+              num_layers: 4
             signature: 'x, batch -> x'
 
       signature: 'graph -> values_hidden, values_batch'
