@@ -5,7 +5,7 @@ import torch
 
 from agents.utils.policy import from_cli as policy_from_cli
 from .model import *
-from .rule import SchedulingRule, ALL_SCHEDULING_RULES, IdleSchedulingRule
+from .rule import SchedulingRule, from_cli
 
 
 class DeepMultiRule(DeepPolicyMachineModel):
@@ -26,17 +26,7 @@ class DeepMultiRule(DeepPolicyMachineModel):
 
     @classmethod
     def from_cli(cls, parameters: Dict):
-        rules = parameters['rules']
-
-        all_rules = ALL_SCHEDULING_RULES
-
-        if rules == "all":
-            rules = [rule() for rule in all_rules.values()]
-        else:
-            rules = [all_rules[rule]() for rule in rules]
-
-        if parameters.get('idle', False):
-            rules = [IdleSchedulingRule()] + rules
+        rules = from_cli(parameters['rules'])
 
         policy_parameters = parameters['policy']
         policy_parameters['parameters']['n_actions'] = len(rules)

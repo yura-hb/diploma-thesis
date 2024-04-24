@@ -36,7 +36,7 @@ class DEEPMARLMinimumRepetitionStateEncoder(StateEncoder):
         state = torch.vstack([state, arriving_job_state])
         state = state.unsqueeze(0)
 
-        return State(state, info=TensorDict({ 'job_idx': job_idx }, batch_size=[]), batch_size=[])
+        return State(state, info=TensorDict({'job_idx': job_idx}, batch_size=[]), batch_size=[])
 
     def __make_initial_state(self, parameters: StateEncoder.Input) -> torch.FloatTensor:
         machine = parameters.machine
