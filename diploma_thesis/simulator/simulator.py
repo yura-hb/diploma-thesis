@@ -398,10 +398,10 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
             gc.collect()
 
-            try:
-                torch.mps.empty_cache()
-            except:
-                pass
+            # try:
+            #     torch.mps.empty_cache()
+            # except:
+            #     pass
 
             torch.cuda.empty_cache()
 

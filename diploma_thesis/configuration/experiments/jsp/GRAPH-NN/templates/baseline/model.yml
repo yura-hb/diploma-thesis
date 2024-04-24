@@ -62,7 +62,7 @@ layers:
 
       signature: 'graph -> values_hidden, values_batch'
 
-  - kind: 'max_pool'
+  - kind: 'mean_pool'
     parameters:
       signature: 'values_hidden, values_batch -> values_hidden'
 
