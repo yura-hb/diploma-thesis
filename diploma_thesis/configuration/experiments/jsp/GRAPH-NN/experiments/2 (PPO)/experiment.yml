@@ -198,10 +198,10 @@ task:
               machine_agent:
                 parameters:
                   *ppo_1
-            - output_dir: 'GAT'
-              machine_agent:
-                parameters:
-                  *ppo_2
+#            - output_dir: 'GAT'
+#              machine_agent:
+#                parameters:
+#                  *ppo_2
             - output_dir: 'GCN'
               machine_agent:
                 parameters:

@@ -315,13 +315,13 @@ task:
 #                  - *marl_dqn_2
                   - *dqn_3
 #                  - *marl_dqn_4
-            - output_dir: 'GAT'
-              machine_agent:
-                parameters:
-                  - *dqn_1_gat
-#                  - *marl_dqn_2_gin
-                  - *dqn_3_gat
-#                  - *marl_dqn_4_gin
+#            - output_dir: 'GAT'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_1_gat
+##                  - *marl_dqn_2_gin
+#                  - *dqn_3_gat
+##                  - *marl_dqn_4_gin
             - output_dir: 'SAGE'
               machine_agent:
                 parameters:

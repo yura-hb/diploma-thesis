@@ -206,10 +206,10 @@ task:
               machine_agent:
                 parameters:
                   *ppo_3
-            - output_dir: 'Flexible GAT'
-              machine_agent:
-                parameters:
-                  *ppo_4
+#            - output_dir: 'Flexible GAT'
+#              machine_agent:
+#                parameters:
+#                  *ppo_4
 
           tape:
             machine_reward:

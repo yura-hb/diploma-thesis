@@ -60,7 +60,7 @@ parameters:
         kind: 'replay'
         parameters:
           size: 2048
-          batch_size: 192
+          batch_size: 256
           prefetch: 8
 
       loss:
