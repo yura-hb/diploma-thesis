@@ -19,7 +19,7 @@ graph: &graph
     is_work_center_set_in_shop_floor_connected: False
 
 default_mods: &default_mods 
-#  - 'util/infrastructure/cuda.yml'
+  - 'util/infrastructure/cuda.yml'
   - 'util/train_schedule/on_store_64.yml'
 
 ###############################################################################################
