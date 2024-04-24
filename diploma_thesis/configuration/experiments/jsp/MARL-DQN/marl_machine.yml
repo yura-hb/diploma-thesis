@@ -68,7 +68,7 @@ parameters:
 
       optimizer:
         model:
-          kind: 'sgd'
+          kind: 'adam_w'
           parameters:
             lr: 0.001
 

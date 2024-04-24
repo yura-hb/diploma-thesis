@@ -4,7 +4,7 @@ task:
   n_workers: 8
   n_threads: 8
   name: 'rules'
-  output_dir: 'results/jsp/experiments/tournaments/jsp/1. MARL-DQN'
+  output_dir: 'results/jsp/experiments/tournaments/jsp/Static Rules'
   store_run_statistics: True
   log_run: False
   update: True
@@ -26,12 +26,12 @@ task:
 #        prefix: 'preferred'
 #        path: 'results/jsp/experiments/1_4/preferred'
 
-    - kind: 'persisted_agents'
-      parameters:
-          prefix: ''
-          path: 'results/jsp/experiments/1. MARL-DQN'
-          depth: 5
-#
+#    - kind: 'persisted_agents'
+#      parameters:
+#          prefix: ''
+#          path: 'results/jsp/experiments/1. MARL-DQN'
+#          depth: 5
+##
 #    - kind: 'persisted_agents'
 #      parameters:
 #        prefix: 'flexible_with_graph'
@@ -97,11 +97,11 @@ task:
 #        prefix: 'marl_all'
 #        path: 'results/jsp/experiments/1_2/4'
 #
-#    - kind: 'static'
-#      parameters:
-#            scheduling: 'all'
-#            routing:
-#              - 'ct'
+    - kind: 'static'
+      parameters:
+            scheduling: 'all'
+            routing:
+              - 'ct'
 
 
 #      - kind: 'persisted_agents'

@@ -20,4 +20,4 @@ parameters:
     train_interval: 100
     max_training_steps: 0
 
-  n_workers: 3
+  n_workers: 4
