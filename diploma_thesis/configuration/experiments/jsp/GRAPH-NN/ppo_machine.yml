@@ -49,13 +49,13 @@ parameters:
     kind: 'ppo'
     parameters:
       device: 'cpu'
-      sample_count: 96
+      sample_count: 256
       policy_step_ratio: 0.2
-      entropy_regularization: 0.001
+      entropy_regularization: 0.01
       rollback_ratio: 0.00
       critic_weight: 0.5
 
-      epochs: 1
+      epochs: 5
 
       loss:
         kind: 'cross_entropy'
@@ -67,9 +67,9 @@ parameters:
 
       optimizer:
         model:
-          kind: 'adam'
+          kind: 'adam_w'
           parameters:
-            lr: 0.0005
+            lr: 0.001
 
       memory:
         kind: 'prioritized_replay'

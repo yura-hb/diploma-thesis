@@ -37,6 +37,7 @@ ppo_1: &ppo_1
 #        'util/agent/multi_agent.yml'
       ]
       - [ 'util/infrastructure/cuda.yml']
+      - [ 'util/train_schedule/on_store.yml']
 
 ppo_2: &ppo_2
   base_path: *base_model
@@ -55,6 +56,7 @@ ppo_2: &ppo_2
 #        'util/agent/multi_agent.yml'
       ]
       - [ 'util/infrastructure/cuda.yml']
+      - [ 'util/train_schedule/on_store.yml']
 
 ppo_3: &ppo_3
   base_path: *base_model
@@ -73,6 +75,7 @@ ppo_3: &ppo_3
 #        'util/agent/multi_agent.yml'
       ]
       - [ 'util/infrastructure/cuda.yml']
+      - [ 'util/train_schedule/on_store.yml']
 
 ###############################################################################################
 
@@ -95,7 +98,7 @@ long_single_source_run: &long_single_source_run
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0 ] ]
+          seed: [ [ 0, 1, 2, 3 ] ]
 
 
 ###############################################################################################
@@ -143,7 +146,7 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 96
+              memory: 64
               emit_trajectory: True
 
           graph:
@@ -155,8 +158,7 @@ task:
               base_path: 'configuration/experiments/jsp/GRAPH-NN/run_ppo.yml'
               mod_dirs:
                 - 'configuration/mods/run/mods'
-              mods:
-                - 'n_workers/1.yml'
+              mods: []
               nested:
                 parameters:
                   simulations:

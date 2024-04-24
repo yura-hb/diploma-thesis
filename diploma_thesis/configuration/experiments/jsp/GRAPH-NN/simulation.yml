@@ -3,7 +3,7 @@
 kind: 'simulation'
 parameters:
   configuration:
-    timespan: 100000
+    timespan: 125000
     machines_per_work_center: 1
     work_center_count: 10
     deduce_naive_actions: True

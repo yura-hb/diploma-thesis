@@ -1,3 +1,5 @@
+import dis
+
 import torch.distributions
 
 from .action_selector import *
@@ -18,6 +20,8 @@ class Sample(ActionSelector):
             distribution = torch.distributions.Categorical(logits=distribution)
 
         action = distribution.sample().item()
+
+        print("action: ", action, "entropy: ", distribution.entropy().item(), distribution.probs)
 
         return action, distribution.probs
 

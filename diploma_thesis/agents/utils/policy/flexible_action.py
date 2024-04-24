@@ -38,7 +38,7 @@ class FlexibleAction(ActionPolicy):
                 prev_count += target_nodes_count
 
             actions = torch.nn.utils.rnn.pad_sequence(result, batch_first=True, padding_value=-float('inf'))
-            lengths = torch.tensor(lengths)
+            lengths = torch.tensor(lengths).to(actions.device)
 
             output[Keys.ACTIONS] = (actions, lengths)
 

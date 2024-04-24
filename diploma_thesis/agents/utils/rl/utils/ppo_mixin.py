@@ -25,7 +25,7 @@ class PPOConfiguration:
             sample_count=parameters.get('sample_count', 128),
             policy_step_ratio=parameters.get('policy_step_ratio', 1.0),
             entropy_regularization=parameters.get('entropy_regularization', 0.0),
-            rollback_ratio=parameters.get('rollback_ratio', 0.1),
+            rollback_ratio=parameters.get('rollback_ratio', 0.0),
             critic_weight=parameters.get('critic_weight', 1.0),
             epochs=parameters.get('epochs', 1),
             priority_reduction_ratio=parameters.get('priority_reduction_ratio', 1.05)
@@ -124,7 +124,7 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
         advantages = batch.info[Record.ADVANTAGE_KEY]
 
         # Normalize advantages
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+        # advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
         action_probs = batch.info[Record.POLICY_KEY][range, batch.action.view(-1)]
 
@@ -138,6 +138,8 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
                                       rollback_value + (1 + rollback_ratio) * (1 + policy_ratio))
 
         advantages = torch.min(weights * advantages, clipped_weights * advantages)
+
+        print(advantages)
 
         entropy = distribution.entropy().mean()
 

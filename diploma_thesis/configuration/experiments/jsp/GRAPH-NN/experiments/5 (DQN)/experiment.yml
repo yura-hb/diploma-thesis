@@ -20,6 +20,7 @@ graph: &graph
 
 default_mods: &default_mods 
   - 'util/infrastructure/cuda.yml'
+  - 'util/train_schedule/on_store_64.yml'
 
 ###############################################################################################
 
@@ -230,7 +231,7 @@ long_single_source_run: &long_single_source_run
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0 ] ]
+          seed: [ [ 0, 1, 2, 3 ] ]
 
 
 ###############################################################################################
@@ -289,8 +290,7 @@ task:
               base_path: 'configuration/experiments/jsp/GRAPH-NN/run.yml'
               mod_dirs:
                 - 'configuration/mods/run/mods'
-              mods:
-                - 'n_workers/1.yml'
+              mods: []
               nested:
                 parameters:
                   simulations:
