@@ -57,6 +57,7 @@ class CustomGraphEncoder(GraphStateEncoder):
             values = [
                 job.processing_times.view(-1) / self.norm_factor,
 
+
                 job.history.arrived_at_machine >= 0,
                 job.history.started_at >= 0,
                 job.history.finished_at >= 0,

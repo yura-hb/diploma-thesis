@@ -30,7 +30,7 @@ ppo_1: &ppo_1
       - [ 'util/optimizer/grad_norm.yml' ]
       - [
           '__none__',
-#          'agent/ppo/p3or.yml'
+          'agent/ppo/p3or.yml'
       ]
       - [
         '__none__',
