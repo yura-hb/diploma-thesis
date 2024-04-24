@@ -11,36 +11,34 @@ layers:
             out_channels: 128
             num_layers: 2
             hidden_channels: 128
+        - kind: 'mask'
 
       signature: 'graph -> actions_hidden, actions_batch'
 
-  - kind: 'mean_pool'
+  - kind: 'layer_norm'
     parameters:
-      signature: 'actions_hidden, actions_batch -> actions_value'
+      signature: 'actions_hidden -> actions_hidden'
+      normalized_shape: 128
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_hidden'
 
   - kind: 'mean_pool'
     parameters:
       signature: 'actions_hidden, actions_batch -> actions_hidden'
 
-  - kind: 'shared'
+  - kind: 'linear'
     parameters:
-      values: [ 'actions_hidden', 'actions_value' ]
-      input_args: 'x'
-      layers:
-        - kind: 'layer_norm'
-          parameters:
-            signature: 'x -> x'
-            normalized_shape: 128
-        - kind: 'linear'
-          parameters:
-            dim: 128
-            activation: 'relu'
-            signature: 'x -> x'
-        - kind: 'linear'
-          parameters:
-            dim: 128
-            activation: 'relu'
-            signature: 'x -> x'
+      dim: 128
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_value'
 
   - kind: 'linear'
     parameters:
@@ -50,7 +48,7 @@ layers:
 
   # Critic
 
-  - kind: 'graph_ model'
+  - kind: 'graph_model'
     parameters:
       layers:
         - kind: 'gin'

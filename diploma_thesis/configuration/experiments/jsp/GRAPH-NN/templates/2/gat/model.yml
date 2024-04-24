@@ -20,31 +20,28 @@ layers:
 
   - kind: 'mean_pool'
     parameters:
-      signature: 'actions_hidden, actions_batch -> actions_value'
-
-  - kind: 'mean_pool'
-    parameters:
       signature: 'actions_hidden, actions_batch -> actions_hidden'
 
-  - kind: 'shared'
+  - kind: 'layer_norm'
     parameters:
-      values: [ 'actions_hidden', 'actions_value' ]
-      input_args: 'x'
-      layers:
-        - kind: 'layer_norm'
-          parameters:
-            signature: 'x -> x'
-            normalized_shape: 128
-        - kind: 'linear'
-          parameters:
-            dim: 128
-            activation: 'relu'
-            signature: 'x -> x'
-        - kind: 'linear'
-          parameters:
-            dim: 128
-            activation: 'relu'
-            signature: 'x -> x'
+      signature: 'actions_hidden -> actions_hidden'
+      normalized_shape: 128
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_hidden'
+
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_value'
 
   - kind: 'linear'
     parameters:

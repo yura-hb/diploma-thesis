@@ -19,7 +19,7 @@ graph: &graph
     is_work_center_set_in_shop_floor_connected: False
 
 default_mods: &default_mods 
-  - 'util/infrastructure/cuda.yml'
+#  - 'util/infrastructure/cuda.yml'
   - 'util/train_schedule/on_store_64.yml'
 
 ###############################################################################################
@@ -307,31 +307,31 @@ task:
                         values:
         values:
           __concat__:
-            - output_dir: 'Baseline'
-              machine_agent:
-                parameters:
-                  - *dqn_1
-#                  - *marl_dqn_2
-                  - *dqn_3
-#                  - *marl_dqn_4
-            - output_dir: 'All'
-              machine_agent:
-                parameters:
-                  - *dqn_1_all
-#                  - *marl_dqn_2_all
-                  - *dqn_3_all
-#                  - *marl_dqn_4_all
+#            - output_dir: 'Baseline'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_1
+##                  - *marl_dqn_2
+#                  - *dqn_3
+##                  - *marl_dqn_4
+#            - output_dir: 'All'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_1_all
+##                  - *marl_dqn_2_all
+#                  - *dqn_3_all
+##                  - *marl_dqn_4_all
             - output_dir: 'Flexible'
               machine_agent:
                 parameters:
                   - *dqn_1_flexible
 #                  - *marl_dqn_2_flexible
                   - *dqn_3_flexible
-            - output_dir: 'Flexible GAT'
-              machine_agent:
-                  parameters:
-                    - *dqn_1_flexible_gat
-                    - *dqn_3_flexible_gat
+#            - output_dir: 'Flexible GAT'
+#              machine_agent:
+#                  parameters:
+#                    - *dqn_1_flexible_gat
+#                    - *dqn_3_flexible_gat
 
           tape:
             machine_reward:
