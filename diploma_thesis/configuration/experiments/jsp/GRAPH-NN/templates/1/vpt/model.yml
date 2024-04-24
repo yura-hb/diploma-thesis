@@ -14,43 +14,31 @@ layers:
 
       signature: 'graph -> actions_hidden, actions_batch'
 
+  - kind: 'mean_pool'
+    parameters:
+      signature: 'actions_hidden, actions_batch -> actions_hidden'
+
   - kind: 'layer_norm'
     parameters:
       signature: 'actions_hidden -> actions_hidden'
       normalized_shape: 128
-  - kind: 'linear'
-    parameters:
-      dim: 128
-      activation: 'relu'
-      signature: 'actions_hidden -> actions_hidden'
-  - kind: 'linear'
-    parameters:
-      dim: 128
-      activation: 'relu'
-      signature: 'actions_hidden -> actions_hidden'
-
-  - kind: 'mean_pool'
-    parameters:
-      signature: 'actions_hidden, actions_batch -> actions_value'
-
-  - kind: 'select_target'
-    parameters:
-      signature: 'graph, actions_hidden -> actions_hidden'
-
-  - kind: 'select_target'
-    parameters:
-      signature: 'graph, actions_batch -> actions_batch'
-
-  - kind: 'merge_graph'
-    parameters:
-      kind: 'concat'
-      signature: 'actions_batch, actions_hidden, actions_value -> actions_hidden'
 
   - kind: 'linear'
     parameters:
       dim: 128
       activation: 'relu'
       signature: 'actions_hidden -> actions_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_hidden'
+
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_value'
 
   - kind: 'linear'
     parameters:
