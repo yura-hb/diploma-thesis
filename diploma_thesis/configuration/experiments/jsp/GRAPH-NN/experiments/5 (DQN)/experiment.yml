@@ -209,6 +209,28 @@ marl_dqn_4_flexible_gat: &marl_dqn_4_flexible_gat
     - *default_mods
 #    - 'util/action_selector/sample.yml'
 
+###############################################################################################
+
+dqn_1_flexible_gcn: &dqn_1_flexible_gcn
+  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_machine.yml'
+  template: '5/flexible_gcn'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+
+dqn_3_flexible_gcn: &dqn_3_flexible_gcn
+  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_machine.yml'
+  template: '5/flexible_gcn'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
+    - 'agent/dqn/dueling.yml'
+    - *default_mods
+#    - 'util/action_selector/sample.yml'
 
 ###############################################################################################
 
@@ -327,6 +349,12 @@ task:
                   - *dqn_1_flexible
 #                  - *marl_dqn_2_flexible
                   - *dqn_3_flexible
+            - output_dir: 'Flexible GCN'
+              machine_agent:
+                  parameters:
+                    - *dqn_1_flexible_gcn
+#                  - *marl_dqn_2_flexible
+                    - *dqn_3_flexible_gcn
 #            - output_dir: 'Flexible GAT'
 #              machine_agent:
 #                  parameters:

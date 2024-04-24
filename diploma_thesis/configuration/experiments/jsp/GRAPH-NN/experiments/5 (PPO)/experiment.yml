@@ -96,6 +96,25 @@ ppo_4: &ppo_4
       - [ 'util/infrastructure/cuda.yml']
       - [ 'util/train_schedule/on_store.yml']
 
+ppo_5: &ppo_5
+  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_machine.yml'
+  template: '5/flexible_gcn'
+  mod_dirs:
+    - ['configuration/mods/machine/mods']
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+      - [
+          '__none__',
+          'agent/ppo/p3or.yml'
+      ]
+      - [
+        '__none__',
+#        'util/agent/multi_agent.yml'
+      ]
+      - [ 'util/infrastructure/cuda.yml']
+      - [ 'util/train_schedule/on_store.yml']
+
 ###############################################################################################
 
 reward: &reward
@@ -206,6 +225,10 @@ task:
               machine_agent:
                 parameters:
                   *ppo_3
+            - output_dir: 'Flexible GCN'
+              machine_agent:
+                parameters:
+                  *ppo_5
 #            - output_dir: 'Flexible GAT'
 #              machine_agent:
 #                parameters:
