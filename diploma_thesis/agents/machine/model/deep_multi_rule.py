@@ -26,7 +26,7 @@ class DeepMultiRule(DeepPolicyMachineModel):
 
     @classmethod
     def from_cli(cls, parameters: Dict):
-        rules = from_cli(parameters['rules'])
+        rules = from_cli(parameters)
 
         policy_parameters = parameters['policy']
         policy_parameters['parameters']['n_actions'] = len(rules)

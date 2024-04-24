@@ -74,8 +74,9 @@ ALL_SCHEDULING_RULES: Dict[str, SchedulingRule.__class__] = {
     'winq': WINQSchedulingRule
 }
 
+
 def from_cli(parameters):
-    rules = parameters['rules']
+    rules = parameters.get('rules', 'all')
 
     all_rules = ALL_SCHEDULING_RULES
 
