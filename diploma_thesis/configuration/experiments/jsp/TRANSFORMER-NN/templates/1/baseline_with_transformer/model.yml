@@ -60,6 +60,12 @@ layers:
 
   - kind: 'linear'
     parameters:
+      dim: 128
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_value'
+
+  - kind: 'linear'
+    parameters:
       dim: 1
       activation: 'none'
       signature: 'actions_value -> actions_value'
@@ -69,15 +75,24 @@ layers:
   - kind: 'graph_model'
     parameters:
       layers:
-        - kind: 'gat'
+        - kind: 'gin'
           parameters:
             in_channels: -1
             out_channels: 128
             num_layers: 2
-            v2: True
-            heads: 4
-            concat: True
             hidden_channels: 128
+
+        - kind: 'attention'
+          parameters:
+            pos_encoding:
+              out_channels: 128
+            layer:
+              d_model: 128
+              nhead: 8
+              dim_feedforward: 256
+            encoder:
+              num_layers: 2
+            signature: 'x, batch -> x'
 
       signature: 'graph -> values_hidden, values_batch'
 

@@ -1,7 +1,7 @@
 # Evaluate the effectivenes of basic DQNs on the JSP environment
 
 template: &template 'baseline'
-base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN/ppo_machine.yml'
+base_model: &base_model 'configuration/experiments/jsp/TRANSFORMER-NN/ppo_machine.yml'
 
 graph: &graph
     transition_model:
@@ -22,7 +22,7 @@ default_mods: &default_mods []
 
 ppo_1: &ppo_1
   base_path: *base_model
-  template: '1/djsp'
+  template: 'baseline'
   mod_dirs:
     - ['configuration/mods/machine/mods']
   mods:
@@ -41,7 +41,7 @@ ppo_1: &ppo_1
 
 ppo_2: &ppo_2
   base_path: *base_model
-  template: '1/vpt'
+  template: 'baseline_with_transformer'
   mod_dirs:
     - ['configuration/mods/machine/mods']
   mods:
@@ -60,7 +60,7 @@ ppo_2: &ppo_2
 
 ppo_3: &ppo_3
   base_path: *base_model
-  template: '1/hierarchical'
+  template: 'transformer'
   mod_dirs:
     - ['configuration/mods/machine/mods']
   mods:
@@ -77,24 +77,6 @@ ppo_3: &ppo_3
       - [ 'util/infrastructure/cuda.yml' ]
       - [ 'util/train_schedule/on_store.yml' ]
 
-ppo_4: &ppo_4
-  base_path: *base_model
-  template: 'baseline'
-  mod_dirs:
-    - ['configuration/mods/machine/mods']
-  mods:
-    __factory__:
-      - [ 'util/optimizer/grad_norm.yml' ]
-      - [
-          '__none__',
-          'agent/ppo/p3or.yml'
-      ]
-      - [
-        '__none__',
-#        'util/agent/multi_agent.yml'
-      ]
-      - [ 'util/infrastructure/cuda.yml' ]
-      - [ 'util/train_schedule/on_store.yml' ]
 ###############################################################################################
 
 reward: &reward
@@ -128,7 +110,7 @@ task:
   n_threads: 32
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/2. GRAPH-NN/1. Graph State Encoding (PPO)/model/'
+  output_dir: 'results/jsp/experiments/3. TRANSFORMER-NN/1. (PPO)/model/'
 
   tasks:
     - kind: 'multi_value'
@@ -173,7 +155,7 @@ task:
           run:
             kind: 'mod'
             parameters:
-              base_path: 'configuration/experiments/jsp/GRAPH-NN/run_ppo.yml'
+              base_path: 'configuration/experiments/jsp/TRANSFORMER-NN/run_ppo.yml'
               mod_dirs:
                 - 'configuration/mods/run/mods'
               mods: []
@@ -186,26 +168,22 @@ task:
                         base:
                           kind: 'mod'
                           parameters:
-                            base_path: 'configuration/experiments/jsp/GRAPH-NN/simulation.yml'
+                            base_path: 'configuration/experiments/jsp/TRANSFORMER-NN/simulation.yml'
                             mod_dirs:
                               - 'configuration/mods/simulation/mods'
                             mods: [ ]
                         values:
         values:
           __concat__:
-            - output_dir: 'Custom'
-              machine_agent:
-                parameters:
-                  *ppo_4
-            - output_dir: 'Hierarchical'
+            - output_dir: 'Transformer'
               machine_agent:
                 parameters:
                   *ppo_3
-            - output_dir: 'VPT'
+            - output_dir: 'Baseline With Transformer'
               machine_agent:
                 parameters:
                   *ppo_2
-            - output_dir: 'DJSP'
+            - output_dir: 'Baseline'
               machine_agent:
                 parameters:
                   *ppo_1
