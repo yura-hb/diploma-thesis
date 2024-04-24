@@ -13,7 +13,7 @@ layers:
             num_layers: 2
             v2: True
             heads: 2
-            concat: True
+            concat: False
             hidden_channels: 128
 
       signature: 'graph -> actions_hidden, actions_batch'
@@ -61,7 +61,7 @@ layers:
             num_layers: 2
             v2: True
             heads: 2
-            concat: True
+            concat: False
             hidden_channels: 128
 
       signature: 'graph -> values_hidden, values_batch'
