@@ -40,7 +40,7 @@ ppo_1: &ppo_1
       - [ 'util/train_schedule/on_store.yml']
 
 ppo_2: &ppo_2
-  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_machine.yml'
+  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_ppo_machine.yml'
   template: '5/flexible'
   mod_dirs:
     - ['configuration/mods/machine/mods']
@@ -78,7 +78,7 @@ ppo_3: &ppo_3
       - [ 'util/train_schedule/on_store.yml']
 
 ppo_4: &ppo_4
-  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_machine.yml'
+  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_ppo_machine.yml'
   template: '5/flexible_gat'
   mod_dirs:
     - ['configuration/mods/machine/mods']
@@ -97,7 +97,7 @@ ppo_4: &ppo_4
       - [ 'util/train_schedule/on_store.yml']
 
 ppo_5: &ppo_5
-  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_machine.yml'
+  base_path: 'configuration/experiments/jsp/GRAPH-NN/flexible_ppo_machine.yml'
   template: '5/flexible_gcn'
   mod_dirs:
     - ['configuration/mods/machine/mods']
