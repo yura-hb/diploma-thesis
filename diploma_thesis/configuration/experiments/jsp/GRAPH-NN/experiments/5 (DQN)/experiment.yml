@@ -1,7 +1,7 @@
 # Evaluate the effectivenes of basic DQNs on the JSP environment
 
 template: &template 'baseline'
-base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN/machine.yml'
+base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN/flexible_machine.yml'
 marl_model: &marl_model 'configuration/experiments/jsp/GRAPH-NN/marl_machine.yml'
 
 graph: &graph
@@ -329,20 +329,20 @@ task:
                         values:
         values:
           __concat__:
-            - output_dir: 'Baseline'
-              machine_agent:
-                parameters:
-                  - *dqn_1
-#                  - *marl_dqn_2
-                  - *dqn_3
-#                  - *marl_dqn_4
-            - output_dir: 'All'
-              machine_agent:
-                parameters:
-                  - *dqn_1_all
-#                  - *marl_dqn_2_all
-                  - *dqn_3_all
-#                  - *marl_dqn_4_all
+#            - output_dir: 'Baseline'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_1
+##                  - *marl_dqn_2
+#                  - *dqn_3
+##                  - *marl_dqn_4
+#            - output_dir: 'All'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_1_all
+##                  - *marl_dqn_2_all
+#                  - *dqn_3_all
+##                  - *marl_dqn_4_all
             - output_dir: 'Flexible'
               machine_agent:
                 parameters:
