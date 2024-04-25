@@ -5,8 +5,6 @@ parameters:
   model:
     kind: 'deep_rule'
     parameters:
-      __rules__: ''
-
       policy:
         kind: 'flexible_action'
         parameters:
