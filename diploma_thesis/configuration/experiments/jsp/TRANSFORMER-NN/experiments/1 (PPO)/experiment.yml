@@ -36,12 +36,12 @@ ppo_1: &ppo_1
         '__none__',
 #        'util/agent/multi_agent.yml'
       ]
-      - [ 'util/infrastructure/cuda.yml' ]
+#      - [ 'util/infrastructure/cuda.yml' ]
       - [ 'util/train_schedule/on_store.yml' ]
 
 ppo_2: &ppo_2
   base_path: *base_model
-  template: 'baseline_with_transformer'
+  template: '1/baseline_with_transformer'
   mod_dirs:
     - ['configuration/mods/machine/mods']
   mods:
@@ -55,12 +55,12 @@ ppo_2: &ppo_2
         '__none__',
 #        'util/agent/multi_agent.yml'
       ]
-      - [ 'util/infrastructure/cuda.yml' ]
+#      - [ 'util/infrastructure/cuda.yml' ]
       - [ 'util/train_schedule/on_store.yml' ]
 
 ppo_3: &ppo_3
   base_path: *base_model
-  template: 'transformer'
+  template: '1/transformer'
   mod_dirs:
     - ['configuration/mods/machine/mods']
   mods:
@@ -94,7 +94,7 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ ['utilization/80.yml'] ]
+        - [ ['utilization/90.yml'] ]
     nested:
       parameters:
         dispatch:
@@ -106,8 +106,8 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 8
-  n_threads: 32
+  n_workers: 3
+  n_threads: 10
   debug: False
   store_run_statistics: False
   output_dir: 'results/jsp/experiments/3. TRANSFORMER-NN/1. (PPO)/model/'

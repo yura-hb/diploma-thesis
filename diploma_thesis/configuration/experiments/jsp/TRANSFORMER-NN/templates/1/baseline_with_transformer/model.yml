@@ -125,3 +125,4 @@ layers:
     parameters:
       value: 'values_hidden'
       actions: 'actions_hidden'
+      actor_value: 'actions_value'

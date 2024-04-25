@@ -112,7 +112,7 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ ['utilization/80.yml'] ]
+        - [ ['utilization/90.yml'] ]
     nested:
       parameters:
         dispatch:
@@ -167,6 +167,8 @@ task:
             parameters:
               memory: 64
               emit_trajectory: True
+              reset_trajectory: False
+              sliding_window: 32
 
           graph:
             *graph
