@@ -311,7 +311,7 @@ task:
             - output_dir: 'Baseline'
               machine_agent:
                 parameters:
-                  - *dqn_1
+#                  - *dqn_1
 #                  - *marl_dqn_2
                   - *dqn_3
 #                  - *marl_dqn_4
@@ -325,14 +325,14 @@ task:
             - output_dir: 'SAGE'
               machine_agent:
                 parameters:
-                  - *dqn_1_sage
+#                  - *dqn_1_sage
 #                  - *marl_dqn_2_sage
                   - *dqn_3_sage
 #                  - *marl_dqn_4_sage
             - output_dir: 'GCN'
               machine_agent:
                 parameters:
-                  - *dqn_1_gcn
+#                  - *dqn_1_gcn
 #                  - *marl_dqn_2_gcn
                   - *dqn_3_gcn
 #                  - *marl_dqn_4_gcn

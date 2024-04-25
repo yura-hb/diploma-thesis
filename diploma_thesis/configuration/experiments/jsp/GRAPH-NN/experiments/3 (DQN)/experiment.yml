@@ -403,42 +403,42 @@ task:
             - output_dir: 'Baseline'
               machine_agent:
                 parameters:
-                  - *dqn_1
+#                  - *dqn_1
 #                  - *marl_dqn_2
                   - *dqn_3
 #                  - *marl_dqn_4
             - output_dir: 'Mean Local'
               machine_agent:
                 parameters:
-                  - *dqn_1_mean_local
+#                  - *dqn_1_mean_local
 #                  - *marl_dqn_2_mean_local
                   - *dqn_3_mean_local
 #                  - *marl_dqn_4_mean_local
             - output_dir: 'Add'
               machine_agent:
                 parameters:
-                  - *dqn_1_add
+#                  - *dqn_1_add
 #                  - *marl_dqn_2_add
                   - *dqn_3_add
 #                  - *marl_dqn_4_add
             - output_dir: 'Add Local'
               machine_agent:
                 parameters:
-                  - *dqn_1_add_local
+#                  - *dqn_1_add_local
 #                  - *marl_dqn_2_add_local
                   - *dqn_3_add_local
 #                  - *marl_dqn_4_add_local
             - output_dir: 'Max'
               machine_agent:
                 parameters:
-                  - *dqn_1_max
+#                  - *dqn_1_max
 #                  - *marl_dqn_2_max
                   - *dqn_3_max
 #                  - *marl_dqn_4_max
             - output_dir: 'Max Local'
               machine_agent:
                 parameters:
-                  - *dqn_1_max_local
+#                  - *dqn_1_max_local
 #                  - *marl_dqn_2_max_local
                   - *dqn_3_max_local
 #                  - *marl_dqn_4_max_local

@@ -215,22 +215,22 @@ task:
             - output_dir: 'Custom'
               machine_agent:
                 parameters:
-                  - *dqn_1
+#                  - *dqn_1
                   - *dqn_3
             - output_dir: 'Hierarchical'
               machine_agent:
                 parameters:
-                  - *dqn_1_hierarchical
+#                  - *dqn_1_hierarchical
                   - *dqn_3_hierarchical
             - output_dir: 'VPT'
               machine_agent:
                 parameters:
-                  - *dqn_1_vpt
+#                  - *dqn_1_vpt
                   - *dqn_3_vpt
             - output_dir: 'DJSP'
               machine_agent:
                 parameters:
-                  - *dqn_1_djsp
+#                  - *dqn_1_djsp
                   - *dqn_3_djsp
 
           tape:

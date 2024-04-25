@@ -262,21 +262,21 @@ task:
             - output_dir: 'Baseline'
               machine_agent:
                 parameters:
-                  - *dqn_1
+#                  - *dqn_1
 #                  - *marl_dqn_2
                   - *dqn_3
 #                  - *marl_dqn_4
             - output_dir: 'Mean'
               machine_agent:
                 parameters:
-                  - *dqn_1_mean
+#                  - *dqn_1_mean
 #                  - *marl_dqn_2_mean
                   - *dqn_3_mean
 #                  - *marl_dqn_4_mean
             - output_dir: 'Mean Local Undirected'
               machine_agent:
                 parameters:
-                  - *dqn_1_mean_local
+#                  - *dqn_1_mean_local
 #                  - *marl_dqn_2_mean_local
                   - *dqn_3_mean_local
 #                  - *marl_dqn_4_mean_local

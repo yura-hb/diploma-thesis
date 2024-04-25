@@ -54,6 +54,20 @@ def __evaluate__(tournament: 'Tournament',
     if 'graph' in candidate.parameters:
         graph_model = GraphModel.from_cli(candidate.parameters['graph'])
 
+    mods = []
+
+    for m in candidate.parameters['machine_agent']['parameters']['mods']:
+        if isinstance(m, str):
+            if 'cuda' not in 'm':
+                mods.append(m)
+            continue
+
+        if isinstance(m, list):
+            mods += [m_ for m_ in m if 'cuda' not in m_]
+            continue
+
+    candidate.parameters['machine_agent']['parameters']['mods'] = mods
+
     try:
         machine, work_center = candidate.load()
     except:
