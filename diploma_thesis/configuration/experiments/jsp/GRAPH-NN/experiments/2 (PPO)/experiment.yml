@@ -167,6 +167,9 @@ task:
             parameters:
               memory: 64
               emit_trajectory: True
+              reset_trajectory: False
+              sliding_window: 32
+
 
           graph:
             *graph

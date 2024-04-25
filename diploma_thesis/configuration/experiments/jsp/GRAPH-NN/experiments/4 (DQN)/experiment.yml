@@ -20,7 +20,7 @@ graph: &graph
 
 default_mods: &default_mods
   - 'util/infrastructure/cuda.yml'
-  - 'util/train_schedule/on_store_64.yml'
+  - 'util/train_schedule/on_store_32.yml'
 ###############################################################################################
 
 dqn_1: &dqn_1

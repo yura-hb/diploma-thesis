@@ -9,12 +9,18 @@ class TDSimulator(Simulator):
     possible
     """
 
-    def __init__(self, memory: int = 100, emit_trajectory: bool = False, reset_trajectory: bool = True, *args, **kwargs):
+    def __init__(self,
+                 memory: int = 100,
+                 emit_trajectory: bool = False,
+                 reset_trajectory: bool = True,
+                 sliding_window: int = 16,
+                 *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.memory = memory
         self.emit_trajectory = emit_trajectory
         self.reset_trajectory = reset_trajectory
+        self.sliding_window = sliding_window
         self.episode = 0
 
         self.machine_queue = TDQueue(self.machine.is_distributed)
@@ -62,12 +68,17 @@ class TDSimulator(Simulator):
         else:
             agent.store(key, Slice(episode_id=context.shop_floor.id, records=records))
 
-        if (not self.emit_trajectory or not self.reset_trajectory) and len(prefix) > 1:
-            queue.store_slice(context.shop_floor.id, key, dict(list(zip(moments, records))[1:]))
+        suffix = max(1, self.sliding_window)
+
+        if (not self.emit_trajectory or not self.reset_trajectory) and len(prefix) > suffix:
+            data = list(zip(moments, records))[suffix:]
+
+            queue.store_slice(context.shop_floor.id, key, dict(data))
 
     @staticmethod
     def from_cli(parameters, *args, **kwargs) -> Simulator:
         return TDSimulator(parameters.get('memory', 1), 
                            parameters.get('emit_trajectory', False),
                            parameters.get('reset_trajectory', True),
+                           parameters.get('sliding_window', 16),
                            *args, **kwargs)
