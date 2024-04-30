@@ -1,14 +1,10 @@
 
 
 layers:
-  - kind: 'layer_norm'
+  - kind: 'partial_instance_norm'
     parameters:
-      normalized_shape: [5, 5]
+      channels: 17
       signature: 'state -> actions_hidden'
-
-  - kind: 'flatten'
-    parameters:
-      signature: 'actions_hidden -> actions_hidden'
 
   - kind: 'linear'
     parameters:

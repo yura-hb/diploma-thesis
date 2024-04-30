@@ -11,17 +11,13 @@ layers:
             out_channels: 128
             num_layers: 2
             hidden_channels: 128
+            act: 'tanh'
 
       signature: 'graph -> actions_hidden, actions_batch'
 
   - kind: 'mean_pool'
     parameters:
       signature: 'actions_hidden, actions_batch -> actions_hidden'
-
-  - kind: 'layer_norm'
-    parameters:
-      signature: 'actions_hidden -> actions_hidden'
-      normalized_shape: 128
 
   - kind: 'linear'
     parameters:
@@ -57,17 +53,13 @@ layers:
             out_channels: 128
             num_layers: 2
             hidden_channels: 128
+            act: 'tanh'
 
       signature: 'graph -> values_hidden, values_batch'
 
   - kind: 'mean_pool'
     parameters:
       signature: 'values_hidden, values_batch -> values_hidden'
-
-  - kind: 'layer_norm'
-    parameters:
-      signature: 'values_hidden -> values_hidden'
-      normalized_shape: 128
 
   - kind: 'linear'
     parameters:

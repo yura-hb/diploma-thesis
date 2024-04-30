@@ -106,7 +106,7 @@ class RLTrainer(Loggable):
 
         self.__train__(model)
 
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
 
         print(f'Train step: { time.time() - start } Optimizer Step: { self.optimizer.step_count }')
 

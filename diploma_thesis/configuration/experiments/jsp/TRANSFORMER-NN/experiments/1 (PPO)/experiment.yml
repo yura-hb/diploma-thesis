@@ -30,7 +30,7 @@ ppo_1: &ppo_1
       - [ 'util/optimizer/grad_norm.yml' ]
       - [
           '__none__',
-          'agent/ppo/p3or.yml'
+#          'agent/ppo/p3or.yml'
       ]
       - [
         '__none__',
@@ -49,7 +49,7 @@ ppo_2: &ppo_2
       - [ 'util/optimizer/grad_norm.yml' ]
       - [
           '__none__',
-          'agent/ppo/p3or.yml'
+#          'agent/ppo/p3or.yml'
       ]
       - [
         '__none__',
@@ -74,17 +74,15 @@ ppo_3: &ppo_3
         '__none__',
 #        'util/agent/multi_agent.yml'
       ]
-      - [ 'util/infrastructure/cuda.yml' ]
+#      - [ 'util/infrastructure/cuda.yml' ]
       - [ 'util/train_schedule/on_store.yml' ]
 
 ###############################################################################################
 
 reward: &reward
-  - kind: 'surrogate_tardiness'
+  - kind: 'global_decomposed_tardiness'
     parameters:
-      winq_factor: 0.2
-      span: 20
-      critical_level_factor: 64
+      span: 128
 
 ##############################################################################################
 
@@ -146,10 +144,10 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 64
+              memory: 128
               emit_trajectory: True
               reset_trajectory: False
-              sliding_window: 32
+              sliding_window: 64
 
           graph:
             *graph

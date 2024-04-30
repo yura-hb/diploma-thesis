@@ -5,16 +5,11 @@ layers:
   - kind: 'graph_model'
     parameters:
       layers:
-        - kind: 'layer_norm'
-          parameters:
-            signature: 'actions_hidden -> actions_hidden'
-            normalized_shape: 17
-
         - kind: 'linear'
           parameters:
             dim: 128
-            activation: 'relu'
-            signature: 'actions_hidden -> actions_hidden'
+            activation: 'tanh'
+            signature: 'x -> x'
 
         - kind: 'gin'
           parameters:
@@ -22,6 +17,7 @@ layers:
             out_channels: 128
             num_layers: 2
             hidden_channels: 128
+            act: 'tanh'
 
       signature: 'graph -> actions_hidden, actions_batch'
 
@@ -37,18 +33,18 @@ layers:
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
 
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_value'
 
   - kind: 'linear'
@@ -62,16 +58,12 @@ layers:
   - kind: 'graph_model'
     parameters:
       layers:
-        - kind: 'layer_norm'
-          parameters:
-            signature: 'actions_hidden -> actions_hidden'
-            normalized_shape: 17
 
         - kind: 'linear'
           parameters:
             dim: 128
-            activation: 'relu'
-            signature: 'actions_hidden -> actions_hidden'
+            activation: 'tanh'
+            signature: 'x -> x'
 
         - kind: 'gin'
           parameters:
@@ -79,6 +71,7 @@ layers:
             out_channels: 128
             num_layers: 2
             hidden_channels: 128
+            act: 'tanh'
 
       signature: 'graph -> values_hidden, values_batch'
 
@@ -86,20 +79,15 @@ layers:
     parameters:
       signature: 'values_hidden, values_batch -> values_hidden'
 
-  - kind: 'layer_norm'
-    parameters:
-      signature: 'values_hidden -> values_hidden'
-      normalized_shape: 128
-
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'values_hidden -> values_hidden'
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'values_hidden -> values_hidden'
 
   - kind: 'output'

@@ -11,7 +11,7 @@ graph: &graph
           kind: 'complete'
 
         schedule:
-          kind: 'complete'
+          kind: 'machine_compressed'
 
     memory: 0
     is_machine_set_in_work_center_connected: False
@@ -42,11 +42,9 @@ ppo_1: &ppo_1
 ###############################################################################################
 
 reward: &reward
-  - kind: 'surrogate_tardiness'
+  - kind: 'global_decomposed_tardiness'
     parameters:
-      winq_factor: 0.2
-      span: 20
-      critical_level_factor: 64
+      span: 128
 
 ##############################################################################################
 
@@ -60,7 +58,7 @@ long_single_source_run: &long_single_source_run
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0, 1, 2, 3 ] ]
+          seed: [ [ 0, 1, 2 ] ]
 
 
 ###############################################################################################
@@ -68,7 +66,7 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 2
+  n_workers: 3
   n_threads: 10
   debug: False
   store_run_statistics: False
@@ -108,10 +106,10 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 64
+              memory: 128
               emit_trajectory: True
               reset_trajectory: False
-              sliding_window: 48
+              sliding_window: 64
 
           graph:
             *graph
@@ -188,6 +186,24 @@ task:
 
                     schedule:
                       kind: 'operation_compressed'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: False
+                is_work_center_set_in_shop_floor_connected: False
+
+            - output_dir: 'complete'
+              machine_agent:
+                parameters:
+                  *ppo_1
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'complete'
 
                 memory: 0
                 is_machine_set_in_work_center_connected: False

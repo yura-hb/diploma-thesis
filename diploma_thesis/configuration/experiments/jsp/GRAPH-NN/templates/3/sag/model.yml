@@ -1,3 +1,4 @@
+
 layers:
 
   # Actor
@@ -5,30 +6,34 @@ layers:
   - kind: 'graph_model'
     parameters:
       layers:
+        - kind: 'linear'
+          parameters:
+            dim: 128
+            activation: 'leaky_relu'
+            signature: 'x -> x'
         - kind: 'gin'
           parameters:
             in_channels: -1
             out_channels: 128
-            num_layers: 2
+            num_layers: 3
             hidden_channels: 128
-        - kind: 'mask'
+            jk: 'cat'
+        - kind: 'linear'
+          parameters:
+            dim: 128
+            activation: 'leaky_relu'
+            signature: 'x -> x'
+        - kind: 'sag_pool'
+          parameters:
+            layer: 'GIN'
+            parameters:
+              in_channels: -1
+              out_channels: 256
+              num_layers: 1
+              hidden_channels: 256
+            signature: 'x, edge_index, batch -> x, edge_index, batch'
 
       signature: 'graph -> actions_hidden, actions_batch'
-
-  - kind: 'layer_norm'
-    parameters:
-      signature: 'actions_hidden -> actions_hidden'
-      normalized_shape: 128
-  - kind: 'linear'
-    parameters:
-      dim: 128
-      activation: 'relu'
-      signature: 'actions_hidden -> actions_hidden'
-  - kind: 'linear'
-    parameters:
-      dim: 128
-      activation: 'relu'
-      signature: 'actions_hidden -> actions_hidden'
 
   - kind: 'mean_pool'
     parameters:
@@ -37,7 +42,18 @@ layers:
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'leaky_relu'
+      signature: 'actions_hidden -> actions_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'leaky_relu'
+      signature: 'actions_hidden -> actions_hidden'
+
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'leaky_relu'
       signature: 'actions_hidden -> actions_value'
 
   - kind: 'linear'
@@ -51,12 +67,23 @@ layers:
   - kind: 'graph_model'
     parameters:
       layers:
+        - kind: 'linear'
+          parameters:
+            dim: 256
+            activation: 'leaky_relu'
+            signature: 'x -> x'
         - kind: 'gin'
           parameters:
             in_channels: -1
-            out_channels: 128
-            num_layers: 2
-            hidden_channels: 128
+            out_channels: 256
+            num_layers: 3
+            hidden_channels: 256
+            jk: 'cat'
+        - kind: 'linear'
+          parameters:
+            dim: 256
+            activation: 'leaky_relu'
+            signature: 'x -> x'
 
       signature: 'graph -> values_hidden, values_batch'
 
@@ -64,20 +91,10 @@ layers:
     parameters:
       signature: 'values_hidden, values_batch -> values_hidden'
 
-  - kind: 'layer_norm'
-    parameters:
-      signature: 'values_hidden -> values_hidden'
-      normalized_shape: 128
-
   - kind: 'linear'
     parameters:
-      dim: 128
-      activation: 'relu'
-      signature: 'values_hidden -> values_hidden'
-  - kind: 'linear'
-    parameters:
-      dim: 128
-      activation: 'relu'
+      dim: 256
+      activation: 'leaky_relu'
       signature: 'values_hidden -> values_hidden'
 
   - kind: 'output'

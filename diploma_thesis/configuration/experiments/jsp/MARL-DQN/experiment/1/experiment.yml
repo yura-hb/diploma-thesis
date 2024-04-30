@@ -194,11 +194,10 @@ marl_dqn_8: &marl_dqn_8
 ###############################################################################################
 
 reward: &reward
-  - kind: 'surrogate_tardiness'
+  - kind: 'global_decomposed_tardiness'
     parameters:
-      winq_factor: 0.2
-      span: 20
-      critical_level_factor: 64
+      span: 128
+
 
 ##############################################################################################
 
@@ -212,7 +211,7 @@ long_single_source_run: &long_single_source_run
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0, 1, 2, 3 ] ]
+          seed: [ [ 0 ] ]
 
 
 ###############################################################################################

@@ -249,11 +249,11 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ ['utilization/80.yml'] ]
+        - [ ['utilization/90.yml'] ]
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0, 1, 2, 3 ] ]
+          seed: [ [ 0, 1, 2 ] ]
 
 
 ###############################################################################################
@@ -261,7 +261,7 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 4
+  n_workers: 2
   n_threads: 10
   debug: False
   store_run_statistics: False
@@ -300,8 +300,6 @@ task:
 
           simulator:
             kind: 'td'
-            parameters:
-              memory: 4
 
           graph:
             *graph
@@ -336,13 +334,13 @@ task:
 ##                  - *marl_dqn_2
 #                  - *dqn_3
 ##                  - *marl_dqn_4
-#            - output_dir: 'All'
-#              machine_agent:
-#                parameters:
+            - output_dir: 'All'
+              machine_agent:
+                parameters:
 #                  - *dqn_1_all
-##                  - *marl_dqn_2_all
-#                  - *dqn_3_all
-##                  - *marl_dqn_4_all
+#                  - *marl_dqn_2_all
+                  - *dqn_3_all
+#                  - *marl_dqn_4_all
             - output_dir: 'Flexible'
               machine_agent:
                 parameters:

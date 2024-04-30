@@ -19,9 +19,7 @@ parameters:
             kind: 'phase_selector'
             parameters:
               default:
-                kind: 'epsilon_greedy'
-                parameters:
-                  epsilon: 0.05
+                 kind: 'greedy'
               phases:
                 - phase:
                     kind: 'warm_up'
@@ -53,14 +51,14 @@ parameters:
     kind: 'dqn'
     parameters:
       decay: 1.0
-      update_steps: 20
+      update_steps: 25
       epochs: 1
 
       memory:
         kind: 'replay'
         parameters:
-          size: 1024
-          batch_size: 128
+          size: 2048
+          batch_size: 192
           prefetch: 8
 
       loss:
@@ -68,11 +66,11 @@ parameters:
 
       optimizer:
         model:
-          kind: 'sgd'
+          kind: 'adam'
           parameters:
             lr: 0.001
 
       return:
         kind: 'no'
         parameters:
-          discount_factor: 0.99
+          discount_factor: 0.95

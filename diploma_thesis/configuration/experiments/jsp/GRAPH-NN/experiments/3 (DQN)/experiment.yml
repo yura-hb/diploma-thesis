@@ -19,7 +19,7 @@ graph: &graph
     is_work_center_set_in_shop_floor_connected: False
 
 default_mods: &default_mods 
-  - 'util/infrastructure/cuda.yml'
+#  - 'util/infrastructure/cuda.yml'
   - 'util/train_schedule/on_store_32.yml'
 
 ###############################################################################################
@@ -118,18 +118,18 @@ marl_dqn_4_add: &marl_dqn_4_add
 
 ###############################################################################################
 
-dqn_1_add_local: &dqn_1_add_local
+dqn_1_sag: &dqn_1_sag
   base_path: *base_model
-  template: '3/add_local'
+  template: '3/sag'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
     - *default_mods
 
-marl_dqn_2_add_local: &marl_dqn_2_add_local
+marl_dqn_2_sag: &marl_dqn_2_sag
   base_path: *marl_model
-  template: '3/add_local'
+  template: '3/sag'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
@@ -138,9 +138,9 @@ marl_dqn_2_add_local: &marl_dqn_2_add_local
     - *default_mods
 
 
-dqn_3_add_local: &dqn_3_add_local
+dqn_3_sag: &dqn_3_sag
   base_path: *base_model
-  template: '3/add_local'
+  template: '3/sag'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
@@ -150,103 +150,9 @@ dqn_3_add_local: &dqn_3_add_local
     - *default_mods
 #    - 'util/action_selector/sample.yml'
 
-marl_dqn_4_add_local: &marl_dqn_4_add_local
+marl_dqn_4_sag: &marl_dqn_4_sag
   base_path: *marl_model
-  template: '3/add_local'
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/dueling.yml'
-    - 'util/agent/multi_agent.yml'
-    - *default_mods
-#    - 'util/action_selector/sample.yml'
-
-###############################################################################################
-
-dqn_1_mean_local: &dqn_1_mean_local
-  base_path: *base_model
-  template: '3/mean_local'
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - *default_mods
-
-marl_dqn_2_mean_local: &marl_dqn_2_mean_local
-  base_path: *marl_model
-  template: '3/mean_local'
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'util/agent/multi_agent.yml'
-    - *default_mods
-
-
-dqn_3_mean_local: &dqn_3_mean_local
-  base_path: *base_model
-  template: '3/add_local'
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/dueling.yml'
-    - *default_mods
-#    - 'util/action_selector/sample.yml'
-
-marl_dqn_4_mean_local: &marl_dqn_4_mean_local
-  base_path: *marl_model
-  template: '3/mean_local'
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/dueling.yml'
-    - 'util/agent/multi_agent.yml'
-    - *default_mods
-#    - 'util/action_selector/sample.yml'
-
-###############################################################################################
-
-dqn_1_max_local: &dqn_1_max_local
-  base_path: *base_model
-  template: '3/max_local'
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - *default_mods
-
-marl_dqn_2_max_local: &marl_dqn_2_max_local
-  base_path: *marl_model
-  template: '3/max_local'
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'util/agent/multi_agent.yml'
-    - *default_mods
-
-
-dqn_3_max_local: &dqn_3_max_local
-  base_path: *base_model
-  template: '3/max_local'
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/dueling.yml'
-    - *default_mods
-#    - 'util/action_selector/sample.yml'
-
-marl_dqn_4_max_local: &marl_dqn_4_max_local
-  base_path: *marl_model
-  template: '3/max_local'
+  template: '3/sag'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
@@ -312,6 +218,7 @@ reward: &reward
       winq_factor: 0.2
       span: 20
       critical_level_factor: 64
+
 ##############################################################################################
 
 # 8 runs
@@ -320,11 +227,11 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ ['utilization/80.yml'] ]
+        - [ ['utilization/90.yml'] ]
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0, 1, 2, 3 ] ]
+          seed: [ [ 0, 1, 2 ] ]
 
 
 ###############################################################################################
@@ -332,8 +239,8 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 8
-  n_threads: 32
+  n_workers: 3
+  n_threads: 10
   debug: False
   store_run_statistics: False
   output_dir: 'results/jsp/experiments/2. GRAPH-NN/3. Pooling (DQN)/model/'
@@ -371,8 +278,6 @@ task:
 
           simulator:
             kind: 'td'
-            parameters:
-              memory: 4
 
           graph:
             *graph
@@ -400,20 +305,14 @@ task:
                         values:
         values:
           __concat__:
-            - output_dir: 'Baseline'
+            - output_dir: 'Mean'
               machine_agent:
                 parameters:
 #                  - *dqn_1
 #                  - *marl_dqn_2
                   - *dqn_3
 #                  - *marl_dqn_4
-            - output_dir: 'Mean Local'
-              machine_agent:
-                parameters:
-#                  - *dqn_1_mean_local
-#                  - *marl_dqn_2_mean_local
-                  - *dqn_3_mean_local
-#                  - *marl_dqn_4_mean_local
+
             - output_dir: 'Add'
               machine_agent:
                 parameters:
@@ -421,13 +320,6 @@ task:
 #                  - *marl_dqn_2_add
                   - *dqn_3_add
 #                  - *marl_dqn_4_add
-            - output_dir: 'Add Local'
-              machine_agent:
-                parameters:
-#                  - *dqn_1_add_local
-#                  - *marl_dqn_2_add_local
-                  - *dqn_3_add_local
-#                  - *marl_dqn_4_add_local
             - output_dir: 'Max'
               machine_agent:
                 parameters:
@@ -435,13 +327,14 @@ task:
 #                  - *marl_dqn_2_max
                   - *dqn_3_max
 #                  - *marl_dqn_4_max
-            - output_dir: 'Max Local'
+            - output_dir: 'SAG'
               machine_agent:
                 parameters:
-#                  - *dqn_1_max_local
-#                  - *marl_dqn_2_max_local
-                  - *dqn_3_max_local
-#                  - *marl_dqn_4_max_local
+                    #                  - *dqn_1_max
+                    #                  - *marl_dqn_2_max
+                  - *dqn_3_sag
+            #                  - *marl_dqn_4_max
+
 
           tape:
             machine_reward:

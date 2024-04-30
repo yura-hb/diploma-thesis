@@ -60,12 +60,9 @@ dqn_100: &dqn_100
 #############################################################################################
 
 reward: &reward
-  - kind: 'surrogate_tardiness'
+  - kind: 'global_decomposed_tardiness'
     parameters:
-      winq_factor: 0.2
-      span: 20
-      critical_level_factor: 64
-
+      span: 128
 ##############################################################################################
 
 # 8 runs
@@ -127,7 +124,7 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 4
+              memory: 1
 
           graph:
             transition_model:

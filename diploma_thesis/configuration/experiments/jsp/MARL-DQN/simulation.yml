@@ -21,28 +21,28 @@ parameters:
           kind: 'uniform'
           parameters:
             uniform: [ 1, 50 ]
-            noise: [ 0, 10 ]
+#            noise: [ 0, 10 ]
         permutation:
-          uneveness: 3
+          uneveness: 0
         due_time:
           kind: 'uniform'
           parameters:
-            uniform: [ 0.5, 2 ]
+            uniform: [ 0.0, 2 ]
         job_arrival_time_on_machine:
           kind: 'expected_utilization'
           parameters:
             value: 0.0
 
     breakdown:
-      kind: 'dynamic'
-      parameters:
-        breakdown_arrival:
-          kind: 'exponential'
-          parameters:
-            mean: 5000
-        repair_duration:
-          kind: 'uniform'
-          parameters:
-            uniform: [ 100, 300 ]
+      kind: 'no'
+#      parameters:
+#        breakdown_arrival:
+#          kind: 'exponential'
+#          parameters:
+#            mean: 5000
+#        repair_duration:
+#          kind: 'uniform'
+#          parameters:
+#            uniform: [ 200, 300 ]
 
     seed: 42

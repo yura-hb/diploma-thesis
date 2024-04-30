@@ -19,7 +19,7 @@ graph: &graph
     is_work_center_set_in_shop_floor_connected: False
 
 default_mods: &default_mods
-  - 'util/infrastructure/cuda.yml'
+#  - 'util/infrastructure/cuda.yml'
   - 'util/train_schedule/on_store_32.yml'
 
 ###############################################################################################
@@ -96,11 +96,9 @@ dqn_3_transformer: &dqn_3_transformer
 ###############################################################################################
 
 reward: &reward
-  - kind: 'surrogate_tardiness'
+  - kind: 'global_decomposed_tardiness'
     parameters:
-      winq_factor: 0.2
-      span: 20
-      critical_level_factor: 64
+      span: 128
 
 ##############################################################################################
 
@@ -122,8 +120,8 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 8
-  n_threads: 32
+  n_workers: 4
+  n_threads: 10
   debug: False
   store_run_statistics: False
   output_dir: 'results/jsp/experiments/3. TRANSFORMER-NN/1. (DQN)/model/'
@@ -162,7 +160,7 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 4
+              memory: 1
 
           graph:
             *graph

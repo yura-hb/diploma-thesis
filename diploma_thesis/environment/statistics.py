@@ -54,6 +54,7 @@ class Statistics:
 
         worker_predicate: WorkerPredicate = field(default_factory=WorkerPredicate)
         time_predicate: TimePredicate = field(default_factory=TimePredicate)
+        limit: int = None
 
     def __init__(self,
                  shop_floor_history: 'environment.ShopFloorHistory',
@@ -278,18 +279,21 @@ class Statistics:
         return job_ids
 
     def __completed_job_ids__(self, predicate: Predicate) -> Iterable[str]:
-        logs = self.__filter__(predicate)
-
-        completed = logs[logs.event == st.LogEvent.completed]['job_id']
-
-        return completed.unique()
+        return self.__job_ids__(st.LogEvent.completed, predicate)
 
     def __job_ids__(self, event: st.LogEvent, predicate: Predicate) -> Iterable[str]:
         logs = self.__filter__(predicate)
 
-        completed = logs[logs.event == event]['job_id']
+        ids = logs[logs.event == event]['job_id']
+        ids = ids.unique()
+        ids = sorted(ids)
 
-        return completed.unique()
+        if predicate.limit and len(ids) > predicate.limit:
+            ids = ids[:predicate.limit]
+        elif predicate.limit is not None:
+            print(f"Warning: Limit {predicate.limit} is greater than the number of jobs {len(ids)}")
+
+        return ids
 
     def __reduce_jobs__(self,
                         job_ids: Iterable[str],

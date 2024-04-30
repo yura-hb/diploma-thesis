@@ -19,9 +19,7 @@ parameters:
             kind: 'phase_selector'
             parameters:
               default:
-                kind: 'epsilon_greedy'
-                parameters:
-                  epsilon: 0.05
+                kind: 'greedy'
               phases:
                 - phase:
                     kind: 'warm_up'
@@ -64,7 +62,7 @@ parameters:
           prefetch: 8
 
       loss:
-        kind: 'huber'
+        kind: 'mse'
 
       optimizer:
         model:

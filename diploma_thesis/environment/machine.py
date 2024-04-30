@@ -279,6 +279,17 @@ class Machine:
             if job.next_work_center_idx == self.work_center_idx and job.release_moment_on_machine is not None
         ]
 
+    @property
+    def will_arrive_jobs(self) -> List[environment.Job]:
+        """
+        Returns: A list of jobs which are about to arrive at the machine, i.e. they were selected for processing on
+        the previous machine
+        """
+        return [
+            job for job in self.shop_floor.in_system_running_jobs
+            if job.next_work_center_idx == self.work_center_idx
+        ]
+
     # Timeline
 
     def __produce__(self):

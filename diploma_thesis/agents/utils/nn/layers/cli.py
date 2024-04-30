@@ -32,6 +32,7 @@ def from_cli(*args, **kwargs):
         'sage': SAGEConv,
         'gat': GATConv,
         'gcn': GCNConv,
+        'graph_conv': GraphConv,
         'deep_gcn': DeepGCNConv,
         'graph_instance_norm': GraphInstanceNorm,
         'mask': MaskTarget,

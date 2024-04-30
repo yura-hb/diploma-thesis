@@ -143,11 +143,9 @@ marl_dqn_7_all: &marl_dqn_7_all
 #############################################################################################
 
 reward: &reward
-  - kind: 'surrogate_tardiness'
+  - kind: 'global_decomposed_tardiness'
     parameters:
-      winq_factor: 0.2
-      span: 20
-      critical_level_factor: 64
+      span: 128
 
 ##############################################################################################
 
@@ -210,7 +208,7 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 4
+              memory: 1
 
           graph:
             transition_model:

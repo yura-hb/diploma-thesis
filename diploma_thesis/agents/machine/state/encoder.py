@@ -23,7 +23,11 @@ class GraphStateEncoder(GraphEncoder, metaclass=ABCMeta):
 
     def __localize__(self, parameters: StateEncoder.Input, graph: Graph):
         job_ids = torch.cat([job.id.view(-1) for job in parameters.machine.queue])
-        job_ids = torch.cat([job_ids, parameters.machine.history.processed_job_ids])
+
+        arriving_jobs = parameters.machine.will_arrive_jobs
+
+        if len(arriving_jobs) > 0:
+            job_ids = torch.cat([job_ids, torch.cat([job.id.view(-1) for job in arriving_jobs])])
 
         return super().__localize_with_job_ids__(graph, job_ids)
 

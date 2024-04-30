@@ -11,6 +11,10 @@ class Tardiness(Criterion):
         return 'tardiness'
 
     def compute(self, statistics):
-        predicate = Statistics.Predicate()
+        if self.at is None:
+            predicate = Statistics.Predicate(limit=self.limit)
+        else:
+            tp = Statistics.Predicate.TimePredicate
+            predicate = Statistics.Predicate(time_predicate=tp(self._at, kind=tp.Kind.less_than), limit=self.limit)
 
-        return statistics.total_tardiness(predicate)
+        return statistics.total_tardiness(predicate=predicate)

@@ -48,13 +48,14 @@ parameters:
     kind: 'ppo'
     parameters:
       device: 'cpu'
-      sample_count: 128
+      sample_count: 256
       policy_step_ratio: 0.2
-      entropy_regularization: 0.02
-      rollback_ratio: 0.00
+      entropy_regularization: 0.0001
+      entropy_decay: 0.999
+      rollback_ratio: 0.001
       critic_weight: 0.5
 
-      epochs: 5
+      epochs: 1
 
       loss:
         kind: 'cross_entropy'
@@ -62,7 +63,7 @@ parameters:
           reduction: 'none'
 
       value_loss:
-        kind: 'huber'
+        kind: 'mse'
 
       optimizer:
         model:
@@ -71,9 +72,9 @@ parameters:
             lr: 0.001
 
       memory:
-        kind: 'prioritized_replay'
+        kind: 'replay'
         parameters:
-          size: 16
+          size: 8
           batch_size: 8
           prefetch: 1
 

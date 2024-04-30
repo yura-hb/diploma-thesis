@@ -19,7 +19,7 @@ graph: &graph
     is_work_center_set_in_shop_floor_connected: False
 
 default_mods: &default_mods 
-  - 'util/infrastructure/cuda.yml'
+#  - 'util/infrastructure/cuda.yml'
   - 'util/train_schedule/on_store_32.yml'
 
 ###############################################################################################
@@ -97,7 +97,7 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 1
+  n_workers: 3
   n_threads: 10
   debug: False
   store_run_statistics: False
@@ -136,8 +136,6 @@ task:
 
           simulator:
             kind: 'td'
-            parameters:
-              memory: 4
 
           graph:
             *graph

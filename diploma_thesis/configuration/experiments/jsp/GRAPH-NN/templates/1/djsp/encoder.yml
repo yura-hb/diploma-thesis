@@ -4,6 +4,6 @@ encoder:
   parameters:
     is_homogeneous: True
     is_undirected: False
-    is_local: False
-    append_target_mask: False
+    is_local: True
+    append_target_mask: True
     include_due_dates: True

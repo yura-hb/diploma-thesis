@@ -51,7 +51,7 @@ parameters:
       device: 'cpu'
       sample_count: 192
       policy_step_ratio: 0.2
-      entropy_regularization: 0.01
+      entropy_regularization: 0.001
       rollback_ratio: 0.00
       critic_weight: 0.5
 
@@ -74,8 +74,8 @@ parameters:
       memory:
         kind: 'prioritized_replay'
         parameters:
-          size: 16
-          batch_size: 8
+          size: 3
+          batch_size: 3
           prefetch: 1
 
       return:

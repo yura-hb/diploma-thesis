@@ -17,9 +17,7 @@ parameters:
             kind: 'phase_selector'
             parameters:
               default:
-                kind: 'epsilon_greedy'
-                parameters:
-                  epsilon: 0.05
+                 kind: 'greedy'
               phases:
                 - phase:
                     kind: 'warm_up'
@@ -57,8 +55,8 @@ parameters:
       memory:
         kind: 'replay'
         parameters:
-          size: 1024
-          batch_size: 128
+          size: 2048
+          batch_size: 192
           prefetch: 8
 
       loss:
@@ -73,4 +71,4 @@ parameters:
       return:
         kind: 'no'
         parameters:
-          discount_factor: 0.99
+          discount_factor: 0.95

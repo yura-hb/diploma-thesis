@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import List, Tuple
 
 import torch_geometric as pyg
-from tensordict import TensorDict
 from torch import nn
 
 from .layers import Key

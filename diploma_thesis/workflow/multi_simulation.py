@@ -11,7 +11,7 @@ from .workflow import *
 def __run__(s: Dict, threads):
     import torch
 
-    torch.set_num_threads(threads)
+    # torch.set_num_threads(threads)
     torch.manual_seed(s.get('seed', 0))
 
     s = Simulation(s)

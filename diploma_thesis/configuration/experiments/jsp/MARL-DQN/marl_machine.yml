@@ -19,9 +19,7 @@ parameters:
             kind: 'phase_selector'
             parameters:
               default:
-                kind: 'epsilon_greedy'
-                parameters:
-                  epsilon: 0.05
+                kind: 'greedy'
               phases:
                 - phase:
                     kind: 'warm_up'
@@ -68,11 +66,11 @@ parameters:
 
       optimizer:
         model:
-          kind: 'adam_w'
+          kind: 'rmsprop'
           parameters:
             lr: 0.001
 
       return:
         kind: 'no'
         parameters:
-          discount_factor: 0.99
+          discount_factor: 0.95

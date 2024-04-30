@@ -63,6 +63,12 @@ class GATConv(GraphModuleWrapper):
         super().__init__(pyg.nn.GAT, configuration)
 
 
+class GraphConv(GraphModuleWrapper):
+
+    def __init__(self, configuration):
+        super().__init__(pyg.nn.GraphConv, configuration)
+
+
 class GCNConv(GraphModuleWrapper):
 
     def __init__(self, configuration):

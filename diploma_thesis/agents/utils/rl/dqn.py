@@ -50,6 +50,8 @@ class DeepQTrainer(RLTrainer):
             def compute_loss():
                 actions = self.__get_action_values__(model, batch.state, batch.action)
 
+                print(actions.view(-1), q_values.view(-1))
+
                 loss_ = self.loss(actions, q_values)
                 td_error_ = torch.square(actions - q_values)
 

@@ -11,6 +11,7 @@ layers:
             out_channels: 256
             num_layers: 2
             hidden_channels: 256
+            act: 'tanh'
 
       signature: 'graph -> actions_hidden, actions_batch'
 
@@ -18,26 +19,21 @@ layers:
     parameters:
       signature: 'actions_hidden, actions_batch -> actions_hidden'
 
-  - kind: 'layer_norm'
-    parameters:
-      signature: 'actions_hidden -> actions_hidden'
-      normalized_shape: 256
-
   - kind: 'linear'
     parameters:
       dim: 256
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
   - kind: 'linear'
     parameters:
       dim: 256
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
 
   - kind: 'linear'
     parameters:
       dim: 256
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_value'
 
   - kind: 'linear'
@@ -57,6 +53,7 @@ layers:
             out_channels: 256
             num_layers: 2
             hidden_channels: 256
+            act: 'tanh'
 
       signature: 'graph -> values_hidden, values_batch'
 
@@ -64,20 +61,15 @@ layers:
     parameters:
       signature: 'values_hidden, values_batch -> values_hidden'
 
-  - kind: 'layer_norm'
-    parameters:
-      signature: 'values_hidden -> values_hidden'
-      normalized_shape: 256
-
   - kind: 'linear'
     parameters:
       dim: 256
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'values_hidden -> values_hidden'
   - kind: 'linear'
     parameters:
       dim: 256
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'values_hidden -> values_hidden'
 
   - kind: 'output'

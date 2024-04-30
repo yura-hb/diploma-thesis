@@ -17,7 +17,7 @@ layers:
         - kind: 'linear'
           parameters:
             dim: 128
-            activation: 'relu'
+            activation: 'tanh'
             signature: 'x -> x'
 
         - kind: 'attention'
@@ -26,7 +26,7 @@ layers:
               out_channels: 128
             layer:
               d_model: 128
-              nhead: 8
+              nhead: 4
               dim_feedforward: 256
             encoder:
               num_layers: 4
@@ -39,29 +39,25 @@ layers:
 
       signature: 'graph -> actions_hidden, actions_batch'
 
-  - kind: 'mean_pool'
+  - kind: 'add_pool'
     parameters:
       signature: 'actions_hidden, actions_batch -> actions_hidden'
 
-  - kind: 'layer_norm'
-    parameters:
-      signature: 'actions_hidden -> actions_hidden'
-      normalized_shape: 128
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
 
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_value'
 
   - kind: 'linear'
@@ -88,7 +84,7 @@ layers:
               out_channels: 128
             layer:
               d_model: 128
-              nhead: 8
+              nhead: 4
               dim_feedforward: 256
             encoder:
               num_layers: 4
@@ -96,29 +92,19 @@ layers:
 
       signature: 'graph -> values_hidden, values_batch'
 
-  - kind: 'mean_pool'
+  - kind: 'add_pool'
     parameters:
       signature: 'values_hidden, values_batch -> values_hidden'
 
-  - kind: 'layer_norm'
-    parameters:
-      signature: 'values_hidden -> values_hidden'
-      normalized_shape: 128
-
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'values_hidden -> values_hidden'
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
-      signature: 'values_hidden -> values_hidden'
-  - kind: 'linear'
-    parameters:
-      dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'values_hidden -> values_hidden'
 
   - kind: 'output'

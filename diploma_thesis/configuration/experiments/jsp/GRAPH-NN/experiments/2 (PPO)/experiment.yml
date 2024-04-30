@@ -11,7 +11,7 @@ graph: &graph
           kind: 'complete'
 
         schedule:
-          kind: 'complete'
+          kind: 'machine_compressed'
 
     memory: 0
     is_machine_set_in_work_center_connected: False
@@ -95,14 +95,31 @@ ppo_4: &ppo_4
       ]
 #      - ['util/infrastructure/cuda.yml']
       - [ 'util/train_schedule/on_store.yml']
+
+ppo_5: &ppo_5
+  base_path: *base_model
+  template: '2/graph_conv'
+  mod_dirs:
+    - ['configuration/mods/machine/mods']
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+      - [
+          '__none__',
+#          'agent/ppo/p3or.yml'
+      ]
+      - [
+        '__none__',
+#        'util/agent/multi_agent.yml'
+      ]
+#      - ['util/infrastructure/cuda.yml']
+      - [ 'util/train_schedule/on_store.yml']
 ###############################################################################################
 
 reward: &reward
-  - kind: 'surrogate_tardiness'
+  - kind: 'global_decomposed_tardiness'
     parameters:
-      winq_factor: 0.2
-      span: 20
-      critical_level_factor: 64
+      span: 128
 
 ##############################################################################################
 
@@ -116,7 +133,7 @@ long_single_source_run: &long_single_source_run
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0, 1, 2, 3 ] ]
+          seed: [ [ 0, 1, 2 ] ]
 
 
 ###############################################################################################
@@ -124,7 +141,7 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 2
+  n_workers: 5
   n_threads: 10
   debug: False
   store_run_statistics: False
@@ -168,8 +185,6 @@ task:
               memory: 64
               emit_trajectory: True
               reset_trajectory: False
-              sliding_window: 48
-
 
           graph:
             *graph
@@ -213,6 +228,10 @@ task:
               machine_agent:
                 parameters:
                   *ppo_4
+            - output_dir: 'GraphCONV'
+              machine_agent:
+                parameters:
+                  *ppo_5
 
           tape:
             machine_reward:

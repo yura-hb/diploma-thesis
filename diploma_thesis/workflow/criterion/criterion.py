@@ -16,10 +16,12 @@ class Scale(StrEnum):
 
 class Criterion(metaclass=ABCMeta):
 
-    def __init__(self, weight: float, direction: Direction, scale: Scale):
+    def __init__(self, weight: float, direction: Direction, scale: Scale, at, limit: int):
         self._weight = weight
         self._direction = direction
         self._scale = scale
+        self._at = at
+        self.limit = limit
 
     @classmethod
     @property
@@ -39,6 +41,10 @@ class Criterion(metaclass=ABCMeta):
     def scale(self) -> Scale:
         return self._scale
 
+    @property
+    def at(self):
+        return self._at
+
     @abstractmethod
     def compute(self, statistics):
         pass
@@ -48,7 +54,9 @@ class Criterion(metaclass=ABCMeta):
         return {
             'weight': parameters['weight'],
             'direction': Direction[parameters['direction']],
-            'scale': Scale[parameters['scale']]
+            'scale': Scale[parameters['scale']],
+            'at': parameters.get('at', None),
+            'limit': parameters.get('limit', None)
         }
 
     @classmethod

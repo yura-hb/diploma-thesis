@@ -52,7 +52,7 @@ long_single_source_run: &long_single_source_run
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0, 1, 2, 3 ] ]
+          seed: [ [ 0, 1, 2, 3, 4, 5 ] ]
 
 
 ###############################################################################################
@@ -100,8 +100,10 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 96
+              memory: 64
               emit_trajectory: True
+              reset_trajectory: False
+              sliding_window: 48
 
           graph:
             transition_model:

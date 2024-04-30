@@ -11,23 +11,20 @@ layers:
             out_channels: 128
             num_layers: 2
             hidden_channels: 128
+            act: 'tanh'
         - kind: 'mask'
 
       signature: 'graph -> actions_hidden, actions_batch'
 
-  - kind: 'layer_norm'
-    parameters:
-      signature: 'actions_hidden -> actions_hidden'
-      normalized_shape: 128
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
 
   - kind: 'mean_pool'
@@ -37,7 +34,7 @@ layers:
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_value -> actions_value'
 
   - kind: 'merge_graph'
@@ -48,7 +45,7 @@ layers:
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
 
   - kind: 'linear'
@@ -68,6 +65,7 @@ layers:
             out_channels: 128
             num_layers: 2
             hidden_channels: 128
+            act: 'tanh'
 
       signature: 'graph -> values_hidden, values_batch'
 
@@ -75,20 +73,15 @@ layers:
     parameters:
       signature: 'values_hidden, values_batch -> values_hidden'
 
-  - kind: 'layer_norm'
-    parameters:
-      signature: 'values_hidden -> values_hidden'
-      normalized_shape: 128
-
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'values_hidden -> values_hidden'
   - kind: 'linear'
     parameters:
       dim: 128
-      activation: 'relu'
+      activation: 'tanh'
       signature: 'values_hidden -> values_hidden'
 
   - kind: 'output'

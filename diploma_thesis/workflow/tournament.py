@@ -40,7 +40,7 @@ def __evaluate__(tournament: 'Tournament',
     import torch
     import random
 
-    torch.set_num_threads(threads)
+    # torch.set_num_threads(threads)
     torch.manual_seed(0)
     random.seed(0)
     np.random.seed(0)
@@ -56,17 +56,18 @@ def __evaluate__(tournament: 'Tournament',
 
     mods = []
 
-    for m in candidate.parameters['machine_agent']['parameters']['mods']:
-        if isinstance(m, str):
-            if 'cuda' not in 'm':
-                mods.append(m)
-            continue
+    if 'machine_agent' in candidate.parameters:
+        for m in candidate.parameters['machine_agent']['parameters']['mods']:
+            if isinstance(m, str):
+                if 'cuda' not in 'm':
+                    mods.append(m)
+                continue
 
-        if isinstance(m, list):
-            mods += [m_ for m_ in m if 'cuda' not in m_]
-            continue
+            if isinstance(m, list):
+                mods += [m_ for m_ in m if 'cuda' not in m_]
+                continue
 
-    candidate.parameters['machine_agent']['parameters']['mods'] = mods
+        candidate.parameters['machine_agent']['parameters']['mods'] = mods
 
     try:
         machine, work_center = candidate.load()
@@ -260,7 +261,7 @@ class Tournament(Workflow):
         records = []
         result = []
 
-        for candidate in candidates:
+        for candidate in tqdm(candidates):
             candidate_output_path: str = os.path.join(output_dir, candidates_dir, candidate.name)
 
             if os.path.exists(candidate_output_path):

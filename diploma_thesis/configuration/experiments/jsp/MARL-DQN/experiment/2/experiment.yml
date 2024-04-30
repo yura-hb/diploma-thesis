@@ -100,11 +100,9 @@ marl_dqn_7_on_store: &marl_dqn_7_on_store
 #############################################################################################
 
 reward: &reward
-  - kind: 'surrogate_tardiness'
+  - kind: 'global_decomposed_tardiness'
     parameters:
-      winq_factor: 0.2
-      span: 20
-      critical_level_factor: 64
+      span: 128
 
 ##############################################################################################
 
@@ -129,7 +127,7 @@ parallel_multi_source_run: &parallel_multi_source_run
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0, 1, 2, 3 ] ]
+          seed: [ [ 0, 1, 2, 3, 4, 5 ] ]
 
 
 ###############################################################################################
@@ -177,7 +175,7 @@ task:
           simulator:
             kind: 'td'
             parameters:
-              memory: 4
+              memory: 1
 
           graph:
             transition_model:
