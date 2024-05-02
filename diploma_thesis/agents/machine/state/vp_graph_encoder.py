@@ -20,7 +20,7 @@ class VPTGraphEncoder(GraphStateEncoder):
 
         for job_id in job_ids:
             job = parameters.machine.shop_floor.job(job_id)
-            completions_times, mean_completion_time, _ = self.__estimate_completion_times__(job)
+            completions_times, mean_completion_time, _ = self.__estimate_completion_times__(job, parameters.now)
 
             status = torch.ones_like(job.step_idx) + 1
 

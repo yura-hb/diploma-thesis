@@ -82,9 +82,6 @@ class RLTrainer(Loggable):
         return pd.DataFrame(self.loss_cache)
 
     def store(self, sample: TrainingSample, model: Policy):
-        if self.train_schedule.kind == TrainSchedule.Kind.ON_STORED_DATA_EXCLUSIVELY:
-            self.storage.clear()
-
         self.storage.store(sample)
 
         if not self.train_schedule.is_on_store:

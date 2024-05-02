@@ -8,7 +8,7 @@ from .rl_agent import *
 
 class MARLAgent(Generic[Key], RLAgent[Key]):
 
-    def __init__(self, is_model_distributed: bool, *args, **kwargs):
+    def __init__(self, is_model_distributed: bool, is_training_centralized: bool, *args, **kwargs):
         self.is_configured = False
 
         super().__init__(*args, **kwargs)
@@ -16,6 +16,7 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
         self.model: DeepPolicyModel | Dict[Key, DeepPolicyModel] = self.model
         self.trainer: RLTrainer | Dict[Key, RLTrainer] = self.trainer
         self.is_model_distributed = is_model_distributed
+        self.is_training_centralized = is_training_centralized
         self.keys = None
 
     def setup(self, shop_floor: ShopFloor):
@@ -88,6 +89,12 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
 
     @filter(lambda self, *args: self.phase != EvaluationPhase())
     def store(self, key: Key, sample: TrainingSample):
+        if self.is_training_centralized:
+            for key in self.keys:
+                self.trainer[key].store(sample, self.__model_for_key__(key).policy)
+
+            return
+
         self.trainer[key].store(sample, self.__model_for_key__(key).policy)
 
     def loss_record(self):

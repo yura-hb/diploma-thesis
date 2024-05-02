@@ -23,10 +23,12 @@ class MARLMachine(MARLAgent[MachineKey]):
         configuration = RunConfiguration.from_cli(parameters)
 
         is_model_distributed = parameters.get('is_model_distributed', True)
+        is_training_centralized = parameters.get('is_training_centralized', True)
 
         assert isinstance(model, DeepPolicyMachineModel), f"Model must conform to NNModel"
 
         return MARLMachine(is_model_distributed=is_model_distributed,
+                           is_training_centralized=is_training_centralized,
                            model=model,
                            encoder=encoder,
                            trainer=trainer,

@@ -20,7 +20,8 @@ class MARLWorkCenter(MARLAgent[WorkCenterKey]):
         trainer = rl_trainer_from_cli(parameters['trainer'])
 
         is_model_distributed = parameters.get('is_model_distributed', True)
+        is_training_centralized = parameters.get('is_training_centralized', True)
 
         assert isinstance(model, DeepPolicyWorkCenterModel), f"Model must conform to NNModel"
 
-        return MARLWorkCenter(model, encoder, trainer, is_model_distributed)
+        return MARLWorkCenter(model, encoder, trainer, is_model_distributed, is_training_centralized=is_training_centralized)

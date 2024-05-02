@@ -151,8 +151,10 @@ class Storage:
                     element.next_state.memory = non_zero_memory
 
     def __collate_variable_length_info_values__(self, batch):
-        keys = [Record.POLICY_KEY, Record.ACTION_KEY]
-        fill_values = {Record.POLICY_KEY: 0.0, Record.ACTION_KEY: torch.finfo(torch.float32).min}
+        keys = [Record.POLICY_KEY, Record.ACTION_KEY, Record.VALUE_KEY]
+        fill_values = {Record.POLICY_KEY: 0.0,
+                       Record.ACTION_KEY: torch.finfo(torch.float32).min,
+                       Record.VALUE_KEY: torch.finfo(torch.float32).min}
 
         result = dict()
 

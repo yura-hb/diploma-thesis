@@ -63,7 +63,7 @@ class DEEPMARLMinimumRepetitionStateEncoder(StateEncoder):
                     is_no_candidates = pool.numel() == 0
                     store = candidates if is_no_candidates else pool
 
-                    idx = torch.argmin(store[:, i])
+                    idx = torch.argmin(store[:, i + 1])
 
                     state += [store[idx]]
 

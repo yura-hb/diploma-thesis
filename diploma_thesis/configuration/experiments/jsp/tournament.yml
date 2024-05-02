@@ -1,8 +1,8 @@
 task:
   kind: 'tournament'
 
-  n_workers: 1
-  n_threads: 4
+  n_workers: 10
+  n_threads: 10
   name: 'rules'
   output_dir: 'results/jsp/experiments/tournaments/jsp/1. MARL-DQN (Tournament)'
   store_run_statistics: True
@@ -37,96 +37,12 @@ task:
           prefix: ''
           path: 'results/jsp/experiments/1. MARL-DQN'
           depth: 5
-#
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'flexible_with_graph'
-#        path: 'results/jsp/experiments/2_9/flexible_with_graph'
-#
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'flexible_without_graph'
-#        path: 'results/jsp/experiments/2_9/flexible_without_graph'
-#
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'transformer_with_graph'
-#        path: 'results/jsp/experiments/2_9/transformer_with_graph'
-#
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'transformer_without_graph'
-#        path: 'results/jsp/experiments/2_9/transformer_without_graph'
 
 #    - kind: 'persisted_agents'
 #      parameters:
-#        prefix: 'adding_arc_machine_compressed'
-#        path: 'results/jsp/experiments/2_8/adding_arc_machine_compressed'
-#
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'adding_arc_complete'
-#        path: 'results/jsp/experiments/2_8/adding_arc_complete'
-
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: '3-step'
-#        path: 'results/jsp/experiments/1_1/4'
-#
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'prioritized'
-#        path: 'results/jsp/experiments/1_1/5'
-#
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'noisy'
-#        path: 'results/jsp/experiments/1_1/6'
-#
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'all'
-#        path: 'results/jsp/experiments/1_1/7'
-##
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'ddqn'
-#        path: 'results/jsp/experiments/1_2/2'
-#
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'all'
-#        path: 'results/jsp/experiments/1_2/3'
-#
-#    - kind: 'persisted_agents'
-#      parameters:
-#        prefix: 'marl_all'
-#        path: 'results/jsp/experiments/1_2/4'
-#
-#      - kind: 'persisted_agents'
-#        parameters:
-#          prefix: 'adam'
-#          path: 'results/jsp/experiments/1_6/adam'
-#
-#      - kind: 'persisted_agents'
-#        parameters:
-#          prefix: 'adam_w'
-#          path: 'results/jsp/experiments/1_6/adam_w'
-#
-#      - kind: 'persisted_agents'
-#        parameters:
-#          prefix: 'adamax'
-#          path: 'results/jsp/experiments/1_6/adamax'
-#
-#      - kind: 'persisted_agents'
-#        parameters:
-#          prefix: 'rms_prop'
-#          path: 'results/jsp/experiments/1_6/rms_prop'
-#
-#      - kind: 'persisted_agents'
-#        parameters:
-#          prefix: 'sgd'
-#          path: 'results/jsp/experiments/1_6/sgd'
+#        prefix: ''
+#        path: 'results/jsp/experiments/2. GRAPH-NN'
+#        depth: 5
 
   criteria:
     - kind: 'makespan'
@@ -139,15 +55,15 @@ task:
         weight: 1
         direction: 'minimize'
         scale: 'linear'
-        at: 3000
-        limit: 50
+        at: 3250
+        limit: 80
 
   reward:
     top_k: -1
     points: 1
 
   simulator:
-    n_workers: 16
+    n_workers: 100
     simulations:
       #      - name: 'tailard'
       #        kind: 'jsp_dataset'
@@ -245,7 +161,7 @@ task:
             kind: 'simulation'
             parameters:
               configuration:
-                timespan: 8000
+                timespan: 3700
                 machines_per_work_center: 1
                 work_center_count: 10
 
@@ -253,7 +169,7 @@ task:
                 initial_job_assignment:
                   kind: 'n_per_machine'
                   parameters:
-                    n: 1
+                    n: 3
 
                 job_sampler:
                   kind: 'dynamic'
@@ -314,18 +230,18 @@ task:
                 job_sampler:
                   parameters:
                     __concat__:
-                      - job_arrival_time_on_machine:
-                          parameters:
-                            value:
-                              - 0.7
-                        n_jobs: 100
+#                      - job_arrival_time_on_machine:
+#                          parameters:
+#                            value:
+#                              - 0.7
+#                        n_jobs: 150
                       - job_arrival_time_on_machine:
                           parameters:
                             value:
                               - 0.8
-                        n_jobs: 100
-                      - job_arrival_time_on_machine:
-                          parameters:
-                            value:
-                              - 0.9
-                        n_jobs: 100
+                        n_jobs: 150
+#                      - job_arrival_time_on_machine:
+#                          parameters:
+#                            value:
+#                              - 0.9
+#                        n_jobs: 150

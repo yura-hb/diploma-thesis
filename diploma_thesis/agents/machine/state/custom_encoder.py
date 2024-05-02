@@ -21,6 +21,7 @@ class CustomGraphEncoder(GraphStateEncoder):
 
         machine_util_rate = torch.nan_to_num(parameters.machine.utilization_rate, nan=0)
         arriving_jobs = len(parameters.machine.arriving_jobs)
+        will_arrive_jobs = len(parameters.machine.will_arrive_jobs)
         time_till_available = parameters.machine.time_till_available / self.norm_factor
         expected_tardy_rate = parameters.machine.shop_floor.expected_tardy_rate(parameters.machine.shop_floor.now)
 
@@ -31,7 +32,7 @@ class CustomGraphEncoder(GraphStateEncoder):
         for job_id in job_ids:
             job = parameters.machine.shop_floor.job(job_id)
 
-            completion_times = self.__estimate_completion_times__(job)
+            completion_times = self.__estimate_completion_times__(job, parameters.now)
             l_completion_time, mean_completion_time, u_completion_time = completion_times
 
             completion_rate = self.__fill_job_matrix__(
@@ -73,6 +74,7 @@ class CustomGraphEncoder(GraphStateEncoder):
                 placeholder + wait_times,
                 placeholder + machine_util_rate,
                 placeholder + arriving_jobs,
+                placeholder + will_arrive_jobs,
                 placeholder + time_till_available,
                 placeholder + expected_tardy_rate,
                 placeholder + winq[idx],

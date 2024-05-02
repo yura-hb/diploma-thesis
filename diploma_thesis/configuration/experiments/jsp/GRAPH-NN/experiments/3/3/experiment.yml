@@ -1,0 +1,205 @@
+# Evaluate the effectivenes of basic DQNs on the JSP environment
+
+template: &template 'baseline'
+base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN/experiments/1/flexible_machine.yml'
+
+graph: &graph
+    transition_model:
+      kind: 'base'
+      parameters:
+        forward:
+          kind: 'complete'
+
+        schedule:
+          kind: 'machine_compressed'
+
+    memory: 0
+    is_machine_set_in_work_center_connected: False
+    is_work_center_set_in_shop_floor_connected: False
+
+default_mods: &default_mods
+  - 'util/train_schedule/on_store_32.yml'
+
+###############################################################################################
+
+dqn_1: &dqn_1
+  base_path: *base_model
+  template: '3/gin'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+
+###############################################################################################
+
+dqn_1_gat: &dqn_1_gat
+  base_path: *base_model
+  template: '3/gat'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+
+###############################################################################################
+
+dqn_1_gcn: &dqn_1_gcn
+  base_path: *base_model
+  template: '3/gcn'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+
+
+###############################################################################################
+
+dqn_1_sage: &dqn_1_sage
+  base_path: *base_model
+  template: '3/sage'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+
+
+##############################################################################################
+
+reward: &reward
+  - kind: 'global_decomposed_tardiness'
+    parameters:
+      span: 128
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ ['utilization/80.yml'] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0, 1, 2 ] ]
+
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 5
+  n_threads: 10
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/0 (Graph)/Graph Layer (DQN)/model/'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+
+          graph:
+            *graph
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/GRAPH-NN/experiments/1/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods: []
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/GRAPH-NN/experiments/1/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+            - output_dir: 'GIN'
+              machine_agent:
+                parameters:
+#                  - *dqn_1
+#                  - *marl_dqn_2
+                  - *dqn_1
+#                  - *marl_dqn_4
+            - output_dir: 'GAT'
+              machine_agent:
+                parameters:
+#                  - *dqn_1_gat
+#                  - *marl_dqn_2_gin
+                  - *dqn_1_gat
+#                  - *marl_dqn_4_gin
+            - output_dir: 'SAGE'
+              machine_agent:
+                parameters:
+#                  - *dqn_1_sage
+#                  - *marl_dqn_2_sage
+                  - *dqn_1_sage
+#                  - *marl_dqn_4_sage
+            - output_dir: 'GCN'
+              machine_agent:
+                parameters:
+#                  - *dqn_1_gcn
+#                  - *marl_dqn_2_gcn
+                  - *dqn_1_gcn
+#                  - *marl_dqn_4_gcn
+
+
+          tape:
+            machine_reward:
+              *reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run

@@ -18,7 +18,7 @@ class HierarchicalGraphEncoder(GraphStateEncoder):
 
         for job_id in job_ids:
             job = parameters.machine.shop_floor.job(job_id)
-            completions_times, mean_completion_time, _ = self.__estimate_completion_times__(job)
+            completions_times, mean_completion_time, _ = self.__estimate_completion_times__(job, parameters.now)
 
             status = torch.zeros_like(job.step_idx)
             status[:job.current_step_idx] = 1

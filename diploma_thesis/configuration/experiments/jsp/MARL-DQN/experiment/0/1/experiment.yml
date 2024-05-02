@@ -1,0 +1,199 @@
+
+template: &template 'baseline'
+base_model: &base_model 'configuration/experiments/jsp/MARL-DQN/experiment/0/machine.yml'
+
+default_mods: &default_mods
+  - 'agent/dqn/ddqn.yml'
+
+###############################################################################################
+
+dqn_1: &dqn_1
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/optimizer/sgd.yml'
+
+dqn_2: &dqn_2
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/optimizer/adam.yml'
+
+
+dqn_3: &dqn_3
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/optimizer/adam_w.yml'
+
+
+dqn_4: &dqn_4
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/optimizer/adamax.yml'
+
+dqn_5: &dqn_5
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/optimizer/rms_prop.yml'
+
+dqn_6: &dqn_6
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/optimizer/radam.yml'
+
+#############################################################################################
+
+reward: &reward
+  - kind: 'global_decomposed_tardiness'
+    parameters:
+      span: 128
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ ['utilization/80.yml'] ]
+    nested:
+      parameters:
+        dispatch:
+          seed: [ [ 0 ] ]
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 6
+  n_threads: 6
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/0 (MARL.)/Optimizer/model/'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/MARL-DQN/experiment/0/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods: []
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/MARL-DQN/experiment/0/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+
+          __concat__:
+            - __concat__:
+                - output_dir: 'SQD'
+                  machine_agent:
+                    parameters:
+                      - *dqn_1
+                - output_dir: 'Adam'
+                  machine_agent:
+                    parameters:
+                      - *dqn_2
+                - output_dir: 'AdamW'
+                  machine_agent:
+                    parameters:
+                      - *dqn_3
+                - output_dir: 'AdaMax'
+                  machine_agent:
+                    parameters:
+                      - *dqn_4
+                - output_dir: 'RMSProp'
+                  machine_agent:
+                    parameters:
+                      - *dqn_5
+                - output_dir: 'RAdam'
+                  machine_agent:
+                    parameters:
+                      - *dqn_6
+
+              tape:
+                machine_reward:
+                  *reward
+
+              run:
+                parameters:
+                  nested:
+                    parameters:
+                      simulations:
+                        __0__:
+                          parameters:
+                            values:
+                              __concat__:
+                                - *long_single_source_run
