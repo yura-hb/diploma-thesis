@@ -29,6 +29,7 @@ dqn_1: &dqn_1
 #      - [ 'util/optimizer/grad_norm.yml' ]
       - [[
         'agent/dqn/ddqn.yml',
+         'agent/dqn/prioritized.yml',
         'util/infrastructure/cuda.yml',
         'util/train_schedule/on_store_32.yml'
       ]]
@@ -44,6 +45,7 @@ dqn_2: &dqn_2
 #      - [ 'util/optimizer/grad_norm.yml' ]
       - [[
         'agent/dqn/ddqn.yml',
+        'agent/dqn/prioritized.yml',
         'util/infrastructure/cuda.yml',
         'util/train_schedule/on_store_32.yml'
       ]]
@@ -60,6 +62,7 @@ dqn_3: &dqn_3
       - [
           [
             'agent/dqn/ddqn.yml',
+            'agent/dqn/prioritized.yml',
             'util/infrastructure/cuda.yml',
             'util/train_schedule/on_store_32.yml'
           ]

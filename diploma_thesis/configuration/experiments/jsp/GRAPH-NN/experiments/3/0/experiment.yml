@@ -14,7 +14,7 @@ dqn_1: &dqn_1
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
-#    - 'agent/dqn/prioritized.yml'
+    - 'agent/dqn/prioritized.yml'
     - *default_mods
 
 
@@ -27,7 +27,7 @@ dqn_1_local: &dqn_1_local
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
-#    - 'agent/dqn/prioritized.yml'
+    - 'agent/dqn/prioritized.yml'
     - *default_mods
 
 ###############################################################################################
