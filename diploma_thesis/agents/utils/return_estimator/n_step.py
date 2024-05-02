@@ -37,6 +37,7 @@ class NStep(Estimator):
 
         self.configuration = configuration
 
+
     @property
     def discount_factor(self) -> float:
         return self.configuration.discount_factor ** self.configuration.n

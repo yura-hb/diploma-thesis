@@ -8,20 +8,20 @@ layers:
       layers:
         - kind: 'linear'
           parameters:
-            dim: 128
+            dim: 256
             activation: 'leaky_relu'
             signature: 'x -> x'
         - kind: 'sage'
           parameters:
             in_channels: -1
-            out_channels: 128
+            out_channels: 256
             num_layers: 2
-            hidden_channels: 128
+            hidden_channels: 256
             normalize: True
             jk: 'cat'
         - kind: 'linear'
           parameters:
-            dim: 128
+            dim: 256
             activation: 'leaky_relu'
             signature: 'x -> x'
         - kind: 'mask'
@@ -30,18 +30,18 @@ layers:
 
   - kind: 'linear'
     parameters:
-      dim: 128
+      dim: 256
       activation: 'leaky_relu'
       signature: 'actions_hidden -> actions_hidden'
   - kind: 'linear'
     parameters:
-      dim: 128
+      dim: 256
       activation: 'leaky_relu'
       signature: 'actions_hidden -> actions_hidden'
 
   - kind: 'linear'
     parameters:
-      dim: 128
+      dim: 256
       activation: 'leaky_relu'
       signature: 'actions_hidden -> actions_value'
 

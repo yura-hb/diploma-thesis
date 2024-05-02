@@ -1,7 +1,7 @@
 # Evaluate the effectivenes of basic DQNs on the JSP environment
 
 template: &template 'baseline'
-base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN/experiments/1/flexible_machine.yml'
+base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN/experiments/3/machine.yml'
 
 graph: &graph
     transition_model:
@@ -18,7 +18,7 @@ graph: &graph
     is_work_center_set_in_shop_floor_connected: False
 
 default_mods: &default_mods 
-#  - 'util/infrastructure/cuda.yml'
+  - 'util/infrastructure/cuda.yml'
   - 'util/train_schedule/on_store_32.yml'
 
 ###############################################################################################
@@ -64,7 +64,7 @@ task:
   n_threads: 10
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/0 (Graph)/Graph Encoding (DQN)/model/'
+  output_dir: 'results/jsp/experiments/3 (Graph)/Graph Encoding (DQN)/model/'
 
   tasks:
     - kind: 'multi_value'
