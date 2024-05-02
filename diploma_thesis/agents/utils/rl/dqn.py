@@ -52,6 +52,7 @@ class DeepQTrainer(RLTrainer):
                 actions = self.__get_action_values__(model, batch.state, batch.action)
 
                 weight = torch.tensor(info['_weight']) if '_weight' in info.keys() else torch.ones_like(q_values)
+                weight = weight.to(actions.device)
 
                 print(weight, info)
 
