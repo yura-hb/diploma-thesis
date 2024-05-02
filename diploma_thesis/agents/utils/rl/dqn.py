@@ -51,9 +51,9 @@ class DeepQTrainer(RLTrainer):
             def compute_loss():
                 actions = self.__get_action_values__(model, batch.state, batch.action)
 
-                print(actions.view(-1), q_values.view(-1))
-
                 weight = torch.tensor(info['_weight']) if '_weight' in info.keys() else torch.ones_like(q_values)
+
+                print(weight, info)
 
                 loss_ = (self.loss(actions, q_values) * weight).mean()
                 td_error_ = torch.square(actions - q_values)

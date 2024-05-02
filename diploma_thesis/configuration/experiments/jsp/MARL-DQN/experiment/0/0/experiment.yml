@@ -12,6 +12,7 @@ dqn_1: &dqn_1
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
     - *default_mods
 
 ###############################################################################################
@@ -23,6 +24,7 @@ dqn_2: &dqn_2
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
     - *default_mods
 
   ###############################################################################################
@@ -34,6 +36,7 @@ dqn_3: &dqn_3
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
     - *default_mods
 
 ###############################################################################################

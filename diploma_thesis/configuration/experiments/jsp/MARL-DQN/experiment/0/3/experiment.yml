@@ -11,6 +11,7 @@ dqn_1: &dqn_1
   template: *template
   mod_dirs:
     - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
     - 'configuration/mods/machine/mods'
   mods:
     *default_mods
@@ -22,6 +23,7 @@ dqn_1_on_store: &dqn_1_on_store
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
     - *default_mods
     - 'util/train_schedule/on_store_32.yml'
 
@@ -32,6 +34,7 @@ dqn_2_on_store: &dqn_2_on_store
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
+    - 'agent/dqn/prioritized.yml'
     - *default_mods
     - 'util/train_schedule/on_store_32.yml'
 
