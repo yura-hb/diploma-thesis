@@ -62,6 +62,8 @@ parameters:
 
       loss:
         kind: 'huber'
+        parameters:
+          reduction: 'none'
 
       optimizer:
         model:

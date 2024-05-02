@@ -1,6 +1,7 @@
 from typing import Dict
 
 import tensordict
+import torch
 from torch.optim.swa_utils import AveragedModel, get_ema_avg_fn
 
 from agents.utils.memory import NotReadyException
@@ -52,7 +53,9 @@ class DeepQTrainer(RLTrainer):
 
                 print(actions.view(-1), q_values.view(-1))
 
-                loss_ = self.loss(actions, q_values)
+                weight = torch.tensor(info['_weight']) if '_weight' in info.keys() else torch.ones_like(q_values)
+
+                loss_ = (self.loss(actions, q_values) * weight).mean()
                 td_error_ = torch.square(actions - q_values)
 
                 entropy = torch.distributions.Categorical(logits=actions).entropy().mean()
