@@ -52,7 +52,7 @@ class VPTGraphEncoder(GraphStateEncoder):
             ]
 
             if self.include_due_dates:
-                slack_times = job.due_at - mean_completion_time
+                slack_times = job.due_at - (mean_completion_time + parameters.now)
 
                 states += [torch.vstack(values + [slack_times.view(-1)])]
             else:

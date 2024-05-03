@@ -39,7 +39,7 @@ class CustomGraphEncoder(GraphStateEncoder):
                 job, torch.arange(1, job.step_idx.shape[0] + 1) / job.step_idx.shape[0], until_current_step=False
             )
 
-            slack_times = job.due_at - job.history.dispatched_at - mean_completion_time
+            slack_times = job.due_at - (mean_completion_time + parameters.now)
             wait_times = job.current_operation_waiting_time_on_machine(parameters.now)
             critical_ratios = 1 - slack_times / (torch.abs(slack_times) + self.norm_factor)
 
