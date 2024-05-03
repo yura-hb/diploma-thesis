@@ -302,7 +302,7 @@ class Machine:
 
             moment = self.environment.now
 
-            job = self.__select_job__()
+            job, is_naive = self.__select_job__()
 
             self.history.with_decision(moment)
 
@@ -312,7 +312,7 @@ class Machine:
 
             self.__notify_job_about_production__(job, production_start=True)
 
-            self.shop_floor.will_produce(job, self)
+            self.shop_floor.will_produce(job, self, is_naive)
 
             processing_time = job.current_operation_processing_time_on_machine.item()
 
@@ -325,7 +325,7 @@ class Machine:
 
             self.__notify_job_about_production__(job, production_start=False)
             self.state.with_runtime(processing_time)
-            self.shop_floor.did_produce(job, self)
+            self.shop_floor.did_produce(job, self, is_naive)
 
             self.__forward__(job)
 
@@ -334,11 +334,11 @@ class Machine:
             return None
 
         if self.shop_floor.configuration.configuration.deduce_naive_actions and len(self.queue) == 1:
-            return self.queue[0]
+            return self.queue[0], True
 
         job = self.shop_floor.schedule(self)
 
-        return job
+        return job, False
 
     def __breakdown_if_needed__(self):
         """

@@ -1,3 +1,4 @@
+import copy
 from typing import Dict
 
 import tensordict
@@ -36,7 +37,7 @@ class DeepQTrainer(RLTrainer):
 
         avg_fn = get_ema_avg_fn(self.configuration.decay)
 
-        self._target_model = AveragedModel(model.clone(), avg_fn=avg_fn).to(self.device)
+        self._target_model = copy.deepcopy(model) #AveragedModel(model.clone(), avg_fn=avg_fn).to(self.device)
 
     def __train__(self, model: Policy):
         for _ in range(self.configuration.epochs):
@@ -53,8 +54,6 @@ class DeepQTrainer(RLTrainer):
 
                 weight = torch.tensor(info['_weight']) if '_weight' in info.keys() else torch.ones_like(q_values)
                 weight = weight.to(actions.device)
-
-                print(weight, info)
 
                 loss_ = (self.loss(actions, q_values) * weight).mean()
                 td_error_ = torch.square(actions - q_values)
@@ -76,7 +75,7 @@ class DeepQTrainer(RLTrainer):
 
         with torch.no_grad():
             if self.optimizer.step_count % self.configuration.update_steps == 0:
-                self._target_model.update_parameters(model)
+                self._target_model = copy.deepcopy(model)
 
             self.storage.update_priority(info['index'], td_error)
 
@@ -100,7 +99,7 @@ class DeepQTrainer(RLTrainer):
 
     @property
     def target_model(self):
-        return self._target_model.module
+        return self._target_model
 
     def state_dict(self):
         state_dict = super().state_dict()

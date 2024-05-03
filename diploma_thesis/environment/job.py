@@ -155,6 +155,10 @@ class Job:
         return torch.mean(processing_times), torch.std(processing_times)
 
     @property
+    def n_steps(self):
+        return self.step_idx.shape[0]
+
+    @property
     def current_operation_processing_time_on_machine(self):
         """
         Returns: The processing time of the current operation in machine

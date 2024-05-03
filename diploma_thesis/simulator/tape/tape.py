@@ -17,7 +17,7 @@ class TapeModel(Delegate, Loggable, metaclass=ABCMeta):
     def __init__(self,
                  machine_reward: MachineReward,
                  work_center_reward: WorkCenterReward,
-                 mode: NextStateRecordMode = NextStateRecordMode.on_produce):
+                 mode: NextStateRecordMode = NextStateRecordMode.on_next_action):
         super().__init__()
 
         self.machine_reward = machine_reward
@@ -82,12 +82,12 @@ class TapeModel(Delegate, Loggable, metaclass=ABCMeta):
             queue.register(context, work_center, job, record, self.next_state_record_mode)
 
     @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.registered_shop_floor_ids)
-    def did_produce(self, context: Context, job: Job, machine: Machine):
+    def did_produce(self, context: Context, job: Job, machine: Machine, is_naive_decision):
         if queue := self.machine_queue(context):
-            queue.did_produce(context, machine, job)
+            queue.did_produce(context, machine, job, is_naive_decision)
 
         if queue := self.work_center_queue(context):
-            queue.did_produce(context, machine, job)
+            queue.did_produce(context, machine, job, is_naive_decision)
 
     @filter(lambda self, context, *args, **kwargs: context.shop_floor.id in self.registered_shop_floor_ids)
     def did_complete(self, context: Context, job: Job):

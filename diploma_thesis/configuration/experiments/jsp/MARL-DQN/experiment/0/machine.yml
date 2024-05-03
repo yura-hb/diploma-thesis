@@ -57,11 +57,11 @@ parameters:
       memory:
         kind: 'replay'
         parameters:
-          size: 2048
-          batch_size: 128
+          size: 1024
+          batch_size: 64
 
       loss:
-        kind: 'huber'
+        kind: 'smooth_l1'
         parameters:
           reduction: 'none'
 

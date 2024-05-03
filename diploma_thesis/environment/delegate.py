@@ -18,19 +18,19 @@ class Delegate:
         for child in self.children:
             child.did_start_simulation(context=context)
 
-    def will_produce(self, context: Context, job: Job, machine: 'environment.Machine'):
+    def will_produce(self, context: Context, job: Job, machine: 'environment.Machine', is_naive_decision: bool):
         """
         Will be triggered before the production of job on machine
         """
         for child in self.children:
-            child.will_produce(context=context, job=job, machine=machine)
+            child.will_produce(context=context, job=job, machine=machine, is_naive_decision=is_naive_decision)
 
-    def did_produce(self, context: Context, job: Job, machine: 'environment.Machine'):
+    def did_produce(self, context: Context, job: Job, machine: 'environment.Machine', is_naive_decision: bool):
         """
         Will be triggered after the production of job on machine
         """
         for child in self.children:
-            child.did_produce(context=context, job=job, machine=machine)
+            child.did_produce(context=context, job=job, machine=machine, is_naive_decision=is_naive_decision)
 
     def will_dispatch(self, context: Context, job: Job, work_center: 'environment.WorkCenter'):
         """

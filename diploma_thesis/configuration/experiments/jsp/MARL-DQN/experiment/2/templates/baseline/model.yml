@@ -15,13 +15,13 @@ layers:
       dim: 256
       activation: 'relu'
       signature: 'actions_hidden -> actions_hidden'
-      initialization: 'xavier'
+      initialization: 'orthogonal'
   - kind: 'linear'
     parameters:
       dim: 256
       activation: 'relu'
       signature: 'actions_hidden -> actions_hidden'
-      initialization: 'xavier'
+      initialization: 'orthogonal'
 
   - kind: 'alias'
     parameters:
@@ -32,21 +32,21 @@ layers:
       dim: 256
       activation: 'relu'
       signature: 'actions_hidden -> actions_hidden'
-      initialization: 'xavier'
+      initialization: 'orthogonal'
 
   - kind: 'linear'
     parameters:
       dim: 256
       activation: 'relu'
       signature: 'values_hidden -> values_hidden'
-      initialization: 'xavier'
+      initialization: 'orthogonal'
 
   - kind: 'linear'
     parameters:
       dim: 1
       activation: 'none'
       signature: 'actions_hidden -> actor_value'
-      initialization: 'xavier'
+      initialization: 'orthogonal'
 
   - kind: 'output'
     parameters:

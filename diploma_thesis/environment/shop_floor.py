@@ -318,11 +318,11 @@ class ShopFloor:
         return self.agent.route(self.__make_context__(), job=job, work_center=work_center)
 
     # Events from subcomponents (WorkCenter, Machine)
-    def will_produce(self, job: environment.Job, machine: environment.Machine):
-        self.delegate.will_produce(context=self.__make_context__(), job=job, machine=machine)
+    def will_produce(self, job: environment.Job, machine: environment.Machine, is_naive_decision: bool):
+        self.delegate.will_produce(context=self.__make_context__(), job=job, machine=machine, is_naive_decision=is_naive_decision)
 
-    def did_produce(self, job: environment.Job, machine: environment.Machine):
-        self.delegate.did_produce(context=self.__make_context__(), job=job, machine=machine)
+    def did_produce(self, job: environment.Job, machine: environment.Machine, is_naive_decision):
+        self.delegate.did_produce(context=self.__make_context__(), job=job, machine=machine, is_naive_decision=is_naive_decision)
 
     def will_dispatch(self, job: environment.Job, work_center: environment.WorkCenter):
         self.delegate.will_dispatch(context=self.__make_context__(), job=job, work_center=work_center)

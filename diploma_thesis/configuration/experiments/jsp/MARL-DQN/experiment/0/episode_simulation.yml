@@ -7,7 +7,7 @@ parameters:
     timespan: 5000
     machines_per_work_center: 1
     work_center_count: 10
-    deduce_naive_actions: True
+#    deduce_naive_actions: False
 
   dispatch:
     initial_job_assignment:

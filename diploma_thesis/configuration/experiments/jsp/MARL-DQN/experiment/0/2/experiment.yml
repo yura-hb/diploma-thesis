@@ -5,13 +5,13 @@ base_model: &base_model 'configuration/experiments/jsp/MARL-DQN/experiment/0/mac
 
 default_mods: &default_mods
   - 'agent/dqn/ddqn.yml'
-  - 'agent/dqn/prioritized.yml'
+#  - 'agent/dqn/prioritized.yml'
 
 ###############################################################################################
 
 dqn_1: &dqn_1
   base_path: *base_model
-  template: 'baseline'
+  template: 'relu'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
@@ -19,7 +19,7 @@ dqn_1: &dqn_1
 
 dqn_2: &dqn_2
   base_path: *base_model
-  template: 'baseline_orthogonal'
+  template: 'relu_orthogonal'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:

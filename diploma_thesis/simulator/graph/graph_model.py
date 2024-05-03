@@ -105,7 +105,7 @@ class GraphModel(Delegate):
                 job, context.shop_floor, self.cache[sid].graph
             )
 
-    def will_produce(self, context: Context, job: Job, machine: Machine):
+    def will_produce(self, context: Context, job: Job, machine: Machine, is_naive_decision: bool):
         sid = context.shop_floor.id
 
         if sid in self.cache:

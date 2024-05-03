@@ -12,7 +12,8 @@ dqn_1: &dqn_1
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
+#    - 'agent/dqn/prioritized.yml'
+    - 'util/agent/multi_agent.yml'
     - *default_mods
 
 ###############################################################################################
@@ -24,7 +25,7 @@ dqn_2: &dqn_2
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
+#    - 'agent/dqn/prioritized.yml'
     - *default_mods
 
   ###############################################################################################
@@ -36,7 +37,7 @@ dqn_3: &dqn_3
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
+#    - 'agent/dqn/prioritized.yml'
     - *default_mods
 
 ###############################################################################################
@@ -139,14 +140,14 @@ task:
               machine_agent:
                 parameters:
                   - *dqn_1
-            - output_dir: 'Relu'
-              machine_agent:
-                parameters:
-                  - *dqn_2
-            - output_dir: 'Tanh'
-              machine_agent:
-                parameters:
-                  - *dqn_3
+#            - output_dir: 'Relu'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_2
+#            - output_dir: 'Tanh'
+#              machine_agent:
+#                parameters:
+#                  - *dqn_3
 
           tape:
             machine_reward:

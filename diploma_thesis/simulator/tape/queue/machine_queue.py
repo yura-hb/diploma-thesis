@@ -35,8 +35,8 @@ class MachineQueue(Queue):
         self.__record_next_state_on_action__(context, record.record.state, machine.key)
         self.__append_to_queue__(context, machine, record, mode)
 
-    def did_produce(self, context: Context, machine: Machine, job: Job):
-        if len(self.queue[machine.key]) == 0:
+    def did_produce(self, context: Context, machine: Machine, job: Job, is_naive_decision: bool):
+        if len(self.queue[machine.key]) == 0 or is_naive_decision:
             return
 
         record = self.queue[machine.key][-1]
@@ -100,6 +100,8 @@ class MachineQueue(Queue):
             context=self.reward.record_job_action(record.result, machine, context.moment),
             memory=record.record.memory,
             moment=context.moment,
+            work_center=machine.work_center_idx,
+            machine=machine.machine_idx,
             mode=mode
         )]
 

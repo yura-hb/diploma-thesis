@@ -39,7 +39,7 @@ class WorkCenterQueue(Queue):
         self.__record_next_state_on_action__(record.record.state, work_center.key)
         self.__append_to_queue__(context, work_center, job, record, mode)
 
-    def did_produce(self, context: Context, machine: Machine, job: Job):
+    def did_produce(self, context: Context, machine: Machine, job: Job, is_naive_decision: bool):
         record = self.queue[machine.work_center.key][-1]
         record.record.reward = self.reward.reward_after_production(record.context)
 

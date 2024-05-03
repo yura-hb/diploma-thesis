@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import TypeVar
 
+import torch
 from tensordict import TensorDict
 
 from agents.utils.memory import Record
@@ -30,7 +31,9 @@ class TapeRecord:
     context: Context
     moment: int
     memory: TensorDict
-    mode: NextStateRecordMode = NextStateRecordMode.on_produce
+    work_center: torch.LongTensor
+    machine: torch.LongTensor
+    mode: NextStateRecordMode = NextStateRecordMode.on_next_action
 
 
 class Queue(Loggable, metaclass=ABCMeta):
@@ -48,7 +51,7 @@ class Queue(Loggable, metaclass=ABCMeta):
     def clear(self, shop_floor: ShopFloor):
         pass
 
-    def did_produce(self, context: Context, machine: Machine, job: Job):
+    def did_produce(self, context: Context, machine: Machine, job: Job, is_naive_decision: bool):
         pass
 
     def did_complete(self, context: Context, job: Job):

@@ -53,11 +53,12 @@ class GlobalDecomposedTardiness(MachineReward):
 
         if job.is_tardy_upon_completion:
             wait_time = torch.FloatTensor([job.wait_time_on_machine(c.step_idx) for c in contexts])
+            next_wait_time = torch.FloatTensor([job.wait_time_on_machine(c.step_idx + 1) if c.step_idx < c.job.n_steps - 1 else 0 for c in contexts])
             slack = torch.FloatTensor([job.slack_upon_arrival_on_machine(c.step_idx) for c in contexts])
 
             critical_factor = 1 - slack / (torch.abs(slack) + self.configuration.sensitivity_to_slack)
             exposure = self.configuration.exposure
-            restructured_wait = wait_time * (1 - exposure) + torch.cat([wait_time[1:] * exposure, torch.zeros(1)])
+            restructured_wait = wait_time * (1 - exposure) + next_wait_time
             restructured_wait *= critical_factor
 
             reward = - torch.square(restructured_wait / self.configuration.span).clip(0, 1)
