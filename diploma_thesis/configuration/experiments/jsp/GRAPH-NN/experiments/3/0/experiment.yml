@@ -3,8 +3,7 @@ base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN/experiments/3/ma
 
 
 default_mods: &default_mods
-  []
-#  - 'util/infrastructure/cuda.yml'
+  - 'util/infrastructure/cuda.yml'
 
 ###############################################################################################
 
