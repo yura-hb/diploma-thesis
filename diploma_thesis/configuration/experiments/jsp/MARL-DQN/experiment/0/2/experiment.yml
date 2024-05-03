@@ -55,7 +55,7 @@ task:
   n_threads: 10
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/0 (MARL.)/Initialization/model/'
+  output_dir: 'results/jsp/experiments/0 (MARL)/Initialization/model/'
 
   tasks:
     - kind: 'multi_value'

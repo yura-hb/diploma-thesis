@@ -13,7 +13,6 @@ dqn_1: &dqn_1
   mods:
     - 'agent/dqn/ddqn.yml'
 #    - 'agent/dqn/prioritized.yml'
-    - 'util/agent/multi_agent.yml'
     - *default_mods
 
 ###############################################################################################
@@ -71,7 +70,7 @@ task:
   n_threads: 3
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/0 (MARL.)/NN/model/'
+  output_dir: 'results/jsp/experiments/0 (MARL)/NN/model/'
 
   tasks:
     - kind: 'multi_value'
@@ -140,14 +139,14 @@ task:
               machine_agent:
                 parameters:
                   - *dqn_1
-#            - output_dir: 'Relu'
-#              machine_agent:
-#                parameters:
-#                  - *dqn_2
-#            - output_dir: 'Tanh'
-#              machine_agent:
-#                parameters:
-#                  - *dqn_3
+            - output_dir: 'Relu'
+              machine_agent:
+                parameters:
+                  - *dqn_2
+            - output_dir: 'Tanh'
+              machine_agent:
+                parameters:
+                  - *dqn_3
 
           tape:
             machine_reward:

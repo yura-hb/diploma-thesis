@@ -19,9 +19,7 @@ parameters:
             kind: 'phase_selector'
             parameters:
               default:
-                kind: 'sample'
-                parameters:
-                  is_distribution: False
+                kind: 'greedy'
               phases:
                 - phase:
                     kind: 'warm_up'
@@ -34,55 +32,46 @@ parameters:
                     parameters:
                       step: 1
                   action_selector:
-                    kind: 'uniform'
+                    kind: 'epsilon_greedy'
+                    parameters:
+                      epsilon: 0.4
                 - phase:
                     kind: 'training'
                   action_selector:
-                    kind: 'sample'
+                    kind: 'epsilon_greedy'
                     parameters:
-                      is_distribution: False
+                      epsilon: 0.4
+                      min_epsilon: 0.1
+                      decay_factor: 0.995
+                      decay_steps: 30
 
 
   __encoder__: ''
 
   trainer:
-    kind: 'ppo'
+    kind: 'dqn'
     parameters:
-      device: 'cpu'
-      sample_count: 512
-      policy_step_ratio: 0.2
-      entropy_regularization: 0.2
-#      entropy_decay: 0.999
-      rollback_ratio: 0.01
-      critic_weight: 1.0
-
-      epochs: 10
-
-      loss:
-        kind: 'cross_entropy'
-        parameters:
-          reduction: 'none'
-
-      value_loss:
-        kind: 'huber'
-
-      optimizer:
-        model:
-          kind: 'adam'
-          parameters:
-            lr: 0.0005
-            betas: [0.99, 0.99]
-            eps: 0.00001
+      decay: 1.0
+      update_steps: 50
 
       memory:
         kind: 'replay'
         parameters:
-          size: 3
-          batch_size: 3
-          prefetch: 1
+          size: 1024
+          batch_size: 64
+
+      loss:
+        kind: 'smooth_l1'
+        parameters:
+          reduction: 'none'
+
+      optimizer:
+        model:
+          kind: 'rmsprop'
+          parameters:
+            lr: 0.001
 
       return:
-        kind: 'gae'
+        kind: 'no'
         parameters:
-          discount_factor: 0.99
-          lambda: 0.95
+          discount_factor: 0.95

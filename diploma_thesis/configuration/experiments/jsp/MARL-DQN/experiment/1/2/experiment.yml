@@ -1,8 +1,8 @@
 # Evaluate the effectivenes of basic DQNs on the JSP environment
 
 template: &template 'baseline'
-base_model: &base_model 'configuration/experiments/jsp/MARL-DQN/machine.yml'
-marl_model: &marl_model 'configuration/experiments/jsp/MARL-DQN/marl_machine.yml'
+base_model: &base_model 'configuration/experiments/jsp/MARL-DQN/experiment/1/machine.yml'
+marl_model: &marl_model 'configuration/experiments/jsp/MARL-DQN/experiment/1/marl_machine.yml'
 
 default_mods: &default_mods
   - 'agent/dqn/ddqn.yml'
@@ -88,7 +88,7 @@ task:
   n_threads: 10
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/1. MARL-DQN/6. Discount Factor/model/'
+  output_dir: 'results/jsp/experiments/1 (MARL)/Discount Rate/model/'
 
   tasks:
     - kind: 'multi_value'
@@ -133,7 +133,7 @@ task:
           run:
             kind: 'mod'
             parameters:
-              base_path: 'configuration/experiments/jsp/MARL-DQN/run.yml'
+              base_path: 'configuration/experiments/jsp/MARL-DQN/experiment/1/run.yml'
               mod_dirs:
                 - 'configuration/mods/run/mods'
               mods: []
@@ -146,7 +146,7 @@ task:
                         base:
                           kind: 'mod'
                           parameters:
-                            base_path: 'configuration/experiments/jsp/MARL-DQN/simulation.yml'
+                            base_path: 'configuration/experiments/jsp/MARL-DQN/experiment/1/simulation.yml'
                             mod_dirs:
                               - 'configuration/mods/simulation/mods'
                             mods: [ ]

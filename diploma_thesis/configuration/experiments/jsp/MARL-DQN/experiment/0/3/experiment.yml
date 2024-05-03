@@ -92,7 +92,7 @@ task:
   n_threads: 8
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/0 (MARL.)/Train Schedule/model/'
+  output_dir: 'results/jsp/experiments/0 (MARL)/Train Schedule/model/'
 
   tasks:
     - kind: 'multi_value'

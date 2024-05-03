@@ -2,6 +2,8 @@
 kind: 'rl'
 parameters:
 
+  is_training_centralized: False
+
   model:
     kind: 'deep_mr'
     parameters:
@@ -61,7 +63,9 @@ parameters:
           batch_size: 64
 
       loss:
-        kind: 'huber'
+        kind: 'smooth_l1'
+        parameters:
+          reduction: 'none'
 
       optimizer:
         model:

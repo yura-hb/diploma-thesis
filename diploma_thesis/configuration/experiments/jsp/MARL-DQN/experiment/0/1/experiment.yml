@@ -93,7 +93,7 @@ task:
   n_threads: 6
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/0 (MARL.)/Optimizer/model/'
+  output_dir: 'results/jsp/experiments/0 (MARL)/Optimizer/model/'
 
   tasks:
     - kind: 'multi_value'

@@ -70,6 +70,7 @@ class DeepQTrainer(RLTrainer):
             self.record_loss(loss)
             self.record_loss(td_error_mean, key='td_error')
             self.record_loss(entropy, key='entropy')
+            self.record_loss(q_values.mean(), key='q_values')
 
             print(f'loss: {loss}, td_error: {td_error_mean}, entropy: {entropy}')
 
