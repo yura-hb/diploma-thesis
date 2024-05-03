@@ -10,9 +10,12 @@ from .workflow import *
 @task(lambda s, _: s['name'])
 def __run__(s: Dict, threads):
     import torch
+    import numpy as np
 
     # torch.set_num_threads(threads)
+    torch.use_deterministic_algorithms(True)
     torch.manual_seed(s.get('seed', 0))
+    np.random.seed(s.get('seed', 0))
 
     s = Simulation(s)
 

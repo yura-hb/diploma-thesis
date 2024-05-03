@@ -71,7 +71,7 @@ parameters:
           parameters:
             lr: 0.001
             betas: [0.99, 0.99]
-            weight_decay: 0.00001
+            weight_decay: 0.0000001
 
       memory:
         kind: 'replay'

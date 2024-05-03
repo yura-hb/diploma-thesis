@@ -64,6 +64,7 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
 
         self.action_layer = action_layer()
         self.value_layer = value_layer()
+        self.is_first_pass = True
 
         self.__post_init__()
 
