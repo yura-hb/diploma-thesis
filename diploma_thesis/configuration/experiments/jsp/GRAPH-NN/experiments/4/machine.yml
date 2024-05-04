@@ -5,6 +5,7 @@ parameters:
   model:
     kind: 'deep_multi_rule'
     parameters:
+      __rules__: ''
 
       policy:
         kind: 'discrete_action'
