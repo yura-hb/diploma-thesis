@@ -30,9 +30,9 @@ ppo_1: &ppo_1
       - [
           '__none__',
       ]
-      - [
-        'util/infrastructure/cuda.yml'
-      ]
+#      - [
+#        'util/infrastructure/cuda.yml'
+#      ]
       - [ 'util/train_schedule/on_stored_data_exclusively_3.yml']
 
 ppo_2: &ppo_2
@@ -47,9 +47,9 @@ ppo_2: &ppo_2
           '__none__',
 #          'agent/ppo/p3or.yml'
       ]
-      - [
-        'util/infrastructure/cuda.yml'
-      ]
+#      - [
+#        'util/infrastructure/cuda.yml'
+#      ]
       - [ 'util/train_schedule/on_stored_data_exclusively_3.yml']
 
 ###############################################################################################

@@ -65,9 +65,10 @@ parameters:
 
       optimizer:
         model:
-          kind: 'rmsprop'
+          kind: 'adam'
           parameters:
             lr: 0.001
+            betas: [ 0.99, 0.99 ]
 
       return:
         kind: 'no'

@@ -15,6 +15,7 @@ dqn_1: &dqn_1
     - 'configuration/mods/machine/mods'
   mods:
     - *default_mods
+    - 'util/agent/multi_agent.yml'
     - 'util/optimizer/sgd.yml'
 
 dqn_2: &dqn_2
@@ -24,8 +25,8 @@ dqn_2: &dqn_2
     - 'configuration/mods/machine/mods'
   mods:
     - *default_mods
+    - 'util/agent/multi_agent.yml'
     - 'util/optimizer/adam.yml'
-
 
 dqn_3: &dqn_3
   base_path: *base_model
@@ -34,6 +35,7 @@ dqn_3: &dqn_3
     - 'configuration/mods/machine/mods'
   mods:
     - *default_mods
+    - 'util/agent/multi_agent.yml'
     - 'util/optimizer/adam_w.yml'
 
 
@@ -44,6 +46,7 @@ dqn_4: &dqn_4
     - 'configuration/mods/machine/mods'
   mods:
     - *default_mods
+    - 'util/agent/multi_agent.yml'
     - 'util/optimizer/adamax.yml'
 
 dqn_5: &dqn_5
@@ -53,6 +56,7 @@ dqn_5: &dqn_5
     - 'configuration/mods/machine/mods'
   mods:
     - *default_mods
+    - 'util/agent/multi_agent.yml'
     - 'util/optimizer/rms_prop.yml'
 
 dqn_6: &dqn_6
@@ -62,12 +66,13 @@ dqn_6: &dqn_6
     - 'configuration/mods/machine/mods'
   mods:
     - *default_mods
+    - 'util/agent/multi_agent.yml'
     - 'util/optimizer/radam.yml'
 
 #############################################################################################
 
 reward: &reward
-  - kind: 'global_tardiness'
+  - kind: 'global_decomposed_tardiness'
     parameters:
       span: 128
 
@@ -95,7 +100,7 @@ task:
   n_threads: 6
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/0 (MARL)/Optimizer/model/'
+  output_dir: 'results/jsp/experiments/MARL/(1) Optimizer/model/'
 
   tasks:
     - kind: 'multi_value'

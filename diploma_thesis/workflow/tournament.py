@@ -12,6 +12,7 @@ from joblib import Parallel, delayed
 from tabulate import tabulate
 from tqdm import tqdm
 
+from agents.utils.action import from_cli
 from environment import Statistics
 from simulator import EvaluateConfiguration, EpisodicSimulator, Simulation
 from simulator.graph import GraphModel
@@ -76,6 +77,11 @@ def __evaluate__(tournament: 'Tournament',
         print(f'Error loading candidate {candidate.name}')
         return []
 
+    action_selector = tournament.action_selector
+
+    if action_selector is not None:
+        a = 10
+
     machine.with_logger(logger)
     work_center.with_logger(logger)
 
@@ -128,6 +134,15 @@ class Tournament(Workflow):
     @property
     def store_run_statistics(self):
         return self.parameters.get('store_run_statistics', False)
+
+    @property
+    def action_selector(self):
+        action_selector = self.parameters.get('action_selector', None)
+
+        if action_selector is not None:
+            action_selector = from_cli(action_selector)
+
+        return action_selector
 
     @property
     def should_update(self):
