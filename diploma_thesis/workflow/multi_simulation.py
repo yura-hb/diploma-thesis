@@ -13,7 +13,7 @@ def __run__(s: Dict, threads):
     import numpy as np
 
     # torch.set_num_threads(threads)
-    torch.use_deterministic_algorithms(True)
+    # torch.use_deterministic_algorithms(True)
     torch.manual_seed(s.get('seed', 0))
     np.random.seed(s.get('seed', 0))
 

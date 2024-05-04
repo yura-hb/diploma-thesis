@@ -231,25 +231,17 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
     # Agent
 
     def schedule(self, context: Context, machine: Machine) -> Job | None:
-        start = time.time()
-
         graph = self.graph_model.graph(context=context)
         memory = self.memory_model.get_schedule_record(context=context, key=machine.key)
         parameters = MachineInput(machine=machine, now=context.moment, graph=graph, memory=memory)
 
-        encode_end = time.time()
-
         result = self.machine.schedule(machine.key, parameters)
-
-        forward_end = time.time()
 
         if self.machine.is_trainable:
             self.tape_model.register_machine_reward_preparation(context=context, machine=machine, record=result)
 
         if result.record is not None:
             self.memory_model.store_schedule_record(context=context, key=machine.key, memory=result.record.memory)
-
-        store_end = time.time()
 
         return result.result
 

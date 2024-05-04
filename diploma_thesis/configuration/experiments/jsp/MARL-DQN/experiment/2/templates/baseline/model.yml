@@ -12,16 +12,35 @@ layers:
 
   - kind: 'linear'
     parameters:
-      dim: 256
-      activation: 'relu'
+      dim: 64
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
       initialization: 'orthogonal'
   - kind: 'linear'
     parameters:
-      dim: 256
-      activation: 'relu'
+      dim: 48
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
       initialization: 'orthogonal'
+  - kind: 'linear'
+    parameters:
+      dim: 48
+      activation: 'tanh'
+      signature: 'actions_hidden -> actions_hidden'
+      initialization: 'orthogonal'
+  - kind: 'linear'
+    parameters:
+      dim: 36
+      activation: 'tanh'
+      signature: 'actions_hidden -> actions_hidden'
+      initialization: 'orthogonal'
+  - kind: 'linear'
+    parameters:
+      dim: 24
+      activation: 'tanh'
+      signature: 'actions_hidden -> actions_hidden'
+      initialization: 'orthogonal'
+
 
   - kind: 'alias'
     parameters:
@@ -29,15 +48,15 @@ layers:
 
   - kind: 'linear'
     parameters:
-      dim: 256
-      activation: 'relu'
+      dim: 12
+      activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
       initialization: 'orthogonal'
 
   - kind: 'linear'
     parameters:
-      dim: 256
-      activation: 'relu'
+      dim: 12
+      activation: 'tanh'
       signature: 'values_hidden -> values_hidden'
       initialization: 'orthogonal'
 
