@@ -68,7 +68,7 @@ task:
   n_threads: 10
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/1 (Graph)/Graph Encoding'
+  output_dir: 'results/jsp/experiments/4 (Graph)/Graph Encoding'
 
   tasks:
     - kind: 'multi_value'

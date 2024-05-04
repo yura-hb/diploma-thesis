@@ -117,7 +117,7 @@ task:
   n_threads: 10
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/1 (Graph)/State'
+  output_dir: 'results/jsp/experiments/4 (Graph)/State'
 
   tasks:
     - kind: 'multi_value'
