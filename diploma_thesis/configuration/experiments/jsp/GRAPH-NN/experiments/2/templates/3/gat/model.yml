@@ -8,21 +8,21 @@ layers:
       layers:
         - kind: 'linear'
           parameters:
-            dim: 128
+            dim: 64
             activation: 'leaky_relu'
             signature: 'x -> x'
         - kind: 'gat'
           parameters:
             in_channels: -1
-            out_channels: 128
+            out_channels: 64
             num_layers: 3
             v2: True
             heads: 2
-            hidden_channels: 128
+            hidden_channels: 64
             jk: 'cat'
         - kind: 'linear'
           parameters:
-            dim: 128
+            dim: 64
             activation: 'leaky_relu'
             signature: 'x -> x'
         - kind: 'mask'
@@ -31,26 +31,10 @@ layers:
 
   - kind: 'linear'
     parameters:
-      dim: 128
-      activation: 'leaky_relu'
-      signature: 'actions_hidden -> actions_hidden'
-  - kind: 'linear'
-    parameters:
-      dim: 128
+      dim: 64
       activation: 'leaky_relu'
       signature: 'actions_hidden -> actions_hidden'
 
-  - kind: 'linear'
-    parameters:
-      dim: 128
-      activation: 'leaky_relu'
-      signature: 'actions_hidden -> actions_value'
-
-  - kind: 'linear'
-    parameters:
-      dim: 1
-      activation: 'none'
-      signature: 'actions_value -> actions_value'
 
   # Critic
 
@@ -59,21 +43,21 @@ layers:
       layers:
         - kind: 'linear'
           parameters:
-            dim: 256
+            dim: 64
             activation: 'leaky_relu'
             signature: 'x -> x'
         - kind: 'gat'
           parameters:
             in_channels: -1
-            out_channels: 256
+            out_channels: 64
             num_layers: 3
             v2: True
             heads: 2
-            hidden_channels: 256
+            hidden_channels: 64
             jk: 'cat'
         - kind: 'linear'
           parameters:
-            dim: 256
+            dim: 64
             activation: 'leaky_relu'
             signature: 'x -> x'
 
@@ -85,12 +69,11 @@ layers:
 
   - kind: 'linear'
     parameters:
-      dim: 256
+      dim: 64
       activation: 'leaky_relu'
       signature: 'values_hidden -> values_hidden'
 
   - kind: 'output'
     parameters:
       value: 'values_hidden'
-      actor_value: 'actions_value'
       actions: 'actions_hidden'
