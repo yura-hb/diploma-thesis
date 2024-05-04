@@ -3,11 +3,11 @@ kind: 'rl'
 parameters:
 
   model:
-    kind: 'deep_rule'
+    kind: 'deep_multi_rule'
     parameters:
 
       policy:
-        kind: 'flexible_action'
+        kind: 'discrete_action'
         parameters:
           policy_method: 'independent'
 

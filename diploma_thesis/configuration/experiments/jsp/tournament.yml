@@ -4,7 +4,7 @@ task:
   n_workers: 4
   n_threads: 10
   name: 'rules'
-  output_dir: 'results/jsp/experiments/tournaments/jsp/GRAPH (Tournament)'
+  output_dir: 'results/jsp/experiments/tournaments/jsp/MARL (Tournament)'
   store_run_statistics: True
   log_run: False
   update: True
@@ -35,7 +35,7 @@ task:
     - kind: 'persisted_agents'
       parameters:
           prefix: ''
-          path: 'results/jsp/experiments/1 (GRAPH)'
+          path: 'results/jsp/experiments/0 (MARL)'
           depth: 5
 
 #    - kind: 'persisted_agents'
