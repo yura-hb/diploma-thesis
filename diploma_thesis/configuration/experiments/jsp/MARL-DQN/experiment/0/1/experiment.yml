@@ -69,6 +69,16 @@ dqn_6: &dqn_6
     - 'util/agent/multi_agent.yml'
     - 'util/optimizer/radam.yml'
 
+dqn_7: &dqn_7
+  base_path: *base_model
+  template: *template
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+    - 'util/agent/multi_agent.yml'
+    - 'util/optimizer/adam_stationary.yml'
+
 #############################################################################################
 
 reward: &reward
@@ -189,6 +199,10 @@ task:
                   machine_agent:
                     parameters:
                       - *dqn_6
+                - output_dir: 'Adam (Non-stationary)'
+                  machine_agent:
+                    parameters:
+                      - *dqn_7
 
               tape:
                 machine_reward:
