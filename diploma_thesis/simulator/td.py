@@ -3,6 +3,8 @@ from .simulator import *
 from .utils import TDQueue
 
 
+receives = 0
+
 class TDSimulator(Simulator):
     """
     A simulator, which estimates returns in Temporal Difference manner and send information for training as soon as
@@ -10,7 +12,7 @@ class TDSimulator(Simulator):
     """
 
     def __init__(self,
-                 memory: int = 100,
+                 memory: int = 1,
                  emit_trajectory: bool = False,
                  reset_trajectory: bool = True,
                  sliding_window: int = 16,
@@ -42,6 +44,14 @@ class TDSimulator(Simulator):
 
     def did_prepare_machine_record(self, context: Context, machine: Machine, record: Record):
         super().did_prepare_machine_record(context, machine, record)
+
+        # self.machine.store(machine.key, Slice(episode_id=context.shop_floor.id, records=[record]))
+
+        global receives
+
+        receives += 1
+
+        print(f'Total Receives: {receives}')
 
         self.machine_queue.store(context.shop_floor.id, machine.key, context.moment, record)
 
@@ -80,5 +90,5 @@ class TDSimulator(Simulator):
         return TDSimulator(parameters.get('memory', 1), 
                            parameters.get('emit_trajectory', False),
                            parameters.get('reset_trajectory', True),
-                           parameters.get('sliding_window', 16),
+                           parameters.get('sliding_window', 1),
                            *args, **kwargs)

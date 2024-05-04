@@ -123,8 +123,6 @@ task:
 
           simulator:
             kind: 'td'
-            parameters:
-              memory: 1
 
           graph:
             transition_model:

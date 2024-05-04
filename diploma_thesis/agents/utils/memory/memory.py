@@ -50,6 +50,7 @@ class Record:
 class NotReadyException(BaseException):
     pass
 
+stores = 0
 
 class Memory(Generic[_Configuration], metaclass=ABCMeta):
 
@@ -63,6 +64,12 @@ class Memory(Generic[_Configuration], metaclass=ABCMeta):
 
             self.buffer.extend(records)
         else:
+            global stores
+
+            stores += 1
+
+            print(f'Stores {stores} {len(records)}')
+
             self.buffer.extend(records)
 
     def sample(self, return_info: bool = False) -> List[Record]:

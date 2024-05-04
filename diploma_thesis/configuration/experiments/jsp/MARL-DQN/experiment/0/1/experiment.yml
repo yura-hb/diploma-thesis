@@ -1,5 +1,5 @@
 
-template: &template 'relu'
+template: &template 'baseline'
 base_model: &base_model 'configuration/experiments/jsp/MARL-DQN/experiment/0/machine.yml'
 
 default_mods: &default_mods
@@ -66,7 +66,7 @@ dqn_6: &dqn_6
 #############################################################################################
 
 reward: &reward
-  - kind: 'global_decomposed_tardiness'
+  - kind: 'global_tardiness'
     parameters:
       span: 128
 

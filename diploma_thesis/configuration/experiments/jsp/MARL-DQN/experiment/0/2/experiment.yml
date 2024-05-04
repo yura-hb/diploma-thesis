@@ -11,7 +11,7 @@ default_mods: &default_mods
 
 dqn_1: &dqn_1
   base_path: *base_model
-  template: 'relu'
+  template: 'baseline'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
@@ -19,7 +19,7 @@ dqn_1: &dqn_1
 
 dqn_2: &dqn_2
   base_path: *base_model
-  template: 'relu_orthogonal'
+  template: 'baseline_orthogonal'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
@@ -28,7 +28,7 @@ dqn_2: &dqn_2
 #############################################################################################
 
 reward: &reward
-  - kind: 'global_decomposed_tardiness'
+  - kind: 'global_tardiness'
     parameters:
       span: 128
 
@@ -90,8 +90,6 @@ task:
 
           simulator:
             kind: 'td'
-            parameters:
-              memory: 1
 
           graph:
             transition_model:

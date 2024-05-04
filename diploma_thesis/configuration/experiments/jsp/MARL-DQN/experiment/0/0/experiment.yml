@@ -42,7 +42,7 @@ dqn_3: &dqn_3
 ###############################################################################################
 
 reward: &reward
-  - kind: 'global_decomposed_tardiness'
+  - kind: 'global_tardiness'
     parameters:
       span: 128
 
@@ -107,6 +107,7 @@ task:
             kind: 'td'
             parameters:
               memory: 4
+              reset_trajectory: False
 
           graph:
             transition_model:

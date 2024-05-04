@@ -11,6 +11,9 @@ from utils import filter
 from .queue import *
 
 
+total_rewards = 0
+
+
 class MachineQueue(Queue):
 
     def __init__(self, reward: MachineReward):
@@ -59,6 +62,12 @@ class MachineQueue(Queue):
 
         if rewards is None:
             return
+
+        global total_rewards
+
+        total_rewards += rewards.units.shape[1]
+
+        print(f'Total rewards: {total_rewards}')
 
         for index in rewards.indices:
             records[index].record.reward = rewards.reward[index]

@@ -38,15 +38,16 @@ class Linear(torch.nn.modules.lazy.LazyModuleMixin, Layer):
         self.__build__()
 
     def initialize_parameters(self, input) -> None:
-        self.linear.initialize_parameters(input)
+        if self.linear.has_uninitialized_params():
+            self.linear.initialize_parameters(input)
 
-        if isinstance(self.linear, torch.nn.Linear):
-            match self.initialization:
-                case Initialization.orthogonal.value:
-                    torch.nn.init.orthogonal_(self.linear.weight)
-                    torch.nn.init.zeros_(self.linear.bias)
-                case _:
-                    pass
+            if isinstance(self.linear, torch.nn.Linear):
+                match self.initialization:
+                    case Initialization.orthogonal.value:
+                        torch.nn.init.orthogonal_(self.linear.weight)
+                        torch.nn.init.zeros_(self.linear.bias)
+                    case _:
+                        pass
 
     def forward(self, batch: torch.FloatTensor) -> torch.FloatTensor:
         batch = self.linear(batch)
