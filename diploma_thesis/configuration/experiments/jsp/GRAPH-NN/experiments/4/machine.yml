@@ -70,8 +70,8 @@ parameters:
           kind: 'adam'
           parameters:
             lr: 0.001
-            betas: [0.99, 0.99]
-#            weight_decay: 0.0000001
+#            betas: [0.99, 0.99]
+            weight_decay: 0.0000001
 
       memory:
         kind: 'replay'

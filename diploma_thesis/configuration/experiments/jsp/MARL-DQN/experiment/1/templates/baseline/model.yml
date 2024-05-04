@@ -15,31 +15,26 @@ layers:
       dim: 64
       activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
-      initialization: 'orthogonal'
   - kind: 'linear'
     parameters:
       dim: 48
       activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
-      initialization: 'orthogonal'
   - kind: 'linear'
     parameters:
       dim: 48
       activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
-      initialization: 'orthogonal'
   - kind: 'linear'
     parameters:
       dim: 36
       activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
-      initialization: 'orthogonal'
   - kind: 'linear'
     parameters:
       dim: 24
       activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
-      initialization: 'orthogonal'
 
 
   - kind: 'alias'
@@ -51,24 +46,15 @@ layers:
       dim: 12
       activation: 'tanh'
       signature: 'actions_hidden -> actions_hidden'
-      initialization: 'orthogonal'
 
   - kind: 'linear'
     parameters:
       dim: 12
       activation: 'tanh'
       signature: 'values_hidden -> values_hidden'
-      initialization: 'orthogonal'
 
-  - kind: 'linear'
-    parameters:
-      dim: 1
-      activation: 'none'
-      signature: 'actions_hidden -> actor_value'
-      initialization: 'orthogonal'
 
   - kind: 'output'
     parameters:
       value: 'values_hidden'
-      actor_value: actor_value
       actions: 'actions_hidden'

@@ -54,16 +54,16 @@ parameters:
     kind: 'dqn'
     parameters:
       decay: 1.0
-      update_steps: 15
+      update_steps: 25
 
       memory:
         kind: 'replay'
         parameters:
-          size: 1024
-          batch_size: 64
+          size: 2048
+          batch_size: 128
 
       loss:
-        kind: 'smooth_l1'
+        kind: 'huber'
         parameters:
           reduction: 'none'
 
@@ -72,8 +72,6 @@ parameters:
           kind: 'adam'
           parameters:
             lr: 0.001
-            betas: [ 0.99, 0.99 ]
-            eps: 0.00001
 
       return:
         kind: 'no'

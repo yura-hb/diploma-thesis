@@ -1,4 +1,6 @@
 
+
+
 kind: 'simulation'
 parameters:
   configuration:
@@ -21,9 +23,9 @@ parameters:
           kind: 'uniform'
           parameters:
             uniform: [ 1, 50 ]
-#            noise: [ 0, 10 ]
+            noise: [ 0, 10 ]
         permutation:
-          uneveness: 0
+          uneveness: 5
         due_time:
           kind: 'uniform'
           parameters:
@@ -36,14 +38,14 @@ parameters:
 
     breakdown:
       kind: 'no'
-#      parameters:
-#        breakdown_arrival:
-#          kind: 'exponential'
-#          parameters:
-#            mean: 5000
-#        repair_duration:
-#          kind: 'uniform'
-#          parameters:
-#            uniform: [ 200, 300 ]
+      parameters:
+        breakdown_arrival:
+          kind: 'exponential'
+          parameters:
+            mean: 5000
+        repair_duration:
+          kind: 'uniform'
+          parameters:
+            uniform: [ 200, 300 ]
 
     seed: 42

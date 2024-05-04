@@ -3,25 +3,12 @@
 template: &template 'baseline'
 base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN/experiments/2/machine.yml'
 
-graph: &graph
-    transition_model:
-      kind: 'base'
-      parameters:
-        forward:
-          kind: 'complete'
-
-        schedule:
-          kind: 'complete'
-
-    memory: 0
-    is_machine_set_in_work_center_connected: False
-    is_work_center_set_in_shop_floor_connected: False
 
 ###############################################################################################
 
 ppo_1: &ppo_1
   base_path: *base_model
-  template: '0/local'
+  template: 'custom_gat'
   mod_dirs:
     - ['configuration/mods/machine/mods']
   mods:
@@ -37,7 +24,41 @@ ppo_1: &ppo_1
 
 ppo_2: &ppo_2
   base_path: *base_model
-  template: '0/global'
+  template: 'custom_gin'
+  mod_dirs:
+    - ['configuration/mods/machine/mods']
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+      - [
+          '__none__',
+#          'agent/ppo/p3or.yml'
+      ]
+      - [
+        'util/infrastructure/cuda.yml'
+      ]
+      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml']
+
+ppo_3: &ppo_3
+  base_path: *base_model
+  template: 'hierarchical_gat'
+  mod_dirs:
+    - ['configuration/mods/machine/mods']
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+      - [
+          '__none__',
+#          'agent/ppo/p3or.yml'
+      ]
+      - [
+        'util/infrastructure/cuda.yml'
+      ]
+      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml']
+
+ppo_4: &ppo_4
+  base_path: *base_model
+  template: 'hierarchical_gin'
   mod_dirs:
     - ['configuration/mods/machine/mods']
   mods:
@@ -85,7 +106,7 @@ task:
   n_threads: 10
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/1 (Graph)/Local'
+  output_dir: 'results/jsp/experiments/2 Flexible-PPO'
 
   tasks:
     - kind: 'multi_value'
@@ -121,9 +142,6 @@ task:
           simulator:
             kind: 'episodic'
 
-          graph:
-            *graph
-
           run:
             kind: 'mod'
             parameters:
@@ -147,15 +165,49 @@ task:
                         values:
         values:
           __concat__:
-            - output_dir: 'Local'
-              machine_agent:
-                parameters:
-                  *ppo_1
-
             - output_dir: 'Global'
               machine_agent:
                 parameters:
-                  *ppo_2
+                  __concat__:
+                    - *ppo_1
+                    - *ppo_2
+                    - *ppo_3
+                    - *ppo_4
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'complete'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: False
+                is_work_center_set_in_shop_floor_connected: False
+
+            - output_dir: 'Local'
+              machine_agent:
+                parameters:
+                  __concat__:
+                    - *ppo_1
+                    - *ppo_2
+                    - *ppo_3
+                    - *ppo_4
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'machine_compressed'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: False
+                is_work_center_set_in_shop_floor_connected: False
 
           tape:
             machine_reward:

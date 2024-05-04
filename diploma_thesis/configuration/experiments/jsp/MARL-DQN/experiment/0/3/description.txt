@@ -1,2 +1,0 @@
-
-The experiment tests the performance of baseline w.r.t. modification of Training Schedule

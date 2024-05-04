@@ -68,7 +68,7 @@ parameters:
           kind: 'adam'
           parameters:
             lr: 0.001
-            betas: [ 0.99, 0.99 ]
+            weight_decay: 0.000001
 
       return:
         kind: 'no'

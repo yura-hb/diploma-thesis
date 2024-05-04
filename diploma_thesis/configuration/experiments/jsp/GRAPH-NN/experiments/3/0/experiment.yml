@@ -10,25 +10,45 @@ default_mods: &default_mods
 
 dqn_1: &dqn_1
   base_path: *base_model
-  template: '0/global'
+  template: 'custom_gat'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
     - *default_mods
 
 
 ###############################################################################################
 
-dqn_1_local: &dqn_1_local
+dqn_2: &dqn_2
   base_path: *base_model
-  template: '0/local'
+  template: 'custom_gin'
   mod_dirs:
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
+    - *default_mods
+
+###############################################################################################
+
+dqn_3: &dqn_3
+  base_path: *base_model
+  template: 'hierarchical_gin'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+
+###############################################################################################
+
+dqn_4: &dqn_4
+  base_path: *base_model
+  template: 'custom_gat'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
     - *default_mods
 
 ###############################################################################################
@@ -59,8 +79,8 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 3
-  n_threads: 10
+  n_workers: 8
+  n_threads: 8
   debug: False
   store_run_statistics: False
   output_dir: 'results/jsp/experiments/3 (Graph)/Local/model/'
@@ -128,6 +148,9 @@ task:
               machine_agent:
                 parameters:
                   - *dqn_1
+                  - *dqn_2
+                  - *dqn_3
+                  - *dqn_4
               graph:
                 transition_model:
                   kind: 'base'
@@ -145,7 +168,10 @@ task:
             - output_dir: 'Local'
               machine_agent:
                 parameters:
-                  - *dqn_1_local
+                  - *dqn_1
+                  - *dqn_2
+                  - *dqn_3
+                  - *dqn_4
               graph:
                 transition_model:
                   kind: 'base'
@@ -154,7 +180,7 @@ task:
                       kind: 'complete'
 
                     schedule:
-                      kind: 'complete'
+                      kind: 'machine_compressed'
 
                 memory: 0
                 is_machine_set_in_work_center_connected: False

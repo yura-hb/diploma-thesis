@@ -8,16 +8,6 @@ default_mods: &default_mods
   - 'util/train_schedule/on_store_32.yml'
 ###############################################################################################
 
-dqn_1: &dqn_1
-  base_path: *base_model
-  template: *template
-  mod_dirs:
-    - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
-    - 'configuration/mods/machine/mods'
-  mods:
-    *default_mods
-
 marl_dqn_1: &marl_dqn_1
   base_path: *marl_model
   template: *template
@@ -25,22 +15,11 @@ marl_dqn_1: &marl_dqn_1
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
+#    - 'agent/dqn/prioritized.yml'
     - 'util/agent/multi_agent.yml'
     - *default_mods
 
 ###############################################################################################
-
-dqn_7: &dqn_7
-  base_path: *base_model
-  template: *template
-  mod_dirs:
-    - 'configuration/mods/machine/mods'
-  mods:
-    - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
-    - 'agent/dqn/dueling.yml'
-    - *default_mods
 
 marl_dqn_7: &marl_dqn_7
   base_path: *marl_model
@@ -49,7 +28,7 @@ marl_dqn_7: &marl_dqn_7
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
-    - 'agent/dqn/prioritized.yml'
+#    - 'agent/dqn/prioritized.yml'
     - 'agent/dqn/dueling.yml'
     - 'util/agent/multi_agent.yml'
     - *default_mods
@@ -68,7 +47,7 @@ long_single_source_run: &long_single_source_run
       parameters:
         dispatch:
           seed:
-            - '__range__': [ 1000, 1150 ]
+            - '__range__': [ 1000, 1100 ]
 
 ###############################################################################################
 
@@ -79,7 +58,7 @@ task:
   n_threads: 8
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/1 (MARL)/Reward/model/'
+  output_dir: 'results/jsp/experiments/(5) Reward/'
 
   tasks:
     - kind: 'multi_value'
@@ -150,12 +129,12 @@ task:
                 - output_dir: 'DDQN/Surrogate Tardiness'
                   machine_agent:
                     parameters:
-                      - *dqn_1
+#                      - *dqn_1
                       - *marl_dqn_1
                 - output_dir: 'All not Noisy, not 3-step/Surrogate Tardiness'
                   machine_agent:
                     parameters:
-                      - *dqn_7
+#                      - *dqn_7
                       - *marl_dqn_7
 
               tape:
@@ -181,12 +160,12 @@ task:
                 - output_dir: 'DDQN/Global Decomposed Tardiness'
                   machine_agent:
                     parameters:
-                      - *dqn_1
+#                      - *dqn_1
                       - *marl_dqn_1
                 - output_dir: 'All not Noisy, not 3-step/Global Decomposed Tardiness'
                   machine_agent:
                     parameters:
-                      - *dqn_7
+#                      - *dqn_7
                       - *marl_dqn_7
 
               tape:
@@ -210,12 +189,12 @@ task:
                 - output_dir: 'DDQN/Global Tardiness'
                   machine_agent:
                     parameters:
-                      - *dqn_1
+#                      - *dqn_1
                       - *marl_dqn_1
                 - output_dir: 'All not Noisy, not 3-step/Global Tardiness'
                   machine_agent:
                     parameters:
-                      - *dqn_7
+#                      - *dqn_7
                       - *marl_dqn_7
 
               tape:
@@ -235,46 +214,46 @@ task:
                               __concat__:
                                 - *long_single_source_run
 
-            - __concat__:
-                - output_dir: 'DDQN/Global MDPI'
-                  machine_agent:
-                    parameters:
-                      - *dqn_1
-                      - *marl_dqn_1
-                - output_dir: 'All not Noisy, not 3-step/Global MDPI'
-                  machine_agent:
-                    parameters:
-                      - *dqn_7
-                      - *marl_dqn_7
-
-              tape:
-                machine_reward:
-                  kind: 'global_mdpi'
-                  parameters:
-                      span: 128
-
-              run:
-                parameters:
-                  nested:
-                    parameters:
-                      simulations:
-                        __0__:
-                          parameters:
-                            values:
-                              __concat__:
-                                - *long_single_source_run
+#            - __concat__:
+#                - output_dir: 'DDQN/Global MDPI'
+#                  machine_agent:
+#                    parameters:
+##                      - *dqn_1
+#                      - *marl_dqn_1
+#                - output_dir: 'All not Noisy, not 3-step/Global MDPI'
+#                  machine_agent:
+#                    parameters:
+##                      - *dqn_7
+#                      - *marl_dqn_7
+#
+#              tape:
+#                machine_reward:
+#                  kind: 'global_mdpi'
+#                  parameters:
+#                      span: 128
+#
+#              run:
+#                parameters:
+#                  nested:
+#                    parameters:
+#                      simulations:
+#                        __0__:
+#                          parameters:
+#                            values:
+#                              __concat__:
+#                                - *long_single_source_run
 
 
             - __concat__:
                 - output_dir: 'DDQN/Makespan'
                   machine_agent:
                     parameters:
-                      - *dqn_1
+#                      - *dqn_1
                       - *marl_dqn_1
                 - output_dir: 'All not Noisy, not 3-step/Makespan'
                   machine_agent:
                     parameters:
-                      - *dqn_7
+#                      - *dqn_7
                       - *marl_dqn_7
 
               tape:
@@ -294,58 +273,58 @@ task:
                               __concat__:
                                 - *long_single_source_run
 
-            - __concat__:
-                - output_dir: 'DDQN/Unary'
-                  machine_agent:
-                    parameters:
-                      - *dqn_1
-                      - *marl_dqn_1
-                - output_dir: 'All not Noisy, not 3-step/Unary'
-                  machine_agent:
-                    parameters:
-                      - *dqn_7
-                      - *marl_dqn_7
+#            - __concat__:
+#                - output_dir: 'DDQN/Unary'
+#                  machine_agent:
+#                    parameters:
+##                      - *dqn_1
+#                      - *marl_dqn_1
+#                - output_dir: 'All not Noisy, not 3-step/Unary'
+#                  machine_agent:
+#                    parameters:
+##                      - *dqn_7
+#                      - *marl_dqn_7
+#
+#              tape:
+#                machine_reward:
+#                  kind: 'unary'
+#                  parameters:
+#                      span: 128
+#
+#              run:
+#                parameters:
+#                  nested:
+#                    parameters:
+#                      simulations:
+#                        __0__:
+#                          parameters:
+#                            values:
+#                              __concat__:
+#                                - *long_single_source_run
 
-              tape:
-                machine_reward:
-                  kind: 'unary'
-                  parameters:
-                      span: 128
-
-              run:
-                parameters:
-                  nested:
-                    parameters:
-                      simulations:
-                        __0__:
-                          parameters:
-                            values:
-                              __concat__:
-                                - *long_single_source_run
-
-            - __concat__:
-                - output_dir: 'DDQN/Surrogate Slack'
-                  machine_agent:
-                    parameters:
-                      - *dqn_1
-                      - *marl_dqn_1
-                - output_dir: 'All not Noisy, not 3-step/Surrogate Slack'
-                  machine_agent:
-                    parameters:
-                      - *dqn_7
-                      - *marl_dqn_7
-
-              tape:
-                machine_reward:
-                  kind: 'surrogate_slack'
-
-              run:
-                parameters:
-                  nested:
-                    parameters:
-                      simulations:
-                        __0__:
-                          parameters:
-                            values:
-                              __concat__:
-                                - *long_single_source_run
+#            - __concat__:
+#                - output_dir: 'DDQN/Surrogate Slack'
+#                  machine_agent:
+#                    parameters:
+##                      - *dqn_1
+#                      - *marl_dqn_1
+#                - output_dir: 'All not Noisy, not 3-step/Surrogate Slack'
+#                  machine_agent:
+#                    parameters:
+##                      - *dqn_7
+#                      - *marl_dqn_7
+#
+#              tape:
+#                machine_reward:
+#                  kind: 'surrogate_slack'
+#
+#              run:
+#                parameters:
+#                  nested:
+#                    parameters:
+#                      simulations:
+#                        __0__:
+#                          parameters:
+#                            values:
+#                              __concat__:
+#                                - *long_single_source_run
