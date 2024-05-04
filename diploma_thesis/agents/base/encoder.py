@@ -62,6 +62,8 @@ class GraphEncoder(Encoder, Generic[Input]):
         result.graph = self.remove_isolated_nodes(result.graph)
         result.graph = self.remove_duplicated_edges(result.graph)
 
+        print('After', result.graph[Graph.TARGET_KEY].sum())
+
         result.graph = Graph.from_pyg_graph(result.graph)
 
         return result
