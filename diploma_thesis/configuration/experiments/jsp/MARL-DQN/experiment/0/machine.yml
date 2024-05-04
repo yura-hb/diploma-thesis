@@ -58,7 +58,7 @@ parameters:
         kind: 'replay'
         parameters:
           size: 1024
-          batch_size: 96
+          batch_size: 64
 
       loss:
         kind: 'smooth_l1'
@@ -67,7 +67,7 @@ parameters:
 
       optimizer:
         model:
-          kind: 'rmsprop'
+          kind: 'adam'
           parameters:
             lr: 0.001
 

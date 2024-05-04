@@ -55,7 +55,7 @@ parameters:
       rollback_ratio: 0.00
       critic_weight: 0.5
 
-      epochs: 10
+      epochs: 15
 
       loss:
         kind: 'cross_entropy'

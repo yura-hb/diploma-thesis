@@ -84,12 +84,12 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ ['utilization/80.yml'] ]
+        - [ [ 'utilization/80.yml' ] ]
     nested:
       parameters:
         dispatch:
           seed:
-            - '__range__': [1000, 1300]
+            - '__range__': [ 1000, 1150 ]
 
 
 

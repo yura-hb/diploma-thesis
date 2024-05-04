@@ -6,6 +6,7 @@ marl_model: &marl_model 'configuration/experiments/jsp/MARL-DQN/experiment/1/mar
 
 default_mods: &default_mods
   - 'agent/dqn/ddqn.yml'
+  - 'util/train_schedule/on_store_32.yml'
 
 ###############################################################################################
 
@@ -71,11 +72,12 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ ['utilization/80.yml'] ]
+        - [ [ 'utilization/80.yml' ] ]
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0 ] ]
+          seed:
+            - '__range__': [ 1000, 1150 ]
 
 
 

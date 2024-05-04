@@ -4,7 +4,8 @@ template: &template 'baseline'
 base_model: &base_model 'configuration/experiments/jsp/MARL-DQN/experiment/1/machine.yml'
 marl_model: &marl_model 'configuration/experiments/jsp/MARL-DQN/experiment/1/marl_machine.yml'
 
-default_mods: &default_mods []
+default_mods: &default_mods
+  - 'util/train_schedule/on_store_32.yml'
 ###############################################################################################
 
 dqn_1: &dqn_1
@@ -207,11 +208,12 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ ['utilization/80.yml'] ]
+        - [ [ 'utilization/80.yml' ] ]
     nested:
       parameters:
         dispatch:
-          seed: [ [ 0 ] ]
+          seed:
+            - '__range__': [ 1000, 1150 ]
 
 
 ###############################################################################################
