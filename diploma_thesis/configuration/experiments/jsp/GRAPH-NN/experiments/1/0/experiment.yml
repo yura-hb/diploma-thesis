@@ -4,7 +4,7 @@ base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN/experiments/1/fl
 
 default_mods: &default_mods
   - 'util/train_schedule/on_store_32.yml'
-  -  'util/infrastructure/cuda.yml'
+#  -  'util/infrastructure/cuda.yml'
 
 ###############################################################################################
 
@@ -46,7 +46,7 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ [ 'utilization/80.yml' ] ]
+        - [ ['utilization/80.yml' ]]
     nested:
       parameters:
         dispatch:

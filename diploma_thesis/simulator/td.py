@@ -47,6 +47,10 @@ class TDSimulator(Simulator):
 
         # self.machine.store(machine.key, Slice(episode_id=context.shop_floor.id, records=[record]))
 
+        if self.memory == 1:
+            self.machine.store(machine.key, Slice(episode_id=context.shop_floor.id, records=[record]))
+            return
+
         global receives
 
         receives += 1

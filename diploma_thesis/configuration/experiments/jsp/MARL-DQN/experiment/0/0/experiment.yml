@@ -13,6 +13,7 @@ dqn_1: &dqn_1
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
+    - 'util/agent/multi_agent.yml'
 #    - 'agent/dqn/prioritized.yml'
     - *default_mods
 
@@ -25,6 +26,7 @@ dqn_2: &dqn_2
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
+    - 'util/agent/multi_agent.yml'
 #    - 'agent/dqn/prioritized.yml'
     - *default_mods
 
@@ -37,13 +39,14 @@ dqn_3: &dqn_3
     - 'configuration/mods/machine/mods'
   mods:
     - 'agent/dqn/ddqn.yml'
+    - 'util/agent/multi_agent.yml'
 #    - 'agent/dqn/prioritized.yml'
     - *default_mods
 
 ###############################################################################################
 
 reward: &reward
-  - kind: 'global_tardiness'
+  - kind: 'global_decomposed_tardiness'
     parameters:
       span: 128
 
@@ -72,7 +75,7 @@ task:
   n_threads: 3
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/0 (MARL)/NN/model/'
+  output_dir: 'results/jsp/experiments/MARL/(0) NN/'
 
   tasks:
     - kind: 'multi_value'
