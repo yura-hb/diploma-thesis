@@ -1,21 +1,21 @@
 task:
   kind: 'tournament'
 
-  n_workers: 4
+  n_workers: 10
   n_threads: 10
   name: 'rules'
-  output_dir: 'results/jsp/experiments/tournaments/jsp/(0) Rules'
+  output_dir: 'results/jsp/experiments/tournaments/jsp/(0) MARL'
   store_run_statistics: True
   log_run: False
   update: True
   debug: False
 
   candidates:
-    - kind: 'static'
-      parameters:
-        scheduling: 'all'
-        routing:
-          - 'ct'
+#    - kind: 'static'
+#      parameters:
+#        scheduling: 'all'
+#        routing:
+#          - 'ct'
 
     #    - kind: 'persisted_agents'
 #      parameters:
@@ -32,11 +32,11 @@ task:
 #        prefix: 'preferred'
 #        path: 'results/jsp/experiments/1_4/preferred'
 #
-#    - kind: 'persisted_agents'
-#      parameters:
-#          prefix: ''
-#          path: 'results/jsp/experiments/MARL/(2) Initialization'
-#          depth: 5
+    - kind: 'persisted_agents'
+      parameters:
+          prefix: ''
+          path: 'results/jsp/experiments/src'
+          depth: 5
 
 #    - kind: 'persisted_agents'
 #      parameters:

@@ -6,8 +6,6 @@ python cli.py --configuration configuration/experiments/jsp/MARL-DQN/experiment/
 wait
 python cli.py --configuration configuration/experiments/jsp/MARL-DQN/experiment/1/0/experiment.yml &
 python cli.py --configuration configuration/experiments/jsp/MARL-DQN/experiment/1/1/experiment.yml &
-#
-wait
 python cli.py --configuration configuration/experiments/jsp/MARL-DQN/experiment/2/experiment.yml &
 
 wait

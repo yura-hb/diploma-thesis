@@ -6,6 +6,7 @@ from typing import TypeVar, Generic, List
 
 from agents.utils import Phase, EvaluationPhase, PhaseUpdatable
 from agents.utils.memory import Record
+from agents.utils.action import ActionSelector
 from environment import ShopFloor
 from utils import Loggable
 from .encoder import Encoder as StateEncoder, Input, State
@@ -74,6 +75,9 @@ class Agent(Generic[Key], Loggable, PhaseUpdatable, metaclass=ABCMeta):
 
     @abstractmethod
     def store(self, key: Key, sample: TrainingSample):
+        pass
+
+    def with_action_selector(self, action_selector: ActionSelector):
         pass
 
     def state_dict(self):

@@ -80,7 +80,8 @@ def __evaluate__(tournament: 'Tournament',
     action_selector = tournament.action_selector
 
     if action_selector is not None:
-        a = 10
+        machine.with_action_selector(action_selector)
+        work_center.with_action_selector(action_selector)
 
     machine.with_logger(logger)
     work_center.with_logger(logger)

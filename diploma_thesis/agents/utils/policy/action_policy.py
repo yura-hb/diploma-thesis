@@ -201,7 +201,8 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
     def with_action_selector(self, action_selector: ActionSelector):
         self.action_selector = action_selector
 
-        self.update(self.phase)
+        if 'phase' in self.__dict__.keys():
+            self.update(self.phase)
 
     @staticmethod
     def __fetch_values__(output: TensorDict):

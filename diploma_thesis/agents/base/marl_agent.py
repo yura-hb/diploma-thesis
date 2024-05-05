@@ -100,9 +100,9 @@ class MARLAgent(Generic[Key], RLAgent[Key]):
     def with_action_selector(self, action_selector: ActionSelector):
         if self.is_model_distributed:
             for _, model in self.model.items():
-                model.with_action_selector(action_selector)
+                model.policy.with_action_selector(action_selector)
         else:
-            self.model.with_action_selector(action_selector)
+            self.model.policy.with_action_selector(action_selector)
 
     def loss_record(self):
         if self.keys is None:
