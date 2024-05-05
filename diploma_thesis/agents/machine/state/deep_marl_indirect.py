@@ -33,7 +33,8 @@ class DEEPMARLIndirectStateEncoder(StateEncoder):
             processing_time_info_state[0:3],
             processing_time_info_state[4:7],
             average_waiting_state[0:3],
-            time_till_due_state[0:3]
+            time_till_due_state[0:3],
+            time_till_due_state[4:7]
         ]
 
         normalized = [
@@ -42,6 +43,7 @@ class DEEPMARLIndirectStateEncoder(StateEncoder):
                 processing_time_info_state[3],
                 processing_time_info_state[-1],
                 average_waiting_state[-1],
+                time_till_due_state[3],
                 time_till_due_state[-1]
             ],
         ]

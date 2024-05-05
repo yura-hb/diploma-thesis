@@ -1,6 +1,7 @@
 from agents.utils import TrainingPhase
 from agents.utils.run_configuration import RunConfiguration
 from agents.utils.rl import RLTrainer
+from agents.utils.action import ActionSelector
 from utils import filter
 from .agent import *
 from .model import DeepPolicyModel
@@ -51,6 +52,9 @@ class RLAgent(Generic[Key], Agent[Key]):
     @filter(lambda self, *args: self.phase != EvaluationPhase())
     def store(self, key: Key, sample: TrainingSample):
         self.trainer.store(sample, self.model.policy)
+
+    def with_action_selector(self, action_selector: ActionSelector):
+        self.model.policy.with_action_selector(action_selector)
 
     def loss_record(self):
         return self.trainer.loss_record()

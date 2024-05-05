@@ -1,27 +1,34 @@
 # Evaluate the effectivenes of basic DQNs on the JSP environment
 
-template: &template 'baseline'
-base_model: &base_model 'configuration/experiments/jsp/MARL-DQN/experiment/2/machine.yml'
+base_model: &base_model 'configuration/experiments/jsp/MARL-DQN/experiment/0/as_machine.yml'
+
+
+default_mods: &default_mods
+  - 'agent/dqn/ddqn.yml'
+  - 'util/train_schedule/on_store_32.yml'
+#  - 'agent/dqn/prioritized.yml'
+
 ###############################################################################################
 
-
-ppo: &ppo
+dqn_1: &dqn_1
   base_path: *base_model
-  template: *template
+  template: 'as'
   mod_dirs:
-    - ['configuration/mods/machine/mods']
+    - 'configuration/mods/machine/mods'
   mods:
-    __factory__:
-      - [ 'util/optimizer/grad_norm.yml' ]
-      - [
-          '__none__',
-      ]
-      - [
-        '__none__',
-      ]
-      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml']
+    - 'util/agent/multi_agent.yml'
+    - *default_mods
 
-###############################################################################################
+dqn_2: &dqn_2
+  base_path: *base_model
+  template: 'as_more_rules'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'util/agent/multi_agent.yml'
+    - *default_mods
+
+#############################################################################################
 
 reward: &reward
   - kind: 'global_decomposed_tardiness'
@@ -36,24 +43,23 @@ long_single_source_run: &long_single_source_run
   parameters:
     mods:
       __inout_factory__:
-        - [ ['utilization/80.yml'] ]
+        - [ [ 'utilization/80.yml' ] ]
     nested:
       parameters:
         dispatch:
           seed:
-            - '__range__': [1000, 1300]
-
+            - '__range__': [ 1000, 1150 ]
 
 ###############################################################################################
 
 
 task:
   kind: 'multi_task'
-  n_workers: 1
-  n_threads: 8
+  n_workers: 2
+  n_threads: 10
   debug: False
   store_run_statistics: False
-  output_dir: 'results/jsp/experiments/6 (PPO)'
+  output_dir: 'results/jsp/experiments/MARL/(3) AS/model/'
 
   tasks:
     - kind: 'multi_value'
@@ -87,7 +93,7 @@ task:
               kind: 'no'
 
           simulator:
-            kind: 'episodic'
+            kind: 'td'
 
           graph:
             transition_model:
@@ -96,11 +102,10 @@ task:
           run:
             kind: 'mod'
             parameters:
-              base_path: 'configuration/experiments/jsp/MARL-DQN/experiment/2/run.yml'
+              base_path: 'configuration/experiments/jsp/MARL-DQN/experiment/0/run.yml'
               mod_dirs:
                 - 'configuration/mods/run/mods'
-              mods:
-                - 'n_workers/1.yml'
+              mods: []
               nested:
                 parameters:
                   simulations:
@@ -110,30 +115,35 @@ task:
                         base:
                           kind: 'mod'
                           parameters:
-                            base_path: 'configuration/experiments/jsp/MARL-DQN/experiment/2/simulation.yml'
+                            base_path: 'configuration/experiments/jsp/MARL-DQN/experiment/0/episode_simulation.yml'
                             mod_dirs:
                               - 'configuration/mods/simulation/mods'
-                            mods:
-                              - 'n_workers/1.yml'
+                            mods: [ ]
                         values:
         values:
+
           __concat__:
-            - output_dir: 'PPO'
-              machine_agent:
-                parameters:
-                  *ppo
+            - __concat__:
+                - output_dir: 'AS'
+                  machine_agent:
+                    parameters:
+                      - *dqn_1
+                - output_dir: 'AS more rules'
+                  machine_agent:
+                    parameters:
+                      - *dqn_2
 
-          tape:
-            machine_reward:
-              *reward
+              tape:
+                machine_reward:
+                  *reward
 
-          run:
-            parameters:
-              nested:
+              run:
                 parameters:
-                  simulations:
-                    __0__:
-                      parameters:
-                        values:
-                          __concat__:
-                            - *long_single_source_run
+                  nested:
+                    parameters:
+                      simulations:
+                        __0__:
+                          parameters:
+                            values:
+                              __concat__:
+                                - *long_single_source_run

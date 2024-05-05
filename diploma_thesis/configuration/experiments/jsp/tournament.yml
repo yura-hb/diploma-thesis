@@ -4,18 +4,18 @@ task:
   n_workers: 4
   n_threads: 10
   name: 'rules'
-  output_dir: 'results/jsp/experiments/tournaments/jsp/(2) Initialization'
+  output_dir: 'results/jsp/experiments/tournaments/jsp/(0) Rules'
   store_run_statistics: True
   log_run: False
   update: True
   debug: False
 
   candidates:
-#    - kind: 'static'
-#      parameters:
-#        scheduling: 'all'
-#        routing:
-#          - 'ct'
+    - kind: 'static'
+      parameters:
+        scheduling: 'all'
+        routing:
+          - 'ct'
 
     #    - kind: 'persisted_agents'
 #      parameters:
@@ -32,11 +32,11 @@ task:
 #        prefix: 'preferred'
 #        path: 'results/jsp/experiments/1_4/preferred'
 #
-    - kind: 'persisted_agents'
-      parameters:
-          prefix: ''
-          path: 'results/jsp/experiments/MARL/(2) Initialization'
-          depth: 5
+#    - kind: 'persisted_agents'
+#      parameters:
+#          prefix: ''
+#          path: 'results/jsp/experiments/MARL/(2) Initialization'
+#          depth: 5
 
 #    - kind: 'persisted_agents'
 #      parameters:
@@ -60,8 +60,8 @@ task:
         weight: 1
         direction: 'minimize'
         scale: 'linear'
-        at: 3250
-        limit: 80
+        at: 3800
+        limit: 100
 
   reward:
     top_k: -1
@@ -166,7 +166,7 @@ task:
             kind: 'simulation'
             parameters:
               configuration:
-                timespan: 3700
+                timespan: 4000
                 machines_per_work_center: 1
                 work_center_count: 10
                 deduce_naive_actions: True

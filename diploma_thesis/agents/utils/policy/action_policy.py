@@ -198,6 +198,11 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
 
         return output
 
+    def with_action_selector(self, action_selector: ActionSelector):
+        self.action_selector = action_selector
+
+        self.update(self.phase)
+
     @staticmethod
     def __fetch_values__(output: TensorDict):
         actions = output[Keys.ACTIONS]
