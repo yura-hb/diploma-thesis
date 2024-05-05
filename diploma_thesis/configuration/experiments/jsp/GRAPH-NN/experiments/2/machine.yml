@@ -50,12 +50,12 @@ parameters:
       device: 'cpu'
       sample_count: 512
       policy_step_ratio: 0.2
-      entropy_regularization: 0.05
+      entropy_regularization: 0.005
       entropy_decay: 0.999
       rollback_ratio: 0.00
       critic_weight: 0.5
 
-      epochs: 15
+      epochs: 20
 
       loss:
         kind: 'cross_entropy'

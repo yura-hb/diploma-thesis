@@ -51,7 +51,7 @@ parameters:
       device: 'cpu'
       sample_count: 512
       policy_step_ratio: 0.2
-      entropy_regularization: 0.05
+      entropy_regularization: 0.01
       entropy_decay: 0.999
       rollback_ratio: 0.01
       critic_weight: 1.0
@@ -70,9 +70,9 @@ parameters:
         model:
           kind: 'adam'
           parameters:
-            lr: 0.0005
+            lr: 0.001
             betas: [0.99, 0.99]
-            eps: 0.00001
+#            eps: 0.00001
 
       memory:
         kind: 'replay'
