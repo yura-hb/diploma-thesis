@@ -51,7 +51,7 @@ parameters:
       device: 'cpu'
       sample_count: 512
       policy_step_ratio: 0.2
-      entropy_regularization: 0.005
+      entropy_regularization: 0.01
       entropy_decay: 0.999
       rollback_ratio: 0.01
       critic_weight: 0.5
