@@ -53,7 +53,7 @@ parameters:
       policy_step_ratio: 0.2
       entropy_regularization: 0.05
       entropy_decay: 0.999
-      rollback_ratio: 0.00
+      rollback_ratio: 0.01
       critic_weight: 0.5
 
       epochs: 15
@@ -71,7 +71,7 @@ parameters:
           kind: 'adam'
           parameters:
             lr: 0.001
-#            betas: [0.99, 0.99]
+            betas: [0.99, 0.99]
             weight_decay: 0.0000001
 
       memory:
