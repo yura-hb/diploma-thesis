@@ -102,7 +102,7 @@ long_single_source_run: &long_single_source_run
 
 task:
   kind: 'multi_task'
-  n_workers: 3
+  n_workers: 8
   n_threads: 10
   debug: False
   store_run_statistics: False
