@@ -32,7 +32,6 @@ class HierarchicalGraphEncoder(GraphStateEncoder):
             values = [completions_times.view(-1), status.view(-1)]
 
             if self.include_due_dates:
-                # TODO: - Correct
                 slack_times = job.due_at - (mean_completion_time + parameters.now)
 
                 states += [torch.vstack(values + [slack_times.view(-1)])]
