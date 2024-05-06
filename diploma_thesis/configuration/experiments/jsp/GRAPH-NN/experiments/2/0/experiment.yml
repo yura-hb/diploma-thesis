@@ -172,9 +172,9 @@ task:
               machine_agent:
                 parameters:
                   __concat__:
-#                    - *ppo_1
-#                    - *ppo_2
-#                    - *ppo_3
+                    - *ppo_1
+                    - *ppo_2
+                    - *ppo_3
                     - *ppo_4
               graph:
                 transition_model:
@@ -190,27 +190,27 @@ task:
                 is_machine_set_in_work_center_connected: False
                 is_work_center_set_in_shop_floor_connected: False
 
-#            - output_dir: 'Local'
-#              machine_agent:
-#                parameters:
-#                  __concat__:
-#                    - *ppo_1
-#                    - *ppo_2
-#                    - *ppo_3
-#                    - *ppo_4
-#              graph:
-#                transition_model:
-#                  kind: 'base'
-#                  parameters:
-#                    forward:
-#                      kind: 'complete'
-#
-#                    schedule:
-#                      kind: 'machine_compressed'
-#
-#                memory: 0
-#                is_machine_set_in_work_center_connected: False
-#                is_work_center_set_in_shop_floor_connected: False
+            - output_dir: 'Local'
+              machine_agent:
+                parameters:
+                  __concat__:
+                    - *ppo_1
+                    - *ppo_2
+                    - *ppo_3
+                    - *ppo_4
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'machine_compressed'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: False
+                is_work_center_set_in_shop_floor_connected: False
 
           tape:
             machine_reward:
