@@ -276,6 +276,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
         def consume(simulation: Simulation):
             with resource.request() as req:
+                is_terminated = True
+
                 try:
                     yield req
 
@@ -304,9 +306,12 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                     if is_training:
                         self.did_finish_simulation(simulation)
 
-                    on_simulation_end(simulation, rewards)
+                    is_terminated = on_simulation_end(simulation, rewards)
                 except:
                     self.__log__(f'Skip simulation {simulation.simulation_id} due to error {traceback.print_exc()}')
+
+                if is_terminated:
+                    raise ValueError('Terminated')
 
         processes = [environment.process(consume(simulation)) for simulation in simulations]
 

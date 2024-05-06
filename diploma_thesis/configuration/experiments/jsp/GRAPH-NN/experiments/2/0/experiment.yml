@@ -93,7 +93,7 @@ long_single_source_run: &long_single_source_run
       parameters:
         dispatch:
           seed:
-            - '__range__': [1000, 1300]
+            - '__range__': [1500, 2000]
 
 
 
@@ -115,6 +115,9 @@ task:
           name: 'model'
           output_dir: '1'
           log_stdout: False
+
+          entropy_average_window: 5
+          min_average_entropy: 0.25
 
           machine_agent:
             kind: 'mod'
@@ -169,9 +172,9 @@ task:
               machine_agent:
                 parameters:
                   __concat__:
-                    - *ppo_1
-                    - *ppo_2
-                    - *ppo_3
+#                    - *ppo_1
+#                    - *ppo_2
+#                    - *ppo_3
                     - *ppo_4
               graph:
                 transition_model:
@@ -187,27 +190,27 @@ task:
                 is_machine_set_in_work_center_connected: False
                 is_work_center_set_in_shop_floor_connected: False
 
-            - output_dir: 'Local'
-              machine_agent:
-                parameters:
-                  __concat__:
-                    - *ppo_1
-                    - *ppo_2
-                    - *ppo_3
-                    - *ppo_4
-              graph:
-                transition_model:
-                  kind: 'base'
-                  parameters:
-                    forward:
-                      kind: 'complete'
-
-                    schedule:
-                      kind: 'machine_compressed'
-
-                memory: 0
-                is_machine_set_in_work_center_connected: False
-                is_work_center_set_in_shop_floor_connected: False
+#            - output_dir: 'Local'
+#              machine_agent:
+#                parameters:
+#                  __concat__:
+#                    - *ppo_1
+#                    - *ppo_2
+#                    - *ppo_3
+#                    - *ppo_4
+#              graph:
+#                transition_model:
+#                  kind: 'base'
+#                  parameters:
+#                    forward:
+#                      kind: 'complete'
+#
+#                    schedule:
+#                      kind: 'machine_compressed'
+#
+#                memory: 0
+#                is_machine_set_in_work_center_connected: False
+#                is_work_center_set_in_shop_floor_connected: False
 
           tape:
             machine_reward:

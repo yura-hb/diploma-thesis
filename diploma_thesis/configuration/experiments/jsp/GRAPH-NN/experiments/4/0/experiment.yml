@@ -105,7 +105,7 @@ long_single_source_run: &long_single_source_run
       parameters:
         dispatch:
           seed:
-            - '__range__': [1000, 1300]
+            - '__range__': [1500, 2000]
 
 
 
@@ -126,6 +126,8 @@ task:
         base:
           name: 'model'
           output_dir: '1'
+          entropy_average_window: 5
+          min_average_entropy: 0.25
           log_stdout: False
 
           machine_agent:
