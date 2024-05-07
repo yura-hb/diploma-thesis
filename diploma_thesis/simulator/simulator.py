@@ -276,7 +276,7 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
         def consume(simulation: Simulation):
             with resource.request() as req:
-                is_terminated = True
+                is_terminated = False
 
                 try:
                     yield req

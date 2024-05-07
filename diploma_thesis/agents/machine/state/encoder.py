@@ -42,8 +42,6 @@ class GraphStateEncoder(GraphEncoder, metaclass=ABCMeta):
 
         graph[Graph.OPERATION_KEY][Graph.TARGET_KEY] = torch.logical_and(is_in_queue.view(-1), is_target.view(-1))
 
-        print('Before', is_target.sum(), len(queued_jobs))
-
         return graph
 
     def __estimate_completion_times__(self, job, now):

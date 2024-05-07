@@ -64,8 +64,6 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
             r = batch.info[Record.RETURN_KEY]
             r = (r - r.mean()) / (r.std() + 1e-8)
 
-            print(f'Value: {value.view(-1)} Return: {r.view(-1)}')
-
             critic_loss = self.configuration.critic_weight * self.configuration.value_loss(value, r)
 
             return actor_loss, critic_loss, entropy

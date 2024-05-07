@@ -1,7 +1,7 @@
 task:
   kind: 'tournament'
 
-  n_workers: 10
+  n_workers: 5
   n_threads: 10
   name: 'rules'
   output_dir: 'results/jsp/experiments/tournaments/jsp/(0) MARL'

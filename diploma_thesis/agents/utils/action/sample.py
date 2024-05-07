@@ -21,8 +21,6 @@ class Sample(ActionSelector):
 
         action = distribution.sample().item()
 
-        print("action: ", action, "entropy: ", distribution.entropy().item(), distribution.probs)
-
         return action, distribution.probs
 
     @staticmethod

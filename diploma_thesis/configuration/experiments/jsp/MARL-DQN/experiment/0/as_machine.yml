@@ -70,6 +70,7 @@ parameters:
           kind: 'adam'
           parameters:
             lr: 0.001
+            w
 
       return:
         kind: 'no'

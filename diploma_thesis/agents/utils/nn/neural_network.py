@@ -17,13 +17,11 @@ class NeuralNetwork(nn.Module):
     @dataclass
     class Configuration:
         layers: List[Layer]
-        init_seed: int
 
         @staticmethod
         def from_cli(parameters: dict):
             return NeuralNetwork.Configuration(
                 layers=[layer_from_cli(layer) for layer in parameters['layers']] if parameters.get('layers') else [],
-                init_seed=parameters.get('init_seed', 0)
             )
 
     def __init__(self, configuration: Configuration):
@@ -36,9 +34,6 @@ class NeuralNetwork(nn.Module):
         self.__build__()
 
     def forward(self, state):
-        if not self.is_configured:
-            torch.manual_seed(self.configuration.init_seed)
-
         output = self.__forward__(state)
 
         self.is_configured = True
