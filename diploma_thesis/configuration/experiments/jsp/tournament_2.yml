@@ -1,7 +1,7 @@
 task:
   kind: 'tournament'
 
-  n_workers: 5
+  n_workers: 10
   n_threads: 10
   name: 'rules'
   output_dir: 'results/jsp/experiments/tournaments/jsp/2'
@@ -32,11 +32,27 @@ task:
 #        prefix: 'preferred'
 #        path: 'results/jsp/experiments/1_4/preferred'
 #
+    - kind: 'static'
+      parameters:
+        scheduling:
+          - 'crspt'
+          - 'cr'
+          - 'atc'
+          - 'ms'
+          - 'winq'
+          - 'fifo'
+          - 'mod'
+          - 'dptwinqnpt'
+          - 'lwkr'
+          - 'spt'
+        routing:
+          - 'ct'
+
     - kind: 'persisted_agents'
       parameters:
-          prefix: ''
-          path: 'results/jsp/experiments/src_2'
-          depth: 5
+        prefix: ''
+        path: 'results/jsp/experiments/src_2'
+        depth: 5
 
 #    - kind: 'persisted_agents'
 #      parameters:
@@ -219,7 +235,7 @@ task:
 
               dispatch:
                 seed:
-                  '__range__': [000, 100]
+                  '__range__': [10000, 10200]
 
                 job_sampler:
                   parameters:

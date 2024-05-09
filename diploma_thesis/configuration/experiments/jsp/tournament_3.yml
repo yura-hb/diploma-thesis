@@ -11,6 +11,22 @@ task:
   debug: False
 
   candidates:
+    - kind: 'static'
+      parameters:
+        scheduling:
+          - 'crspt'
+          - 'cr'
+          - 'atc'
+          - 'ms'
+          - 'winq'
+          - 'fifo'
+          - 'mod'
+          - 'dptwinqnpt'
+          - 'lwkr'
+          - 'spt'
+        routing:
+          - 'ct'
+
 #    - kind: 'static'
 #      parameters:
 #        scheduling: 'all'
@@ -219,7 +235,7 @@ task:
 
               dispatch:
                 seed:
-                  '__range__': [000, 100]
+                  '__range__': [10000, 10200]
 
                 job_sampler:
                   parameters:

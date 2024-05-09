@@ -1,7 +1,7 @@
 task:
   kind: 'tournament'
 
-  n_workers: 5
+  n_workers: 10
   n_threads: 10
   name: 'rules'
   output_dir: 'results/jsp/experiments/tournaments/jsp/1'
@@ -11,11 +11,21 @@ task:
   debug: False
 
   candidates:
-#    - kind: 'static'
-#      parameters:
-#        scheduling: 'all'
-#        routing:
-#          - 'ct'
+    - kind: 'static'
+      parameters:
+        scheduling:
+          - 'crspt'
+          - 'cr'
+          - 'atc'
+          - 'ms'
+          - 'winq'
+          - 'fifo'
+          - 'mod'
+          - 'dptwinqnpt'
+          - 'lwkr'
+          - 'spt'
+        routing:
+          - 'ct'
 
     #    - kind: 'persisted_agents'
 #      parameters:
@@ -219,7 +229,7 @@ task:
 
               dispatch:
                 seed:
-                  '__range__': [0, 100]
+                  '__range__': [10000, 10200]
 
 
                 job_sampler:
