@@ -9,3 +9,5 @@ python cli.py --configuration PATH_TO_EXPERIMENT_FILE
 ```
 
 The requirements of the work are present in `requirements.txt`.
+
+Trained models and experiment results are available [here](https://campuscvut-my.sharepoint.com/:u:/g/personal/hayeuyur_cvut_cz/EQ7TgHnCjbVIvDmWBltOo5ABQH5YcKSm6CRa0k33InaY8A?e=ul41Pa).
