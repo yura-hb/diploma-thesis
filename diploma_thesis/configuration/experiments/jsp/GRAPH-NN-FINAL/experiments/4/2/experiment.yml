@@ -1,7 +1,7 @@
 # Evaluate the effectivenes of basic DQNs on the JSP environment
 
 template: &template 'baseline'
-base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN/experiments/4/machine.yml'
+base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN-FINAL/experiments/4/machine.yml'
 
 graph: &graph
     transition_model:
@@ -163,7 +163,7 @@ task:
           run:
             kind: 'mod'
             parameters:
-              base_path: 'configuration/experiments/jsp/GRAPH-NN/experiments/4/run.yml'
+              base_path: 'configuration/experiments/jsp/GRAPH-NN-FINAL/experiments/4/run.yml'
               mod_dirs:
                 - 'configuration/mods/run/mods'
               mods: []
@@ -176,7 +176,7 @@ task:
                         base:
                           kind: 'mod'
                           parameters:
-                            base_path: 'configuration/experiments/jsp/GRAPH-NN/experiments/4/simulation.yml'
+                            base_path: 'configuration/experiments/jsp/GRAPH-NN-FINAL/experiments/4/simulation.yml'
                             mod_dirs:
                               - 'configuration/mods/simulation/mods'
                             mods: [ ]

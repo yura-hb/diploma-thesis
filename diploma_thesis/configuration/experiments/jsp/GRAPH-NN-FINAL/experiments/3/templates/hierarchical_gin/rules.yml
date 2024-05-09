@@ -1,9 +1,13 @@
 
 rules:
+  - 'crspt'
+  - 'spmwkspt'
+  - 'mod'
+  - 'dptwinqnpt'
+  - 'ms'
   - 'spt'
-  - 'cr'
+  - 'covert'
+  - 'atc'
+  - 'lwkr'
   - 'ms'
   - 'winq'
-  - 'edd'
-  - 'lwkr'
-  - 'atc'

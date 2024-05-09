@@ -1,0 +1,23 @@
+
+# JSP training based on the DEEP-MARL thesis
+
+kind: 'plain'
+parameters:
+  timeline:
+    warmup:
+      - 5000
+      - 5000
+
+    duration: 20000000
+
+  machine_train_schedule:
+    pretrain_steps: 10
+    train_interval: 25
+    max_training_steps: 100000000
+
+  work_center_train_schedule:
+    pretrain_steps: 0
+    train_interval: 100
+    max_training_steps: 0
+
+  n_workers: 2

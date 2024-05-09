@@ -62,6 +62,7 @@ layers:
 
       signature: 'graph -> values_hidden, values_batch'
 
+
   - kind: 'linear'
     parameters:
       dim: 128
