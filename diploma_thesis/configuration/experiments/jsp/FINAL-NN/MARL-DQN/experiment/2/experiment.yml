@@ -1,0 +1,274 @@
+# Evaluate the effectivenes of basic DQNs on the JSP environment
+
+default_mods: &default_mods
+  - 'util/train_schedule/on_store_32.yml'
+###############################################################################################
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ [ 'utilization/80.yml' ] ]
+    nested:
+      parameters:
+        dispatch:
+          seed:
+            - '__range__': [ 2300, 2450 ]
+
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 8
+  n_threads: 8
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/FINAL/MARL-DQN/2'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+          seed: 333
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/FINAL-NN/MARL-DQN/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods: []
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/FINAL-NN/MARL-DQN/episode_simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+            # Deep MARL-AS (8) rules (GDT)
+            - output_dir: 'DeepMARL_AS (8 rules) (GDT)'
+              machine_agent:
+                parameters:
+                  - base_path: 'configuration/experiments/jsp/FINAL-NN/MARL-DQN/as_machine.yml'
+                    template: 'as_more_rules'
+                    mod_dirs:
+                      - 'configuration/mods/machine/mods'
+                    mods:
+                        - 'agent/dqn/ddqn.yml'
+                        - 'util/agent/multi_agent.yml'
+                        - 'util/optimizer/adam_stationary.yml'
+                        - *default_mods
+              tape:
+                machine_reward:
+                  kind: 'global_decomposed_tardiness'
+                  parameters:
+                    span: 128
+
+            # Deep MARL-AS (8) rules (S)
+            - output_dir: 'DeepMARL_AS (8 rules) (S)'
+              machine_agent:
+                parameters:
+                  - base_path: 'configuration/experiments/jsp/FINAL-NN/MARL-DQN/as_machine.yml'
+                    template: 'as_more_rules'
+                    mod_dirs:
+                      - 'configuration/mods/machine/mods'
+                    mods:
+                      - 'agent/dqn/ddqn.yml'
+                      - 'util/agent/multi_agent.yml'
+                      - 'util/optimizer/adam_stationary.yml'
+                      - *default_mods
+              tape:
+                machine_reward:
+                  kind: 'surrogate_tardiness'
+                  parameters:
+                    winq_factor: 0.2
+                    span: 30
+                    critical_level_factor: 64
+
+            # Deep MARL-AS (8) rules GDT + Prioritized (GDT)
+            - output_dir: 'DeepMARL_AS (8 rules) Prioritized (GDT)'
+              machine_agent:
+                parameters:
+                  - base_path: 'configuration/experiments/jsp/FINAL-NN/MARL-DQN/as_machine.yml'
+                    template: 'as_more_rules'
+                    mod_dirs:
+                      - 'configuration/mods/machine/mods'
+                    mods:
+                      - 'agent/dqn/ddqn.yml'
+                      - 'util/agent/multi_agent.yml'
+                      - 'agent/dqn/prioritized.yml'
+                      - 'util/optimizer/adam_stationary.yml'
+                      - *default_mods
+              tape:
+                machine_reward:
+                  kind: 'global_decomposed_tardiness'
+                  parameters:
+                    span: 128
+
+            # Deep MARL-AS (8) rules + Prioritized (S)
+            - output_dir: 'DeepMARL_AS (8 rules) Prioritized (S)'
+              machine_agent:
+                parameters:
+                  - base_path: 'configuration/experiments/jsp/FINAL-NN/MARL-DQN/as_machine.yml'
+                    template: 'as_more_rules'
+                    mod_dirs:
+                      - 'configuration/mods/machine/mods'
+                    mods:
+                      - 'agent/dqn/ddqn.yml'
+                      - 'util/agent/multi_agent.yml'
+                      - 'agent/dqn/prioritized.yml'
+                      - 'util/optimizer/adam_stationary.yml'
+                      - *default_mods
+              tape:
+                machine_reward:
+                  kind: 'surrogate_tardiness'
+                  parameters:
+                    winq_factor: 0.2
+                    span: 30
+                    critical_level_factor: 64
+
+            # Deep MARL-MR (S)
+            - output_dir: 'DeepMARL_MR (S)'
+              machine_agent:
+                parameters:
+                  - base_path: 'configuration/experiments/jsp/FINAL-NN/MARL-DQN/machine.yml'
+                    template: 'baseline'
+                    mod_dirs:
+                      - 'configuration/mods/machine/mods'
+                    mods:
+                      - 'agent/dqn/ddqn.yml'
+                      - 'util/agent/multi_agent.yml'
+                      - 'util/optimizer/adam_stationary.yml'
+                      - *default_mods
+              tape:
+                machine_reward:
+                  kind: 'surrogate_tardiness'
+                  parameters:
+                    winq_factor: 0.2
+                    span: 30
+                    critical_level_factor: 64
+
+            # Deep MARL-MR + Prioritized (S)
+            - output_dir: 'DeepMARL_MR Prioritized (S)'
+              machine_agent:
+                parameters:
+                  - base_path: 'configuration/experiments/jsp/FINAL-NN/MARL-DQN/machine.yml'
+                    template: 'baseline'
+                    mod_dirs:
+                      - 'configuration/mods/machine/mods'
+                    mods:
+                      - 'agent/dqn/ddqn.yml'
+                      - 'util/agent/multi_agent.yml'
+                      - 'agent/dqn/prioritized.yml'
+                      - 'util/optimizer/adam_stationary.yml'
+                      - *default_mods
+              tape:
+                machine_reward:
+                  kind: 'surrogate_tardiness'
+                  parameters:
+                    winq_factor: 0.2
+                    span: 30
+                    critical_level_factor: 64
+
+            # Deep MARL-MR (Beefy)
+            - output_dir: 'DeepMARL_MR (8 rules) (Beefy)'
+              machine_agent:
+                parameters:
+                  - base_path: 'configuration/experiments/jsp/FINAL-NN/MARL-DQN/machine.yml'
+                    template: 'relu_best_rules'
+                    mod_dirs:
+                      - 'configuration/mods/machine/mods'
+                    mods:
+                      - 'agent/dqn/ddqn.yml'
+                      - 'util/agent/multi_agent.yml'
+                      - 'agent/dqn/prioritized.yml'
+                      - 'util/optimizer/adam_stationary.yml'
+                      - *default_mods
+              tape:
+                machine_reward:
+                  kind: 'surrogate_tardiness'
+                  parameters:
+                    winq_factor: 0.2
+                    span: 30
+                    critical_level_factor: 64
+
+            # Deep MARL-AS (Beefy)
+            - output_dir: 'DeepMARL_AS (Beefy)'
+              machine_agent:
+                parameters:
+                  - base_path: 'configuration/experiments/jsp/FINAL-NN/MARL-DQN/as_machine.yml'
+                    template: 'as_relu_best_rules'
+                    mod_dirs:
+                      - 'configuration/mods/machine/mods'
+                    mods:
+                      - 'agent/dqn/ddqn.yml'
+                      - 'util/agent/multi_agent.yml'
+                      - 'agent/dqn/prioritized.yml'
+                      - 'util/optimizer/adam_stationary.yml'
+                      - *default_mods
+              tape:
+                machine_reward:
+                  kind: 'surrogate_tardiness'
+                  parameters:
+                    winq_factor: 0.2
+                    span: 30
+                    critical_level_factor: 64
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run

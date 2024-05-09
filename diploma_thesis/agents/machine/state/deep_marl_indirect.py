@@ -7,6 +7,7 @@ from agents.base.state import State
 from environment import JobReductionStrategy
 from .encoder import StateEncoder
 
+# TODO: - Update normalized state
 
 class DEEPMARLIndirectStateEncoder(StateEncoder):
 
@@ -32,13 +33,19 @@ class DEEPMARLIndirectStateEncoder(StateEncoder):
             processing_time_info_state[0:3],
             processing_time_info_state[4:7],
             average_waiting_state[0:3],
-            time_till_due_state[0:3]
+            time_till_due_state[0:3],
+            time_till_due_state[4:7]
         ]
 
         normalized = [
             system_state,
-            [processing_time_info_state[3], processing_time_info_state[-1],
-             average_waiting_state[-1], time_till_due_state[-1]],
+            [
+                processing_time_info_state[3],
+                processing_time_info_state[-1],
+                average_waiting_state[-1],
+                time_till_due_state[3],
+                time_till_due_state[-1]
+            ],
         ]
 
         state = reduce(lambda x, y: x + y, not_normalized_state + normalized, [])
@@ -52,6 +59,7 @@ class DEEPMARLIndirectStateEncoder(StateEncoder):
         state = [
             len(parameters.machine.shop_floor.in_system_jobs),
             parameters.machine.queue_size,
+            len(parameters.machine.arriving_jobs)
         ]
 
         return state
@@ -129,7 +137,13 @@ class DEEPMARLIndirectStateEncoder(StateEncoder):
             job.time_until_due(parameters.now) for job in parameters.machine.queue
         ])
 
-        state = self.__moments__(time_till_due)
+        slack_time = torch.FloatTensor([
+            job.slack_upon_moment(parameters.now) for job in parameters.machine.queue
+        ])
+
+        state = []
+        state += self.__moments__(time_till_due)
+        state += self.__moments__(slack_time)
 
         return state
 

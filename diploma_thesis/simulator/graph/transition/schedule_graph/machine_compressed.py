@@ -16,6 +16,8 @@ class MachineCompressedTransition(ScheduleTransition):
     """
 
     def schedule_implicit(self, job: Job, graph: Graph) -> Graph:
+        self.__schedule_implicit__(job, graph)
+
         return graph
 
     def schedule(self, job: Job, graph: Graph) -> Graph:
@@ -44,7 +46,7 @@ class MachineCompressedTransition(ScheduleTransition):
             if machine_index is None or operation_id is None:
                 continue
 
-            self.__append_operations_to_scheduled_graph__(operation_id, machine_index, graph)
+            self.__append__(graph.data[Graph.MACHINE_KEY, machine_index], Graph.SCHEDULED_KEY, operation_id, dim=1)
 
     def __schedule__(self, job: Job, graph: Graph):
         operation_id = self.__current_operation_id__(graph, job)

@@ -12,6 +12,7 @@ from joblib import Parallel, delayed
 from tabulate import tabulate
 from tqdm import tqdm
 
+from agents.utils.action import from_cli
 from environment import Statistics
 from simulator import EvaluateConfiguration, EpisodicSimulator, Simulation
 from simulator.graph import GraphModel
@@ -40,7 +41,7 @@ def __evaluate__(tournament: 'Tournament',
     import torch
     import random
 
-    torch.set_num_threads(threads)
+    # torch.set_num_threads(threads)
     torch.manual_seed(0)
     random.seed(0)
     np.random.seed(0)
@@ -54,12 +55,33 @@ def __evaluate__(tournament: 'Tournament',
     if 'graph' in candidate.parameters:
         graph_model = GraphModel.from_cli(candidate.parameters['graph'])
 
+    mods = []
+
+    if 'machine_agent' in candidate.parameters:
+        for m in candidate.parameters['machine_agent']['parameters']['mods']:
+            if isinstance(m, str):
+                if 'cuda' not in 'm':
+                    mods.append(m)
+                continue
+
+            if isinstance(m, list):
+                mods += [m_ for m_ in m if 'cuda' not in m_]
+                continue
+
+        candidate.parameters['machine_agent']['parameters']['mods'] = mods
+
     try:
         machine, work_center = candidate.load()
     except:
         traceback.print_exc()
         print(f'Error loading candidate {candidate.name}')
         return []
+
+    action_selector = tournament.action_selector
+
+    if action_selector is not None:
+        machine.with_action_selector(action_selector)
+        work_center.with_action_selector(action_selector)
 
     machine.with_logger(logger)
     work_center.with_logger(logger)
@@ -113,6 +135,15 @@ class Tournament(Workflow):
     @property
     def store_run_statistics(self):
         return self.parameters.get('store_run_statistics', False)
+
+    @property
+    def action_selector(self):
+        action_selector = self.parameters.get('action_selector', None)
+
+        if action_selector is not None:
+            action_selector = from_cli(action_selector)
+
+        return action_selector
 
     @property
     def should_update(self):
@@ -246,7 +277,7 @@ class Tournament(Workflow):
         records = []
         result = []
 
-        for candidate in candidates:
+        for candidate in tqdm(candidates):
             candidate_output_path: str = os.path.join(output_dir, candidates_dir, candidate.name)
 
             if os.path.exists(candidate_output_path):

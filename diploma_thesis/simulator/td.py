@@ -3,18 +3,26 @@ from .simulator import *
 from .utils import TDQueue
 
 
+receives = 0
+
 class TDSimulator(Simulator):
     """
     A simulator, which estimates returns in Temporal Difference manner and send information for training as soon as
     possible
     """
 
-    def __init__(self, memory: int = 100, emit_trajectory: bool = False, reset_trajectory: bool = True, *args, **kwargs):
+    def __init__(self,
+                 memory: int = 1,
+                 emit_trajectory: bool = False,
+                 reset_trajectory: bool = True,
+                 sliding_window: int = 16,
+                 *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.memory = memory
         self.emit_trajectory = emit_trajectory
         self.reset_trajectory = reset_trajectory
+        self.sliding_window = sliding_window
         self.episode = 0
 
         self.machine_queue = TDQueue(self.machine.is_distributed)
@@ -36,6 +44,18 @@ class TDSimulator(Simulator):
 
     def did_prepare_machine_record(self, context: Context, machine: Machine, record: Record):
         super().did_prepare_machine_record(context, machine, record)
+
+        # self.machine.store(machine.key, Slice(episode_id=context.shop_floor.id, records=[record]))
+
+        if self.memory == 1:
+            self.machine.store(machine.key, Slice(episode_id=context.shop_floor.id, records=[record]))
+            return
+
+        global receives
+
+        receives += 1
+
+        print(f'Total Receives: {receives}')
 
         self.machine_queue.store(context.shop_floor.id, machine.key, context.moment, record)
 
@@ -62,12 +82,17 @@ class TDSimulator(Simulator):
         else:
             agent.store(key, Slice(episode_id=context.shop_floor.id, records=records))
 
-        if (not self.emit_trajectory or not self.reset_trajectory) and len(prefix) > 1:
-            queue.store_slice(context.shop_floor.id, key, dict(list(zip(moments, records))[1:]))
+        suffix = max(1, self.sliding_window)
+
+        if (not self.emit_trajectory or not self.reset_trajectory) and len(prefix) > suffix:
+            data = list(zip(moments, records))[suffix:]
+
+            queue.store_slice(context.shop_floor.id, key, dict(data))
 
     @staticmethod
     def from_cli(parameters, *args, **kwargs) -> Simulator:
         return TDSimulator(parameters.get('memory', 1), 
                            parameters.get('emit_trajectory', False),
                            parameters.get('reset_trajectory', True),
+                           parameters.get('sliding_window', 1),
                            *args, **kwargs)

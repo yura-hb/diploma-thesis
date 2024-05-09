@@ -1,0 +1,74 @@
+layers:
+
+  # Actor
+
+  - kind: 'graph_model'
+    parameters:
+      layers:
+        - kind: 'linear'
+          parameters:
+            dim: 128
+            activation: 'leaky_relu'
+            signature: 'x -> x'
+        - kind: 'gin'
+          parameters:
+            in_channels: -1
+            out_channels: 128
+            num_layers: 3
+            hidden_channels: 128
+            jk: 'cat'
+        - kind: 'linear'
+          parameters:
+            dim: 128
+            activation: 'leaky_relu'
+            signature: 'x -> x'
+        - kind: 'mask'
+
+      signature: 'graph -> actions_hidden, actions_batch'
+
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'leaky_relu'
+      signature: 'actions_hidden -> actions_hidden'
+
+  # Critic
+
+  - kind: 'graph_model'
+    parameters:
+      layers:
+        - kind: 'linear'
+          parameters:
+            dim: 128
+            activation: 'leaky_relu'
+            signature: 'x -> x'
+        - kind: 'gin'
+          parameters:
+            in_channels: -1
+            out_channels: 128
+            num_layers: 3
+            hidden_channels: 128
+            jk: 'cat'
+        - kind: 'linear'
+          parameters:
+            dim: 128
+            activation: 'leaky_relu'
+            signature: 'x -> x'
+        - kind: 'mask'
+
+      signature: 'graph -> values_hidden, values_batch'
+
+  - kind: 'mean_pool'
+    parameters:
+      signature: 'values_hidden, values_batch -> values_hidden'
+
+  - kind: 'linear'
+    parameters:
+      dim: 128
+      activation: 'leaky_relu'
+      signature: 'values_hidden -> values_hidden'
+
+  - kind: 'output'
+    parameters:
+      value: 'values_hidden'
+      actions: 'actions_hidden'

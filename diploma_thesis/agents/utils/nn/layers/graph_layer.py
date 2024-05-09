@@ -39,10 +39,10 @@ class GraphModuleWrapper(BaseWrapper):
 
     @property
     def signature(self):
-        return self._signature or 'x, edge_index -> x'
+        return self._signature or 'x, edge_index, batch -> x'
 
-    def forward(self, x, edge_index):
-        return self.model(x, edge_index)
+    def forward(self, x, edge_index, batch):
+        return self.model(x, edge_index, batch)
 
 
 class GIN(GraphModuleWrapper):
@@ -61,6 +61,12 @@ class GATConv(GraphModuleWrapper):
 
     def __init__(self, configuration):
         super().__init__(pyg.nn.GAT, configuration)
+
+
+class GraphConv(GraphModuleWrapper):
+
+    def __init__(self, configuration):
+        super().__init__(pyg.nn.GraphConv, configuration)
 
 
 class GCNConv(GraphModuleWrapper):
@@ -83,6 +89,16 @@ class GraphInstanceNorm(GraphModuleWrapper):
     @property
     def signature(self):
         return self._signature or 'x, batch -> x'
+
+
+class GraphBatchNorm(GraphModuleWrapper):
+
+    def __init__(self, configuration):
+        super().__init__(pyg.nn.BatchNorm, configuration)
+
+    @property
+    def signature(self):
+        return self._signature or 'x -> x'
 
 
 class GraphFunctionWrapper(BaseWrapper):

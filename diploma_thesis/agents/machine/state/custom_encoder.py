@@ -21,6 +21,7 @@ class CustomGraphEncoder(GraphStateEncoder):
 
         machine_util_rate = torch.nan_to_num(parameters.machine.utilization_rate, nan=0)
         arriving_jobs = len(parameters.machine.arriving_jobs)
+        will_arrive_jobs = len(parameters.machine.will_arrive_jobs)
         time_till_available = parameters.machine.time_till_available / self.norm_factor
         expected_tardy_rate = parameters.machine.shop_floor.expected_tardy_rate(parameters.machine.shop_floor.now)
 
@@ -31,14 +32,15 @@ class CustomGraphEncoder(GraphStateEncoder):
         for job_id in job_ids:
             job = parameters.machine.shop_floor.job(job_id)
 
-            completion_times = self.__estimate_completion_times__(job)
+            completion_times = self.__estimate_completion_times__(job, parameters.now)
             l_completion_time, mean_completion_time, u_completion_time = completion_times
 
             completion_rate = self.__fill_job_matrix__(
                 job, torch.arange(1, job.step_idx.shape[0] + 1) / job.step_idx.shape[0], until_current_step=False
             )
 
-            slack_times = job.due_at - job.history.dispatched_at - mean_completion_time
+            slack_times = job.due_at - (mean_completion_time + parameters.now)
+            wait_times = job.current_operation_waiting_time_on_machine(parameters.now)
             critical_ratios = 1 - slack_times / (torch.abs(slack_times) + self.norm_factor)
 
             idx = job.next_work_center_idx.item() if job.next_work_center_idx is not None else -1
@@ -61,16 +63,18 @@ class CustomGraphEncoder(GraphStateEncoder):
                 job.history.started_at >= 0,
                 job.history.finished_at >= 0,
 
-                l_completion_time.view(-1) / self.norm_factor,
+                # l_completion_time.view(-1) / self.norm_factor,
                 mean_completion_time.view(-1) / self.norm_factor,
-                u_completion_time.view(-1) / self.norm_factor,
+                # u_completion_time.view(-1) / self.norm_factor,
                 slack_times.view(-1) / self.norm_factor,
 
                 completion_rate.view(-1),
                 critical_ratios.view(-1),
 
+                placeholder + wait_times,
                 placeholder + machine_util_rate,
                 placeholder + arriving_jobs,
+                placeholder + will_arrive_jobs,
                 placeholder + time_till_available,
                 placeholder + expected_tardy_rate,
                 placeholder + winq[idx],
@@ -88,7 +92,6 @@ class CustomGraphEncoder(GraphStateEncoder):
     @classmethod
     def from_cli(cls, parameters: dict):
         return CustomGraphEncoder(
-            norm_factor=parameters.get('norm_factor', 1024),
-            include_due_dates=parameters.get('include_due_dates', False),
+            norm_factor=parameters.get('norm_factor', 128),
             **cls.base_parameters_from_cli(parameters)
         )

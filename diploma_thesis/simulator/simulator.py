@@ -231,25 +231,17 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
     # Agent
 
     def schedule(self, context: Context, machine: Machine) -> Job | None:
-        start = time.time()
-
         graph = self.graph_model.graph(context=context)
         memory = self.memory_model.get_schedule_record(context=context, key=machine.key)
         parameters = MachineInput(machine=machine, now=context.moment, graph=graph, memory=memory)
 
-        encode_end = time.time()
-
         result = self.machine.schedule(machine.key, parameters)
-
-        forward_end = time.time()
 
         if self.machine.is_trainable:
             self.tape_model.register_machine_reward_preparation(context=context, machine=machine, record=result)
 
         if result.record is not None:
             self.memory_model.store_schedule_record(context=context, key=machine.key, memory=result.record.memory)
-
-        store_end = time.time()
 
         return result.result
 
@@ -284,6 +276,8 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
         def consume(simulation: Simulation):
             with resource.request() as req:
+                is_terminated = False
+
                 try:
                     yield req
 
@@ -312,9 +306,12 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
                     if is_training:
                         self.did_finish_simulation(simulation)
 
-                    on_simulation_end(simulation, rewards)
+                    is_terminated = on_simulation_end(simulation, rewards)
                 except:
                     self.__log__(f'Skip simulation {simulation.simulation_id} due to error {traceback.print_exc()}')
+
+                if is_terminated:
+                    raise ValueError('Terminated')
 
         processes = [environment.process(consume(simulation)) for simulation in simulations]
 
@@ -398,7 +395,11 @@ class Simulator(Agent, Loggable, SimulatorInterface, metaclass=ABCMeta):
 
             gc.collect()
 
-            torch.mps.empty_cache()
+            try:
+                torch.mps.empty_cache()
+            except:
+                pass
+
             torch.cuda.empty_cache()
 
     def __terminate_if_needed__(self, environment: simpy.Environment, run_event: simpy.Event, delay: float):

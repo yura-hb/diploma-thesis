@@ -1,4 +1,4 @@
-from torchrl.data import TensorDictReplayBuffer
+from torchrl.data import TensorDictReplayBuffer, SamplerWithoutReplacement
 
 from .memory import *
 from .memory import Configuration as MemoryConfiguration
@@ -23,7 +23,7 @@ class Configuration(MemoryConfiguration):
 class ReplayMemory(Memory[Configuration]):
 
     def __make_buffer__(self) -> ReplayBuffer | TensorDictReplayBuffer:
-        sampler = self.configuration.sampler.make() if self.configuration.sampler else RandomSampler()
+        sampler = self.configuration.sampler.make() if self.configuration.sampler else SamplerWithoutReplacement()
         cls = None
 
         params = dict(

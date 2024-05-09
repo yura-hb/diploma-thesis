@@ -64,6 +64,7 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
 
         self.action_layer = action_layer()
         self.value_layer = value_layer()
+        self.is_first_pass = True
 
         self.__post_init__()
 
@@ -196,6 +197,12 @@ class ActionPolicy(Policy[Input], metaclass=ABCMeta):
             output[Keys.ACTIONS] = torch.nan_to_num(actions[0], neginf=min_value)
 
         return output
+
+    def with_action_selector(self, action_selector: ActionSelector):
+        self.action_selector = action_selector
+
+        if 'phase' in self.__dict__.keys():
+            self.update(self.phase)
 
     @staticmethod
     def __fetch_values__(output: TensorDict):

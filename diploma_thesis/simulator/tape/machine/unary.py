@@ -47,15 +47,15 @@ class Unary(MachineReward):
             return torch.FloatTensor(1)
 
         if actual_tardiness_rate > context.actual_tardiness_rate:
-            return torch.FloatTensor(-1)
+            return torch.FloatTensor([-1]).view(-1)
 
         expected_tardiness_rate = context.machine.shop_floor.expected_tardy_rate(now)
 
         if expected_tardiness_rate < context.expected_tardiness_rate:
-            return torch.FloatTensor(1)
+            return torch.FloatTensor([1]).view(-1)
 
         if expected_tardiness_rate > context.expected_tardiness_rate:
-            return torch.FloatTensor(-1)
+            return torch.FloatTensor([-1]).view(-1)
 
         utilization_rate = context.machine.shop_floor.utilization_rate()
 
@@ -63,9 +63,9 @@ class Unary(MachineReward):
             return torch.FloatTensor(1)
 
         if utilization_rate > context.utilization_rate * 0.95:
-            return torch.FloatTensor(0)
+            return torch.FloatTensor([0]).view(-1)
 
-        return torch.FloatTensor(-1)
+        return torch.FloatTensor([-1]).view(-1)
 
     def reward_after_completion(self, contexts: List[Context]):
         return None

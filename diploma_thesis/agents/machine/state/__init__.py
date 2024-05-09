@@ -10,6 +10,7 @@ from .hierarchical_graph_encoder import HierarchicalGraphEncoder
 from .plain import PlainEncoder
 from .vp_graph_encoder import VPTGraphEncoder
 from .custom_encoder import CustomGraphEncoder
+from .custom_encoder_v2 import CustomV2GraphEncoder
 
 key_to_class = {
     "plain": PlainEncoder,
@@ -19,7 +20,8 @@ key_to_class = {
     'djsp': DJSPGraphEncoder,
     'hierarchical': HierarchicalGraphEncoder,
     'vpt': VPTGraphEncoder,
-    'custom': CustomGraphEncoder
+    'custom': CustomGraphEncoder,
+    'custom_v2': CustomV2GraphEncoder
 }
 
 from_cli = partial(from_cli, key_to_class=key_to_class)

@@ -2,7 +2,11 @@ from dataclasses import dataclass
 from typing import Dict
 
 from abc import ABCMeta
+
+import torch
+
 from ..rl import *
+
 
 
 @dataclass
@@ -12,6 +16,7 @@ class PPOConfiguration:
     sample_count: float
     policy_step_ratio: float
     entropy_regularization: float
+    entropy_decay: float
     rollback_ratio: float
     critic_weight: float
     epochs: int
@@ -25,8 +30,9 @@ class PPOConfiguration:
             sample_count=parameters.get('sample_count', 128),
             policy_step_ratio=parameters.get('policy_step_ratio', 1.0),
             entropy_regularization=parameters.get('entropy_regularization', 0.0),
-            rollback_ratio=parameters.get('rollback_ratio', 0.1),
+            rollback_ratio=parameters.get('rollback_ratio', 0.0),
             critic_weight=parameters.get('critic_weight', 1.0),
+            entropy_decay=parameters.get('entropy_decay', 0.0),
             epochs=parameters.get('epochs', 1),
             priority_reduction_ratio=parameters.get('priority_reduction_ratio', 1.05)
         )
@@ -46,18 +52,23 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
             self.configuration.value_optimizer.connect(model.parameters())
 
     def __step__(self, batch: Record, model: Policy):
+        entropy_reg = self.configuration.entropy_regularization * (self.configuration.entropy_decay ** self.optimizer.step_count)
+
+        self.logger.info(f'Step {self.optimizer.step_count} with entropy regularization {entropy_reg}')
+
         def compute_loss():
             output = model(batch.state)
             value, logits, _ = model.__fetch_values__(output)
 
-            actor_loss, entropy = self.actor_loss(batch, logits, self.configuration, self.device)
-            critic_loss = self.configuration.critic_weight * self.configuration.value_loss(value, batch.info[Record.RETURN_KEY])
+            actor_loss, entropy = self.actor_loss(batch, logits, self.configuration, self.device, entropy_reg)
+            r = batch.info[Record.RETURN_KEY]
+            r = (r - r.mean()) / (r.std() + 1e-8)
+
+            critic_loss = self.configuration.critic_weight * self.configuration.value_loss(value, r)
 
             return actor_loss, critic_loss, entropy
 
         actor_loss, critic_loss, entropy = compute_loss()
-
-        print(f'actor_loss: {actor_loss}, critic_loss: {critic_loss}, entropy: {entropy}')
 
         if self.configuration.value_optimizer is not None:
             self.configuration.value_optimizer.zero_grad()
@@ -70,12 +81,15 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
 
                 return loss
 
+            self.optimizer.step(compute_actor_grad)
+
+            _, critic_loss, _ = compute_loss()
+
             def compute_critic_grad():
                 critic_loss.backward()
 
                 return critic_loss
 
-            self.optimizer.step(compute_actor_grad)
             self.configuration.value_optimizer.step(compute_critic_grad)
         else:
             def compute_grad():
@@ -113,10 +127,9 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
             self.configuration.value_optimizer.load_state_dict(state_dict['value_optimizer'])
 
     @staticmethod
-    def actor_loss(batch, logits, configuration: PPOConfiguration, device):
+    def actor_loss(batch, logits, configuration: PPOConfiguration, device, entropy_regularization=0.0):
         rollback_ratio = configuration.rollback_ratio
         policy_ratio = configuration.policy_step_ratio
-        entropy_regularization = configuration.entropy_regularization
 
         distribution = torch.distributions.Categorical(logits=logits)
 
@@ -138,6 +151,8 @@ class PPOMixin(RLTrainer, metaclass=ABCMeta):
                                       rollback_value + (1 + rollback_ratio) * (1 + policy_ratio))
 
         advantages = torch.min(weights * advantages, clipped_weights * advantages)
+
+        # print(advantages)
 
         entropy = distribution.entropy().mean()
 

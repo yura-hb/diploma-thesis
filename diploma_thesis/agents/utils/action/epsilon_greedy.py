@@ -14,6 +14,8 @@ class EpsilonGreedy(ActionSelector):
     def __call__(self, distribution: torch.Tensor) -> Tuple[int, torch.Tensor]:
         self.decay()
 
+        print(distribution)
+
         distribution = torch.atleast_1d(distribution)
 
         action = torch.argmax(distribution).item()

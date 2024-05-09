@@ -1,0 +1,7 @@
+
+parameters:
+  device: 'cuda'
+
+  trainer:
+    parameters:
+      device: 'cuda'

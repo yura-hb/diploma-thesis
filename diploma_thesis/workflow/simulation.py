@@ -27,6 +27,7 @@ class Simulation(Workflow):
         super().__init__()
 
         self.parameters = parameters
+        self.entropies = []
 
     @property
     def workflow_id(self) -> str:
@@ -163,7 +164,35 @@ class Simulation(Workflow):
 
             simulation.shop_floor = None
 
-        self.__store_reward__(simulation, rewards, output_dir)
+        machine_reward = self.__store_reward__(simulation, rewards, output_dir)
+
+        return self.__terminate_on_entropy_convergence__(machine_reward)
+
+    def __terminate_on_entropy_convergence__(self, machine_reward):
+        if 'entropy' not in machine_reward.columns:
+            return False
+
+        entropy = machine_reward['entropy'].mean()
+
+        entropy_average_window = self.parameters.get('entropy_average_window', 5)
+        min_average_entropy = self.parameters.get('min_average_entropy')
+
+        if min_average_entropy is None:
+            return False
+
+        if len(self.entropies) < entropy_average_window:
+            self.entropies += [entropy]
+        else:
+            self.entropies = self.entropies[1:] + [entropy]
+
+        if len(self.entropies) == entropy_average_window:
+            average_entropy = torch.mean(torch.tensor(self.entropies))
+
+            if average_entropy < min_average_entropy:
+                return True
+
+        return False
+
 
     @classmethod
     def __store_reward__(cls, simulation: simulator.Simulation, reward_cache: RewardCache, output_dir: str):
@@ -175,11 +204,10 @@ class Simulation(Workflow):
         if not os.path.exists(path):
             os.makedirs(path)
 
-        sh_id = simulation.simulation_index
-
         cls.__store_reward_record__(path, machine_reward, 'machine_reward.csv')
         cls.__store_reward_record__(path, work_center_reward, 'work_center_reward.csv')
 
+        return machine_reward
 
     @classmethod
     def __process_reward_cache__(cls, reward_cache: RewardCache):

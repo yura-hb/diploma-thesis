@@ -1,0 +1,202 @@
+# Evaluate the effectivenes of basic DQNs on the JSP environment
+base_model: &base_model 'configuration/experiments/jsp/GRAPH-NN/experiments/3/machine.yml'
+
+
+default_mods: &default_mods
+#  - 'util/infrastructure/cuda.yml'
+  - 'util/train_schedule/on_store_32.yml'
+
+###############################################################################################
+
+dqn_1: &dqn_1
+  base_path: *base_model
+  template: 'custom_gat'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+
+
+###############################################################################################
+
+dqn_2: &dqn_2
+  base_path: *base_model
+  template: 'custom_gin'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+
+###############################################################################################
+
+dqn_3: &dqn_3
+  base_path: *base_model
+  template: 'hierarchical_gin'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+
+###############################################################################################
+
+dqn_4: &dqn_4
+  base_path: *base_model
+  template: 'hierarchical_gat'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - 'agent/dqn/ddqn.yml'
+    - *default_mods
+
+###############################################################################################
+
+reward: &reward
+  - kind: 'global_decomposed_tardiness'
+    parameters:
+      span: 128
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ [ 'utilization/80.yml' ] ]
+    nested:
+      parameters:
+        dispatch:
+          seed:
+            - '__range__': [ 1150, 1300 ]
+
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 8
+  n_threads: 32
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/3 (Graph)/Local/model/'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+#              sliding_window: 96
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/GRAPH-NN/experiments/1/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods: []
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/GRAPH-NN/experiments/1/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+
+            - output_dir: 'Global'
+              machine_agent:
+                parameters:
+                  - *dqn_1
+                  - *dqn_2
+                  - *dqn_3
+                  - *dqn_4
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'complete'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: False
+                is_work_center_set_in_shop_floor_connected: False
+
+            - output_dir: 'Local'
+              machine_agent:
+                parameters:
+                  - *dqn_1
+                  - *dqn_2
+                  - *dqn_3
+                  - *dqn_4
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'machine_compressed'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: False
+                is_work_center_set_in_shop_floor_connected: False
+
+          tape:
+            machine_reward:
+              *reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run

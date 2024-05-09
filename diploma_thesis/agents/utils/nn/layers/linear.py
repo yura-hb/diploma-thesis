@@ -13,6 +13,11 @@ class NoiseType(StrEnum):
     factorized = auto()
 
 
+class Initialization(StrEnum):
+    orthogonal = auto()
+    xavier = auto()
+
+
 class Linear(torch.nn.modules.lazy.LazyModuleMixin, Layer):
 
     def __init__(self,
@@ -20,22 +25,29 @@ class Linear(torch.nn.modules.lazy.LazyModuleMixin, Layer):
                  activation: str,
                  dropout: float,
                  noise_parameters: Dict,
-                 signature: str):
+                 signature: str,
+                 initialization: Initialization = Initialization.orthogonal.value):
         super().__init__(signature=signature)
 
         self.dim = dim
         self.activation = Activation(kind=activation, signature='')
         self.dropout = nn.Dropout(p=dropout) if dropout is not None else None
+        self.initialization = initialization
         self.noise_parameters = noise_parameters or dict()
 
         self.__build__()
 
     def initialize_parameters(self, input) -> None:
-        self.linear.initialize_parameters(input)
+        if self.linear.has_uninitialized_params():
+            self.linear.initialize_parameters(input)
 
-        if isinstance(self.linear, torch.nn.Linear):
-            torch.nn.init.orthogonal_(self.linear.weight)
-            torch.nn.init.zeros_(self.linear.bias)
+            if isinstance(self.linear, torch.nn.Linear):
+                match self.initialization:
+                    case Initialization.orthogonal.value:
+                        torch.nn.init.orthogonal_(self.linear.weight)
+                        torch.nn.init.zeros_(self.linear.bias)
+                    case _:
+                        pass
 
     def forward(self, batch: torch.FloatTensor) -> torch.FloatTensor:
         batch = self.linear(batch)
@@ -74,5 +86,6 @@ class Linear(torch.nn.modules.lazy.LazyModuleMixin, Layer):
             activation=parameters['activation'],
             dropout=parameters.get('dropout'),
             noise_parameters=parameters.get('noise', dict()).get('parameters', dict()),
-            signature=parameters['signature']
+            signature=parameters['signature'],
+            initialization=parameters.get('initialization')
         )

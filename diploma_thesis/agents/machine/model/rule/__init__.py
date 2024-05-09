@@ -73,3 +73,19 @@ ALL_SCHEDULING_RULES: Dict[str, SchedulingRule.__class__] = {
     'swt': SWTSchedulingRule,
     'winq': WINQSchedulingRule
 }
+
+
+def from_cli(parameters):
+    rules = parameters.get('rules', 'all')
+
+    all_rules = ALL_SCHEDULING_RULES
+
+    if rules == "all":
+        rules = [rule() for rule in all_rules.values()]
+    else:
+        rules = [all_rules[rule]() for rule in rules]
+
+    if parameters.get('idle', False):
+        rules = [IdleSchedulingRule()] + rules
+
+    return rules

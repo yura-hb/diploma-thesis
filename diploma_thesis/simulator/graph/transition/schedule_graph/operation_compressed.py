@@ -20,8 +20,6 @@ class OperationCompressedTransition(CompleteTransition):
             (Graph.MACHINE_KEY, machine_index, Graph.PROCESSED_KEY), default=torch.tensor([]).view(4, 0)
         )
 
-        # edges = [torch.atleast_2d(torch.cat([edge[0], edge[1]])).T for edge in edges]
-
         if history.numel() == 0 and dj.shape[-1] > 1 and not self.skip_no_history_phase:
             range = torch.arange(dj.shape[-1])
             combinations = torch.combinations(range, 2)

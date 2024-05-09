@@ -23,4 +23,3 @@ eval `ssh-agent`
 # ssh-add
 
 #conda create --name main python=3.11
-#conda activate main

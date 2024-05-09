@@ -1,0 +1,241 @@
+task:
+  kind: 'tournament'
+
+  n_workers: 5
+  n_threads: 10
+  name: 'rules'
+  output_dir: 'results/jsp/experiments/tournaments/jsp/2'
+  store_run_statistics: True
+  log_run: False
+  update: True
+  debug: False
+
+  candidates:
+#    - kind: 'static'
+#      parameters:
+#        scheduling: 'all'
+#        routing:
+#          - 'ct'
+
+    #    - kind: 'persisted_agents'
+#      parameters:
+#        prefix: 'all'
+#        path: 'results/jsp/experiments/1_4/all'
+#
+#    - kind: 'persisted_agents'
+#      parameters:
+#        prefix: 'default'
+#        path: 'results/jsp/experiments/1_4/default'
+#
+#    - kind: 'persisted_agents'
+#      parameters:
+#        prefix: 'preferred'
+#        path: 'results/jsp/experiments/1_4/preferred'
+#
+    - kind: 'persisted_agents'
+      parameters:
+          prefix: ''
+          path: 'results/jsp/experiments/src_2'
+          depth: 5
+
+#    - kind: 'persisted_agents'
+#      parameters:
+#        prefix: ''
+#        path: 'results/jsp/experiments/2. GRAPH-NN'
+#        depth: 5
+#
+#  action_selector:
+#    kind: 'epsilon_greedy'
+#    parameters:
+#      epsilon: 0.05
+
+  criteria:
+    - kind: 'makespan'
+      parameters:
+        weight: 1
+        direction: 'minimize'
+        scale: 'linear'
+    - kind: 'tardiness'
+      parameters:
+        weight: 1
+        direction: 'minimize'
+        scale: 'linear'
+        at: 5000
+        limit: 100
+
+  reward:
+    top_k: -1
+    points: 1
+
+  simulator:
+    n_workers: 100
+    simulations:
+      #      - name: 'tailard'
+      #        kind: 'jsp_dataset'
+      #        parameters:
+      #          path: 'datasets/tailard'
+      #
+      #      - name: 'demirkol'
+      #        kind: 'jsp_dataset'
+      #        parameters:
+      #          path: 'datasets/demirkol'
+      #
+      #      - name: ''
+      #        kind: 'multi_value'
+      #        parameters:
+      #          base:
+      #            kind: 'simulation'
+      #            parameters:
+      #              configuration:
+      #                timespan: 8192
+      #                machines_per_work_center: 1
+      #                work_center_count: 10
+      #
+      #              dispatch:
+      #                initial_job_assignment:
+      #                  kind: 'n_per_machine'
+      #                  parameters:
+      #                    n: 1
+      #
+      #                job_sampler:
+      #                  kind: 'dynamic'
+      #                  parameters:
+      #                    processing_times: # Sampler
+      #                      kind: 'uniform'
+      #                      parameters:
+      #                        uniform: [ 1, 50 ]
+      #                        noise: [ 0, 10 ]
+      #                    permutation:
+      #                      uneveness: 3
+      #                    due_time: # Sampler
+      #                      kind: 'uniform'
+      #                      parameters:
+      #                        uniform: [ 1000, 1001 ]
+      #                    job_arrival_time_on_machine:
+      #                      kind: 'sampler'
+      #                      parameters:
+      #                        sampler:
+      #                          kind: 'constant'
+      #                          parameters:
+      #                            value: 100000
+      #
+      #                breakdown:
+      #                  kind: 'dynamic'
+      #                  parameters:
+      #                    breakdown_arrival:
+      #                      kind: 'exponential'
+      #                      parameters:
+      #                        mean: 5000
+      #                    repair_duration:
+      #                      kind: 'uniform'
+      #                      parameters:
+      #                        uniform: [ 1, 50 ]
+      #
+      #                seed: 32
+      #
+      #          values:
+      #
+      #            parameters:
+      #              configuration:
+      #                work_center_count:
+      #                  - 10
+      #
+      #              dispatch:
+      #                initial_job_assignment:
+      #                  parameters:
+      #                    n: [10, 5]
+      #                seed:
+      #                  [
+      #                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+      #                    10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+      #                    20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+      #                    30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+      #                    40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+      #                    50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+      #                    60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+      #                    70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+      #                    80, 81, 82, 83, 84, 85, 86, 87, 88, 89,
+      #                    90, 91, 92, 93, 94, 95, 96, 97, 98, 99
+      #                  ]
+
+
+      - name: ''
+        kind: 'multi_value'
+        parameters:
+          base:
+            kind: 'simulation'
+            parameters:
+              configuration:
+                timespan: 5000
+                machines_per_work_center: 1
+                work_center_count: 10
+                deduce_naive_actions: True
+
+              dispatch:
+                initial_job_assignment:
+                  kind: 'n_per_machine'
+                  parameters:
+                    n: 3
+
+                job_sampler:
+                  kind: 'dynamic'
+                  parameters:
+                    processing_times:
+                      kind: 'uniform'
+                      parameters:
+                        uniform: [ 1, 50 ]
+                        noise: [ 0, 10 ]
+                    permutation:
+                      uneveness: 5
+                    due_time:
+                      kind: 'uniform'
+                      parameters:
+                        uniform: [ 0.0, 2 ]
+                    job_arrival_time_on_machine:
+                      kind: 'expected_utilization'
+                      parameters:
+                        value: 0.0
+
+                breakdown:
+                  kind: 'dynamic'
+                  parameters:
+                    breakdown_arrival:
+                      kind: 'exponential'
+                      parameters:
+                        mean: 5000
+                    repair_duration:
+                      kind: 'uniform'
+                      parameters:
+                        uniform: [ 200, 300 ]
+
+                seed: 32
+
+          values:
+
+            parameters:
+              configuration:
+                work_center_count:
+                  - 10
+
+              dispatch:
+                seed:
+                  '__range__': [000, 100]
+
+                job_sampler:
+                  parameters:
+                    __concat__:
+#                      - job_arrival_time_on_machine:
+#                          parameters:
+#                            value:
+#                              - 0.7
+#                        n_jobs: 150
+                      - job_arrival_time_on_machine:
+                          parameters:
+                            value:
+                              - 0.8
+                        n_jobs: 150
+#                      - job_arrival_time_on_machine:
+#                          parameters:
+#                            value:
+#                              - 0.9
+#                        n_jobs: 150

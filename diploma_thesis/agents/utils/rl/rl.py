@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 import pandas as pd
+import torch.cuda
 
 from agents.utils.nn import Loss, Optimizer
 from agents.utils.policy import Policy
@@ -81,9 +82,6 @@ class RLTrainer(Loggable):
         return pd.DataFrame(self.loss_cache)
 
     def store(self, sample: TrainingSample, model: Policy):
-        if self.train_schedule.kind == TrainSchedule.Kind.ON_STORED_DATA_EXCLUSIVELY:
-            self.storage.clear()
-
         self.storage.store(sample)
 
         if not self.train_schedule.is_on_store:
@@ -104,6 +102,8 @@ class RLTrainer(Loggable):
         start = time.time()
 
         self.__train__(model)
+
+        torch.cuda.empty_cache()
 
         print(f'Train step: { time.time() - start } Optimizer Step: { self.optimizer.step_count }')
 

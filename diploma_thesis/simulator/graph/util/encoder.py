@@ -279,11 +279,11 @@ class Encoder:
                 op_key = [Graph.SCHEDULED_KEY, Graph.PROCESSED_KEY]
                 relation_key = [Graph.SCHEDULED_RELATION_KEY, Graph.PROCESSED_RELATION_KEY]
 
-                for op, relation in zip(op_key, relation_key):
+                for op, rel in zip(op_key, relation_key):
                     if op not in source.data[Graph.MACHINE_KEY, machine_id].keys():
                         continue
 
-                    relation = edge(Graph.MACHINE_KEY, relation, Graph.OPERATION_KEY)
+                    relation = edge(Graph.MACHINE_KEY, rel, Graph.OPERATION_KEY)
                     edges[relation] = edges.get(relation, [])
 
                     scheduled_operations = source.data[Graph.MACHINE_KEY, machine_id, op]
@@ -292,6 +292,14 @@ class Encoder:
                     edges[relation] += [torch.vstack([
                         torch.full((scheduled_operations.shape[0],), fill_value=unkey(machine_id, is_tensor=True)),
                         scheduled_operations
+                    ])]
+
+                    inverse_relation = edge(Graph.OPERATION_KEY, rel, Graph.MACHINE_KEY)
+
+                    edges[inverse_relation] = edges.get(inverse_relation, [])
+                    edges[inverse_relation] += [torch.vstack([
+                        scheduled_operations,
+                        torch.full((scheduled_operations.shape[0],), fill_value=unkey(machine_id, is_tensor=True))
                     ])]
 
         for relation, graph in edges.items():
@@ -321,7 +329,9 @@ class Encoder:
             edge(Graph.OPERATION_KEY, Graph.SCHEDULED_RELATION_KEY, Graph.OPERATION_KEY),
             edge(Graph.OPERATION_KEY, Graph.PROCESSED_RELATION_KEY, Graph.OPERATION_KEY),
             edge(Graph.MACHINE_KEY, Graph.SCHEDULED_RELATION_KEY, Graph.OPERATION_KEY),
-            edge(Graph.MACHINE_KEY, Graph.PROCESSED_RELATION_KEY, Graph.OPERATION_KEY)
+            edge(Graph.MACHINE_KEY, Graph.PROCESSED_RELATION_KEY, Graph.OPERATION_KEY),
+            edge(Graph.OPERATION_KEY, Graph.SCHEDULED_RELATION_KEY, Graph.MACHINE_KEY),
+            edge(Graph.OPERATION_KEY, Graph.PROCESSED_RELATION_KEY, Graph.MACHINE_KEY),
         ]
 
         for edge_ in edges:

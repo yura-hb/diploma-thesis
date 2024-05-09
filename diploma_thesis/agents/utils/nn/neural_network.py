@@ -3,8 +3,8 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import List, Tuple
 
+import torch
 import torch_geometric as pyg
-from tensordict import TensorDict
 from torch import nn
 
 from .layers import Key
@@ -21,7 +21,7 @@ class NeuralNetwork(nn.Module):
         @staticmethod
         def from_cli(parameters: dict):
             return NeuralNetwork.Configuration(
-                layers=[layer_from_cli(layer) for layer in parameters['layers']] if parameters.get('layers') else []
+                layers=[layer_from_cli(layer) for layer in parameters['layers']] if parameters.get('layers') else [],
             )
 
     def __init__(self, configuration: Configuration):
