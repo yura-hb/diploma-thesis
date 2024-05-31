@@ -8,4 +8,4 @@ parameters:
           discount: 0.9
           lambda_factor: 0.9
           n: 3
-          off_policy: true
+          off_policy: False

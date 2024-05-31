@@ -72,7 +72,7 @@ class CustomV2GraphEncoder(GraphStateEncoder):
                 completion_rate.view(-1),
                 critical_ratios.view(-1),
 
-                placeholder + wait_times,
+                placeholder + wait_times / self.norm_factor,
                 placeholder + machine_util_rate,
                 placeholder + arriving_jobs,
                 placeholder + will_arrive_jobs,

@@ -14,7 +14,7 @@ def plot_reward_distribution_per_action(data: pd.DataFrame, name: str, figsize=(
     # Create violins for each action
     for i, action in enumerate(actions):
         action_data = data[data["action"] == action]["reward"]
-        violin_parts = ax.boxplot(
+        violin_parts = ax.violinplot(
             action_data,
             positions=[i],
             showmeans=True,
@@ -32,7 +32,7 @@ def plot_reward_distribution_per_action(data: pd.DataFrame, name: str, figsize=(
     ax.set_xticks(np.arange(len(actions)), actions, rotation=45)
 
     # Add grid and adjust layout
-    ax.grid(True)
+    ax.grid(True, zorder=0)
     plt.tight_layout()
 
     return fig

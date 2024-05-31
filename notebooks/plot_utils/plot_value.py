@@ -6,50 +6,64 @@ import matplotlib.pyplot as plt
 from .legend import add_legend
 
 
-def plot_value(path: str | dict, info: dict, figsize=(8, 8), post_process_fn=lambda a: a):
+def plot_value(path: str | dict, info: dict, figsize=(8, 8), ax = None, post_process_fn=lambda a: a, background_process_fn=None):
     if not isinstance(path, dict):
         path = dict(first=path)
 
-    fig, ax = plt.subplots(figsize=figsize)
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+
+    min_value_len = float('inf')
 
     for name, data_path in path.items():
-        df = pd.read_csv(data_path)
+        if not isinstance(data_path, list):
+            data_path = [data_path]
 
-        if info.get('norm_index', False):
-            df[info['index']] -= df[info['index']].min()
+        result = []
 
-        suffix = '' if len(path) == 1 else f'{name}'
+        for p in data_path:
+            df = pd.read_csv(p)
 
-        if 'work_center_id' in df.columns and info.get('is_reward_per_unit_visible', False):
-            work_centers = np.sort(df['work_center_id'].unique())
-            machines = np.sort(df['machine_id'].unique())
+            if info.get('norm_index', False):
+                df[info['index']] -= df[info['index']].min()
 
-            for work_center_id in work_centers:
-                for machine_id in machines:
-                    filtered = df[(df['work_center_id'] == work_center_id) & (df['machine_id'] == machine_id)]
-                    filtered = filtered.sort_values(by=info['index'])
-                    filtered.set_index(info['index'], inplace=True)
+            if f := info.get('filter'):
+                df = f(df)
 
-                    if len(machines) == 1:
-                        label = f'M_idx: {work_center_id}'
-                    else:
-                        label = f'W_idx: {work_center_id}, M_idx: {machine_id}'
+            suffix = '' if len(path) == 1 else f'{name}'
 
-                    if len(suffix) > 0:
-                        label += ' ' + suffix
-
-                    ax.plot(post_process_fn(filtered[info['column']]), label=label)
-        else:
             df = df.sort_values(by=info['index'])
             df.set_index(info['index'], inplace=True)
 
-            ax.plot(post_process_fn(df[info['column']]), label=name)
+            result += [post_process_fn(df[info['column']])]
 
-    ax.grid(True)
-    ax.set_title(info['title'])
+            min_value_len = min(min_value_len, len(result[-1]))
+
+
+        if len(result) == 1:
+            ax.plot(result[0], label=name)
+        else:
+            result = [v[:min_value_len] for v in result]
+            result = np.vstack(result)
+
+            min_value = result.min(axis=0)
+            mean_value = result.mean(axis=0)
+            max_value = result.max(axis=0)
+
+            ax.plot(np.arange(len(mean_value)), mean_value, marker=info['marker'], label=name)
+
+            ax.fill_between(np.arange(len(mean_value)), min_value, max_value, alpha=0.25)
+
+    ax.grid(True, zorder=0)
+
+    if 'title' in info:
+        ax.set_title(info['title'])
+
     ax.set_xlabel(info['xlabel'])
     ax.set_ylabel(info['ylabel'])
 
-    add_legend(ax, info)
+    # if len(path) > 1:
+    #     add_legend(ax, info)
 
-    return fig
+    if ax is None:
+        return fig

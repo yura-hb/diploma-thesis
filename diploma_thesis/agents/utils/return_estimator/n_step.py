@@ -37,6 +37,8 @@ class NStep(Estimator):
 
         self.configuration = configuration
 
+        if self.configuration.n > 1:
+            self.value_fetch_method = ValueFetchMethod.ACTION
 
     @property
     def discount_factor(self) -> float:
@@ -75,7 +77,7 @@ class NStep(Estimator):
                 off_policy_weights += [1]
 
         for i in range(len(records)):
-            g = records[i].info[Record.VALUE_KEY]
+            g = self.get_value(records[i])
             n = min(self.configuration.n, len(records) - i)
 
             weights = off_policy_weights[i:i+n]

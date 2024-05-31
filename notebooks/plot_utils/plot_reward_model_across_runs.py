@@ -31,7 +31,7 @@ def plot_reward_per_model_across_runs(data, info):
 
             ax.plot(filtered[metric], filtered[reward], marker=info['marker'], ms=10, ls='', label=title)
 
-    ax.grid(True)
+    ax.grid(True, zorder=0)
 
     ax.set_xlabel(info['xlabel'])
     ax.set_ylabel(info['ylabel'])

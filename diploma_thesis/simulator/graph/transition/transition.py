@@ -95,7 +95,7 @@ class GraphTransition:
         if job_id in graph.data[Graph.JOB_KEY].keys():
             graph.data[Graph.JOB_KEY].pop(job_id)
             return
-        
+
         raise ValueError(f'Job with id {job.id} not found in graph')
 
     # Utils

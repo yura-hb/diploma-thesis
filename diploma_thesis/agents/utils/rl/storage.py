@@ -27,9 +27,9 @@ class Storage:
             record.info['episode'] = sample.episode_id
 
             # Remove extra fields for training record
-            if record.state.graph is not None and Graph.JOB_INDEX_MAP in record.state.graph.data.keys():
-                del record.state.graph.data[Graph.JOB_INDEX_MAP]
-                del record.next_state.graph.data[Graph.JOB_INDEX_MAP]
+            for graph in [record.state.graph, record.next_state.graph]:
+                if graph is not None and Graph.JOB_INDEX_MAP in graph.data.keys():
+                    del graph.data[Graph.JOB_INDEX_MAP]
 
         if self.is_episodic:
             self.memory.store([records])

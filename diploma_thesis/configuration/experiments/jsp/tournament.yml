@@ -70,7 +70,7 @@ task:
         weight: 1
         direction: 'minimize'
         scale: 'linear'
-        at: 5000
+        at: 8000
         limit: 100
 
   reward:
@@ -190,35 +190,37 @@ task:
                 job_sampler:
                   kind: 'dynamic'
                   parameters:
+                    n_jobs: 200
                     processing_times:
                       kind: 'uniform'
                       parameters:
-                        uniform: [ 1, 50 ]
-                        noise: [ 0, 10 ]
+                        uniform: [ 1, 100 ]
+                        noise: [ 0, 5 ]
                     permutation:
                       uneveness: 5
                     due_time:
                       kind: 'uniform'
                       parameters:
-                        uniform: [ 0.0, 2 ]
+                        uniform: [ 0, 2 ]
                     job_arrival_time_on_machine:
                       kind: 'expected_utilization'
                       parameters:
                         value: 0.0
 
+
                 breakdown:
-                  kind: 'dynamic'
+                  kind: 'no'
                   parameters:
                     breakdown_arrival:
                       kind: 'exponential'
                       parameters:
-                        mean: 5000
+                        mean: 1000
                     repair_duration:
                       kind: 'uniform'
                       parameters:
                         uniform: [ 200, 300 ]
 
-                seed: 32
+                seed: 42
 
           values:
 
@@ -235,18 +237,18 @@ task:
                 job_sampler:
                   parameters:
                     __concat__:
-#                      - job_arrival_time_on_machine:
-#                          parameters:
-#                            value:
-#                              - 0.7
-#                        n_jobs: 150
+                      - job_arrival_time_on_machine:
+                          parameters:
+                            value:
+                              - 0.7
+                        n_jobs: 200
                       - job_arrival_time_on_machine:
                           parameters:
                             value:
                               - 0.8
-                        n_jobs: 150
-#                      - job_arrival_time_on_machine:
-#                          parameters:
-#                            value:
-#                              - 0.9
-#                        n_jobs: 150
+                        n_jobs: 200
+                      - job_arrival_time_on_machine:
+                          parameters:
+                            value:
+                              - 0.9
+                        n_jobs: 200
