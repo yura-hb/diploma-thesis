@@ -1,0 +1,163 @@
+
+
+default_mods: &default_mods
+  - 'util/train_schedule/on_store_256.yml'
+  - 'agent/dqn/ddqn.yml'
+  - 'agent/dqn/prioritized.yml'
+  - 'util/optimizer/adam_stationary.yml'
+  - 'util/optimizer/grad_norm.yml'
+
+###############################################################################################
+
+dqn_1: &dqn_1
+  base_path: 'configuration/experiments/jsp/BEST/experiments/1/flexible_machine.yml'
+  template: '../../../../../../mods/machine/model/flexible_custom_gat'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+
+
+dqn_2: &dqn_2
+  base_path: 'configuration/experiments/jsp/BEST/experiments/1/mr_machine.yml'
+  template: '../../../../../../mods/machine/model/marl_dqn/baseline'
+  mod_dirs:
+    - 'configuration/mods/machine/mods'
+  mods:
+    - *default_mods
+
+###############################################################################################
+
+reward: &reward
+  - kind: 'surrogate_tardiness'
+    parameters:
+      winq_factor: 0.2
+      span: 80
+      critical_level_factor: 64
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ ['utilization/70.yml', 'utilization/80.yml', 'utilization/90.yml']]
+    nested:
+      parameters:
+        dispatch:
+          seed:
+            - '__range__': [ 2000, 2200 ]
+
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 2
+  n_threads: 30
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/FINAL/BEST/0'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+          seed: 123
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'td'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/BEST/experiments/1/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods: []
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/BEST/experiments/1/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+
+            - output_dir: 'Graph'
+              machine_agent:
+                parameters:
+                  - *dqn_1
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'machine_compressed'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: True
+                is_work_center_set_in_shop_floor_connected: True
+
+            - output_dir: 'MARL'
+              machine_agent:
+                parameters:
+                  - *dqn_2
+              graph:
+                transition_model:
+                  kind: 'no'
+
+          tape:
+            machine_reward:
+              *reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run
