@@ -90,6 +90,8 @@ class CustomV2GraphEncoder(GraphStateEncoder):
 
         states = torch.cat(states, dim=1).T if len(states) > 0 else torch.tensor([]).view(0, self.include_due_dates + 2)
 
+        # Preserve system info only in operations from the machine queue. Normalize the values so that their every convex
+        # combination is equal can sum to 1.0.
         is_target = torch.cat(is_target) if len(is_target) > 0 else torch.tensor([])
 
         states[is_target, -9:] /= is_target.sum()
