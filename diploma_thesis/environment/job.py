@@ -452,7 +452,7 @@ class Job:
     def __processing_time_on_work_center__(cls,
                                            steps: torch.LongTensor,
                                            processing_times: torch.LongTensor,
-                                           step_idx: int, 
+                                           step_idx: int,
                                            strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The processing time of the operation in work center
@@ -468,7 +468,7 @@ class Job:
     @lru_cache
     def __processing_time_on_machine__(cls,
                                        steps: torch.LongTensor,
-                                       processing_times: torch.LongTensor, 
+                                       processing_times: torch.LongTensor,
                                        step_idx: int,
                                        machine_idx: int):
         """
@@ -485,7 +485,7 @@ class Job:
     def __next_processing_time__(cls,
                                  steps: torch.LongTensor,
                                  processing_times: torch.LongTensor,
-                                 step_idx: int, 
+                                 step_idx: int,
                                  strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The processing time of the next operation
@@ -516,12 +516,12 @@ class Job:
         result += cls.__next_remaining_processing_time__(processing_times, step_idx, strategy)
 
         return result
-    
+
     @classmethod
     @lru_cache
     def __next_remaining_processing_time__(cls,
-                                           processing_times: torch.LongTensor, 
-                                           step_idx: int, 
+                                           processing_times: torch.LongTensor,
+                                           step_idx: int,
                                            strategy: ReductionStrategy = ReductionStrategy.mean):
         """
         Returns: The remaining processing time of the next operation

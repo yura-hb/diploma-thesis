@@ -1,0 +1,3 @@
+kind: 'marl'
+parameters:
+  is_model_distributed: False

@@ -1,3 +1,0 @@
-
-Model from "Deep Reinforcement Learning for dynamic flexible job shop scheduling problem
- considering variable processing time" paper

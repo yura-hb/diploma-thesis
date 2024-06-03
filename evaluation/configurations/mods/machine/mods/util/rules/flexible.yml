@@ -1,0 +1,7 @@
+
+parameters:
+  model:
+    kind: 'deep_rule'
+    parameters:
+      policy:
+        kind: 'flexible_action'

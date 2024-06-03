@@ -1,0 +1,6 @@
+
+
+parameters:
+  trainer:
+    parameters:
+      train_schedule: 'on_stored_data_exclusively'

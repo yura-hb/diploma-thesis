@@ -105,7 +105,7 @@ class RLTrainer(Loggable):
 
         torch.cuda.empty_cache()
 
-        print(f'Train step: { time.time() - start } Optimizer Step: { self.optimizer.step_count }')
+        print(f'Train step: { time.time() - start } Optimizer Step: { self.optimizer.step_count } Learning Rate: { self.optimizer.learning_rate}')
 
     def clear(self):
         self.loss_cache = []

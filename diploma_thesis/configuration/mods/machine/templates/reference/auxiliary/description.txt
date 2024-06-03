@@ -1,2 +1,0 @@
-
-Model from "Dynamic job-shop scheduling using graph reinforcement learning with auxiliary strategy" paper

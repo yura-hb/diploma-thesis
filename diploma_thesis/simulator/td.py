@@ -91,7 +91,7 @@ class TDSimulator(Simulator):
 
     @staticmethod
     def from_cli(parameters, *args, **kwargs) -> Simulator:
-        return TDSimulator(parameters.get('memory', 1), 
+        return TDSimulator(parameters.get('memory', 1),
                            parameters.get('emit_trajectory', False),
                            parameters.get('reset_trajectory', True),
                            parameters.get('sliding_window', 1),

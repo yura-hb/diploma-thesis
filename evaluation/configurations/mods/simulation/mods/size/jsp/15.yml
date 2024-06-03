@@ -1,0 +1,3 @@
+parameters:
+  configuration:
+      work_center_count: 15

@@ -1,0 +1,4 @@
+
+parameters:
+  configuration:
+    deduce_naive_actions: True

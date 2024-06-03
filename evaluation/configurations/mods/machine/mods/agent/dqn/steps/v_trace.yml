@@ -1,0 +1,7 @@
+
+parameters:
+  trainer:
+    parameters:
+      return:
+        parameters:
+          vtrace_clip: 0.2

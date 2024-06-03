@@ -1,0 +1,8 @@
+
+parameters:
+  model:
+    parameters:
+      policy:
+        parameters:
+          estimator:
+            is_dueling: True

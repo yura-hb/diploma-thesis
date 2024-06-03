@@ -1,0 +1,9 @@
+
+parameters:
+  trainer:
+    parameters:
+      optimizer:
+        model:
+          kind: 'rmsprop'
+          parameters:
+            lr: 0.001

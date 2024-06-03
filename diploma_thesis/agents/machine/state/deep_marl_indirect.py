@@ -7,7 +7,7 @@ from agents.base.state import State
 from environment import JobReductionStrategy
 from .encoder import StateEncoder
 
-# TODO: - Update normalized state
+
 
 class DEEPMARLIndirectStateEncoder(StateEncoder):
 

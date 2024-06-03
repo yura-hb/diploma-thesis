@@ -93,9 +93,11 @@ class Graph:
             if isinstance(key, str):
                 data[key] = self.data[key]
 
+            # Nested
             if len(key) == 2:
                 data[key[0]][key[1]] = self.data[key]
 
+            # Edge
             if len(key) == 4:
                 data[key[:3]][key[3]] = self.data[key]
 

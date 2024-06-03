@@ -1,0 +1,38 @@
++----------------------------------------+--------------------+---------------------+--------------------+
+|               candidate                |  makespan_reward   |  tardiness_reward   |     total_sum      |
++----------------------------------------+--------------------+---------------------+--------------------+
+|    SPTSchedulingRule_CTRoutingRule     |  4.5930430367589   | 3.7000130337171258  | 8.293056070476025  |
+|    ATCSchedulingRule_CTRoutingRule     | 4.370608834549785  |  3.666229799649614  | 8.036838634199398  |
+|   CRSPTSchedulingRule_CTRoutingRule    | 4.034558653831482  | 3.8906282327865305  | 7.925186886618013  |
+|  SPMWKSPTSchedulingRule_CTRoutingRule  | 4.034558653831482  | 3.8906282327865305  | 7.925186886618013  |
+|   PTWINQSchedulingRule_CTRoutingRule   | 4.277061715256423  | 3.6025813709057037  | 7.879643086162126  |
+| DPTWINQNPTSchedulingRule_CTRoutingRule |  4.07037310115993  | 3.7482904965740484  | 7.818663597733979  |
+|    MONSchedulingRule_CTRoutingRule     |  4.8767742626369   | 2.9383675558085725  | 7.815141818445472  |
+|   COVERTSchedulingRule_CTRoutingRule   | 3.826079787686467  | 3.6978805883744394  | 7.523960376060907  |
+|    WINQSchedulingRule_CTRoutingRule    | 3.937683064956218  | 3.0291939494994913  |  6.96687701445571  |
+|    GP2SchedulingRule_CTRoutingRule     | 3.0399248558096588 | 3.7068855586271794  | 6.746810414436839  |
+|    MODSchedulingRule_CTRoutingRule     | 2.9818492252379656 | 3.7471847314727027  | 6.729033956710668  |
+|   AVPROSchedulingRule_CTRoutingRule    | 2.7048926702700555 |  3.536796249063295  | 6.241688919333351  |
+|  PTWINQSSchedulingRule_CTRoutingRule   | 2.845223674637964  |  3.387699719553269  | 6.232923394191233  |
+|    MROSchedulingRule_CTRoutingRule     | 5.745922373607755  | 0.40415756421343274 | 6.150079937821188  |
+|    LWTSchedulingRule_CTRoutingRule     | 3.641298299189657  |  2.131831660713598  | 5.773129959903255  |
+|    FIFOSchedulingRule_CTRoutingRule    | 3.641298299189657  |  2.131831660713598  | 5.773129959903255  |
+|     MSSchedulingRule_CTRoutingRule     | 2.6231637600576505 | 3.0538512219570766  | 5.677014982014727  |
+|  DPTLWKRSSchedulingRule_CTRoutingRule  | 2.274525380547857  | 3.3119111316028063  | 5.586436512150663  |
+|    MWRKSchedulingRule_CTRoutingRule    | 5.464327462017536  | 0.02619940324731922 | 5.490526865264855  |
+|    EDDSchedulingRule_CTRoutingRule     | 2.2145568030537106 |  3.210611858014185  | 5.425168661067896  |
+|    LIFOSchedulingRule_CTRoutingRule    | 3.2660660473629832 | 2.1259275323769207  | 5.3919935797399035 |
+|   RandomSchedulingRule_CTRoutingRule   | 3.259915567468852  | 2.0868504477851992  | 5.346766015254051  |
+|  LWRKSPTSchedulingRule_CTRoutingRule   | 1.4919482199766207 |  3.688884412633084  | 5.180832632609705  |
+|  DPTLWKRSchedulingRule_CTRoutingRule   | 1.4919482199766207 |  3.688884412633084  | 5.180832632609705  |
+|     CRSchedulingRule_CTRoutingRule     | 1.9218283225636696 |  3.226908402904576  | 5.148736725468245  |
+|   SPMWKSchedulingRule_CTRoutingRule    | 1.9218283225636696 |  3.226908402904576  | 5.148736725468245  |
+|    SWTSchedulingRule_CTRoutingRule     | 2.9112883291672915 |  2.031444522888768  | 4.942732852056059  |
+|  LWRKMODSchedulingRule_CTRoutingRule   | 1.3683306493185228 | 3.5544377403569225  | 4.922768389675445  |
+|    GP1SchedulingRule_CTRoutingRule     | 1.2872176346572815 | 3.4185446974598332  | 4.705762332117114  |
+|    NPTSchedulingRule_CTRoutingRule     | 2.3471806409652345 | 2.3462303018583914  | 4.6934109428236255 |
+|    LWRKSchedulingRule_CTRoutingRule    | 0.9540979414969115 | 3.3671125161525564  | 4.321210457649467  |
+|    MDDSchedulingRule_CTRoutingRule     | 0.9562246616987977 |  3.229828747312127  | 4.186053409010925  |
+|    LROSchedulingRule_CTRoutingRule     | 0.8759924996411428 |  2.903644406396866  | 3.7796369060380086 |
+|    LPTSchedulingRule_CTRoutingRule     | 0.7484092367812991 | 0.29161943705657767 | 1.0400286738378768 |
++----------------------------------------+--------------------+---------------------+--------------------+

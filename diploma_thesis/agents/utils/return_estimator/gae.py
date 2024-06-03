@@ -37,8 +37,6 @@ class GAE(Estimator):
             records[i].info[Record.ADVANTAGE_KEY] = coef ** i * advantage + next_advantage
             records[i].info[Record.RETURN_KEY] = records[i].info[Record.ADVANTAGE_KEY] + value
 
-
-
         return records[:-1]
 
     @staticmethod

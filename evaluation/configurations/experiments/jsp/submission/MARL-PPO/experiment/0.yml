@@ -1,0 +1,231 @@
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ ['utilization/80.yml'] ]
+    nested:
+      parameters:
+        dispatch:
+          seed:
+            - '__range__': [ 2000, 2400 ]
+
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 8
+  n_threads: 8
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/FINAL/MARL-PPO/0'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+          seed: 333
+          entropy_average_window: 5
+          min_average_entropy: 0.25
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'episodic'
+
+          graph:
+            transition_model:
+              kind: 'no'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/FINAL/MARL-PPO/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods:
+                - 'n_workers/1.yml'
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/FINAL/MARL-PPO/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods:
+                              - 'n_workers/1.yml'
+                        values:
+        values:
+          __concat__:
+            # Deep MARL-MR + Surrogate Tardiness
+            - output_dir: 'Deep MARL-MR (S)'
+              machine_agent:
+                parameters:
+                  base_path: 'configuration/experiments/jsp/FINAL/MARL-PPO/machine.yml'
+                  template: 'baseline'
+                  mod_dirs:
+                    - [ 'configuration/mods/machine/mods' ]
+                  mods:
+                    __factory__:
+                      - [ 'util/optimizer/grad_norm.yml' ]
+                      - [
+                        '__none__',
+                      ]
+                      - [
+                        '__none__',
+                      ]
+                      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml' ]
+              tape:
+                machine_reward:
+                  kind: 'surrogate_tardiness'
+                  parameters:
+                    winq_factor: 0.2
+                    span: 30
+                    critical_level_factor: 64
+
+            # Deep MARL-AS + GDT
+            - output_dir: 'Deep MARL-AS (GDT)'
+              machine_agent:
+                parameters:
+                  base_path: 'configuration/experiments/jsp/FINAL/MARL-PPO/as_machine.yml'
+                  template: 'as_more_rules'
+                  mod_dirs:
+                    - [ 'configuration/mods/machine/mods' ]
+                  mods:
+                    __factory__:
+                      - [ 'util/optimizer/grad_norm.yml' ]
+                      - [
+                        '__none__',
+                      ]
+                      - [
+                        '__none__',
+                      ]
+                      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml' ]
+              tape:
+                machine_reward:
+                  kind: 'global_decomposed_tardiness'
+                  parameters:
+                    span: 128
+
+            # Deep MARL-AS + Surrogaate
+            - output_dir: 'Deep MARL-AS (S)'
+              machine_agent:
+                parameters:
+                  base_path: 'configuration/experiments/jsp/FINAL/MARL-PPO/as_machine.yml'
+                  template: 'as_more_rules'
+                  mod_dirs:
+                    - [ 'configuration/mods/machine/mods' ]
+                  mods:
+                    __factory__:
+                      - [ 'util/optimizer/grad_norm.yml' ]
+                      - [
+                        '__none__',
+                      ]
+                      - [
+                        '__none__',
+                      ]
+                      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml' ]
+              tape:
+                machine_reward:
+                  kind: 'surrogate_tardiness'
+                  parameters:
+                    winq_factor: 0.2
+                    span: 30
+                    critical_level_factor: 64
+
+            # Deep MARL-MR + Surrogate + Beefy
+            - output_dir: 'Deep MARL-MR Beefy (S)'
+              machine_agent:
+                parameters:
+                  base_path: 'configuration/experiments/jsp/FINAL/MARL-PPO/machine.yml'
+                  template: 'relu_best_rules'
+                  mod_dirs:
+                    - [ 'configuration/mods/machine/mods' ]
+                  mods:
+                    __factory__:
+                      - [ 'util/optimizer/grad_norm.yml' ]
+                      - [
+                        '__none__',
+                      ]
+                      - [
+                        '__none__',
+                      ]
+                      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml' ]
+              tape:
+                machine_reward:
+                  kind: 'surrogate_tardiness'
+                  parameters:
+                    winq_factor: 0.2
+                    span: 30
+                    critical_level_factor: 64
+
+            # Deep MARL-AS + Surrogate + Beefy
+            - output_dir: 'Deep MARL-AS Beefy (S)'
+              machine_agent:
+                parameters:
+                  base_path: 'configuration/experiments/jsp/FINAL/MARL-PPO/as_machine.yml'
+                  template: 'as_relu_best_rules'
+                  mod_dirs:
+                    - [ 'configuration/mods/machine/mods' ]
+                  mods:
+                    __factory__:
+                      - [ 'util/optimizer/grad_norm.yml' ]
+                      - [
+                        '__none__',
+                      ]
+                      - [
+                        '__none__',
+                      ]
+                      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml' ]
+              tape:
+                machine_reward:
+                  kind: 'surrogate_tardiness'
+                  parameters:
+                    winq_factor: 0.2
+                    span: 30
+                    critical_level_factor: 64
+
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run

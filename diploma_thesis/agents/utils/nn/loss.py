@@ -13,7 +13,7 @@ class Loss(torch.nn.Module):
 
     def __init__(self, configuration: Configuration):
         super().__init__()
-        
+
         self.configuration = configuration
         self.loss = self.__make_loss__()
 

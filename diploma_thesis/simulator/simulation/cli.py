@@ -1,9 +1,10 @@
+
 from logging import Logger
 from typing import Dict, List, Iterable
 
 from utils import modified
-from .simulation import Simulation
 from .jsp_dataset import JSPDataset
+from .simulation import Simulation
 
 
 def from_cli(prefix: str, parameters: List[Dict], logger: Logger) -> [Simulation]:

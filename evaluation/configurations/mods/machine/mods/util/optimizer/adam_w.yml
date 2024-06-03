@@ -1,0 +1,10 @@
+
+
+parameters:
+  trainer:
+    parameters:
+      optimizer:
+        model:
+          kind: 'adam_w'
+          parameters:
+            lr: 0.001
