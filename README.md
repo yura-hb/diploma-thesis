@@ -1,7 +1,7 @@
 
 # The source code of the "Graph neural networks and deep reinforcement learning in job-shop scheduling"
 
-**Edit:** Organise the configuration files for better reproducibility of results. Added only configurations from 
+**Edit:** Organised the configuration files for better reproducibility of results. Added only configurations from 
 the final steps of the experiments!
 
 To perform any of the experiments you must define the configuration file following examples in `configuration/experiments/**/emperiment.yml` files.
