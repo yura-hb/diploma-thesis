@@ -1,0 +1,20 @@
+
+__rules__:
+  rules:
+    - atc
+    - avpro
+    - cr
+    - edd
+    - fifo
+    - lifo
+    - lpt
+    - lro
+    - lwkr
+    - mro
+    - mwkr
+    - lwt
+    - npt
+    - random
+    - spt
+    - swt
+    - winq

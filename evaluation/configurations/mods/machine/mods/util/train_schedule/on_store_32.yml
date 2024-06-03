@@ -1,0 +1,7 @@
+
+
+parameters:
+  trainer:
+    parameters:
+      train_schedule: 'on_store'
+      train_every: 32

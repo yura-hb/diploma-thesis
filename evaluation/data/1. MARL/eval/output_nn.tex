@@ -1,0 +1,234 @@
+\documentclass[a3paper,10pt]{article}
+\usepackage{graphicx}
+\usepackage{lscape}
+\usepackage[a3paper, total={10in, 8in}]{geometry}\title{Results}
+\author{}
+\date{\today}
+\begin{document}
+\oddsidemargin 0in \topmargin 0in\maketitle
+\section{Tables of Friedman, Bonferroni-Dunn, Holm, Hochberg and Hommel Tests}
+\begin{table}[!htp]
+\centering
+\caption{Average Rankings of the algorithms
+}\begin{tabular}{c|c}
+Algorithm&Ranking\\
+\hline
+LWRK&3.39\\
+MS&4.91\\
+SPT&2.15\\
+WINQ&5.27\\
+|(3) AS|model|AS-model-0&2.68\\
+|(3) AS|model|AS more rules-model-1&2.60\\
+\end{tabular}
+\end{table}
+
+
+Friedman statistic considering reduction performance (distributed according to chi-square with 5 degrees of freedom: 721.2509523809197.
+
+
+P-value computed by Friedman Test: 2.3786450586982255E-10.\newline
+
+Iman and Davenport statistic considering reduction performance (distributed according to F-distribution with 5 and 1495 degrees of freedom: 276.9236577832461.
+
+
+P-value computed by Iman and Daveport Test: -2.220446049250313E-16.\newline
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Holm / Hochberg Table for $\alpha=0.05$}
+\begin{tabular}{ccccc}
+$i$&algorithm&$z=(R_0 - R_i)/SE$&$p$&Holm/Hochberg/Hommel\\
+\hline
+5&WINQ&20.381550948041596&2.4380647681055544E-92&0.01\\
+4&MS&18.046619522516483&8.386947965104725E-73&0.0125\\
+3&LWRK&8.084972833243505&6.217805505351816E-16&0.016666666666666666\\
+2&|(3) AS|model|AS-model-0&3.447842665728637&5.650831025027736E-4&0.025\\
+1&|(3) AS|model|AS more rules-model-1&2.935030623674126&0.0033351477078036942&0.05\\
+\hline
+\end{tabular}
+\end{table}
+Bonferroni-Dunn's procedure rejects those hypotheses that have a p-value $\le0.01$.
+
+
+Hochberg's procedure rejects those hypotheses that have a p-value $\le0.05$.
+
+
+Hommel's procedure rejects all hypotheses.
+
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Holm / Hochberg Table for $\alpha=0.10$}
+\begin{tabular}{ccccc}
+$i$&algorithm&$z=(R_0 - R_i)/SE$&$p$&Holm/Hochberg/Hommel\\
+\hline
+5&WINQ&20.381550948041596&2.4380647681055544E-92&0.02\\
+4&MS&18.046619522516483&8.386947965104725E-73&0.025\\
+3&LWRK&8.084972833243505&6.217805505351816E-16&0.03333333333333333\\
+2&|(3) AS|model|AS-model-0&3.447842665728637&5.650831025027736E-4&0.05\\
+1&|(3) AS|model|AS more rules-model-1&2.935030623674126&0.0033351477078036942&0.1\\
+\hline
+\end{tabular}
+\end{table}
+Bonferroni-Dunn's procedure rejects those hypotheses that have a p-value $\le0.02$.
+
+
+Hochberg's procedure rejects those hypotheses that have a p-value $\le0.1$.
+
+
+Hommel's procedure rejects all hypotheses.
+
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Adjusted $p$-values}
+\begin{tabular}{ccccccc}
+i&algorithm&unadjusted $p$&$p_{Bonf}$&$p_{Holm}$&$p_{Hoch}$&$p_{Homm}$\\
+\hline
+1&WINQ&2.4380647681055544E-92&1.2190323840527772E-91&1.2190323840527772E-91&1.2190323840527772E-91&1.2190323840527772E-91\\
+2&MS&8.386947965104725E-73&4.1934739825523623E-72&3.35477918604189E-72&3.35477918604189E-72&3.35477918604189E-72\\
+3&LWRK&6.217805505351816E-16&3.108902752675908E-15&1.8653416516055447E-15&1.8653416516055447E-15&1.8653416516055447E-15\\
+4&|(3) AS|model|AS-model-0&5.650831025027736E-4&0.002825415512513868&0.0011301662050055472&0.0011301662050055472&0.0011301662050055472\\
+5&|(3) AS|model|AS more rules-model-1&0.0033351477078036942&0.01667573853901847&0.0033351477078036942&0.0033351477078036942&0.0033351477078036942\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Holm / Shaffer Table for $\alpha=0.05$}
+\begin{tabular}{cccccc}
+$i$&algorithms&$z=(R_0 - R_i)/SE$&$p$&Holm&Shaffer\\
+\hline
+15&SPT vs. WINQ&20.381550948041596&2.4380647681055544E-92&0.0033333333333333335&0.0033333333333333335\\
+14&MS vs. SPT&18.046619522516483&8.386947965104725E-73&0.0035714285714285718&0.005\\
+13&WINQ vs. |(3) AS|model|AS more rules-model-1&17.44652032436747&3.658525646082898E-68&0.0038461538461538464&0.005\\
+12&WINQ vs. |(3) AS|model|AS-model-0&16.93370828231296&2.5387017706360366E-64&0.004166666666666667&0.005\\
+11&MS vs. |(3) AS|model|AS more rules-model-1&15.111588898842358&1.3582469042495956E-51&0.004545454545454546&0.005\\
+10&MS vs. |(3) AS|model|AS-model-0&14.598776856787847&2.8592924926366497E-48&0.005&0.005\\
+9&LWRK vs. WINQ&12.29657811479809&9.449309303242612E-35&0.005555555555555556&0.0071428571428571435\\
+8&LWRK vs. MS&9.961646689272978&2.2431608137424718E-23&0.00625&0.0071428571428571435\\
+7&LWRK vs. SPT&8.084972833243505&6.217805505351816E-16&0.0071428571428571435&0.0071428571428571435\\
+6&LWRK vs. |(3) AS|model|AS more rules-model-1&5.149942209569379&2.60566732719091E-7&0.008333333333333333&0.008333333333333333\\
+5&LWRK vs. |(3) AS|model|AS-model-0&4.637130167514869&3.532799469025868E-6&0.01&0.0125\\
+4&SPT vs. |(3) AS|model|AS-model-0&3.447842665728637&5.650831025027736E-4&0.0125&0.0125\\
+3&SPT vs. |(3) AS|model|AS more rules-model-1&2.935030623674126&0.0033351477078036942&0.016666666666666666&0.016666666666666666\\
+2&MS vs. WINQ&2.3349314255251112&0.01954700336517042&0.025&0.025\\
+1&|(3) AS|model|AS-model-0 vs. |(3) AS|model|AS more rules-model-1&0.5128120420545111&0.6080828054059082&0.05&0.05\\
+\hline
+\end{tabular}
+\end{table}
+Nemenyi's procedure rejects those hypotheses that have a p-value $\le0.0033333333333333335$.
+
+
+Holm's procedure rejects those hypotheses that have a p-value $\le0.05$.
+
+
+Shaffer's procedure rejects those hypotheses that have a p-value $\le0.0033333333333333335$.
+
+
+Bergmann's procedure rejects these hypotheses:
+
+
+\begin{itemize}
+
+
+\item LWRK vs. MS
+\item LWRK vs. SPT
+\item LWRK vs. WINQ
+\item LWRK vs. |(3) AS|model|AS-model-0
+\item LWRK vs. |(3) AS|model|AS more rules-model-1
+\item MS vs. SPT
+\item MS vs. WINQ
+\item MS vs. |(3) AS|model|AS-model-0
+\item MS vs. |(3) AS|model|AS more rules-model-1
+\item SPT vs. WINQ
+\item SPT vs. |(3) AS|model|AS-model-0
+\item SPT vs. |(3) AS|model|AS more rules-model-1
+\item WINQ vs. |(3) AS|model|AS-model-0
+\item WINQ vs. |(3) AS|model|AS more rules-model-1
+\end{itemize}
+
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Holm / Shaffer Table for $\alpha=0.10$}
+\begin{tabular}{cccccc}
+$i$&algorithms&$z=(R_0 - R_i)/SE$&$p$&Holm&Shaffer\\
+\hline
+15&SPT vs. WINQ&20.381550948041596&2.4380647681055544E-92&0.006666666666666667&0.006666666666666667\\
+14&MS vs. SPT&18.046619522516483&8.386947965104725E-73&0.0071428571428571435&0.01\\
+13&WINQ vs. |(3) AS|model|AS more rules-model-1&17.44652032436747&3.658525646082898E-68&0.007692307692307693&0.01\\
+12&WINQ vs. |(3) AS|model|AS-model-0&16.93370828231296&2.5387017706360366E-64&0.008333333333333333&0.01\\
+11&MS vs. |(3) AS|model|AS more rules-model-1&15.111588898842358&1.3582469042495956E-51&0.009090909090909092&0.01\\
+10&MS vs. |(3) AS|model|AS-model-0&14.598776856787847&2.8592924926366497E-48&0.01&0.01\\
+9&LWRK vs. WINQ&12.29657811479809&9.449309303242612E-35&0.011111111111111112&0.014285714285714287\\
+8&LWRK vs. MS&9.961646689272978&2.2431608137424718E-23&0.0125&0.014285714285714287\\
+7&LWRK vs. SPT&8.084972833243505&6.217805505351816E-16&0.014285714285714287&0.014285714285714287\\
+6&LWRK vs. |(3) AS|model|AS more rules-model-1&5.149942209569379&2.60566732719091E-7&0.016666666666666666&0.016666666666666666\\
+5&LWRK vs. |(3) AS|model|AS-model-0&4.637130167514869&3.532799469025868E-6&0.02&0.025\\
+4&SPT vs. |(3) AS|model|AS-model-0&3.447842665728637&5.650831025027736E-4&0.025&0.025\\
+3&SPT vs. |(3) AS|model|AS more rules-model-1&2.935030623674126&0.0033351477078036942&0.03333333333333333&0.03333333333333333\\
+2&MS vs. WINQ&2.3349314255251112&0.01954700336517042&0.05&0.05\\
+1&|(3) AS|model|AS-model-0 vs. |(3) AS|model|AS more rules-model-1&0.5128120420545111&0.6080828054059082&0.1&0.1\\
+\hline
+\end{tabular}
+\end{table}
+Nemenyi's procedure rejects those hypotheses that have a p-value $\le0.006666666666666667$.
+
+
+Holm's procedure rejects those hypotheses that have a p-value $\le0.1$.
+
+
+Shaffer's procedure rejects those hypotheses that have a p-value $\le0.006666666666666667$.
+
+
+Bergmann's procedure rejects these hypotheses:
+
+
+\begin{itemize}
+
+
+\item LWRK vs. MS
+\item LWRK vs. SPT
+\item LWRK vs. WINQ
+\item LWRK vs. |(3) AS|model|AS-model-0
+\item LWRK vs. |(3) AS|model|AS more rules-model-1
+\item MS vs. SPT
+\item MS vs. WINQ
+\item MS vs. |(3) AS|model|AS-model-0
+\item MS vs. |(3) AS|model|AS more rules-model-1
+\item SPT vs. WINQ
+\item SPT vs. |(3) AS|model|AS-model-0
+\item SPT vs. |(3) AS|model|AS more rules-model-1
+\item WINQ vs. |(3) AS|model|AS-model-0
+\item WINQ vs. |(3) AS|model|AS more rules-model-1
+\end{itemize}
+
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Adjusted $p$-values}
+\begin{tabular}{cccccccc}
+i&hypothesis&unadjusted $p$&$p_{Neme}$&$p_{Holm}$&$p_{Shaf}$&$p_{Berg}$\\
+\hline
+1&SPT vs .WINQ&2.4380647681055544E-92&3.6570971521583314E-91&3.6570971521583314E-91&3.6570971521583314E-91&3.6570971521583314E-91\\
+2&MS vs .SPT&8.386947965104725E-73&1.2580421947657087E-71&1.1741727151146616E-71&8.386947965104725E-72&8.386947965104725E-72\\
+3&WINQ vs .|(3) AS|model|AS more rules-model-1&3.658525646082898E-68&5.487788469124347E-67&4.7560833399077674E-67&3.658525646082898E-67&3.658525646082898E-67\\
+4&WINQ vs .|(3) AS|model|AS-model-0&2.5387017706360366E-64&3.808052655954055E-63&3.046442124763244E-63&2.5387017706360364E-63&1.7770912394452256E-63\\
+5&MS vs .|(3) AS|model|AS more rules-model-1&1.3582469042495956E-51&2.0373703563743935E-50&1.494071594674555E-50&1.3582469042495956E-50&8.149481425497574E-51\\
+6&MS vs .|(3) AS|model|AS-model-0&2.8592924926366497E-48&4.2889387389549744E-47&2.85929249263665E-47&2.85929249263665E-47&1.1437169970546599E-47\\
+7&LWRK vs .WINQ&9.449309303242612E-35&1.4173963954863919E-33&8.504378372918351E-34&6.614516512269828E-34&5.669585581945567E-34\\
+8&LWRK vs .MS&2.2431608137424718E-23&3.3647412206137076E-22&1.7945286509939775E-22&1.5702125696197304E-22&8.972643254969887E-23\\
+9&LWRK vs .SPT&6.217805505351816E-16&9.326708258027724E-15&4.352463853746271E-15&4.352463853746271E-15&4.352463853746271E-15\\
+10&LWRK vs .|(3) AS|model|AS more rules-model-1&2.60566732719091E-7&3.908500990786365E-6&1.563400396314546E-6&1.563400396314546E-6&1.042266930876364E-6\\
+11&LWRK vs .|(3) AS|model|AS-model-0&3.532799469025868E-6&5.299199203538802E-5&1.766399734512934E-5&1.4131197876103472E-5&1.0598398407077603E-5\\
+12&SPT vs .|(3) AS|model|AS-model-0&5.650831025027736E-4&0.008476246537541605&0.0022603324100110944&0.0022603324100110944&0.0022603324100110944\\
+13&SPT vs .|(3) AS|model|AS more rules-model-1&0.0033351477078036942&0.050027215617055414&0.010005443123411083&0.010005443123411083&0.0066702954156073885\\
+14&MS vs .WINQ&0.01954700336517042&0.2932050504775563&0.03909400673034084&0.03909400673034084&0.03909400673034084\\
+15&|(3) AS|model|AS-model-0 vs .|(3) AS|model|AS more rules-model-1&0.6080828054059082&9.121242081088623&0.6080828054059082&0.6080828054059082&0.6080828054059082\\
+\hline
+\end{tabular}
+\end{table}
+
+\end{lscape}\end{document}

@@ -1,0 +1,6 @@
+
+parameters:
+  trainer:
+    parameters:
+      return:
+        kind: 'no'

@@ -1,0 +1,8 @@
+
+parameters:
+  model:
+    parameters:
+      policy:
+        parameters:
+          noise:
+            kind: 'factorized'

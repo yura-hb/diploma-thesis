@@ -1,0 +1,11 @@
+
+parameters:
+  trainer:
+    parameters:
+      optimizer:
+        scheduler:
+          kind: 'linear'
+          parameters:
+            start_factor: 1
+            end_factor: 0.1
+            total_iters: 60000

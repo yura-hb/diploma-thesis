@@ -1,0 +1,38 @@
+
+
+layers:
+  - kind: 'partial_instance_norm'
+    parameters:
+      channels: 21
+      signature: 'state -> p'
+
+  - kind: 'flatten'
+    parameters:
+      signature: 'p -> p'
+
+  - kind: 'linear'
+    parameters:
+      dim: 256
+      activation: 'relu'
+      signature: 'p -> actions_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 256
+      activation: 'relu'
+      signature: 'actions_hidden -> actions_hidden'
+
+  - kind: 'linear'
+    parameters:
+      dim: 256
+      activation: 'relu'
+      signature: 'p -> values_hidden'
+  - kind: 'linear'
+    parameters:
+      dim: 256
+      activation: 'relu'
+      signature: 'values_hidden -> values_hidden'
+
+  - kind: 'output'
+    parameters:
+      value: 'values_hidden'
+      actions: 'actions_hidden'

@@ -1,0 +1,229 @@
+# Evaluate the effectivenes of basic DQNs on the JSP environment
+
+template: &template 'baseline'
+base_model: &base_model 'configuration/experiments/jsp/submission/GRAPH-NN/experiments/FLEXIBLE-PPO/machine.yml'
+
+
+###############################################################################################
+
+ppo_1: &ppo_1
+  base_path: *base_model
+  template: 'custom_gat'
+  mod_dirs:
+    - ['configuration/mods/machine/mods']
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+      - [
+          '__none__',
+      ]
+#      - [
+#        'util/infrastructure/cuda.yml'
+#      ]
+      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml']
+
+ppo_2: &ppo_2
+  base_path: *base_model
+  template: 'custom_gin'
+  mod_dirs:
+    - ['configuration/mods/machine/mods']
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+      - [
+          '__none__',
+#          'agent/ppo/p3or.yml'
+      ]
+#      - [
+#        'util/infrastructure/cuda.yml'
+#      ]
+      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml']
+
+ppo_3: &ppo_3
+  base_path: *base_model
+  template: 'hierarchical_gat'
+  mod_dirs:
+    - ['configuration/mods/machine/mods']
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+      - [
+          '__none__',
+#          'agent/ppo/p3or.yml'
+      ]
+#      - [
+#        'util/infrastructure/cuda.yml'
+#      ]
+      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml']
+
+ppo_4: &ppo_4
+  base_path: *base_model
+  template: 'hierarchical_gin'
+  mod_dirs:
+    - ['configuration/mods/machine/mods']
+  mods:
+    __factory__:
+      - [ 'util/optimizer/grad_norm.yml' ]
+      - [
+          '__none__',
+#          'agent/ppo/p3or.yml'
+      ]
+#      - [
+#        'util/infrastructure/cuda.yml'
+#      ]
+      - [ 'util/train_schedule/on_stored_data_exclusively_3.yml']
+
+###############################################################################################
+
+reward: &reward
+  - kind: 'surrogate_tardiness'
+    parameters:
+      winq_factor: 0.2
+      span: 30
+      critical_level_factor: 64
+
+##############################################################################################
+
+# 8 runs
+
+long_single_source_run: &long_single_source_run
+  parameters:
+    mods:
+      __inout_factory__:
+        - [ ['utilization/80.yml'] ]
+    nested:
+      parameters:
+        dispatch:
+          seed:
+            - '__range__': [2000, 2500]
+
+###############################################################################################
+
+
+task:
+  kind: 'multi_task'
+  n_workers: 8
+  n_threads: 10
+  debug: False
+  store_run_statistics: False
+  output_dir: 'results/jsp/experiments/FINAL/Flexible-PPO/1'
+
+  tasks:
+    - kind: 'multi_value'
+      parameters:
+        base:
+          name: 'model'
+          output_dir: '1'
+          log_stdout: False
+          seed: 123
+
+          entropy_average_window: 5
+          min_average_entropy: 0.25
+
+          machine_agent:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/mods/machine_agent/model.yml'
+              mods: [ ]
+
+          work_center_agent:
+            kind: 'static'
+            parameters:
+              model:
+                kind: 'static'
+                parameters:
+                  rule: 'et'
+              encoder:
+                kind: 'plain'
+
+          tape:
+            machine_reward:
+              kind: 'surrogate_tardiness'
+
+            work_center_reward:
+              kind: 'no'
+
+          simulator:
+            kind: 'episodic'
+
+          run:
+            kind: 'mod'
+            parameters:
+              base_path: 'configuration/experiments/jsp/submission/GRAPH-NN/experiments/FLEXIBLE-PPO/run.yml'
+              mod_dirs:
+                - 'configuration/mods/run/mods'
+              mods: []
+              nested:
+                parameters:
+                  simulations:
+                    - name: ''
+                      kind: 'multi_value'
+                      parameters:
+                        base:
+                          kind: 'mod'
+                          parameters:
+                            base_path: 'configuration/experiments/jsp/submission/GRAPH-NN/experiments/FLEXIBLE-PPO/simulation.yml'
+                            mod_dirs:
+                              - 'configuration/mods/simulation/mods'
+                            mods: [ ]
+                        values:
+        values:
+          __concat__:
+            - output_dir: 'Global'
+              machine_agent:
+                parameters:
+                  __concat__:
+                    - *ppo_1
+                    - *ppo_2
+                    - *ppo_3
+                    - *ppo_4
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'complete'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: False
+                is_work_center_set_in_shop_floor_connected: False
+
+            - output_dir: 'Local'
+              machine_agent:
+                parameters:
+                  __concat__:
+                    - *ppo_1
+                    - *ppo_2
+                    - *ppo_3
+                    - *ppo_4
+              graph:
+                transition_model:
+                  kind: 'base'
+                  parameters:
+                    forward:
+                      kind: 'complete'
+
+                    schedule:
+                      kind: 'machine_compressed'
+
+                memory: 0
+                is_machine_set_in_work_center_connected: False
+                is_work_center_set_in_shop_floor_connected: False
+
+          tape:
+            machine_reward:
+              *reward
+
+          run:
+            parameters:
+              nested:
+                parameters:
+                  simulations:
+                    __0__:
+                      parameters:
+                        values:
+                          __concat__:
+                            - *long_single_source_run

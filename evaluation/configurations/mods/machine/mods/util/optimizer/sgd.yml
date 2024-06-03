@@ -1,0 +1,10 @@
+
+parameters:
+  trainer:
+    parameters:
+      optimizer:
+        model:
+          kind: 'sgd'
+          parameters:
+            lr: 0.001
+            momentum: 0.9

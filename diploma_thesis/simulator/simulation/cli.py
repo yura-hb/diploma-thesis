@@ -1,4 +1,4 @@
-import random
+
 from logging import Logger
 from typing import Dict, List, Iterable
 
@@ -20,8 +20,6 @@ def from_cli(prefix: str, parameters: List[Dict], logger: Logger) -> [Simulation
 
         simulation.update_name(prefix + simulation.simulation_id + '_' + str(ids[simulation.simulation_id]))
         simulation.update_index(index)
-
-    random.shuffle(simulations)
 
     return simulations
 

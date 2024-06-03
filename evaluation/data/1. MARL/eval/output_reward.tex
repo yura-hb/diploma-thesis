@@ -1,0 +1,368 @@
+\documentclass[a3paper,10pt]{article}
+\usepackage{graphicx}
+\usepackage{lscape}
+\usepackage[a3paper, total={10in, 8in}]{geometry}\title{Results}
+\author{}
+\date{\today}
+\begin{document}
+\oddsidemargin 0in \topmargin 0in\maketitle
+\section{Tables of Friedman, Bonferroni-Dunn, Holm, Hochberg and Hommel Tests}
+\begin{table}[!htp]
+\centering
+\caption{Average Rankings of the algorithms
+}\begin{tabular}{c|c}
+Algorithm&Ranking\\
+\hline
+LWRK&5.43\\
+MS&7.59\\
+SPT&3.93\\
+WINQ&8.02\\
+|(5) Reward|DDQN|Surrogate Tardiness-model-0&2.76\\
+|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&2.23\\
+|(5) Reward|DDQN|Global Decomposed Tardiness-model-2&10.28\\
+|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&10.47\\
+|(5) Reward|DDQN|Global Tardiness-model-4&8.54\\
+|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&10.06\\
+|(5) Reward|DDQN|Makespan-model-6&4.77\\
+|(5) Reward|All not Noisy not 3-step|Makespan-model-7&3.93\\
+\end{tabular}
+\end{table}
+
+
+Friedman statistic considering reduction performance (distributed according to chi-square with 11 degrees of freedom: 2309.1399999999944.
+
+
+P-value computed by Friedman Test: 0.0.\newline
+
+Iman and Davenport statistic considering reduction performance (distributed according to F-distribution with 11 and 3289 degrees of freedom: 696.8016268695825.
+
+
+P-value computed by Iman and Daveport Test: 1.1102230246251565E-16.\newline
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Holm / Hochberg Table for $\alpha=0.05$}
+\begin{tabular}{ccccc}
+$i$&algorithm&$z=(R_0 - R_i)/SE$&$p$&Holm/Hochberg/Hommel\\
+\hline
+11&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&28.00121105439581&1.5705333359801975E-172&0.004545454545454546\\
+10&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2&27.367135915274837&6.7531648225184375E-165&0.005\\
+9&|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&26.59718753205654&7.316095053645367E-156&0.005555555555555556\\
+8&|(5) Reward|DDQN|Global Tardiness-model-4&21.456649797040093&3.958174181827914E-102&0.00625\\
+7&WINQ&19.678974853433065&3.265407079585866E-86&0.0071428571428571435\\
+6&MS&18.229660249727974&3.0018006706610033E-74&0.008333333333333333\\
+5&LWRK&10.869859527788115&1.6044768956075757E-27&0.01\\
+4&|(5) Reward|DDQN|Makespan-model-6&8.627951000181767&6.246082562570496E-18&0.0125\\
+3&|(5) Reward|All not Noisy not 3-step|Makespan-model-7&5.785935644478848&7.2109819185362035E-9&0.016666666666666666\\
+2&SPT&5.774612874137438&7.713021082425E-9&0.025\\
+1&|(5) Reward|DDQN|Surrogate Tardiness-model-0&1.800320484289899&0.0718100482492432&0.05\\
+\hline
+\end{tabular}
+\end{table}
+Bonferroni-Dunn's procedure rejects those hypotheses that have a p-value $\le0.004545454545454546$.
+
+
+Holm's procedure rejects those hypotheses that have a p-value $\le0.05$.
+
+
+Hochberg's procedure rejects those hypotheses that have a p-value $\le0.025$.
+
+
+Hommel's procedure rejects those hypotheses that have a p-value $\le0.05$.
+
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Holm / Hochberg Table for $\alpha=0.10$}
+\begin{tabular}{ccccc}
+$i$&algorithm&$z=(R_0 - R_i)/SE$&$p$&Holm/Hochberg/Hommel\\
+\hline
+11&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&28.00121105439581&1.5705333359801975E-172&0.009090909090909092\\
+10&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2&27.367135915274837&6.7531648225184375E-165&0.01\\
+9&|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&26.59718753205654&7.316095053645367E-156&0.011111111111111112\\
+8&|(5) Reward|DDQN|Global Tardiness-model-4&21.456649797040093&3.958174181827914E-102&0.0125\\
+7&WINQ&19.678974853433065&3.265407079585866E-86&0.014285714285714287\\
+6&MS&18.229660249727974&3.0018006706610033E-74&0.016666666666666666\\
+5&LWRK&10.869859527788115&1.6044768956075757E-27&0.02\\
+4&|(5) Reward|DDQN|Makespan-model-6&8.627951000181767&6.246082562570496E-18&0.025\\
+3&|(5) Reward|All not Noisy not 3-step|Makespan-model-7&5.785935644478848&7.2109819185362035E-9&0.03333333333333333\\
+2&SPT&5.774612874137438&7.713021082425E-9&0.05\\
+1&|(5) Reward|DDQN|Surrogate Tardiness-model-0&1.800320484289899&0.0718100482492432&0.1\\
+\hline
+\end{tabular}
+\end{table}
+Bonferroni-Dunn's procedure rejects those hypotheses that have a p-value $\le0.009090909090909092$.
+
+
+Hochberg's procedure rejects those hypotheses that have a p-value $\le0.1$.
+
+
+Hommel's procedure rejects all hypotheses.
+
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Adjusted $p$-values}
+\begin{tabular}{ccccccc}
+i&algorithm&unadjusted $p$&$p_{Bonf}$&$p_{Holm}$&$p_{Hoch}$&$p_{Homm}$\\
+\hline
+1&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&1.5705333359801975E-172&1.7275866695782172E-171&1.7275866695782172E-171&1.7275866695782172E-171&1.7275866695782172E-171\\
+2&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2&6.7531648225184375E-165&7.428481304770282E-164&6.753164822518438E-164&6.753164822518438E-164&6.753164822518438E-164\\
+3&|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&7.316095053645367E-156&8.047704559009905E-155&6.58448554828083E-155&6.58448554828083E-155&6.58448554828083E-155\\
+4&|(5) Reward|DDQN|Global Tardiness-model-4&3.958174181827914E-102&4.353991600010706E-101&3.1665393454623314E-101&3.1665393454623314E-101&3.1665393454623314E-101\\
+5&WINQ&3.265407079585866E-86&3.5919477875444526E-85&2.2857849557101064E-85&2.2857849557101064E-85&2.2857849557101064E-85\\
+6&MS&3.0018006706610033E-74&3.301980737727104E-73&1.801080402396602E-73&1.801080402396602E-73&1.801080402396602E-73\\
+7&LWRK&1.6044768956075757E-27&1.7649245851683334E-26&8.022384478037879E-27&8.022384478037879E-27&8.022384478037879E-27\\
+8&|(5) Reward|DDQN|Makespan-model-6&6.246082562570496E-18&6.870690818827546E-17&2.4984330250281984E-17&2.4984330250281984E-17&2.4984330250281984E-17\\
+9&|(5) Reward|All not Noisy not 3-step|Makespan-model-7&7.2109819185362035E-9&7.932080110389824E-8&2.163294575560861E-8&1.542604216485E-8&1.4421963837072407E-8\\
+10&SPT&7.713021082425E-9&8.4843231906675E-8&2.163294575560861E-8&1.542604216485E-8&1.542604216485E-8\\
+11&|(5) Reward|DDQN|Surrogate Tardiness-model-0&0.0718100482492432&0.7899105307416752&0.0718100482492432&0.0718100482492432&0.0718100482492432\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Holm / Shaffer Table for $\alpha=0.05$}
+\begin{tabular}{cccccc}
+$i$&algorithms&$z=(R_0 - R_i)/SE$&$p$&Holm&Shaffer\\
+\hline
+66&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&28.00121105439581&1.5705333359801975E-172&7.575757575757576E-4&7.575757575757576E-4\\
+65&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&27.367135915274837&6.7531648225184375E-165&7.692307692307692E-4&9.090909090909091E-4\\
+64&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&26.59718753205654&7.316095053645367E-156&7.8125E-4&9.090909090909091E-4\\
+63&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&26.200890570105912&2.5960200684203956E-151&7.936507936507937E-4&9.090909090909091E-4\\
+62&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&25.566815430984935&3.5701839602392024E-144&8.064516129032258E-4&9.090909090909091E-4\\
+61&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&24.796867047766643&9.690407941445081E-136&8.19672131147541E-4&9.090909090909091E-4\\
+60&SPT vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&22.226598180258375&1.8999863508163888E-109&8.333333333333334E-4&9.090909090909091E-4\\
+59&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&22.215275409916963&2.4447840044293965E-109&8.474576271186442E-4&9.090909090909091E-4\\
+58&SPT vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&21.5925230411374&2.1116445144588104E-103&8.620689655172415E-4&9.090909090909091E-4\\
+57&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&21.58120027079599&2.6977346587071206E-103&8.771929824561404E-4&9.090909090909091E-4\\
+56&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|DDQN|Global Tardiness-model-4&21.456649797040093&3.958174181827914E-102&8.928571428571429E-4&9.090909090909091E-4\\
+55&SPT vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&20.822574657919105&2.7026666461458364E-96&9.090909090909091E-4&9.090909090909091E-4\\
+54&|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&20.811251887577694&3.4228909477217586E-96&9.25925925925926E-4&0.0010869565217391304\\
+53&WINQ vs. |(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&19.678974853433065&3.265407079585866E-86&9.433962264150943E-4&0.0010869565217391304\\
+52&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|DDQN|Global Tardiness-model-4&19.656329312750195&5.103438779513083E-86&9.615384615384616E-4&0.0010869565217391304\\
+51&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs. |(5) Reward|DDQN|Makespan-model-6&19.373260054214047&1.2977450509095873E-83&9.80392156862745E-4&0.0010869565217391304\\
+50&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs. |(5) Reward|DDQN|Makespan-model-6&18.73918491509307&2.372337472536066E-78&0.001&0.0010869565217391304\\
+49&MS vs. |(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&18.229660249727974&3.0018006706610033E-74&0.0010204081632653062&0.0010869565217391304\\
+48&|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5 vs. |(5) Reward|DDQN|Makespan-model-6&17.969236531874778&3.393527642096516E-72&0.0010416666666666667&0.0010869565217391304\\
+47&WINQ vs. |(5) Reward|DDQN|Surrogate Tardiness-model-0&17.878654369143167&1.729612434203607E-71&0.0010638297872340426&0.0010869565217391304\\
+46&LWRK vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&17.1313515266077&8.661892325715942E-66&0.0010869565217391304&0.0010869565217391304\\
+45&LWRK vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&16.49727638748672&3.8381818007989186E-61&0.0011111111111111111&0.0011111111111111111\\
+44&MS vs. |(5) Reward|DDQN|Surrogate Tardiness-model-0&16.429339765438076&1.1793599320553013E-60&0.0011363636363636365&0.001282051282051282\\
+43&LWRK vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&15.727328004268427&9.827141891808938E-56&0.0011627906976744186&0.001282051282051282\\
+42&SPT vs. |(5) Reward|DDQN|Global Tardiness-model-4&15.682036922902657&2.0071305098194908E-55&0.0011904761904761906&0.001282051282051282\\
+41&|(5) Reward|DDQN|Global Tardiness-model-4 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&15.670714152561246&2.3986896650659277E-55&0.0012195121951219512&0.001282051282051282\\
+40&SPT vs. WINQ&13.904361979295631&5.95959116186651E-44&0.00125&0.001282051282051282\\
+39&WINQ vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&13.89303920895422&6.980915833543656E-44&0.001282051282051282&0.001282051282051282\\
+38&|(5) Reward|DDQN|Global Tardiness-model-4 vs. |(5) Reward|DDQN|Makespan-model-6&12.828698796858328&1.1325019874695399E-37&0.0013157894736842105&0.0013513513513513514\\
+37&MS vs. SPT&12.455047375590537&1.312735109368628E-35&0.0013513513513513514&0.0013513513513513514\\
+36&MS vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&12.443724605249127&1.512815521317573E-35&0.001388888888888889&0.001388888888888889\\
+35&WINQ vs. |(5) Reward|DDQN|Makespan-model-6&11.051023853251301&2.16728875221825E-28&0.0014285714285714286&0.0014705882352941176\\
+34&LWRK vs. |(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&10.869859527788115&1.6044768956075757E-27&0.0014705882352941176&0.0014705882352941176\\
+33&LWRK vs. |(5) Reward|DDQN|Global Tardiness-model-4&10.58679026925198&3.4315721889864093E-26&0.0015151515151515152&0.0016129032258064516\\
+32&MS vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&9.771550804667838&1.4915128020967013E-22&0.0015625&0.0016129032258064516\\
+31&MS vs. |(5) Reward|DDQN|Makespan-model-6&9.601709249546209&7.8629509808395455E-22&0.0016129032258064516&0.0016129032258064516\\
+30&MS vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&9.13747566554686&6.392706007973724E-20&0.0016666666666666668&0.0016666666666666668\\
+29&LWRK vs. |(5) Reward|DDQN|Surrogate Tardiness-model-0&9.069539043498215&1.1952157494529354E-19&0.001724137931034483&0.001724137931034483\\
+28&LWRK vs. WINQ&8.809115325644953&1.2613736384667424E-18&0.0017857142857142859&0.0017857142857142859\\
+27&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|DDQN|Makespan-model-6&8.627951000181767&6.246082562570496E-18&0.001851851851851852&0.001851851851851852\\
+26&MS vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&8.367527282328567&5.883990241829328E-17&0.0019230769230769232&0.002\\
+25&WINQ vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&8.322236200962745&8.631907809885239E-17&0.002&0.002\\
+24&WINQ vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&7.68816106184177&1.492648332505821E-14&0.0020833333333333333&0.0020833333333333333\\
+23&LWRK vs. MS&7.359800721939861&1.8418497817216497E-13&0.002173913043478261&0.002173913043478261\\
+22&WINQ vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&6.918212678623475&4.573772987235022E-12&0.002272727272727273&0.002272727272727273\\
+21&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|DDQN|Makespan-model-6&6.827630515891867&8.632857775961996E-12&0.002380952380952381&0.002380952380952381\\
+20&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs. |(5) Reward|DDQN|Global Tardiness-model-4&6.544561257355718&5.967030269284628E-11&0.0025&0.0025\\
+19&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs. |(5) Reward|DDQN|Global Tardiness-model-4&5.910486118234742&3.4109959856125836E-9&0.002631578947368421&0.002631578947368421\\
+18&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&5.785935644478848&7.2109819185362035E-9&0.002777777777777778&0.002777777777777778\\
+17&SPT vs. |(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&5.774612874137438&7.713021082425E-9&0.0029411764705882353&0.0029411764705882353\\
+16&|(5) Reward|DDQN|Global Tardiness-model-4 vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&5.140537735016447&2.739532962648937E-7&0.003125&0.003125\\
+15&LWRK vs. SPT&5.095246653650676&3.4828749788912644E-7&0.0033333333333333335&0.0033333333333333335\\
+14&LWRK vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&5.083923883309266&3.6971614987874587E-7&0.0035714285714285718&0.0035714285714285718\\
+13&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&3.98561516018895&6.730552374949803E-5&0.0038461538461538464&0.0038461538461538464\\
+12&SPT vs. |(5) Reward|DDQN|Surrogate Tardiness-model-0&3.9742923898475397&7.058880382337269E-5&0.004166666666666667&0.004166666666666667\\
+11&MS vs. |(5) Reward|DDQN|Global Tardiness-model-4&3.2269895473121193&0.0012510003005977769&0.004545454545454546&0.004545454545454546\\
+10&SPT vs. |(5) Reward|DDQN|Makespan-model-6&2.853338126044328&0.004326256244849688&0.005&0.005\\
+9&|(5) Reward|DDQN|Makespan-model-6 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&2.8420153557029177&0.004482933229761039&0.005555555555555556&0.005555555555555556\\
+8&LWRK vs. |(5) Reward|DDQN|Makespan-model-6&2.2419085276063484&0.02496728479184817&0.00625&0.00625\\
+7&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&1.800320484289899&0.0718100482492432&0.0071428571428571435&0.0071428571428571435\\
+6&WINQ vs. |(5) Reward|DDQN|Global Tardiness-model-4&1.7776749436070276&0.075457257213952&0.008333333333333333&0.008333333333333333\\
+5&MS vs. WINQ&1.449314603705092&0.14724974459811188&0.01&0.01\\
+4&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&1.4040235223392707&0.16031184519332708&0.0125&0.0125\\
+3&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&0.7699483832182946&0.4413305118272063&0.016666666666666666&0.016666666666666666\\
+2&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&0.6340751391209761&0.5260317864344614&0.025&0.025\\
+1&SPT vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&0.011322770341410014&0.9909659293951814&0.05&0.05\\
+\hline
+\end{tabular}
+\end{table}
+Nemenyi's procedure rejects those hypotheses that have a p-value $\le7.575757575757576E-4$.
+
+
+Holm's procedure rejects those hypotheses that have a p-value $\le0.00625$.
+
+
+Shaffer's procedure rejects those hypotheses that have a p-value $\le7.575757575757576E-4$.
+
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Holm / Shaffer Table for $\alpha=0.10$}
+\begin{tabular}{cccccc}
+$i$&algorithms&$z=(R_0 - R_i)/SE$&$p$&Holm&Shaffer\\
+\hline
+66&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&28.00121105439581&1.5705333359801975E-172&0.0015151515151515152&0.0015151515151515152\\
+65&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&27.367135915274837&6.7531648225184375E-165&0.0015384615384615385&0.0018181818181818182\\
+64&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&26.59718753205654&7.316095053645367E-156&0.0015625&0.0018181818181818182\\
+63&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&26.200890570105912&2.5960200684203956E-151&0.0015873015873015873&0.0018181818181818182\\
+62&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&25.566815430984935&3.5701839602392024E-144&0.0016129032258064516&0.0018181818181818182\\
+61&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&24.796867047766643&9.690407941445081E-136&0.001639344262295082&0.0018181818181818182\\
+60&SPT vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&22.226598180258375&1.8999863508163888E-109&0.0016666666666666668&0.0018181818181818182\\
+59&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&22.215275409916963&2.4447840044293965E-109&0.0016949152542372883&0.0018181818181818182\\
+58&SPT vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&21.5925230411374&2.1116445144588104E-103&0.001724137931034483&0.0018181818181818182\\
+57&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&21.58120027079599&2.6977346587071206E-103&0.0017543859649122807&0.0018181818181818182\\
+56&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|DDQN|Global Tardiness-model-4&21.456649797040093&3.958174181827914E-102&0.0017857142857142859&0.0018181818181818182\\
+55&SPT vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&20.822574657919105&2.7026666461458364E-96&0.0018181818181818182&0.0018181818181818182\\
+54&|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&20.811251887577694&3.4228909477217586E-96&0.001851851851851852&0.002173913043478261\\
+53&WINQ vs. |(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&19.678974853433065&3.265407079585866E-86&0.0018867924528301887&0.002173913043478261\\
+52&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|DDQN|Global Tardiness-model-4&19.656329312750195&5.103438779513083E-86&0.0019230769230769232&0.002173913043478261\\
+51&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs. |(5) Reward|DDQN|Makespan-model-6&19.373260054214047&1.2977450509095873E-83&0.00196078431372549&0.002173913043478261\\
+50&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs. |(5) Reward|DDQN|Makespan-model-6&18.73918491509307&2.372337472536066E-78&0.002&0.002173913043478261\\
+49&MS vs. |(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&18.229660249727974&3.0018006706610033E-74&0.0020408163265306124&0.002173913043478261\\
+48&|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5 vs. |(5) Reward|DDQN|Makespan-model-6&17.969236531874778&3.393527642096516E-72&0.0020833333333333333&0.002173913043478261\\
+47&WINQ vs. |(5) Reward|DDQN|Surrogate Tardiness-model-0&17.878654369143167&1.729612434203607E-71&0.002127659574468085&0.002173913043478261\\
+46&LWRK vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&17.1313515266077&8.661892325715942E-66&0.002173913043478261&0.002173913043478261\\
+45&LWRK vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&16.49727638748672&3.8381818007989186E-61&0.0022222222222222222&0.0022222222222222222\\
+44&MS vs. |(5) Reward|DDQN|Surrogate Tardiness-model-0&16.429339765438076&1.1793599320553013E-60&0.002272727272727273&0.002564102564102564\\
+43&LWRK vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&15.727328004268427&9.827141891808938E-56&0.002325581395348837&0.002564102564102564\\
+42&SPT vs. |(5) Reward|DDQN|Global Tardiness-model-4&15.682036922902657&2.0071305098194908E-55&0.002380952380952381&0.002564102564102564\\
+41&|(5) Reward|DDQN|Global Tardiness-model-4 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&15.670714152561246&2.3986896650659277E-55&0.0024390243902439024&0.002564102564102564\\
+40&SPT vs. WINQ&13.904361979295631&5.95959116186651E-44&0.0025&0.002564102564102564\\
+39&WINQ vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&13.89303920895422&6.980915833543656E-44&0.002564102564102564&0.002564102564102564\\
+38&|(5) Reward|DDQN|Global Tardiness-model-4 vs. |(5) Reward|DDQN|Makespan-model-6&12.828698796858328&1.1325019874695399E-37&0.002631578947368421&0.002702702702702703\\
+37&MS vs. SPT&12.455047375590537&1.312735109368628E-35&0.002702702702702703&0.002702702702702703\\
+36&MS vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&12.443724605249127&1.512815521317573E-35&0.002777777777777778&0.002777777777777778\\
+35&WINQ vs. |(5) Reward|DDQN|Makespan-model-6&11.051023853251301&2.16728875221825E-28&0.002857142857142857&0.0029411764705882353\\
+34&LWRK vs. |(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&10.869859527788115&1.6044768956075757E-27&0.0029411764705882353&0.0029411764705882353\\
+33&LWRK vs. |(5) Reward|DDQN|Global Tardiness-model-4&10.58679026925198&3.4315721889864093E-26&0.0030303030303030303&0.0032258064516129032\\
+32&MS vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&9.771550804667838&1.4915128020967013E-22&0.003125&0.0032258064516129032\\
+31&MS vs. |(5) Reward|DDQN|Makespan-model-6&9.601709249546209&7.8629509808395455E-22&0.0032258064516129032&0.0032258064516129032\\
+30&MS vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&9.13747566554686&6.392706007973724E-20&0.0033333333333333335&0.0033333333333333335\\
+29&LWRK vs. |(5) Reward|DDQN|Surrogate Tardiness-model-0&9.069539043498215&1.1952157494529354E-19&0.003448275862068966&0.003448275862068966\\
+28&LWRK vs. WINQ&8.809115325644953&1.2613736384667424E-18&0.0035714285714285718&0.0035714285714285718\\
+27&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|DDQN|Makespan-model-6&8.627951000181767&6.246082562570496E-18&0.003703703703703704&0.003703703703703704\\
+26&MS vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&8.367527282328567&5.883990241829328E-17&0.0038461538461538464&0.004\\
+25&WINQ vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&8.322236200962745&8.631907809885239E-17&0.004&0.004\\
+24&WINQ vs. |(5) Reward|DDQN|Global Decomposed Tardiness-model-2&7.68816106184177&1.492648332505821E-14&0.004166666666666667&0.004166666666666667\\
+23&LWRK vs. MS&7.359800721939861&1.8418497817216497E-13&0.004347826086956522&0.004347826086956522\\
+22&WINQ vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&6.918212678623475&4.573772987235022E-12&0.004545454545454546&0.004545454545454546\\
+21&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|DDQN|Makespan-model-6&6.827630515891867&8.632857775961996E-12&0.004761904761904762&0.004761904761904762\\
+20&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs. |(5) Reward|DDQN|Global Tardiness-model-4&6.544561257355718&5.967030269284628E-11&0.005&0.005\\
+19&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs. |(5) Reward|DDQN|Global Tardiness-model-4&5.910486118234742&3.4109959856125836E-9&0.005263157894736842&0.005263157894736842\\
+18&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&5.785935644478848&7.2109819185362035E-9&0.005555555555555556&0.005555555555555556\\
+17&SPT vs. |(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&5.774612874137438&7.713021082425E-9&0.0058823529411764705&0.0058823529411764705\\
+16&|(5) Reward|DDQN|Global Tardiness-model-4 vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&5.140537735016447&2.739532962648937E-7&0.00625&0.00625\\
+15&LWRK vs. SPT&5.095246653650676&3.4828749788912644E-7&0.006666666666666667&0.006666666666666667\\
+14&LWRK vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&5.083923883309266&3.6971614987874587E-7&0.0071428571428571435&0.0071428571428571435\\
+13&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&3.98561516018895&6.730552374949803E-5&0.007692307692307693&0.007692307692307693\\
+12&SPT vs. |(5) Reward|DDQN|Surrogate Tardiness-model-0&3.9742923898475397&7.058880382337269E-5&0.008333333333333333&0.008333333333333333\\
+11&MS vs. |(5) Reward|DDQN|Global Tardiness-model-4&3.2269895473121193&0.0012510003005977769&0.009090909090909092&0.009090909090909092\\
+10&SPT vs. |(5) Reward|DDQN|Makespan-model-6&2.853338126044328&0.004326256244849688&0.01&0.01\\
+9&|(5) Reward|DDQN|Makespan-model-6 vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&2.8420153557029177&0.004482933229761039&0.011111111111111112&0.011111111111111112\\
+8&LWRK vs. |(5) Reward|DDQN|Makespan-model-6&2.2419085276063484&0.02496728479184817&0.0125&0.0125\\
+7&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs. |(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&1.800320484289899&0.0718100482492432&0.014285714285714287&0.014285714285714287\\
+6&WINQ vs. |(5) Reward|DDQN|Global Tardiness-model-4&1.7776749436070276&0.075457257213952&0.016666666666666666&0.016666666666666666\\
+5&MS vs. WINQ&1.449314603705092&0.14724974459811188&0.02&0.02\\
+4&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&1.4040235223392707&0.16031184519332708&0.025&0.025\\
+3&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs. |(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&0.7699483832182946&0.4413305118272063&0.03333333333333333&0.03333333333333333\\
+2&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs. |(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&0.6340751391209761&0.5260317864344614&0.05&0.05\\
+1&SPT vs. |(5) Reward|All not Noisy not 3-step|Makespan-model-7&0.011322770341410014&0.9909659293951814&0.1&0.1\\
+\hline
+\end{tabular}
+\end{table}
+Nemenyi's procedure rejects those hypotheses that have a p-value $\le0.0015151515151515152$.
+
+
+Holm's procedure rejects those hypotheses that have a p-value $\le0.0125$.
+
+
+Shaffer's procedure rejects those hypotheses that have a p-value $\le0.0015151515151515152$.
+
+
+\begin{table}[!htp]
+\centering\tiny
+\caption{Adjusted $p$-values}
+\begin{tabular}{cccccccc}
+i&hypothesis&unadjusted $p$&$p_{Neme}$&$p_{Holm}$&$p_{Shaf}$&$p_{Berg}$\\
+\hline
+1&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs .|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&1.5705333359801975E-172&1.0365520017469304E-170&1.0365520017469304E-170&1.0365520017469304E-170&0.0\\
+2&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs .|(5) Reward|DDQN|Global Decomposed Tardiness-model-2&6.7531648225184375E-165&4.457088782862169E-163&4.3895571346369844E-163&3.7142406523851404E-163&0.0\\
+3&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs .|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&7.316095053645367E-156&4.8286227354059426E-154&4.682300834333035E-154&4.023852279504952E-154&0.0\\
+4&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs .|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&2.5960200684203956E-151&1.713373245157461E-149&1.6354926431048491E-149&1.4278110376312175E-149&0.0\\
+5&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs .|(5) Reward|DDQN|Global Decomposed Tardiness-model-2&3.5701839602392024E-144&2.3563214137578735E-142&2.2135140553483056E-142&1.9636011781315612E-142&0.0\\
+6&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs .|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&9.690407941445081E-136&6.395669241353753E-134&5.911148844281499E-134&5.329724367794795E-134&0.0\\
+7&SPT vs .|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&1.8999863508163888E-109&1.2539909915388165E-107&1.1399918104898332E-107&1.0449924929490139E-107&0.0\\
+8&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs .|(5) Reward|All not Noisy not 3-step|Makespan-model-7&2.4447840044293965E-109&1.6135574429234017E-107&1.4424225626133438E-107&1.3446312024361681E-107&0.0\\
+9&SPT vs .|(5) Reward|DDQN|Global Decomposed Tardiness-model-2&2.1116445144588104E-103&1.3936853795428148E-101&1.22475381838611E-101&1.1614044829523457E-101&0.0\\
+10&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs .|(5) Reward|All not Noisy not 3-step|Makespan-model-7&2.6977346587071206E-103&1.7805048747466997E-101&1.537708755463059E-101&1.4837540622889164E-101&0.0\\
+11&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs .|(5) Reward|DDQN|Global Tardiness-model-4&3.958174181827914E-102&2.6123949600064233E-100&2.216577541823632E-100&2.1769958000053529E-100&0.0\\
+12&SPT vs .|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&2.7026666461458364E-96&1.783759986456252E-94&1.48646665538021E-94&1.48646665538021E-94&0.0\\
+13&|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5 vs .|(5) Reward|All not Noisy not 3-step|Makespan-model-7&3.4228909477217586E-96&2.2591080254963606E-94&1.8483611117697497E-94&1.574529835952009E-94&0.0\\
+14&WINQ vs .|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&3.265407079585866E-86&2.1551686725266715E-84&1.730665752180509E-84&1.5020872566094984E-84&0.0\\
+15&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs .|(5) Reward|DDQN|Global Tardiness-model-4&5.103438779513083E-86&3.3682695944786345E-84&2.6537881653468033E-84&2.347581838576018E-84&0.0\\
+16&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs .|(5) Reward|DDQN|Makespan-model-6&1.2977450509095873E-83&8.565117336003276E-82&6.618499759638895E-82&5.969627234184102E-82&0.0\\
+17&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs .|(5) Reward|DDQN|Makespan-model-6&2.372337472536066E-78&1.5657427318738038E-76&1.186168736268033E-76&1.0912752373665904E-76&0.0\\
+18&MS vs .|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&3.0018006706610033E-74&1.9811884426362623E-72&1.4708823286238916E-72&1.3808283085040616E-72&0.0\\
+19&|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5 vs .|(5) Reward|DDQN|Makespan-model-6&3.393527642096516E-72&2.2397282437837006E-70&1.6288932682063276E-70&1.5610227153643975E-70&0.0\\
+20&WINQ vs .|(5) Reward|DDQN|Surrogate Tardiness-model-0&1.729612434203607E-71&1.1415442065743806E-69&8.129178440756953E-70&7.956217197336592E-70&0.0\\
+21&LWRK vs .|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&8.661892325715942E-66&5.716848934972522E-64&3.9844704698293335E-64&3.9844704698293335E-64&0.0\\
+22&LWRK vs .|(5) Reward|DDQN|Global Decomposed Tardiness-model-2&3.8381818007989186E-61&2.5331999885272863E-59&1.7271818103595134E-59&1.7271818103595134E-59&0.0\\
+23&MS vs .|(5) Reward|DDQN|Surrogate Tardiness-model-0&1.1793599320553013E-60&7.783775551564988E-59&5.189183701043326E-59&4.599503735015675E-59&0.0\\
+24&LWRK vs .|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&9.827141891808938E-56&6.485913648593899E-54&4.225671013477843E-54&3.832585337805486E-54&0.0\\
+25&SPT vs .|(5) Reward|DDQN|Global Tardiness-model-4&2.0071305098194908E-55&1.324706136480864E-53&8.429948141241861E-54&7.827808988296014E-54&0.0\\
+26&|(5) Reward|DDQN|Global Tardiness-model-4 vs .|(5) Reward|All not Noisy not 3-step|Makespan-model-7&2.3986896650659277E-55&1.5831351789435123E-53&9.834627626770304E-54&9.354889693757118E-54&0.0\\
+27&SPT vs .WINQ&5.95959116186651E-44&3.9333301668318965E-42&2.383836464746604E-42&2.324240553127939E-42&0.0\\
+28&WINQ vs .|(5) Reward|All not Noisy not 3-step|Makespan-model-7&6.980915833543656E-44&4.6074044501388126E-42&2.7225571750820256E-42&2.7225571750820256E-42&0.0\\
+29&|(5) Reward|DDQN|Global Tardiness-model-4 vs .|(5) Reward|DDQN|Makespan-model-6&1.1325019874695399E-37&7.474513117298963E-36&4.3035075523842516E-36&4.1902573536372975E-36&0.0\\
+30&MS vs .SPT&1.312735109368628E-35&8.664051721832945E-34&4.857119904663924E-34&4.857119904663924E-34&0.0\\
+31&MS vs .|(5) Reward|All not Noisy not 3-step|Makespan-model-7&1.512815521317573E-35&9.984582440695982E-34&5.446135876743263E-34&5.446135876743263E-34&0.0\\
+32&WINQ vs .|(5) Reward|DDQN|Makespan-model-6&2.16728875221825E-28&1.4304105764640448E-26&7.585510632763875E-27&7.368781757542049E-27&0.0\\
+33&LWRK vs .|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&1.6044768956075757E-27&1.058954751101E-25&5.455221445065758E-26&5.455221445065758E-26&0.0\\
+34&LWRK vs .|(5) Reward|DDQN|Global Tardiness-model-4&3.4315721889864093E-26&2.2648376447310302E-24&1.1324188223655151E-24&1.0637873785857869E-24&0.0\\
+35&MS vs .|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&1.4915128020967013E-22&9.843984493838228E-21&4.772840966709444E-21&4.623689686499774E-21&0.0\\
+36&MS vs .|(5) Reward|DDQN|Makespan-model-6&7.8629509808395455E-22&5.1895476473541E-20&2.437514804060259E-20&2.437514804060259E-20&0.0\\
+37&MS vs .|(5) Reward|DDQN|Global Decomposed Tardiness-model-2&6.392706007973724E-20&4.219185965262658E-18&1.9178118023921172E-18&1.9178118023921172E-18&0.0\\
+38&LWRK vs .|(5) Reward|DDQN|Surrogate Tardiness-model-0&1.1952157494529354E-19&7.888423946389374E-18&3.4661256734135127E-18&3.4661256734135127E-18&0.0\\
+39&LWRK vs .WINQ&1.2613736384667424E-18&8.3250660138805E-17&3.531846187706879E-17&3.531846187706879E-17&0.0\\
+40&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs .|(5) Reward|DDQN|Makespan-model-6&6.246082562570496E-18&4.1224144912965273E-16&1.6864422918940338E-16&1.6864422918940338E-16&0.0\\
+41&MS vs .|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&5.883990241829328E-17&3.8834335596073565E-15&1.5298374628756253E-15&1.470997560457332E-15&0.0\\
+42&WINQ vs .|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&8.631907809885239E-17&5.697059154524257E-15&2.1579769524713097E-15&2.1579769524713097E-15&0.0\\
+43&WINQ vs .|(5) Reward|DDQN|Global Decomposed Tardiness-model-2&1.492648332505821E-14&9.851478994538418E-13&3.58235599801397E-13&3.58235599801397E-13&0.0\\
+44&LWRK vs .MS&1.8418497817216497E-13&1.2156208559362888E-11&4.2362544979597946E-12&4.2362544979597946E-12&0.0\\
+45&WINQ vs .|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&4.573772987235022E-12&3.0186901715751143E-10&1.0062300571917048E-10&1.0062300571917048E-10&0.0\\
+46&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs .|(5) Reward|DDQN|Makespan-model-6&8.632857775961996E-12&5.697686132134917E-10&1.8129001329520192E-10&1.8129001329520192E-10&0.0\\
+47&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs .|(5) Reward|DDQN|Global Tardiness-model-4&5.967030269284628E-11&3.938239977727854E-9&1.1934060538569255E-9&1.1934060538569255E-9&0.0\\
+48&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs .|(5) Reward|DDQN|Global Tardiness-model-4&3.4109959856125836E-9&2.251257350504305E-7&6.480892372663909E-8&6.480892372663909E-8&0.0\\
+49&|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1 vs .|(5) Reward|All not Noisy not 3-step|Makespan-model-7&7.2109819185362035E-9&4.759248066233894E-7&1.2979767453365166E-7&1.2979767453365166E-7&0.0\\
+50&SPT vs .|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&7.713021082425E-9&5.0905939144005E-7&1.31121358401225E-7&1.31121358401225E-7&0.0\\
+51&|(5) Reward|DDQN|Global Tardiness-model-4 vs .|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&2.739532962648937E-7&1.8080917553482985E-5&4.383252740238299E-6&4.383252740238299E-6&0.0\\
+52&LWRK vs .SPT&3.4828749788912644E-7&2.2986974860682345E-5&5.224312468336896E-6&5.224312468336896E-6&0.0\\
+53&LWRK vs .|(5) Reward|All not Noisy not 3-step|Makespan-model-7&3.6971614987874587E-7&2.4401265891997228E-5&5.224312468336896E-6&5.224312468336896E-6&0.0\\
+54&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs .|(5) Reward|All not Noisy not 3-step|Makespan-model-7&6.730552374949803E-5&0.00444216456746687&8.749718087434744E-4&8.749718087434744E-4&0.0\\
+55&SPT vs .|(5) Reward|DDQN|Surrogate Tardiness-model-0&7.058880382337269E-5&0.0046588610523425975&8.749718087434744E-4&8.749718087434744E-4&0.0\\
+56&MS vs .|(5) Reward|DDQN|Global Tardiness-model-4&0.0012510003005977769&0.08256601983945328&0.013761003306575545&0.013761003306575545&0.0\\
+57&SPT vs .|(5) Reward|DDQN|Makespan-model-6&0.004326256244849688&0.2855329121600794&0.04326256244849688&0.04326256244849688&0.0\\
+58&|(5) Reward|DDQN|Makespan-model-6 vs .|(5) Reward|All not Noisy not 3-step|Makespan-model-7&0.004482933229761039&0.29587359316422857&0.04326256244849688&0.04326256244849688&0.0\\
+59&LWRK vs .|(5) Reward|DDQN|Makespan-model-6&0.02496728479184817&1.6478407962619792&0.19973827833478536&0.19973827833478536&0.0\\
+60&|(5) Reward|DDQN|Surrogate Tardiness-model-0 vs .|(5) Reward|All not Noisy not 3-step|Surrogate Tardiness-model-1&0.0718100482492432&4.7394631844500505&0.5026703377447024&0.5026703377447024&0.0\\
+61&WINQ vs .|(5) Reward|DDQN|Global Tardiness-model-4&0.075457257213952&4.980178976120832&0.5026703377447024&0.5026703377447024&0.0\\
+62&MS vs .WINQ&0.14724974459811188&9.718483143475384&0.7362487229905594&0.7362487229905594&0.0\\
+63&|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3 vs .|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&0.16031184519332708&10.580581782759587&0.7362487229905594&0.7362487229905594&0.0\\
+64&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs .|(5) Reward|All not Noisy not 3-step|Global Tardiness-model-5&0.4413305118272063&29.127813780595616&1.323991535481619&1.323991535481619&0.0\\
+65&|(5) Reward|DDQN|Global Decomposed Tardiness-model-2 vs .|(5) Reward|All not Noisy not 3-step|Global Decomposed Tardiness-model-3&0.5260317864344614&34.71809790467445&1.323991535481619&1.323991535481619&0.0\\
+66&SPT vs .|(5) Reward|All not Noisy not 3-step|Makespan-model-7&0.9909659293951814&65.40375134008197&1.323991535481619&1.323991535481619&0.0\\
+\hline
+\end{tabular}
+\end{table}
+
+\end{lscape}\end{document}

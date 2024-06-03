@@ -1,0 +1,9 @@
+
+parameters:
+  trainer:
+    parameters:
+      optimizer:
+        grad_norm:
+          kind: 'norm'
+          parameters:
+            value: 0.5
